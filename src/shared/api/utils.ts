@@ -4,7 +4,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverGte from 'semver/functions/gte';
 import { z } from 'zod';
 
-import { ServerListItem } from '/@/shared/types/domain-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
 // Since ts-rest client returns a strict response type, we need to add the headers to the body object

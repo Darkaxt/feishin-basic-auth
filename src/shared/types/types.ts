@@ -2,15 +2,11 @@ import { AppRoute } from '@ts-rest/core';
 import { ReactNode } from 'react';
 import { Song } from 'src/main/features/core/lyrics/netease';
 
-import {
-    Album,
-    AlbumArtist,
-    Artist,
-    LibraryItem,
-    Playlist,
-    QueueSong,
-} from '/@/shared/types/domain-types';
-import { ServerFeatures } from '/@/shared/types/features-types';
+import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtist, Artist } from '/@/shared/types/domain/artist-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
 
 export enum ListDisplayType {
     CARD = 'card',
@@ -25,12 +21,6 @@ export enum Platform {
     MACOS = 'macos',
     WEB = 'web',
     WINDOWS = 'windows',
-}
-
-export enum ServerType {
-    JELLYFIN = 'jellyfin',
-    NAVIDROME = 'navidrome',
-    SUBSONIC = 'subsonic',
 }
 
 export type CardRoute = {
@@ -208,20 +198,6 @@ export type QueryBuilderRule = {
     operator?: null | string;
     uniqueId: string;
     value?: any | Date | null | number | string | undefined;
-};
-
-export type ServerListItem = {
-    credential: string;
-    features?: ServerFeatures;
-    id: string;
-    name: string;
-    ndCredential?: string;
-    savePassword?: boolean;
-    type: ServerType;
-    url: string;
-    userId: null | string;
-    username: string;
-    version?: string;
 };
 
 export type SongState = {

@@ -227,7 +227,11 @@
         "songCount": "song count",
         "title": "title",
         "toYear": "to year",
-        "trackNumber": "track"
+        "trackNumber": "track",
+        "createdAt": "created at",
+        "updatedAt": "updated at",
+        "type": "type",
+        "email": "email"
     },
     "form": {
         "addServer": {

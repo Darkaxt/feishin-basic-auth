@@ -3,17 +3,17 @@ import { z } from 'zod';
 
 import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
+import { LibraryItem } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import {
-    Album,
-    AlbumArtist,
-    Genre,
-    LibraryItem,
-    MusicFolder,
-    Playlist,
-    RelatedArtist,
-    Song,
-} from '/@/shared/types/domain-types';
-import { ServerListItem, ServerType } from '/@/shared/types/types';
+    ServerListItem,
+    ServerMusicFolder,
+    ServerType,
+} from '/@/shared/types/domain/server-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 const getStreamUrl = (args: {
     container?: string;
@@ -432,7 +432,7 @@ const normalizePlaylist = (
     };
 };
 
-const normalizeMusicFolder = (item: JFMusicFolder): MusicFolder => {
+const normalizeMusicFolder = (item: JFMusicFolder): ServerMusicFolder => {
     return {
         id: item.Id,
         name: item.Name,

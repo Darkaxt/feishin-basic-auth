@@ -4,17 +4,14 @@ import z from 'zod';
 import { NDGenre } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
-import {
-    Album,
-    AlbumArtist,
-    Genre,
-    LibraryItem,
-    Playlist,
-    RelatedArtist,
-    Song,
-    User,
-} from '/@/shared/types/domain-types';
-import { ServerListItem, ServerType } from '/@/shared/types/types';
+import { LibraryItem } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
+import { User } from '/@/shared/types/domain/user-domain-types';
 
 const getImageUrl = (args: { url: null | string }) => {
     const { url } = args;

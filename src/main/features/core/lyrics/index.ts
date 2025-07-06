@@ -17,7 +17,7 @@ import {
     getSearchResults as searchNetease,
 } from './netease';
 
-import { Song } from '/@/shared/types/domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export enum LyricSource {
     GENIUS = 'Genius',

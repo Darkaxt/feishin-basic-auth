@@ -2,17 +2,12 @@ import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
-import {
-    Album,
-    AlbumArtist,
-    Genre,
-    LibraryItem,
-    Playlist,
-    QueueSong,
-    RelatedArtist,
-    ServerListItem,
-    ServerType,
-} from '/@/shared/types/domain-types';
+import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
 
 const getCoverArtUrl = (args: {
     baseUrl: string | undefined;

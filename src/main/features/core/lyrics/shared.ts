@@ -1,9 +1,7 @@
 import Fuse from 'fuse.js';
 
-import {
-    InternetProviderLyricSearchResponse,
-    LyricSearchQuery,
-} from '/@/shared/types/domain-types';
+import { InternetProviderLyricSearchResponse } from '/@/shared/types/domain/lyric-domain-types';
+import { LyricSearchQuery } from '/@/shared/types/domain/lyric-domain-types';
 
 export const orderSearchResults = (args: {
     params: LyricSearchQuery;
