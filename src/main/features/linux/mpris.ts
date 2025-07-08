@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import Player from 'mpris-service';
 
 import { getMainWindow } from '/@/main/index';
-import { QueueSong } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { PlayerRepeat, PlayerStatus } from '/@/shared/types/types';
 
 const mprisPlayer = Player({

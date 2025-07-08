@@ -11,7 +11,7 @@ import { useAuthStore } from '/@/renderer/store';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { resultWithHeaders } from '/@/shared/api/utils';
 import { toast } from '/@/shared/components/toast/toast';
-import { ServerListItem } from '/@/shared/types/domain-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

@@ -11,8 +11,8 @@ import manifest from './manifest.json';
 
 import { getMainWindow } from '/@/main/index';
 import { isLinux } from '/@/main/utils';
-import { QueueSong } from '/@/shared/types/domain-types';
-import { ClientEvent, ServerEvent } from '/@/shared/types/remote-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { ClientEvent, ServerEvent } from '/@/shared/types/domain/remote-types';
 import { PlayerRepeat, PlayerStatus, SongState } from '/@/shared/types/types';
 
 let mprisPlayer: any | undefined;

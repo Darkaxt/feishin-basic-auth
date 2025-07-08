@@ -14,19 +14,14 @@ import {
     ssType,
     SubsonicExtensions,
 } from '/@/shared/api/subsonic/subsonic-types';
-import {
-    AlbumListSort,
-    ControllerEndpoint,
-    GenreListSort,
-    LibraryItem,
-    PlaylistListSort,
-    Song,
-    sortAlbumArtistList,
-    sortAlbumList,
-    SortOrder,
-    sortSongList,
-} from '/@/shared/types/domain-types';
-import { ServerFeatures } from '/@/shared/types/features-types';
+import { AlbumListSort, sortAlbumList } from '/@/shared/types/domain/album-domain-types';
+import { ControllerEndpoint } from '/@/shared/types/domain/api-domain-types';
+import { sortAlbumArtistList } from '/@/shared/types/domain/artist-domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerFeatures } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { Song, sortSongList } from '/@/shared/types/domain/song-domain-types';
 
 const ALBUM_LIST_SORT_MAPPING: Record<AlbumListSort, AlbumListSortType | undefined> = {
     [AlbumListSort.ALBUM_ARTIST]: AlbumListSortType.ALPHABETICAL_BY_ARTIST,
@@ -381,7 +376,7 @@ export const SubsonicController: ControllerEndpoint = {
         }
 
         if (type === AlbumListSortType.BY_YEAR && !fromYear && !toYear) {
-            if (query.sortOrder === SortOrder.ASC) {
+            if (query.sortOrder === ListSortOrder.ASC) {
                 fromYear = 0;
                 toYear = dayjs().year();
             } else {

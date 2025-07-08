@@ -1,6 +1,6 @@
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 
-import { QueueSong } from '/@/shared/types/domain-types';
+import { QueueSong, QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
 const requestFavorite = (

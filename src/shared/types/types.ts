@@ -2,11 +2,12 @@ import { AppRoute } from '@ts-rest/core';
 import { ReactNode } from 'react';
 import { Song } from 'src/main/features/core/lyrics/netease';
 
-import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
 import { AlbumArtist, Artist } from '/@/shared/types/domain/artist-domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export enum ListDisplayType {
     CARD = 'card',

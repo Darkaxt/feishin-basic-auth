@@ -13,6 +13,7 @@ import {
     ServerMusicFolder,
     ServerType,
 } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 
 const getStreamUrl = (args: {

@@ -10,6 +10,7 @@ import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain/artist-domain
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 import { User } from '/@/shared/types/domain/user-domain-types';
 

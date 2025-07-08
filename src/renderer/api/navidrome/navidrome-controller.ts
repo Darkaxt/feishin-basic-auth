@@ -7,22 +7,24 @@ import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
 import { SubsonicExtensions } from '/@/shared/api/subsonic/subsonic-types';
 import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
+import { albumListSortMap } from '/@/shared/types/domain/album-domain-types';
+import { ControllerEndpoint } from '/@/shared/types/domain/api-domain-types';
+import { albumArtistListSortMap } from '/@/shared/types/domain/artist-domain-types';
+import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types';
+import { genreListSortMap } from '/@/shared/types/domain/genre-domain-types';
 import {
-    albumArtistListSortMap,
-    albumListSortMap,
-    AuthenticationResponse,
-    ControllerEndpoint,
-    genreListSortMap,
     playlistListSortMap,
     PlaylistSongListArgs,
     PlaylistSongListResponse,
+} from '/@/shared/types/domain/playlist-domain-types';
+import {
+    ServerFeature,
+    ServerFeatures,
     ServerListItem,
-    Song,
-    songListSortMap,
-    sortOrderMap,
-    userListSortMap,
-} from '/@/shared/types/domain-types';
-import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
+} from '/@/shared/types/domain/server-domain-types';
+import { sortOrderMap } from '/@/shared/types/domain/shared-domain-types';
+import { Song, songListSortMap } from '/@/shared/types/domain/song-domain-types';
+import { userListSortMap } from '/@/shared/types/domain/user-domain-types';
 
 const VERSION_INFO: VersionInfo = [
     ['0.55.0', { [ServerFeature.BFR]: [1] }],

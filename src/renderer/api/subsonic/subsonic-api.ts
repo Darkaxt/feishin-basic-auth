@@ -7,7 +7,7 @@ import { z } from 'zod';
 import i18n from '/@/i18n/i18n';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import { toast } from '/@/shared/components/toast/toast';
-import { ServerListItem } from '/@/shared/types/domain-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 
 const c = initContract();
 

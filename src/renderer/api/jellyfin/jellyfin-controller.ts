@@ -6,19 +6,15 @@ import { JFSongListSort, JFSortOrder } from '/@/shared/api/jellyfin.types';
 import { jfNormalize } from '/@/shared/api/jellyfin/jellyfin-normalize';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
-import {
-    albumArtistListSortMap,
-    albumListSortMap,
-    ControllerEndpoint,
-    genreListSortMap,
-    LibraryItem,
-    Played,
-    playlistListSortMap,
-    Song,
-    songListSortMap,
-    sortOrderMap,
-} from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+import { albumListSortMap } from '/@/shared/types/domain/album-domain-types';
+import { ControllerEndpoint } from '/@/shared/types/domain/api-domain-types';
+import { albumArtistListSortMap } from '/@/shared/types/domain/artist-domain-types';
+import { genreListSortMap } from '/@/shared/types/domain/genre-domain-types';
+import { Played } from '/@/shared/types/domain/player-domain-types';
+import { playlistListSortMap } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerFeature } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, sortOrderMap } from '/@/shared/types/domain/shared-domain-types';
+import { Song, songListSortMap } from '/@/shared/types/domain/song-domain-types';
 
 const formatCommaDelimitedString = (value: string[]) => {
     return value.join(',');

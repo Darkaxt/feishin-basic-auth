@@ -1,6 +1,6 @@
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 
-import { PlayerData } from '/@/shared/types/domain-types';
+import { PlayerData } from '/@/shared/types/domain/player-domain-types';
 
 const initialize = (data: { extraParameters?: string[]; properties?: Record<string, any> }) => {
     return ipcRenderer.invoke('player-initialize', data);
