@@ -1,8 +1,6 @@
-import i18n from 'src/i18n/i18n';
 import { z } from 'zod';
 
-import { Genre } from './genre-domain-types';
-
+import i18n from '/@/i18n/i18n';
 import { JFPlaylistListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDPlaylistListSort } from '/@/shared/api/navidrome.types';
@@ -11,10 +9,10 @@ import {
     BaseEndpointArgs,
     BasePaginatedResponse,
     BaseQuery,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/api-domain-types';
+import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
-import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Song, SongListSort } from '/@/shared/types/domain/song-domain-types';
 
 export enum PlaylistListSortOptions {
@@ -191,6 +189,17 @@ export const playlistListSortMap: PlaylistListSortMap = {
         updatedAt: undefined,
     },
 };
+export type MoveItemArgs = BaseEndpointArgs & {
+    query: MoveItemQuery;
+};
+
+export type MoveItemQuery = {
+    endingIndex: number;
+    playlistId: string;
+    startingIndex: number;
+    trackId: string;
+};
+
 export type PlaylistDetailArgs = BaseEndpointArgs & { query: PlaylistDetailQuery };
 
 export type PlaylistDetailQuery = {
@@ -200,7 +209,6 @@ export type PlaylistDetailQuery = {
 export type PlaylistDetailResponse = Playlist;
 
 export type PlaylistSongListArgs = BaseEndpointArgs & { query: PlaylistSongListQuery };
-
 export type PlaylistSongListQuery = {
     id: string;
     limit?: number;

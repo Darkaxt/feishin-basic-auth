@@ -1,6 +1,7 @@
-import i18n from 'src/i18n/i18n';
+import { orderBy, reverse, shuffle } from 'lodash';
 import { z } from 'zod';
 
+import i18n from '/@/i18n/i18n';
 import { JFSongListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDSongListSort } from '/@/shared/api/navidrome.types';
@@ -9,13 +10,12 @@ import {
     BaseEndpointArgs,
     BasePaginatedResponse,
     BaseQuery,
-    GainInfo,
-    LibraryItem,
-    Played,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/api-domain-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { Played, QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 export enum SongListSortOptions {
     ALBUM = 'album',
@@ -212,6 +212,11 @@ export const songListSortMap: SongListSortMap = {
         year: undefined,
     },
 };
+export type GainInfo = {
+    album?: number;
+    track?: number;
+};
+
 export type RandomSongListArgs = BaseEndpointArgs & {
     query: RandomSongListQuery;
 };
@@ -224,8 +229,8 @@ export type RandomSongListQuery = {
     musicFolderId?: string;
     played: Played;
 };
-
 export type RandomSongListResponse = SongListResponse;
+
 export type SimilarSongsArgs = BaseEndpointArgs & {
     query: SimilarSongsQuery;
 };
@@ -235,11 +240,11 @@ export type SimilarSongsQuery = {
     count?: number;
     songId: string;
 };
-
 export type SongDetailArgs = BaseEndpointArgs & { query: SongDetailQuery };
-export type SongDetailQuery = { id: string };
 
+export type SongDetailQuery = { id: string };
 export type SongDetailResponse = null | Song | undefined;
+
 export type TopSongListArgs = BaseEndpointArgs & { query: TopSongListQuery };
 
 export type TopSongListQuery = {
@@ -247,5 +252,99 @@ export type TopSongListQuery = {
     artistId: string;
     limit?: number;
 };
-
 export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export const sortSongList = (
+    songs: QueueSong[],
+    sortBy: SongListSort,
+    sortOrder: ListSortOrder,
+) => {
+    let results = songs;
+
+    const order = sortOrder === ListSortOrder.ASC ? 'asc' : 'desc';
+
+    switch (sortBy) {
+        case SongListSort.ALBUM:
+            results = orderBy(
+                results,
+                [(v) => v.album?.toLowerCase(), 'discNumber', 'trackNumber'],
+                [order, 'asc', 'asc'],
+            );
+            break;
+
+        case SongListSort.ALBUM_ARTIST:
+            results = orderBy(
+                results,
+                ['albumArtist', (v) => v.album?.toLowerCase(), 'discNumber', 'trackNumber'],
+                [order, order, 'asc', 'asc'],
+            );
+            break;
+
+        case SongListSort.ARTIST:
+            results = orderBy(
+                results,
+                ['artist', (v) => v.album?.toLowerCase(), 'discNumber', 'trackNumber'],
+                [order, order, 'asc', 'asc'],
+            );
+            break;
+
+        case SongListSort.DURATION:
+            results = orderBy(results, ['duration'], [order]);
+            break;
+
+        case SongListSort.FAVORITED:
+            results = orderBy(results, ['userFavorite', (v) => v.name.toLowerCase()], [order]);
+            break;
+
+        case SongListSort.GENRE:
+            results = orderBy(
+                results,
+                [
+                    (v) => v.genres?.[0].name.toLowerCase(),
+                    (v) => v.album?.toLowerCase(),
+                    'discNumber',
+                    'trackNumber',
+                ],
+                [order, order, 'asc', 'asc'],
+            );
+            break;
+
+        case SongListSort.ID:
+            if (order === 'desc') {
+                results = reverse(results as any);
+            }
+            break;
+
+        case SongListSort.NAME:
+            results = orderBy(results, [(v) => v.name.toLowerCase()], [order]);
+            break;
+
+        case SongListSort.PLAY_COUNT:
+            results = orderBy(results, ['playCount'], [order]);
+            break;
+
+        case SongListSort.RANDOM:
+            results = shuffle(results);
+            break;
+
+        case SongListSort.RATING:
+            results = orderBy(results, ['userRating', (v) => v.name.toLowerCase()], [order]);
+            break;
+
+        case SongListSort.RECENTLY_ADDED:
+            results = orderBy(results, ['created'], [order]);
+            break;
+
+        case SongListSort.YEAR:
+            results = orderBy(
+                results,
+                ['year', (v) => v.album?.toLowerCase(), 'discNumber', 'track'],
+                [order, 'asc', 'asc', 'asc'],
+            );
+            break;
+
+        default:
+            break;
+    }
+
+    return results;
+};

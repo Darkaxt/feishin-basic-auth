@@ -1,15 +1,13 @@
-import i18n from 'src/i18n/i18n';
-
-import { UserListSort } from './user-domain-types';
-
+import i18n from '/@/i18n/i18n';
 import { JFGenreListSort } from '/@/shared/api/jellyfin.types';
 import { NDGenreListSort } from '/@/shared/api/navidrome.types';
 import {
     BaseEndpointArgs,
     BasePaginatedResponse,
     BaseQuery,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/api-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { UserListSort } from '/@/shared/types/domain/user-domain-types';
 
 export enum GenreListSortOptions {
     ALBUM_COUNT = 'albumCount',
@@ -22,6 +20,7 @@ export const GenreListSortOptionsLabels = {
     [GenreListSortOptions.NAME]: i18n.t('filter.name'),
     [GenreListSortOptions.TRACK_COUNT]: i18n.t('filter.trackCount'),
 };
+
 export type Genre = {
     albumCount?: number;
     id: string;
@@ -43,7 +42,6 @@ export interface GenreListQuery extends BaseQuery<GenreListSort> {
     searchTerm?: string;
     startIndex: number;
 }
-// Genre List
 
 export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
 

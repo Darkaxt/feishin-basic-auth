@@ -1,6 +1,7 @@
-import i18n from 'src/i18n/i18n';
+import { orderBy } from 'lodash';
 import { z } from 'zod';
 
+import i18n from '/@/i18n/i18n';
 import { JFAlbumArtistListSort, JFArtistListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumArtistListSort } from '/@/shared/api/navidrome.types';
@@ -9,10 +10,10 @@ import {
     BaseEndpointArgs,
     BasePaginatedResponse,
     BaseQuery,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/api-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 export enum ArtistListSortOptions {
     ALBUM_COUNT = 'albumCount',
@@ -242,4 +243,36 @@ export type ArtistInfoQuery = {
     artistId: string;
     limit: number;
     musicFolderId?: string;
+};
+export const sortAlbumArtistList = (
+    artists: AlbumArtist[],
+    sortBy: AlbumArtistListSort | ArtistListSort,
+    sortOrder: ListSortOrder,
+) => {
+    const order = sortOrder === ListSortOrder.ASC ? 'asc' : 'desc';
+
+    let results = artists;
+
+    switch (sortBy) {
+        case AlbumArtistListSort.ALBUM_COUNT:
+            results = orderBy(artists, ['albumCount', (v) => v.name.toLowerCase()], [order, 'asc']);
+            break;
+
+        case AlbumArtistListSort.FAVORITED:
+            results = orderBy(artists, ['starred'], [order]);
+            break;
+
+        case AlbumArtistListSort.NAME:
+            results = orderBy(artists, [(v) => v.name.toLowerCase()], [order]);
+            break;
+
+        case AlbumArtistListSort.RATING:
+            results = orderBy(artists, ['userRating'], [order]);
+            break;
+
+        default:
+            break;
+    }
+
+    return results;
 };

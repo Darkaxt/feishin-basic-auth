@@ -1,12 +1,17 @@
-import { BaseEndpointArgs, LyricSource } from '/@/shared/types/domain-types';
+import { BaseEndpointArgs } from './api-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
+
+export enum LyricSource {
+    GENIUS = 'Genius',
+    LRCLIB = 'lrclib.net',
+    NETEASE = 'NetEase',
+}
 
 export type FullLyricsMetadata = Omit<InternetProviderLyricResponse, 'id' | 'lyrics' | 'source'> & {
     lyrics: LyricsResponse;
     remote: boolean;
     source: string;
 };
-
 export type InternetProviderLyricResponse = {
     artist: string;
     id: string;
@@ -21,6 +26,7 @@ export type InternetProviderLyricSearchResponse = {
     score?: number;
     source: LyricSource;
 };
+
 export type LyricGetQuery = {
     remoteSongId: string;
     remoteSource: LyricSource;
@@ -32,7 +38,6 @@ export type LyricOverride = Omit<InternetProviderLyricResponse, 'lyrics'>;
 export type LyricsArgs = BaseEndpointArgs & {
     query: LyricsQuery;
 };
-
 export type LyricSearchQuery = {
     album?: string;
     artist?: string;
@@ -40,6 +45,7 @@ export type LyricSearchQuery = {
     name?: string;
 };
 export type LyricsOverride = Omit<FullLyricsMetadata, 'lyrics'> & { id: string };
+
 export type LyricsQuery = {
     songId: string;
 };
@@ -58,7 +64,6 @@ export type StructuredSyncedLyric = Omit<FullLyricsMetadata, 'lyrics'> & {
     lyrics: SynchronizedLyricsArray;
     synced: true;
 };
-
 export type StructuredUnsyncedLyric = Omit<FullLyricsMetadata, 'lyrics'> & {
     lyrics: string;
     synced: false;

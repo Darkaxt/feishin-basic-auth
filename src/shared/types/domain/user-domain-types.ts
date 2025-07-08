@@ -1,13 +1,11 @@
-import i18n from 'src/i18n/i18n';
+import i18n from '/@/i18n/i18n';
+import { NDUserListSort } from '/@/shared/api/navidrome.types';
 import {
-    AnyLibraryItems,
     BaseEndpointArgs,
     BasePaginatedResponse,
     BaseQuery,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
-import { RatingQuery } from '/@/shared/types/domain/user-domain-types';
-import { NDUserListSort } from '/@/shared/api/navidrome.types';
+} from '/@/shared/types/domain/api-domain-types';
+import { AnyLibraryItems, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export enum UserListSortOptions {
     CREATED_AT = 'createdAt',
@@ -22,6 +20,7 @@ export const UserListSortOptionsLabels = {
     [UserListSortOptions.NAME]: i18n.t('filter.name'),
     [UserListSortOptions.UPDATED_AT]: i18n.t('filter.updatedAt'),
 };
+
 export type FavoriteArgs = BaseEndpointArgs & { query: FavoriteQuery; serverId?: string };
 
 export type FavoriteQuery = {
@@ -36,7 +35,9 @@ export type RatingQuery = {
 };
 
 export type RatingResponse = null | undefined;
+
 export type SetRatingArgs = BaseEndpointArgs & { query: RatingQuery; serverId?: string };
+
 export type UserListArgs = BaseEndpointArgs & { query: UserListQuery };
 
 export interface UserListQuery extends BaseQuery<UserListSort> {
@@ -51,6 +52,7 @@ export interface UserListQuery extends BaseQuery<UserListSort> {
 }
 
 export type UserListResponse = BasePaginatedResponse<User[]> | null | undefined;
+
 type UserListSortMap = {
     jellyfin: Record<UserListSort, undefined>;
     navidrome: Record<UserListSort, NDUserListSort | undefined>;
@@ -68,6 +70,19 @@ export const userListSortMap: UserListSortMap = {
         name: undefined,
     },
 };
+
+export enum UserListSort {
+    NAME = 'name',
+}
+
+export type DownloadArgs = BaseEndpointArgs & {
+    query: DownloadQuery;
+};
+
+export type DownloadQuery = {
+    id: string;
+};
+
 export type ScrobbleArgs = BaseEndpointArgs & {
     query: ScrobbleQuery;
     serverId?: string;
@@ -81,9 +96,19 @@ export type ScrobbleQuery = {
 };
 
 export type ScrobbleResponse = null | undefined;
-export enum UserListSort {
-    NAME = 'name',
-}
+
+export type ShareItemArgs = BaseEndpointArgs & { body: ShareItemBody; serverId?: string };
+
+export type ShareItemBody = {
+    description: string;
+    downloadable: boolean;
+    expires: number;
+    resourceIds: string;
+    resourceType: string;
+};
+
+export type ShareItemResponse = undefined | { id: string };
+
 export type User = {
     createdAt: null | string;
     email: null | string;

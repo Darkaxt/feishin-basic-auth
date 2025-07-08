@@ -1,5 +1,5 @@
-import { BaseEndpointArgs } from '/@/shared/types/domain-types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
+import { BaseEndpointArgs } from '/@/shared/types/domain/api-domain-types';
 import { AlbumArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 

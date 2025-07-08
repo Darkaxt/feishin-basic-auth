@@ -1,7 +1,6 @@
 import i18n from 'src/i18n/i18n';
 
-import { BaseEndpointArgs, BasePaginatedResponse } from '/@/shared/types/domain-types';
-import { ServerFeatures } from '/@/shared/types/features-types';
+import { BaseEndpointArgs, BasePaginatedResponse } from '/@/shared/types/domain/api-domain-types';
 
 export enum ServerListSortOptions {
     CREATED_AT = 'createdAt',
@@ -17,11 +16,23 @@ export const ServerListSortOptionsLabels = {
     [ServerListSortOptions.UPDATED_AT]: i18n.t('filter.updatedAt'),
 };
 
+export enum ServerFeature {
+    BFR = 'bfr',
+    LYRICS_MULTIPLE_STRUCTURED = 'lyricsMultipleStructured',
+    LYRICS_SINGLE_STRUCTURED = 'lyricsSingleStructured',
+    PLAYLISTS_SMART = 'playlistsSmart',
+    PUBLIC_PLAYLIST = 'publicPlaylist',
+    SHARING_ALBUM_SONG = 'sharingAlbumSong',
+    TAGS = 'tags',
+}
+
 export enum ServerType {
     JELLYFIN = 'jellyfin',
     NAVIDROME = 'navidrome',
     SUBSONIC = 'subsonic',
 }
+
+export type ServerFeatures = Partial<Record<ServerFeature, number[]>>;
 
 export type ServerInfo = {
     features: ServerFeatures;
@@ -53,8 +64,10 @@ export type ServerMusicFolder = {
 export type ServerMusicFolderListArgs = BaseEndpointArgs;
 
 export type ServerMusicFolderListQuery = null;
+
 export type ServerMusicFolderListResponse =
     | BasePaginatedResponse<ServerMusicFolder[]>
     | null
     | undefined;
+
 export type ServerMusicFoldersResponse = ServerMusicFolder[];
