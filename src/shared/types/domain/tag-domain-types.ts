@@ -1,4 +1,3 @@
-import { BaseEndpointArgs } from '/@/shared/types/domain/api-domain-types';
 import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export type Tag = {
@@ -6,14 +5,12 @@ export type Tag = {
     options: string[];
 };
 
-export type TagArgs = BaseEndpointArgs & {
-    query: TagQuery;
-};
-
 export type TagQuery = {
     folder?: string;
     type: LibraryItem.ALBUM | LibraryItem.SONG;
 };
+
+export type TagRequest = { query: TagQuery };
 
 export type TagsResponse = {
     boolTags?: string[];

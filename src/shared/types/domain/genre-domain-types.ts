@@ -1,11 +1,7 @@
 import i18n from '/@/i18n/i18n';
 import { JFGenreListSort } from '/@/shared/api/jellyfin.types';
 import { NDGenreListSort } from '/@/shared/api/navidrome.types';
-import {
-    BaseEndpointArgs,
-    BasePaginatedResponse,
-    BaseQuery,
-} from '/@/shared/types/domain/api-domain-types';
+import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { UserListSort } from '/@/shared/types/domain/user-domain-types';
 
@@ -30,8 +26,6 @@ export type Genre = {
     songCount?: number;
 };
 
-export type GenreListArgs = BaseEndpointArgs & { query: GenreListQuery };
-
 export interface GenreListQuery extends BaseQuery<GenreListSort> {
     _custom?: {
         jellyfin?: null;
@@ -43,9 +37,10 @@ export interface GenreListQuery extends BaseQuery<GenreListSort> {
     startIndex: number;
 }
 
+export type GenreListRequest = { query: GenreListQuery };
+
 export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
 
-export type GenresResponse = Genre[];
 type GenreListSortMap = {
     jellyfin: Record<GenreListSort, JFGenreListSort | undefined>;
     navidrome: Record<GenreListSort, NDGenreListSort | undefined>;

@@ -6,11 +6,7 @@ import { JFAlbumArtistListSort, JFArtistListSort } from '/@/shared/api/jellyfin.
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumArtistListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import {
-    BaseEndpointArgs,
-    BasePaginatedResponse,
-    BaseQuery,
-} from '/@/shared/types/domain/api-domain-types';
+import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
@@ -142,13 +138,11 @@ export enum ArtistListSort {
     SONG_COUNT = 'songCount',
 }
 
-export type AlbumArtistDetailArgs = BaseEndpointArgs & { query: AlbumArtistDetailQuery };
-
 export type AlbumArtistDetailQuery = { id: string };
 
-export type AlbumArtistDetailResponse = AlbumArtist | null;
+export type AlbumArtistDetailRequest = { query: AlbumArtistDetailQuery };
 
-export type ArtistListArgs = BaseEndpointArgs & { query: ArtistListQuery };
+export type AlbumArtistDetailResponse = AlbumArtist | null;
 
 export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
     _custom?: {
@@ -161,6 +155,8 @@ export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
     searchTerm?: string;
     startIndex: number;
 }
+
+export type ArtistListRequest = { query: ArtistListQuery };
 
 export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
 type ArtistListSortMap = {
@@ -224,8 +220,6 @@ export enum AlbumArtistListSort {
     SONG_COUNT = 'songCount',
 }
 
-export type AlbumArtistListArgs = BaseEndpointArgs & { query: AlbumArtistListQuery };
-
 export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.albumArtistList>>;
@@ -236,14 +230,19 @@ export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
     searchTerm?: string;
     startIndex: number;
 }
+
+export type AlbumArtistListRequest = { query: AlbumArtistListQuery };
+
 export type AlbumArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
-export type ArtistInfoArgs = BaseEndpointArgs & { query: ArtistInfoQuery };
 
 export type ArtistInfoQuery = {
     artistId: string;
     limit: number;
     musicFolderId?: string;
 };
+
+export type ArtistInfoRequest = { query: ArtistInfoQuery };
+
 export const sortAlbumArtistList = (
     artists: AlbumArtist[],
     sortBy: AlbumArtistListSort | ArtistListSort,

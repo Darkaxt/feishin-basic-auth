@@ -6,11 +6,7 @@ import { JFAlbumListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import {
-    BaseEndpointArgs,
-    BasePaginatedResponse,
-    BaseQuery,
-} from '/@/shared/types/domain/api-domain-types';
+import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
@@ -71,8 +67,6 @@ export enum AlbumListSort {
     YEAR = 'year',
 }
 
-export type AlbumListArgs = BaseEndpointArgs & { query: AlbumListQuery };
-
 export interface AlbumListQuery extends BaseQuery<AlbumListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.albumList>>;
@@ -90,7 +84,10 @@ export interface AlbumListQuery extends BaseQuery<AlbumListSort> {
     startIndex: number;
 }
 
+export type AlbumListRequest = { query: AlbumListQuery };
+
 export type AlbumListResponse = BasePaginatedResponse<Album[]> | null | undefined;
+
 type AlbumListSortMap = {
     jellyfin: Record<AlbumListSort, JFAlbumListSort | undefined>;
     navidrome: Record<AlbumListSort, NDAlbumListSort | undefined>;
@@ -200,9 +197,9 @@ export type Album = {
     userRating: null | number;
 } & { songs?: Song[] };
 
-export type AlbumDetailArgs = BaseEndpointArgs & { query: AlbumDetailQuery };
-
 export type AlbumDetailQuery = { id: string };
+
+export type AlbumDetailRequest = { query: AlbumDetailQuery };
 
 export type AlbumDetailResponse = Album | null | undefined;
 

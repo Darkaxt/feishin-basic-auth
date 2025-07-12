@@ -1,5 +1,4 @@
 import { Album } from '/@/shared/types/domain/album-domain-types';
-import { BaseEndpointArgs } from '/@/shared/types/domain/api-domain-types';
 import { AlbumArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 
@@ -17,10 +16,6 @@ export type SearchAlbumsQuery = {
     query?: string;
 };
 
-export type SearchArgs = BaseEndpointArgs & {
-    query: SearchQuery;
-};
-
 export type SearchQuery = {
     albumArtistLimit?: number;
     albumArtistStartIndex?: number;
@@ -31,6 +26,8 @@ export type SearchQuery = {
     songLimit?: number;
     songStartIndex?: number;
 };
+
+export type SearchRequest = { query: SearchQuery };
 
 export type SearchResponse = {
     albumArtists: AlbumArtist[];

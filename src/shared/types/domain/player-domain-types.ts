@@ -1,4 +1,3 @@
-import { BaseEndpointArgs } from '/@/shared/types/domain/api-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -29,15 +28,17 @@ export interface QueueData {
     next?: QueueSong;
     previous?: QueueSong;
 }
+
 export type QueueSong = Song & {
     uniqueId: string;
-};
-export type TranscodingArgs = BaseEndpointArgs & {
-    query: TranscodingQuery;
 };
 
 export type TranscodingQuery = {
     base: string;
     bitrate?: number;
     format?: string;
+};
+
+export type TranscodingRequest = {
+    query: TranscodingQuery;
 };

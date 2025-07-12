@@ -9,7 +9,7 @@ import {
     BaseEndpointArgs,
     BasePaginatedResponse,
     BaseQuery,
-} from '/@/shared/types/domain/api-domain-types';
+} from '/@/shared/types/adapter/api-controller-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
@@ -58,8 +58,6 @@ export type AddToPlaylistQuery = {
 
 export type AddToPlaylistResponse = null | undefined;
 
-export type CreatePlaylistArgs = BaseEndpointArgs & { body: CreatePlaylistBody; serverId?: string };
-
 export type CreatePlaylistBody = {
     _custom?: {
         navidrome?: {
@@ -74,14 +72,19 @@ export type CreatePlaylistBody = {
     public?: boolean;
 };
 
-export type CreatePlaylistResponse = undefined | { id: string };
-
-export type DeletePlaylistArgs = BaseEndpointArgs & {
-    query: DeletePlaylistQuery;
+export type CreatePlaylistRequest = {
+    body: CreatePlaylistBody;
     serverId?: string;
 };
 
+export type CreatePlaylistResponse = undefined | { id: string };
+
 export type DeletePlaylistQuery = { id: string };
+
+export type DeletePlaylistRequest = {
+    query: DeletePlaylistQuery;
+    serverId?: string;
+};
 
 export type DeletePlaylistResponse = null | undefined;
 
@@ -104,8 +107,6 @@ export type Playlist = {
     songCount: null | number;
     sync?: boolean | null;
 };
-export type PlaylistListArgs = BaseEndpointArgs & { query: PlaylistListQuery };
-
 export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.playlistList>>;
@@ -116,25 +117,21 @@ export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
     startIndex: number;
 }
 
-export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
+export type PlaylistListRequest = { query: PlaylistListQuery };
 
-export type RemoveFromPlaylistArgs = BaseEndpointArgs & {
-    query: RemoveFromPlaylistQuery;
-    serverId?: string;
-};
+export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
 
 export type RemoveFromPlaylistQuery = {
     id: string;
     songId: string[];
 };
 
-export type RemoveFromPlaylistResponse = null | undefined;
-
-export type UpdatePlaylistArgs = BaseEndpointArgs & {
-    body: UpdatePlaylistBody;
-    query: UpdatePlaylistQuery;
+export type RemoveFromPlaylistRequest = {
+    query: RemoveFromPlaylistQuery;
     serverId?: string;
 };
+
+export type RemoveFromPlaylistResponse = null | undefined;
 
 export type UpdatePlaylistBody = {
     _custom?: {
@@ -153,6 +150,12 @@ export type UpdatePlaylistBody = {
 
 export type UpdatePlaylistQuery = {
     id: string;
+};
+
+export type UpdatePlaylistRequest = {
+    body: UpdatePlaylistBody;
+    query: UpdatePlaylistQuery;
+    serverId?: string;
 };
 
 export type UpdatePlaylistResponse = null | undefined;
@@ -189,10 +192,6 @@ export const playlistListSortMap: PlaylistListSortMap = {
         updatedAt: undefined,
     },
 };
-export type MoveItemArgs = BaseEndpointArgs & {
-    query: MoveItemQuery;
-};
-
 export type MoveItemQuery = {
     endingIndex: number;
     playlistId: string;
@@ -200,15 +199,18 @@ export type MoveItemQuery = {
     trackId: string;
 };
 
-export type PlaylistDetailArgs = BaseEndpointArgs & { query: PlaylistDetailQuery };
+export type MoveItemRequest = {
+    query: MoveItemQuery;
+};
 
 export type PlaylistDetailQuery = {
     id: string;
 };
 
+export type PlaylistDetailRequest = { query: PlaylistDetailQuery };
+
 export type PlaylistDetailResponse = Playlist;
 
-export type PlaylistSongListArgs = BaseEndpointArgs & { query: PlaylistSongListQuery };
 export type PlaylistSongListQuery = {
     id: string;
     limit?: number;
@@ -216,5 +218,7 @@ export type PlaylistSongListQuery = {
     sortOrder?: ListSortOrder;
     startIndex: number;
 };
+
+export type PlaylistSongListRequest = { query: PlaylistSongListQuery };
 
 export type PlaylistSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;

@@ -1,10 +1,6 @@
 import i18n from '/@/i18n/i18n';
 import { NDUserListSort } from '/@/shared/api/navidrome.types';
-import {
-    BaseEndpointArgs,
-    BasePaginatedResponse,
-    BaseQuery,
-} from '/@/shared/types/domain/api-domain-types';
+import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { AnyLibraryItems, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export enum UserListSortOptions {
@@ -21,24 +17,23 @@ export const UserListSortOptionsLabels = {
     [UserListSortOptions.UPDATED_AT]: i18n.t('filter.updatedAt'),
 };
 
-export type FavoriteArgs = BaseEndpointArgs & { query: FavoriteQuery; serverId?: string };
-
 export type FavoriteQuery = {
     id: string[];
     type: LibraryItem;
 };
 
-export type FavoriteResponse = null | undefined;
+export type FavoriteRequest = { query: FavoriteQuery; serverId?: string };
+
+export type FavoriteResponse = null;
+
 export type RatingQuery = {
     item: AnyLibraryItems;
     rating: number;
 };
 
-export type RatingResponse = null | undefined;
+export type RatingResponse = null;
 
-export type SetRatingArgs = BaseEndpointArgs & { query: RatingQuery; serverId?: string };
-
-export type UserListArgs = BaseEndpointArgs & { query: UserListQuery };
+export type SetRatingRequest = { query: RatingQuery; serverId?: string };
 
 export interface UserListQuery extends BaseQuery<UserListSort> {
     _custom?: {
@@ -50,6 +45,8 @@ export interface UserListQuery extends BaseQuery<UserListSort> {
     searchTerm?: string;
     startIndex: number;
 }
+
+export type UserListRequest = { query: UserListQuery };
 
 export type UserListResponse = BasePaginatedResponse<User[]> | null | undefined;
 
@@ -75,18 +72,11 @@ export enum UserListSort {
     NAME = 'name',
 }
 
-export type DownloadArgs = BaseEndpointArgs & {
-    query: DownloadQuery;
-};
-
 export type DownloadQuery = {
     id: string;
 };
 
-export type ScrobbleArgs = BaseEndpointArgs & {
-    query: ScrobbleQuery;
-    serverId?: string;
-};
+export type DownloadRequest = { query: DownloadQuery };
 
 export type ScrobbleQuery = {
     event?: 'pause' | 'start' | 'timeupdate' | 'unpause';
@@ -95,9 +85,9 @@ export type ScrobbleQuery = {
     submission: boolean;
 };
 
-export type ScrobbleResponse = null | undefined;
+export type ScrobbleRequest = { query: ScrobbleQuery; serverId?: string };
 
-export type ShareItemArgs = BaseEndpointArgs & { body: ShareItemBody; serverId?: string };
+export type ScrobbleResponse = null;
 
 export type ShareItemBody = {
     description: string;
@@ -107,7 +97,9 @@ export type ShareItemBody = {
     resourceType: string;
 };
 
-export type ShareItemResponse = undefined | { id: string };
+export type ShareItemRequest = { body: ShareItemBody; serverId?: string };
+
+export type ShareItemResponse = null | { id: string };
 
 export type User = {
     createdAt: null | string;

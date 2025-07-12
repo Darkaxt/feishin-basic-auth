@@ -6,11 +6,7 @@ import { JFSongListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDSongListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import {
-    BaseEndpointArgs,
-    BasePaginatedResponse,
-    BaseQuery,
-} from '/@/shared/types/domain/api-domain-types';
+import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { Played, QueueSong } from '/@/shared/types/domain/player-domain-types';
@@ -58,6 +54,7 @@ export const SongListSortOptionsLabels = {
     [SongListSortOptions.RELEASE_DATE]: i18n.t('filter.releaseDate'),
     [SongListSortOptions.YEAR]: i18n.t('filter.year'),
 };
+
 export enum SongListSort {
     ALBUM = 'album',
     ALBUM_ARTIST = 'albumArtist',
@@ -78,6 +75,7 @@ export enum SongListSort {
     RELEASE_DATE = 'releaseDate',
     YEAR = 'year',
 }
+
 export type Song = {
     album: null | string;
     albumArtists: RelatedArtist[];
@@ -121,7 +119,6 @@ export type Song = {
     userFavorite: boolean;
     userRating: null | number;
 };
-export type SongListArgs = BaseEndpointArgs & { query: SongListQuery };
 
 export interface SongListQuery extends BaseQuery<SongListSort> {
     _custom?: {
@@ -142,6 +139,8 @@ export interface SongListQuery extends BaseQuery<SongListSort> {
     searchTerm?: string;
     startIndex: number;
 }
+
+export type SongListRequest = { query: SongListQuery };
 
 export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 type SongListSortMap = {
@@ -212,13 +211,10 @@ export const songListSortMap: SongListSortMap = {
         year: undefined,
     },
 };
+
 export type GainInfo = {
     album?: number;
     track?: number;
-};
-
-export type RandomSongListArgs = BaseEndpointArgs & {
-    query: RandomSongListQuery;
 };
 
 export type RandomSongListQuery = {
@@ -229,30 +225,35 @@ export type RandomSongListQuery = {
     musicFolderId?: string;
     played: Played;
 };
-export type RandomSongListResponse = SongListResponse;
 
-export type SimilarSongsArgs = BaseEndpointArgs & {
-    query: SimilarSongsQuery;
-};
+export type RandomSongListRequest = { query: RandomSongListQuery };
+
+export type RandomSongListResponse = SongListResponse;
 
 export type SimilarSongsQuery = {
     albumArtistIds: string[];
     count?: number;
     songId: string;
 };
-export type SongDetailArgs = BaseEndpointArgs & { query: SongDetailQuery };
+
+export type SimilarSongsRequest = { query: SimilarSongsQuery };
 
 export type SongDetailQuery = { id: string };
-export type SongDetailResponse = null | Song | undefined;
 
-export type TopSongListArgs = BaseEndpointArgs & { query: TopSongListQuery };
+export type SongDetailRequest = { query: SongDetailQuery };
+
+export type SongDetailResponse = null | Song | undefined;
 
 export type TopSongListQuery = {
     artist: string;
     artistId: string;
     limit?: number;
 };
+
+export type TopSongListRequest = { query: TopSongListQuery };
+
 export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+
 export const sortSongList = (
     songs: QueueSong[],
     sortBy: SongListSort,
@@ -299,7 +300,7 @@ export const sortSongList = (
             results = orderBy(
                 results,
                 [
-                    (v) => v.genres?.[0].name.toLowerCase(),
+                    (v) => v.genres?.[0]?.name.toLowerCase(),
                     (v) => v.album?.toLowerCase(),
                     'discNumber',
                     'trackNumber',

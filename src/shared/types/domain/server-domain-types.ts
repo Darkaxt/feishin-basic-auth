@@ -1,6 +1,6 @@
 import i18n from 'src/i18n/i18n';
 
-import { BaseEndpointArgs, BasePaginatedResponse } from '/@/shared/types/domain/api-domain-types';
+import { BasePaginatedResponse } from '/@/shared/types/adapter/api-controller-types';
 
 export enum ServerListSortOptions {
     CREATED_AT = 'createdAt',
@@ -40,7 +40,7 @@ export type ServerInfo = {
     version: string;
 };
 
-export type ServerInfoArgs = BaseEndpointArgs;
+export type ServerInfoRequest = null;
 
 export type ServerListItem = {
     credential: string;
@@ -61,9 +61,9 @@ export type ServerMusicFolder = {
     name: string;
 };
 
-export type ServerMusicFolderListArgs = BaseEndpointArgs;
-
 export type ServerMusicFolderListQuery = null;
+
+export type ServerMusicFolderListRequest = null;
 
 export type ServerMusicFolderListResponse =
     | BasePaginatedResponse<ServerMusicFolder[]>
