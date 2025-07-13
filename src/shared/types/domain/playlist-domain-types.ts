@@ -10,7 +10,7 @@ import {
     BasePaginatedResponse,
     BaseQuery,
 } from '/@/shared/types/adapter/api-controller-types';
-import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { Genre, RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Song, SongListSort } from '/@/shared/types/domain/song-domain-types';
@@ -89,24 +89,26 @@ export type DeletePlaylistRequest = {
 export type DeletePlaylistResponse = null | undefined;
 
 export type Playlist = {
+    _itemType: LibraryItem.PLAYLIST;
+    _serverId: string;
+    _serverType: ServerType;
+    createdDate: null | string;
     description: null | string;
     duration: null | number;
-    genres: Genre[];
+    genres: RelatedGenre[];
     id: string;
-    imagePlaceholderUrl: null | string;
     imageUrl: null | string;
-    itemType: LibraryItem.PLAYLIST;
     name: string;
     owner: null | string;
     ownerId: null | string;
     public: boolean | null;
     rules?: null | Record<string, any>;
-    serverId: string;
-    serverType: ServerType;
     size: null | number;
     songCount: null | number;
     sync?: boolean | null;
+    updatedDate: null | string;
 };
+
 export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
     _custom?: {
         jellyfin?: Partial<z.infer<typeof jfType._parameters.playlistList>>;
@@ -120,6 +122,10 @@ export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
 export type PlaylistListRequest = { query: PlaylistListQuery };
 
 export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
+
+export type PlaylistSong = Song & {
+    playlistItemId: string;
+};
 
 export type RemoveFromPlaylistQuery = {
     id: string;

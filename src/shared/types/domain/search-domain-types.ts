@@ -1,5 +1,5 @@
 import { Album } from '/@/shared/types/domain/album-domain-types';
-import { AlbumArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export type SearchAlbumArtistsQuery = {
@@ -30,7 +30,7 @@ export type SearchQuery = {
 export type SearchRequest = { query: SearchQuery };
 
 export type SearchResponse = {
-    albumArtists: AlbumArtist[];
+    albumArtists: Artist[];
     albums: Album[];
     songs: Song[];
 };

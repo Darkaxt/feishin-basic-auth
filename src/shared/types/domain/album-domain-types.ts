@@ -8,9 +8,17 @@ import { NDAlbumListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
-import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
-import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import {
+    LibraryItem,
+    ListSortOrder,
+    Mood,
+    Participants,
+    RecordLabel,
+    ReleaseType,
+    Tags,
+} from '/@/shared/types/domain/shared-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export enum AlbumListSortOptions {
@@ -150,52 +158,45 @@ export const albumListSortMap: AlbumListSortMap = {
 };
 
 export type Album = {
-    albumArtist: string;
-    albumArtists: RelatedArtist[];
+    _itemType: LibraryItem.ALBUM;
+    _serverId: string;
+    _serverType: ServerType;
+    artistName: null | string;
     artists: RelatedArtist[];
-    backdropImageUrl: null | string;
     comment: null | string;
-    createdDate: string;
-    description: null | string;
-    discTitles: {
-        disc: number;
-        title: string;
-    }[];
+    createdDate: null | string;
+    discTitles: DiscTitle[];
     displayArtist: null | string;
     duration: null | number;
-    genres: Genre[];
+    explicit: boolean | null;
+    genres: RelatedGenre[];
     id: string;
     imagePlaceholderUrl: null | string;
     imageUrl: null | string;
     isCompilation: boolean | null;
-    itemType: LibraryItem.ALBUM;
-    mbzAlbumId: null | string;
+    mbzId: null | string;
     mbzReleaseGroupId: null | string;
-    missing: boolean;
+    missing: boolean | null;
+    moods: Mood[];
     name: string;
     originalReleaseDate: null | string;
-    participants: null | Record<string, RelatedArtist[]>;
+    participants: Participants;
+    recordLabels: RecordLabel[];
     releaseDate: null | string;
-    releaseTypes: {
-        id: string;
-        name: string;
-    }[];
+    releaseTypes: ReleaseType[];
     releaseYear: null | number;
-    serverId: string;
-    serverType: ServerType;
     size: null | number;
     songCount: null | number;
-    songs?: Song[];
     sortName: string;
-    tags: Record<string, string[]>;
-    uniqueId: string;
-    updatedDate: string;
+    tags: Tags;
+    updatedDate: null | string;
     userFavorite: boolean;
     userFavoriteDate: null | string;
     userLastPlayedDate: null | string;
     userPlayCount: null | number;
     userRating: null | number;
-} & { songs?: Song[] };
+    version: null | string;
+};
 
 export type AlbumDetailQuery = { id: string };
 
@@ -206,6 +207,13 @@ export type AlbumDetailResponse = Album | null | undefined;
 export type AlbumInfo = {
     imageUrl: null | string;
     notes: null | string;
+};
+
+export type AlbumWithSongs = Album & { songs: Song[] };
+
+export type DiscTitle = {
+    disc: number;
+    title: string;
 };
 
 export const sortAlbumList = (albums: Album[], sortBy: AlbumListSort, sortOrder: ListSortOrder) => {

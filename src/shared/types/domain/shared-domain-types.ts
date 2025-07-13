@@ -1,7 +1,7 @@
 import { JFSortOrder } from '/@/shared/api/jellyfin.types';
 import { NDSortOrder } from '/@/shared/api/navidrome.types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
-import { AlbumArtist, Artist } from '/@/shared/types/domain/artist-domain-types';
+import { Artist, Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
@@ -19,15 +19,9 @@ export enum ListSortOrder {
     DESC = 'DESC',
 }
 
-export type AnyLibraryItem = Album | AlbumArtist | Artist | Playlist | QueueSong | Song;
+export type AnyLibraryItem = Album | Artist | Artist | Playlist | QueueSong | Song;
 
-export type AnyLibraryItems =
-    | Album[]
-    | AlbumArtist[]
-    | Artist[]
-    | Playlist[]
-    | QueueSong[]
-    | Song[];
+export type AnyLibraryItems = Album[] | Artist[] | Artist[] | Playlist[] | QueueSong[] | Song[];
 type SortOrderMap = {
     jellyfin: Record<ListSortOrder, JFSortOrder>;
     navidrome: Record<ListSortOrder, NDSortOrder>;
@@ -56,3 +50,22 @@ export type FontData = {
     postscriptName: string;
     style: string;
 };
+
+export type Mood = {
+    id: string;
+    name: string;
+};
+
+export type Participants = Record<string, RelatedArtist[]>;
+
+export type RecordLabel = {
+    id: string;
+    name: string;
+};
+
+export type ReleaseType = {
+    id: string;
+    name: string;
+};
+
+export type Tags = Record<string, string[]>;

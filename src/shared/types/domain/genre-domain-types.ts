@@ -2,6 +2,7 @@ import i18n from '/@/i18n/i18n';
 import { JFGenreListSort } from '/@/shared/api/jellyfin.types';
 import { NDGenreListSort } from '/@/shared/api/navidrome.types';
 import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { UserListSort } from '/@/shared/types/domain/user-domain-types';
 
@@ -18,12 +19,14 @@ export const GenreListSortOptionsLabels = {
 };
 
 export type Genre = {
-    albumCount?: number;
+    _itemType: LibraryItem.GENRE;
+    _serverId: string;
+    _serverType: ServerType;
+    albumCount: null | number;
     id: string;
     imageUrl: null | string;
-    itemType: LibraryItem.GENRE;
     name: string;
-    songCount?: number;
+    songCount: null | number;
 };
 
 export interface GenreListQuery extends BaseQuery<GenreListSort> {
@@ -40,6 +43,12 @@ export interface GenreListQuery extends BaseQuery<GenreListSort> {
 export type GenreListRequest = { query: GenreListQuery };
 
 export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
+
+export type RelatedGenre = {
+    id: string;
+    imageUrl: null | string;
+    name: string;
+};
 
 type GenreListSortMap = {
     jellyfin: Record<GenreListSort, JFGenreListSort | undefined>;

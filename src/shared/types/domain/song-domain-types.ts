@@ -8,10 +8,16 @@ import { NDSongListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
-import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { Played, QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
-import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import {
+    LibraryItem,
+    ListSortOrder,
+    Mood,
+    Participants,
+    Tags,
+} from '/@/shared/types/domain/shared-domain-types';
 
 export enum SongListSortOptions {
     ALBUM = 'album',
@@ -77,46 +83,54 @@ export enum SongListSort {
 }
 
 export type Song = {
+    _itemType: LibraryItem.SONG;
+    _serverId: string;
+    _serverType: ServerType;
     album: null | string;
+    albumArtistName: null | string;
     albumArtists: RelatedArtist[];
-    albumId: string;
-    artistName: string;
+    albumId: null | string;
+    artistName: null | string;
     artists: RelatedArtist[];
-    bitRate: number;
+    bitDepth: null | number;
+    bitRate: null | number;
     bpm: null | number;
     channels: null | number;
     comment: null | string;
-    compilation: boolean | null;
+    composer: null | string;
     container: null | string;
-    createdAt: string;
+    createdDate: null | string;
     discNumber: number;
     discSubtitle: null | string;
     duration: number;
+    explicit: boolean | null;
     gain: GainInfo | null;
-    genres: Genre[];
+    genres: RelatedGenre[];
     id: string;
-    imagePlaceholderUrl: null | string;
     imageUrl: null | string;
-    itemType: LibraryItem.SONG;
-    lastPlayedAt: null | string;
+    isCompilation: boolean | null;
+    isrc: string[];
     lyrics: null | string;
+    mbzId: null | string;
+    missing: boolean | null;
+    moods: Mood[];
     name: string;
-    participants: null | Record<string, RelatedArtist[]>;
+    participants: Participants;
     path: null | string;
     peak: GainInfo | null;
     playCount: number;
-    playlistItemId?: string;
     releaseDate: null | string;
-    releaseYear: null | string;
-    serverId: string;
-    serverType: ServerType;
+    releaseYear: null | number;
+    samplingRate: null | number;
     size: number;
+    sortName: string;
     streamUrl: string;
-    tags: null | Record<string, string[]>;
+    tags: Tags;
     trackNumber: number;
-    uniqueId: string;
-    updatedAt: string;
+    updatedDate: null | string;
     userFavorite: boolean;
+    userFavoriteDate: null | string;
+    userLastPlayedDate: null | string;
     userRating: null | number;
 };
 

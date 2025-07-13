@@ -7,7 +7,7 @@ import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumArtistListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
-import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
@@ -31,43 +31,24 @@ export const ArtistListSortOptionsLabels = {
     [ArtistListSortOptions.TRACK_COUNT]: i18n.t('filter.trackCount'),
 };
 
-export type AlbumArtist = {
+export type Artist = {
+    _serverId: string;
+    _serverType: ServerType;
     albumCount: null | number;
-    backgroundImageUrl: null | string;
     biography: null | string;
     duration: null | number;
-    genres: Genre[];
+    genres: RelatedGenre[];
     id: string;
     imageUrl: null | string;
     itemType: LibraryItem.ALBUM_ARTIST;
-    lastPlayedAt: null | string;
-    mbz: null | string;
+    mbzId: null | string;
     name: string;
     playCount: null | number;
-    serverId: string;
-    serverType: ServerType;
     similarArtists: null | RelatedArtist[];
     songCount: null | number;
     userFavorite: boolean;
+    userLastPlayedDate: null | string;
     userRating: null | number;
-};
-
-export type Artist = {
-    biography: null | string;
-    createdAt: string;
-    id: string;
-    itemType: LibraryItem.ARTIST;
-    name: string;
-    remoteCreatedAt: null | string;
-    serverFolderId: string;
-    serverId: string;
-    serverType: ServerType;
-    updatedAt: string;
-};
-
-export type RelatedAlbumArtist = {
-    id: string;
-    name: string;
 };
 
 export type RelatedArtist = {
@@ -142,7 +123,7 @@ export type AlbumArtistDetailQuery = { id: string };
 
 export type AlbumArtistDetailRequest = { query: AlbumArtistDetailQuery };
 
-export type AlbumArtistDetailResponse = AlbumArtist | null;
+export type AlbumArtistDetailResponse = Artist | null;
 
 export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
     _custom?: {
@@ -158,7 +139,7 @@ export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
 
 export type ArtistListRequest = { query: ArtistListQuery };
 
-export type ArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
+export type ArtistListResponse = BasePaginatedResponse<Artist[]> | null | undefined;
 type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;
     navidrome: Record<ArtistListSort, undefined>;
@@ -233,7 +214,7 @@ export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
 
 export type AlbumArtistListRequest = { query: AlbumArtistListQuery };
 
-export type AlbumArtistListResponse = BasePaginatedResponse<AlbumArtist[]> | null | undefined;
+export type AlbumArtistListResponse = BasePaginatedResponse<Artist[]> | null | undefined;
 
 export type ArtistInfoQuery = {
     artistId: string;
@@ -244,7 +225,7 @@ export type ArtistInfoQuery = {
 export type ArtistInfoRequest = { query: ArtistInfoQuery };
 
 export const sortAlbumArtistList = (
-    artists: AlbumArtist[],
+    artists: Artist[],
     sortBy: AlbumArtistListSort | ArtistListSort,
     sortOrder: ListSortOrder,
 ) => {
