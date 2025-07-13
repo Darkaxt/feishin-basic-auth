@@ -1,24 +1,20 @@
-import createClient, { Middleware } from 'openapi-fetch';
+import createClient, { Client, Middleware } from 'openapi-fetch';
 import qs from 'qs';
 
 import { paths } from './subsonic-schema';
 
 import i18n from '/@/i18n/i18n';
 import { normalize } from '/@/shared/api/subsonic/subsonic-normalize';
-import { ApiController } from '/@/shared/types/adapter/api-controller-types';
+import { API_CLIENT_NAME, ApiController } from '/@/shared/types/adapter/api-controller-types';
 import { ApiControllerError } from '/@/shared/types/adapter/api-controller-types';
 import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
-export function deserializeCredential(credential: string): Record<string, string> {
+function deserializeCredential(credential: string): Record<string, string> {
     return JSON.parse(credential);
 }
 
-export function serializeCredential(
-    username: string,
-    credential: Record<string, string>,
-    type: string,
-) {
+function serializeCredential(username: string, credential: Record<string, string>, type: string) {
     switch (type) {
         case 'apiKey':
             return JSON.stringify({ apiKey: credential.apiKey });
@@ -31,32 +27,36 @@ export function serializeCredential(
     }
 }
 
-const middleware: Middleware = {
-    onRequest: async () => {},
-};
-
-const client = createClient<paths>({
+export const apiClient = createClient<paths>({
     querySerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
 });
 
-client.use(middleware);
+export const middleware: (server: ServerListItem) => Middleware = (server: ServerListItem) => ({
+    onRequest: async ({ params }) => {
+        const credential = deserializeCredential(server.credential);
+
+        if (params.query) {
+            params.query.v = '1.16.1';
+            params.query.c = API_CLIENT_NAME;
+            params.query.f = 'json';
+
+            for (const [key, value] of Object.entries(credential)) {
+                params.query[key] = value;
+            }
+        }
+    },
+});
+
+const client: SubsonicClient = createClient<paths>({
+    querySerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+});
 
 type ErrorResponseArgs = {
     code?: number;
     message?: string;
 };
 
-// type Req<T extends keyof paths> = paths[T]['get']['parameters'];
-
-// type Res<T extends keyof paths> = T extends keyof paths
-//     ? paths[T]['get'] extends {
-//           responses: {
-//               '200': { content: { 'application/json': { 'subsonic-response'?: infer R } } };
-//           };
-//       }
-//         ? NonNullable<R>
-//         : never
-//     : never;
+type SubsonicClient = Client<paths, `${string}/${string}`>;
 
 function errorResponse(args: ErrorResponseArgs): [ApiControllerError, null] {
     const message = `${i18n.t('error.genericError', { postProcess: 'sentenceCase' }) as string}${
@@ -131,7 +131,7 @@ function toHttpErrorCode(subsonicErrorCode: number): number {
     }
 }
 
-export const adapter: ApiController = {
+export const controller: ApiController = {
     _utility: {
         getImageUrl: (
             args: { id: string; size?: number; type: LibraryItem },

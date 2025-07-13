@@ -4,7 +4,7 @@ import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller
 import { NDSongListSort } from '/@/shared/api/navidrome.types';
 import { ndNormalize } from '/@/shared/api/navidrome/navidrome-normalize';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import { ssNormalize } from '/@/shared/api/subsonic/subsonic-normalize';
+import { normalize } from '/@/shared/api/subsonic/subsonic-normalize';
 import { SubsonicExtensions } from '/@/shared/api/subsonic/subsonic-types';
 import { getFeatures, hasFeature, VersionInfo } from '/@/shared/api/utils';
 import { albumListSortMap } from '/@/shared/types/domain/album-domain-types';
@@ -14,7 +14,7 @@ import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types
 import { genreListSortMap } from '/@/shared/types/domain/genre-domain-types';
 import {
     playlistListSortMap,
-    PlaylistSongListArgs,
+    PlaylistSongListRequest,
     PlaylistSongListResponse,
 } from '/@/shared/types/domain/playlist-domain-types';
 import {
@@ -424,7 +424,9 @@ export const NavidromeController: ControllerEndpoint = {
             apiClientProps,
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
-    getPlaylistSongList: async (args: PlaylistSongListArgs): Promise<PlaylistSongListResponse> => {
+    getPlaylistSongList: async (
+        args: PlaylistSongListRequest,
+    ): Promise<PlaylistSongListResponse> => {
         const { apiClientProps, query } = args;
 
         const res = await ndApiClient(apiClientProps).getPlaylistSongList({
@@ -520,7 +522,7 @@ export const NavidromeController: ControllerEndpoint = {
         if (res.status === 200 && res.body.similarSongs?.song) {
             const similar = res.body.similarSongs.song.reduce<Song[]>((acc, song) => {
                 if (song.id !== query.songId) {
-                    acc.push(ssNormalize.song(song, apiClientProps.server));
+                    acc.push(normalize.song(song, apiClientProps.server));
                 }
 
                 return acc;

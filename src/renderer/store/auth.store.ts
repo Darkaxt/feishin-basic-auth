@@ -7,7 +7,7 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import { useAlbumArtistListDataStore } from '/@/renderer/store/album-artist-list-data.store';
 import { useAlbumListDataStore } from '/@/renderer/store/album-list-data.store';
 import { useListStore } from '/@/renderer/store/list.store';
-import { ServerListItem } from '/@/shared/types/domain-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 
 export interface AuthSlice extends AuthState {
     actions: {
@@ -70,8 +70,8 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
                                 ...args,
                             };
 
-                            state.serverList[id] = updatedServer;
-                            state.currentServer = updatedServer;
+                            state.serverList[id] = updatedServer as ServerListItem;
+                            state.currentServer = updatedServer as ServerListItem;
                         });
                     },
                 },

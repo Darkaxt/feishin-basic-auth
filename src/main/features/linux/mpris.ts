@@ -168,7 +168,7 @@ ipcMain.on('update-song', (_event, song: QueueSong | undefined) => {
             'xesam:contentCreated': song.releaseDate,
             'xesam:discNumber': song.discNumber ? song.discNumber : null,
             'xesam:genre': song.genres?.length ? song.genres.map((genre: any) => genre.name) : null,
-            'xesam:lastUsed': song.lastPlayedAt,
+            'xesam:lastUsed': song.userLastPlayedDate,
             'xesam:title': song.name || null,
             'xesam:trackNumber': song.trackNumber ? song.trackNumber : null,
             'xesam:useCount':

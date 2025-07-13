@@ -5,7 +5,7 @@ import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/shared/api/jelly
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
-import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import {
@@ -213,6 +213,7 @@ const normalizeSong = (
     }
 
     return {
+        _itemType: LibraryItem.SONG,
         album: item.Album,
         albumArtists: item.AlbumArtists?.map((entry) => ({
             id: entry.Id,
@@ -256,8 +257,7 @@ const normalizeSong = (
         id: item.Id,
         imagePlaceholderUrl: null,
         imageUrl: getSongCoverArtUrl({ baseUrl: server?.url || '', item, size: imageSize || 100 }),
-        itemType: LibraryItem.SONG,
-        lastPlayedAt: null,
+        isCompilation: null,
         lyrics: null,
         name: item.Name,
         participants: getPeople(item),
@@ -279,8 +279,9 @@ const normalizeSong = (
         tags: getTags(item),
         trackNumber: item.IndexNumber,
         uniqueId: nanoid(),
-        updatedAt: item.DateCreated,
+        updatedDate: item.DateCreated,
         userFavorite: (item.UserData && item.UserData.IsFavorite) || false,
+        userLastPlayedDate: null,
         userRating: null,
     };
 };
@@ -291,6 +292,9 @@ const normalizeAlbum = (
     imageSize?: number,
 ): Album => {
     return {
+        _itemType: LibraryItem.ALBUM,
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         albumArtist: item.AlbumArtist,
         albumArtists:
             item.AlbumArtists.map((entry) => ({
@@ -321,7 +325,6 @@ const normalizeAlbum = (
             size: imageSize || 300,
         }),
         isCompilation: null,
-        itemType: LibraryItem.ALBUM,
         lastPlayedAt: null,
         mbzId: item.ProviderIds?.MusicBrainzAlbum || null,
         name: item.Name,
@@ -330,8 +333,6 @@ const normalizeAlbum = (
         playCount: item.UserData?.PlayCount || 0,
         releaseDate: item.PremiereDate?.split('T')[0] || null,
         releaseYear: item.ProductionYear || null,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         size: null,
         songCount: item?.ChildCount || null,
         songs: item.Songs?.map((song) => normalizeSong(song, server, '', imageSize)),
@@ -349,7 +350,7 @@ const normalizeAlbumArtist = (
     },
     server: null | ServerListItem,
     imageSize?: number,
-): AlbumArtist => {
+): Artist => {
     const similarArtists =
         item.similarArtists?.Items?.filter((entry) => entry.Name !== 'Various Artists').map(
             (entry) => ({
@@ -364,6 +365,8 @@ const normalizeAlbumArtist = (
         ) || [];
 
     return {
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         albumCount: item.AlbumCount ?? null,
         backgroundImageUrl: null,
         biography: item.Overview || null,
@@ -381,15 +384,13 @@ const normalizeAlbumArtist = (
             size: imageSize || 300,
         }),
         itemType: LibraryItem.ALBUM_ARTIST,
-        lastPlayedAt: null,
-        mbz: item.ProviderIds?.MusicBrainzArtist || null,
+        mbzId: item.ProviderIds?.MusicBrainzArtist || null,
         name: item.Name,
         playCount: item.UserData?.PlayCount || 0,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         similarArtists,
         songCount: item.SongCount ?? null,
         userFavorite: item.UserData?.IsFavorite || false,
+        userLastPlayedDate: null,
         userRating: null,
     };
 };
@@ -408,6 +409,9 @@ const normalizePlaylist = (
     const imagePlaceholderUrl = null;
 
     return {
+        _itemType: LibraryItem.PLAYLIST,
+        _serverId: server?.id || '',
+        _serverType: ServerType.JELLYFIN,
         description: item.Overview || null,
         duration: item.RunTimeTicks / 10000,
         genres: item.GenreItems?.map((entry) => ({
@@ -419,14 +423,11 @@ const normalizePlaylist = (
         id: item.Id,
         imagePlaceholderUrl,
         imageUrl: imageUrl || null,
-        itemType: LibraryItem.PLAYLIST,
         name: item.Name,
         owner: null,
         ownerId: null,
         public: null,
         rules: null,
-        serverId: server?.id || '',
-        serverType: ServerType.JELLYFIN,
         size: null,
         songCount: item?.ChildCount || null,
         sync: null,
@@ -482,10 +483,10 @@ const getGenreCoverArtUrl = (args: {
 
 const normalizeGenre = (item: JFGenre, server: null | ServerListItem): Genre => {
     return {
+        _itemType: LibraryItem.GENRE,
         albumCount: undefined,
         id: item.Id,
         imageUrl: getGenreCoverArtUrl({ baseUrl: server?.url || '', item, size: 200 }),
-        itemType: LibraryItem.GENRE,
         name: item.Name,
         songCount: undefined,
     };

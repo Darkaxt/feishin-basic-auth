@@ -6,7 +6,7 @@ import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
-import { AlbumArtist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
 import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
@@ -151,9 +151,9 @@ const normalizeSong = (
         bpm: item.bpm ? item.bpm : null,
         channels: item.channels ? item.channels : null,
         comment: item.comment ? item.comment : null,
-        compilation: item.compilation,
+        isCompilation: item.compilation,
         container: item.suffix,
-        createdAt: item.createdAt.split('T')[0],
+        createdDate: item.createdAt.split('T')[0],
         discNumber: item.discNumber,
         discSubtitle: item.discSubtitle ? item.discSubtitle : null,
         duration: item.duration * 1000,
@@ -170,8 +170,8 @@ const normalizeSong = (
         id,
         imagePlaceholderUrl,
         imageUrl,
-        itemType: LibraryItem.SONG,
-        lastPlayedAt: normalizePlayDate(item),
+        _itemType: LibraryItem.SONG,
+        userLastPlayedDate: normalizePlayDate(item),
         lyrics: item.lyrics ? item.lyrics : null,
         name: item.title,
         // Thankfully, Windows is merciful and allows a mix of separators. So, we can use the
@@ -196,7 +196,7 @@ const normalizeSong = (
         tags: item.tags || null,
         trackNumber: item.trackNumber,
         uniqueId: nanoid(),
-        updatedAt: item.updatedAt,
+        updatedDate: item.updatedAt,
         userFavorite: item.starred || false,
         userRating: item.rating || null,
     };
@@ -237,7 +237,7 @@ const normalizeAlbum = (
         imagePlaceholderUrl,
         imageUrl,
         isCompilation: item.compilation,
-        itemType: LibraryItem.ALBUM,
+        _itemType: LibraryItem.ALBUM,
         lastPlayedAt: normalizePlayDate(item),
 
         mbzId: item.mbzAlbumId || null,
@@ -253,8 +253,8 @@ const normalizeAlbum = (
             : new Date(Date.UTC(item.minYear, 0, 1))
         ).toISOString(),
         releaseYear: item.minYear,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs ? item.songs.map((song) => normalizeSong(song, server)) : undefined,
@@ -271,7 +271,7 @@ const normalizeAlbumArtist = (
         similarArtists?: z.infer<typeof ssType._response.artistInfo>['artistInfo']['similarArtist'];
     },
     server: null | ServerListItem,
-): AlbumArtist => {
+): Artist => {
     let imageUrl = getImageUrl({ url: item?.largeImageUrl || null });
 
     if (!imageUrl) {
@@ -314,12 +314,12 @@ const normalizeAlbumArtist = (
         id: item.id,
         imageUrl: imageUrl || null,
         itemType: LibraryItem.ALBUM_ARTIST,
-        lastPlayedAt: normalizePlayDate(item),
-        mbz: item.mbzArtistId || null,
+        userLastPlayedDate: normalizePlayDate(item),
+        mbzId: item.mbzArtistId || null,
         name: item.name,
         playCount: item.playCount || 0,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         similarArtists:
             item.similarArtists?.map((artist) => ({
                 id: artist.id,
@@ -353,14 +353,14 @@ const normalizePlaylist = (
         id: item.id,
         imagePlaceholderUrl,
         imageUrl,
-        itemType: LibraryItem.PLAYLIST,
+        _itemType: LibraryItem.PLAYLIST,
         name: item.name,
         owner: item.ownerName,
         ownerId: item.ownerId,
         public: item.public,
         rules: item?.rules || null,
-        serverId: server?.id || 'unknown',
-        serverType: ServerType.NAVIDROME,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         size: item.size,
         songCount: item.songCount,
         sync: item.sync,
@@ -372,7 +372,7 @@ const normalizeGenre = (item: NDGenre): Genre => {
         albumCount: undefined,
         id: item.id,
         imageUrl: null,
-        itemType: LibraryItem.GENRE,
+        _itemType: LibraryItem.GENRE,
         name: item.name,
         songCount: undefined,
     };

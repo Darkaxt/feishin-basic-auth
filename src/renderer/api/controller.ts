@@ -4,11 +4,9 @@ import { NavidromeController } from '/@/renderer/api/navidrome/navidrome-control
 import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
 import { useAuthStore } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
-import {
-    AuthenticationResponse,
-    ControllerEndpoint,
-    ServerType,
-} from '/@/shared/types/domain-types';
+import { ControllerEndpoint } from '/@/shared/types/domain/api-domain-types';
+import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
 
 type ApiController = {
     jellyfin: ControllerEndpoint;

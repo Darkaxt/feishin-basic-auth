@@ -211,3 +211,5 @@ export interface BaseQuery<T> {
 }
 
 export type ExtractControllerResponse<T> = T extends ApiControllerFn<any, infer R> ? R : never;
+
+export const API_CLIENT_NAME = 'Feishin';
