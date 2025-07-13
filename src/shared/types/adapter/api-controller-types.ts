@@ -102,7 +102,7 @@ export type ApiClientProps = {
 
 export type ApiController = {
     _utility: {
-        getDownloadUrl: ApiControllerFn<DownloadRequest, string>;
+        getDownloadUrl?: ApiControllerFn<DownloadRequest, string>;
         getImageUrl: (
             args: { id: string; size?: number; type: LibraryItem },
             server: ServerListItem,
@@ -113,67 +113,67 @@ export type ApiController = {
         ) => string;
     };
     album: {
-        getDetail: ApiControllerFn<AlbumDetailRequest, AlbumDetailResponse>;
+        getDetail?: ApiControllerFn<AlbumDetailRequest, AlbumDetailResponse>;
         getInfo?: ApiControllerFn<AlbumDetailRequest, AlbumInfo>;
-        getList: ApiControllerFn<AlbumListRequest, AlbumListResponse>;
-        getListCount: ApiControllerFn<AlbumListRequest, number>;
+        getList?: ApiControllerFn<AlbumListRequest, AlbumListResponse>;
+        getListCount?: ApiControllerFn<AlbumListRequest, number>;
     };
     albumArtist: {
-        getDetail: ApiControllerFn<AlbumArtistDetailRequest, AlbumArtistDetailResponse>;
-        getList: ApiControllerFn<AlbumArtistListRequest, AlbumArtistListResponse>;
-        getListCount: ApiControllerFn<AlbumArtistListRequest, number>;
+        getDetail?: ApiControllerFn<AlbumArtistDetailRequest, AlbumArtistDetailResponse>;
+        getList?: ApiControllerFn<AlbumArtistListRequest, AlbumArtistListResponse>;
+        getListCount?: ApiControllerFn<AlbumArtistListRequest, number>;
     };
     artist: {
-        getList: ApiControllerFn<ArtistListRequest, ArtistListResponse>;
-        getListCount: ApiControllerFn<ArtistListRequest, number>;
+        getList?: ApiControllerFn<ArtistListRequest, ArtistListResponse>;
+        getListCount?: ApiControllerFn<ArtistListRequest, number>;
     };
     favorite: {
-        create: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
-        delete: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
+        create?: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
+        delete?: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
     };
     genre: {
-        getList: ApiControllerFn<GenreListRequest, GenreListResponse>;
+        getList?: ApiControllerFn<GenreListRequest, GenreListResponse>;
     };
     musicFolder: {
-        getList: ApiControllerFn<ServerMusicFolderListRequest, ServerMusicFolderListResponse>;
+        getList?: ApiControllerFn<ServerMusicFolderListRequest, ServerMusicFolderListResponse>;
     };
     playlist: {
-        addTo: ApiControllerFn<AddToPlaylistArgs, AddToPlaylistResponse>;
-        create: ApiControllerFn<CreatePlaylistRequest, CreatePlaylistResponse>;
-        delete: ApiControllerFn<DeletePlaylistRequest, DeletePlaylistResponse>;
-        getDetail: ApiControllerFn<PlaylistDetailRequest, PlaylistDetailResponse>;
-        getList: ApiControllerFn<PlaylistListRequest, PlaylistListResponse>;
-        getListCount: ApiControllerFn<PlaylistListRequest, number>;
-        getSongList: ApiControllerFn<PlaylistSongListRequest, SongListResponse>;
+        addTo?: ApiControllerFn<AddToPlaylistArgs, AddToPlaylistResponse>;
+        create?: ApiControllerFn<CreatePlaylistRequest, CreatePlaylistResponse>;
+        delete?: ApiControllerFn<DeletePlaylistRequest, DeletePlaylistResponse>;
+        getDetail?: ApiControllerFn<PlaylistDetailRequest, PlaylistDetailResponse>;
+        getList?: ApiControllerFn<PlaylistListRequest, PlaylistListResponse>;
+        getListCount?: ApiControllerFn<PlaylistListRequest, number>;
+        getSongList?: ApiControllerFn<PlaylistSongListRequest, SongListResponse>;
         moveItem?: ApiControllerFn<MoveItemRequest, void>;
-        removeFrom: ApiControllerFn<RemoveFromPlaylistRequest, RemoveFromPlaylistResponse>;
-        update: ApiControllerFn<UpdatePlaylistRequest, UpdatePlaylistResponse>;
+        removeFrom?: ApiControllerFn<RemoveFromPlaylistRequest, RemoveFromPlaylistResponse>;
+        update?: ApiControllerFn<UpdatePlaylistRequest, UpdatePlaylistResponse>;
     };
     server: {
         authenticate: (
             url: string,
             body: { legacy?: boolean; password: string; username: string },
         ) => Promise<AuthenticationResponse>;
-        getRoles: ApiControllerFn<
+        getRoles?: ApiControllerFn<
             BaseEndpointArgs,
             Array<string | { label: string; value: string }>
         >;
-        getServerInfo: ApiControllerFn<ServerInfoRequest, ServerInfo>;
-        getTags: ApiControllerFn<TagRequest, TagsResponse>;
-        getTranscodingUrl: ApiControllerFn<TranscodingRequest, string>;
-        getType: () => ServerType;
-        scrobble: ApiControllerFn<ScrobbleRequest, ScrobbleResponse>;
-        search: ApiControllerFn<SearchRequest, SearchResponse>;
+        getServerInfo?: ApiControllerFn<ServerInfoRequest, ServerInfo>;
+        getTags?: ApiControllerFn<TagRequest, TagsResponse>;
+        getTranscodingUrl?: ApiControllerFn<TranscodingRequest, string>;
+        getType?: () => ServerType;
+        scrobble?: ApiControllerFn<ScrobbleRequest, ScrobbleResponse>;
+        search?: ApiControllerFn<SearchRequest, SearchResponse>;
     };
     song: {
-        getDetail: ApiControllerFn<SongDetailRequest, SongDetailResponse>;
-        getList: ApiControllerFn<SongListRequest, SongListResponse>;
-        getListCount: ApiControllerFn<SongListRequest, number>;
+        getDetail?: ApiControllerFn<SongDetailRequest, SongDetailResponse>;
+        getList?: ApiControllerFn<SongListRequest, SongListResponse>;
+        getListCount?: ApiControllerFn<SongListRequest, number>;
         getLyrics?: ApiControllerFn<LyricsRequest, LyricsResponse>;
-        getRandomList: ApiControllerFn<RandomSongListRequest, SongListResponse>;
-        getSimilar: ApiControllerFn<SimilarSongsRequest, Song[]>;
+        getRandomList?: ApiControllerFn<RandomSongListRequest, SongListResponse>;
+        getSimilar?: ApiControllerFn<SimilarSongsRequest, Song[]>;
         getStructuredLyrics?: ApiControllerFn<StructuredLyricsRequest, StructuredLyric[]>;
-        getTopList: ApiControllerFn<TopSongListRequest, TopSongListResponse>;
+        getTopList?: ApiControllerFn<TopSongListRequest, TopSongListResponse>;
     };
     user: {
         getList?: ApiControllerFn<UserListRequest, UserListResponse>;
