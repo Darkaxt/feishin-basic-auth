@@ -30,6 +30,7 @@ const config: UserConfig = {
         ],
         resolve: {
             alias: {
+                '/@/i18n': resolve('src/i18n'),
                 '/@/main': resolve('src/main'),
                 '/@/shared': resolve('src/shared'),
             },
@@ -39,6 +40,7 @@ const config: UserConfig = {
         plugins: [externalizeDepsPlugin()],
         resolve: {
             alias: {
+                '/@/i18n': resolve('src/i18n'),
                 '/@/preload': resolve('src/preload'),
                 '/@/shared': resolve('src/shared'),
             },
