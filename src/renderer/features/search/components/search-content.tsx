@@ -17,7 +17,9 @@ import {
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreByKey, usePlayButtonBehavior } from '/@/renderer/store';
-import { LibraryItem, QueueSong, SongListQuery } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 interface SearchContentProps {
     tableRef: MutableRefObject<AgGridReactType | null>;

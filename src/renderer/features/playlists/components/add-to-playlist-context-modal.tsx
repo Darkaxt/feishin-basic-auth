@@ -16,12 +16,9 @@ import { MultiSelect } from '/@/shared/components/multi-select/multi-select';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { toast } from '/@/shared/components/toast/toast';
-import {
-    PlaylistListSort,
-    SongListQuery,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
+import { SongListQuery, SongListSort } from '/@/shared/types/domain/song-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 export const AddToPlaylistContextModal = ({
     id,
@@ -48,7 +45,7 @@ export const AddToPlaylistContextModal = ({
                 },
             },
             sortBy: PlaylistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -74,7 +71,7 @@ export const AddToPlaylistContextModal = ({
         const query: SongListQuery = {
             albumIds: [albumId],
             sortBy: SongListSort.ALBUM,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         };
 
@@ -92,7 +89,7 @@ export const AddToPlaylistContextModal = ({
         const query: SongListQuery = {
             artistIds: [artistId],
             sortBy: SongListSort.ARTIST,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         };
 
@@ -165,7 +162,7 @@ export const AddToPlaylistContextModal = ({
                         query: {
                             id: playlistId,
                             sortBy: SongListSort.ID,
-                            sortOrder: SortOrder.ASC,
+                            sortOrder: ListSortOrder.ASC,
                             startIndex: 0,
                         },
                     });

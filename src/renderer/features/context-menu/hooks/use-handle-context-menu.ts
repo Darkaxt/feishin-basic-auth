@@ -2,14 +2,11 @@ import { CellContextMenuEvent, GridApi } from '@ag-grid-community/core';
 import sortBy from 'lodash/sortBy';
 
 import { openContextMenu, SetContextMenuItems } from '/@/renderer/features/context-menu/events';
-import {
-    Album,
-    AlbumArtist,
-    Artist,
-    LibraryItem,
-    QueueSong,
-    Song,
-} from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export const useHandleTableContextMenu = (
     itemType: LibraryItem,

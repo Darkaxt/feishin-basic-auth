@@ -24,13 +24,9 @@ import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
-import {
-    Album,
-    AlbumArtist,
-    Artist,
-    LibraryItem,
-    RelatedArtist,
-} from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { CardRoute, CardRow } from '/@/shared/types/types';
 
 const getSlidesPerView = (windowWidth: number) => {

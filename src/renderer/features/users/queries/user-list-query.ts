@@ -1,11 +1,11 @@
 import type { QueryHookArgs } from '/@/renderer/lib/react-query';
-import type { UserListQuery } from '/@/shared/types/domain-types';
 
 import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { getServerById } from '/@/renderer/store';
+import { UserListQuery } from '/@/shared/types/domain/user-domain-types';
 
 export const useUserList = (args: QueryHookArgs<UserListQuery>) => {
     const { options, query, serverId } = args || {};

@@ -4,7 +4,7 @@ import styles from './unsynchronized-lyrics.module.css';
 
 import { LyricLine } from '/@/renderer/features/lyrics/lyric-line';
 import { useLyricsSettings } from '/@/renderer/store';
-import { FullLyricsMetadata } from '/@/shared/types/domain-types';
+import { FullLyricsMetadata } from '/@/shared/types/domain/lyric-domain-types';
 
 export interface UnsynchronizedLyricsProps extends Omit<FullLyricsMetadata, 'lyrics'> {
     lyrics: string;

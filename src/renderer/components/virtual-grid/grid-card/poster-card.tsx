@@ -10,20 +10,17 @@ import { GridCardControls } from '/@/renderer/components/virtual-grid/grid-card/
 import { Image } from '/@/shared/components/image/image';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Stack } from '/@/shared/components/stack/stack';
-import {
-    Album,
-    AlbumArtist,
-    Artist,
-    LibraryItem,
-    Playlist,
-    Song,
-} from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 import { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 interface BaseGridCardProps {
     columnIndex: number;
     controls: {
-        cardRows: CardRow<Album | AlbumArtist | Artist | Playlist | Song>[];
+        cardRows: CardRow<Album | Artist | Playlist | Song>[];
         handleFavorite: (options: {
             id: string[];
             isFavorite: boolean;

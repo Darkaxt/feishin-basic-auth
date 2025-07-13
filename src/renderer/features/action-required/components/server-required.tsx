@@ -18,7 +18,7 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { ServerListItem, ServerType } from '/@/shared/types/domain-types';
+import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

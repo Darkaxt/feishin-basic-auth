@@ -18,8 +18,9 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { Textarea } from '/@/shared/components/textarea/textarea';
 import { toast } from '/@/shared/components/toast/toast';
-import { CreatePlaylistBody, ServerType, SongListSort } from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+import { CreatePlaylistBody } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerFeature, ServerType } from '/@/shared/types/domain/server-domain-types';
+import { SongListSort } from '/@/shared/types/domain/song-domain-types';
 
 interface CreatePlaylistFormProps {
     onCancel: () => void;

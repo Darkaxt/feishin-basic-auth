@@ -13,9 +13,8 @@ import { toast } from '/@/shared/components/toast/toast';
 import {
     CreatePlaylistBody,
     CreatePlaylistResponse,
-    ServerType,
-} from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+} from '/@/shared/types/domain/playlist-domain-types';
+import { ServerFeature, ServerType } from '/@/shared/types/domain/server-domain-types';
 
 interface SaveAsPlaylistFormProps {
     body: Partial<CreatePlaylistBody>;

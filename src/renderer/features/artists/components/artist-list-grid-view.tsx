@@ -18,12 +18,11 @@ import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions } from '/@/renderer/store';
 import { useListStoreByKey } from '/@/renderer/store/list.store';
 import {
-    AlbumArtist,
     ArtistListQuery,
     ArtistListResponse,
     ArtistListSort,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 interface ArtistListGridViewProps {

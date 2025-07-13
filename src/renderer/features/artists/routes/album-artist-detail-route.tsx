@@ -10,7 +10,7 @@ import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 const AlbumArtistDetailRoute = () => {
     const scrollAreaRef = useRef<HTMLDivElement>(null);

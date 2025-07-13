@@ -4,7 +4,8 @@ import { AxiosError } from 'axios';
 import { api } from '/@/renderer/api';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { AnyLibraryItems, ShareItemArgs, ShareItemResponse } from '/@/shared/types/domain-types';
+import { AnyLibraryItems } from '/@/shared/types/domain/shared-domain-types';
+import { ShareItemRequest, ShareItemResponse } from '/@/shared/types/domain/user-domain-types';
 
 export const useShareItem = (args: MutationHookArgs) => {
     const { options } = args || {};
@@ -12,7 +13,7 @@ export const useShareItem = (args: MutationHookArgs) => {
     return useMutation<
         ShareItemResponse,
         AxiosError,
-        Omit<ShareItemArgs, 'apiClientProps' | 'server'>,
+        Omit<ShareItemRequest, 'apiClientProps' | 'server'>,
         { previous: undefined | { items: AnyLibraryItems } }
     >({
         mutationFn: (args) => {

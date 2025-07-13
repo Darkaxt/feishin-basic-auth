@@ -3,18 +3,21 @@ import formatDuration from 'format-duration';
 import React from 'react';
 import { generatePath } from 'react-router';
 import { Link } from 'react-router-dom';
+import { Song } from 'src/main/features/core/lyrics/netease';
 
 import styles from './card-rows.module.css';
 
 import { AppRoute } from '/@/renderer/router/routes';
 import { formatDateAbsolute, formatDateRelative, formatRating } from '/@/renderer/utils/format';
 import { Text } from '/@/shared/components/text/text';
-import { Album, AlbumArtist, Artist, Playlist, Song } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import { CardRow } from '/@/shared/types/types';
 
 interface CardRowsProps {
     data: any;
-    rows: CardRow<Album>[] | CardRow<AlbumArtist>[] | CardRow<Artist>[];
+    rows: CardRow<Album>[] | CardRow<Artist>[];
 }
 
 export const CardRows = ({ data, rows }: CardRowsProps) => {

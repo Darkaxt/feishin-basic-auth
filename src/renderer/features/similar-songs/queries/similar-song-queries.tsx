@@ -4,7 +4,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { SimilarSongsQuery } from '/@/shared/types/domain-types';
+import { SimilarSongsQuery } from '/@/shared/types/domain/song-domain-types';
 
 export const useSimilarSongs = (args: QueryHookArgs<SimilarSongsQuery>) => {
     const { options, query, serverId } = args || {};

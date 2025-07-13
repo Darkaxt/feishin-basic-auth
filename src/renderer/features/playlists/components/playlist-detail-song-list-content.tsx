@@ -40,15 +40,12 @@ import {
 } from '/@/renderer/store';
 import { PersistedTableColumn, usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { toast } from '/@/shared/components/toast/toast';
-import {
-    LibraryItem,
-    PlaylistSongListQuery,
-    QueueSong,
-    Song,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
-import { ListDisplayType, ServerType } from '/@/shared/types/types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { PlaylistSongListQuery } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { Song, SongListSort } from '/@/shared/types/domain/song-domain-types';
+import { ListDisplayType } from '/@/shared/types/types';
 
 interface PlaylistDetailContentProps {
     songs?: Song[];
@@ -66,7 +63,7 @@ export const PlaylistDetailSongListContent = ({ songs, tableRef }: PlaylistDetai
     const filters: Partial<PlaylistSongListQuery> = useMemo(() => {
         return {
             sortBy: page?.table.id[playlistId]?.filter?.sortBy || SongListSort.ID,
-            sortOrder: page?.table.id[playlistId]?.filter?.sortOrder || SortOrder.ASC,
+            sortOrder: page?.table.id[playlistId]?.filter?.sortOrder || ListSortOrder.ASC,
         };
     }, [page?.table.id, playlistId]);
 

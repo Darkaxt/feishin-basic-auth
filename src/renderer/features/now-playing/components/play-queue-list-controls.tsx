@@ -13,7 +13,7 @@ import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-d
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
 import { Popover } from '/@/shared/components/popover/popover';
-import { Song } from '/@/shared/types/domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 import { PlaybackType, TableType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;

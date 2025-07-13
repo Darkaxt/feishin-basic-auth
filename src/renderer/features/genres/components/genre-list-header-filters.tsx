@@ -33,33 +33,29 @@ import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
-import {
-    GenreListQuery,
-    GenreListSort,
-    LibraryItem,
-    ServerType,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { GenreListQuery, GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { ListDisplayType } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.name', { postProcess: 'titleCase' }),
             value: GenreListSort.NAME,
         },
     ],
     navidrome: [
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.name', { postProcess: 'titleCase' }),
             value: GenreListSort.NAME,
         },
     ],
     subsonic: [
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.name', { postProcess: 'titleCase' }),
             value: GenreListSort.NAME,
         },
@@ -137,7 +133,7 @@ export const GenreListHeaderFilters = ({
                 customFilters,
                 data: {
                     sortBy: e.currentTarget.value as GenreListSort,
-                    sortOrder: sortOrder || SortOrder.ASC,
+                    sortOrder: sortOrder || ListSortOrder.ASC,
                 },
                 itemType: LibraryItem.GENRE,
                 key: pageKey,
@@ -175,7 +171,8 @@ export const GenreListHeaderFilters = ({
     );
 
     const handleToggleSortOrder = useCallback(() => {
-        const newSortOrder = filter.sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC;
+        const newSortOrder =
+            filter.sortOrder === ListSortOrder.ASC ? ListSortOrder.DESC : ListSortOrder.ASC;
         const updatedFilters = setFilter({
             customFilters,
             data: { sortOrder: newSortOrder },

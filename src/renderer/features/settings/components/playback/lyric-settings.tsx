@@ -12,7 +12,7 @@ import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Select } from '/@/shared/components/select/select';
 import { Switch } from '/@/shared/components/switch/switch';
 import { TextInput } from '/@/shared/components/text-input/text-input';
-import { LyricSource } from '/@/shared/types/domain-types';
+import { LyricSource } from '/@/shared/types/domain/lyric-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

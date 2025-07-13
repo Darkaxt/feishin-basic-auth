@@ -5,7 +5,10 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { AddToPlaylistArgs, AddToPlaylistResponse } from '/@/shared/types/domain-types';
+import {
+    AddToPlaylistArgs,
+    AddToPlaylistResponse,
+} from '/@/shared/types/domain/playlist-domain-types';
 
 export const useAddToPlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};

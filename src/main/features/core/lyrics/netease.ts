@@ -1,42 +1,19 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { store } from '../settings';
+import { orderSearchResults } from './shared';
+
 import {
     InternetProviderLyricResponse,
     InternetProviderLyricSearchResponse,
     LyricSearchQuery,
     LyricSource,
-} from '.';
-import { store } from '../settings';
-import { orderSearchResults } from './shared';
+} from '/@/shared/types/domain/lyric-domain-types';
 
 const SEARCH_URL = 'https://music.163.com/api/search/get';
 const LYRICS_URL = 'https://music.163.com/api/song/lyric';
 
 // Adapted from https://github.com/NyaomiDEV/Sunamu/blob/master/src/main/lyricproviders/netease.ts
-
-export interface Result {
-    hasMore: boolean;
-    songCount: number;
-    songs: Song[];
-}
-
-export interface Song {
-    album: Album;
-    alias: string[];
-    artists: Artist[];
-    copyrightId: number;
-    duration: number;
-    fee: number;
-    ftype: number;
-    id: number;
-    mark: number;
-    mvid: number;
-    name: string;
-    rtype: number;
-    rUrl: null;
-    status: number;
-    transNames?: string[];
-}
 
 interface Album {
     artist: Artist;
@@ -67,6 +44,30 @@ interface Artist {
 interface NetEaseResponse {
     code: number;
     result: Result;
+}
+
+interface Result {
+    hasMore: boolean;
+    songCount: number;
+    songs: Song[];
+}
+
+interface Song {
+    album: Album;
+    alias: string[];
+    artists: Artist[];
+    copyrightId: number;
+    duration: number;
+    fee: number;
+    ftype: number;
+    id: number;
+    mark: number;
+    mvid: number;
+    name: string;
+    rtype: number;
+    rUrl: null;
+    status: number;
+    transNames?: string[];
 }
 
 export async function getLyricsBySongId(songId: string): Promise<null | string> {

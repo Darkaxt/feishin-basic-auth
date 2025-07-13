@@ -1,4 +1,3 @@
-import type { Song } from '/@/shared/types/domain-types';
 import type { AgGridReact as AgGridReactType } from '@ag-grid-community/react/lib/agGridReact';
 
 import { useRef } from 'react';
@@ -8,6 +7,7 @@ import { NowPlayingHeader } from '/@/renderer/features/now-playing/components/no
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { PlayQueueListControls } from '/@/renderer/features/now-playing/components/play-queue-list-controls';
 import { AnimatedPage } from '/@/renderer/features/shared';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 const NowPlayingRoute = () => {
     const queueRef = useRef<null | { grid: AgGridReactType<Song> }>(null);

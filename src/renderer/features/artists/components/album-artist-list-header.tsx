@@ -15,7 +15,8 @@ import { AlbumArtistListFilter, useCurrentServer } from '/@/renderer/store';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
-import { AlbumArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
+import { AlbumArtistListQuery } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface AlbumArtistListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

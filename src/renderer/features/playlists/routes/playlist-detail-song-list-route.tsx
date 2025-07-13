@@ -22,12 +22,10 @@ import { Box } from '/@/shared/components/box/box';
 import { Group } from '/@/shared/components/group/group';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import {
-    PlaylistSongListQuery,
-    ServerType,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { PlaylistSongListQuery } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { SongListSort } from '/@/shared/types/domain/song-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 const PlaylistDetailSongListRoute = () => {
     const { t } = useTranslation();
@@ -150,7 +148,7 @@ const PlaylistDetailSongListRoute = () => {
     const page = usePlaylistDetailStore();
     const filters: Partial<PlaylistSongListQuery> = {
         sortBy: page?.table.id[playlistId]?.filter?.sortBy || SongListSort.ID,
-        sortOrder: page?.table.id[playlistId]?.filter?.sortOrder || SortOrder.ASC,
+        sortOrder: page?.table.id[playlistId]?.filter?.sortOrder || ListSortOrder.ASC,
     };
 
     const itemCountCheck = usePlaylistSongList({

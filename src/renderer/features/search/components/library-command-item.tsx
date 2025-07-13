@@ -8,7 +8,7 @@ import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Image } from '/@/shared/components/image/image';
 import { Text } from '/@/shared/components/text/text';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 interface LibraryCommandItemProps {

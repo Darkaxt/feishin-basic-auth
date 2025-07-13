@@ -5,7 +5,7 @@ import { api } from '/@/renderer/api';
 import { MutationOptions } from '/@/renderer/lib/react-query';
 import { getServerById, useIncrementQueuePlayCount } from '/@/renderer/store';
 import { usePlayEvent } from '/@/renderer/store/event.store';
-import { ScrobbleArgs, ScrobbleResponse } from '/@/shared/types/domain-types';
+import { ScrobbleRequest, ScrobbleResponse } from '/@/shared/types/domain/user-domain-types';
 
 export const useSendScrobble = (options?: MutationOptions) => {
     const incrementPlayCount = useIncrementQueuePlayCount();
@@ -14,7 +14,7 @@ export const useSendScrobble = (options?: MutationOptions) => {
     return useMutation<
         ScrobbleResponse,
         AxiosError,
-        Omit<ScrobbleArgs, 'apiClientProps' | 'server'>,
+        Omit<ScrobbleRequest, 'apiClientProps' | 'server'>,
         null
     >({
         mutationFn: (args) => {

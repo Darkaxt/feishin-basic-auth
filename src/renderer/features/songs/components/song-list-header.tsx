@@ -16,7 +16,8 @@ import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
-import { LibraryItem, SongListQuery } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 interface SongListHeaderProps {
     genreId?: string;

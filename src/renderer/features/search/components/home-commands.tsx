@@ -9,7 +9,8 @@ import { CreatePlaylistForm } from '/@/renderer/features/playlists';
 import { Command, CommandPalettePages } from '/@/renderer/features/search/components/command';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
-import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface HomeCommandsProps {
     handleClose: () => void;

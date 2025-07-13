@@ -12,7 +12,9 @@ import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 interface JellyfinSongFiltersProps {
     customFilters?: Partial<SongListFilter>;
@@ -39,7 +41,7 @@ export const JellyfinSongFilters = ({
         query: {
             musicFolderId: filter?.musicFolderId,
             sortBy: GenreListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,

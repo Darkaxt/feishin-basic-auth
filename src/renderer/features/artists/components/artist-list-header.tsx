@@ -15,7 +15,8 @@ import { ArtistListFilter, useCurrentServer } from '/@/renderer/store';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
-import { ArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
+import { ArtistListQuery } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface ArtistListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

@@ -19,7 +19,8 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
-import { AuthenticationResponse, ServerListItem, ServerType } from '/@/shared/types/domain-types';
+import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types';
+import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

@@ -8,7 +8,7 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
 
-import { PlayerData, QueueData, QueueSong } from '/@/shared/types/domain-types';
+import { PlayerData, QueueData, QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { Play, PlayerRepeat, PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 export interface PlayerSlice extends PlayerState {

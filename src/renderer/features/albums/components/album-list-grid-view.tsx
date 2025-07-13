@@ -21,8 +21,8 @@ import {
     AlbumListQuery,
     AlbumListResponse,
     AlbumListSort,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/album-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 export const AlbumListGridView = ({ gridRef, itemCount }: any) => {

@@ -12,7 +12,7 @@ import { SEPARATOR_STRING } from '/@/shared/api/utils';
 import { Image } from '/@/shared/components/image/image';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Text } from '/@/shared/components/text/text';
-import { AlbumArtist, Artist } from '/@/shared/types/domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
 
 export const CombinedTitleCell = ({
     context,
@@ -74,7 +74,7 @@ export const CombinedTitleCell = ({
                 </Text>
                 <Text isMuted overflow="hidden" size="md">
                     {artists?.length ? (
-                        artists.map((artist: AlbumArtist | Artist, index: number) => (
+                        artists.map((artist: Artist, index: number) => (
                             <React.Fragment key={`queue-${rowIndex}-artist-${artist.id}`}>
                                 {index > 0 ? SEPARATOR_STRING : null}
                                 {artist.id ? (

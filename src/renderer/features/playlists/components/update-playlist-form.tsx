@@ -1,5 +1,6 @@
 import { useForm } from '@mantine/form';
 import { closeAllModals, openModal } from '@mantine/modals';
+import { User } from '@xhayper/discord-rpc';
 import { useTranslation } from 'react-i18next';
 
 import i18n from '/@/i18n/i18n';
@@ -18,16 +19,16 @@ import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
 import {
     PlaylistDetailResponse,
-    ServerListItem,
-    ServerType,
-    SortOrder,
     UpdatePlaylistBody,
     UpdatePlaylistQuery,
-    User,
-    UserListQuery,
-    UserListSort,
-} from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+} from '/@/shared/types/domain/playlist-domain-types';
+import {
+    ServerFeature,
+    ServerListItem,
+    ServerType,
+} from '/@/shared/types/domain/server-domain-types';
+import { UserListQuery, UserListSort } from '/@/shared/types/domain/user-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 interface UpdatePlaylistFormProps {
     body: Partial<UpdatePlaylistBody>;
@@ -165,7 +166,7 @@ export const openUpdatePlaylistModal = async (args: {
 
     const query: UserListQuery = {
         sortBy: UserListSort.NAME,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
     };
 

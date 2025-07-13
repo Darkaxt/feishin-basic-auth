@@ -57,13 +57,12 @@ import { Rating } from '/@/shared/components/rating/rating';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
+import { ServerFeature, ServerType } from '/@/shared/types/domain/server-domain-types';
 import {
     AnyLibraryItem,
     AnyLibraryItems,
     LibraryItem,
-    ServerType,
-} from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+} from '/@/shared/types/domain/shared-domain-types';
 import { Play, PlaybackType } from '/@/shared/types/types';
 
 type ContextMenuContextProps = {

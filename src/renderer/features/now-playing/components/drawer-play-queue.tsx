@@ -5,7 +5,7 @@ import { useRef } from 'react';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { PlayQueueListControls } from '/@/renderer/features/now-playing/components/play-queue-list-controls';
 import { Flex } from '/@/shared/components/flex/flex';
-import { Song } from '/@/shared/types/domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export const DrawerPlayQueue = () => {
     const queueRef = useRef<null | { grid: AgGridReactType<Song> }>(null);

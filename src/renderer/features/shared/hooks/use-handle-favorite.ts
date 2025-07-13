@@ -3,8 +3,8 @@ import { MutableRefObject, useCallback } from 'react';
 import { VirtualInfiniteGridRef } from '/@/renderer/components/virtual-grid';
 import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
-import { LibraryItem } from '/@/shared/types/domain-types';
-import { ServerListItem } from '/@/shared/types/types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface HandleFavoriteProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

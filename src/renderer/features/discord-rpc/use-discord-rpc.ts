@@ -11,8 +11,9 @@ import {
     useGeneralSettings,
     usePlayerStore,
 } from '/@/renderer/store';
-import { QueueSong, ServerType } from '/@/shared/types/domain-types';
-import { PlayerStatus } from '/@/shared/types/types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { PlayerStatus, PlayerStatus } from '/@/shared/types/types';
 
 const discordRpc = isElectron() ? window.api.discordRpc : null;
 

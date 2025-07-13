@@ -14,7 +14,9 @@ import { FixedSizeList } from 'react-window';
 import styles from './virtual-grid-wrapper.module.css';
 
 import { GridCard } from '/@/renderer/components/virtual-grid/grid-card';
-import { Album, AlbumArtist, Artist, LibraryItem } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 const createItemData = memoize(
     (
@@ -72,7 +74,7 @@ export const VirtualGridWrapper = ({
     width,
     ...rest
 }: Omit<FixedSizeListProps, 'children' | 'height' | 'itemSize' | 'ref' | 'width'> & {
-    cardRows: CardRow<Album | AlbumArtist | Artist>[];
+    cardRows: CardRow<Album | Artist>[];
     columnCount: number;
     display: ListDisplayType;
     handleFavorite?: (options: {

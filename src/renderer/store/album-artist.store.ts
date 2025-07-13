@@ -4,10 +4,14 @@ import { createWithEqualityFn } from 'zustand/traditional';
 
 import { DataTableProps } from '/@/renderer/store/settings.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import { AlbumArtistListArgs, AlbumArtistListSort, SortOrder } from '/@/shared/types/domain-types';
+import {
+    AlbumArtistListRequest,
+    AlbumArtistListSort,
+} from '/@/shared/types/domain/artist-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
-export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'limit' | 'startIndex'>;
+export type AlbumArtistListFilter = Omit<AlbumArtistListRequest['query'], 'limit' | 'startIndex'>;
 
 export interface AlbumArtistSlice extends AlbumArtistState {
     actions: {
@@ -71,7 +75,7 @@ export const useAlbumArtistStore = createWithEqualityFn<AlbumArtistSlice>()(
                     filter: {
                         musicFolderId: undefined,
                         sortBy: AlbumArtistListSort.NAME,
-                        sortOrder: SortOrder.ASC,
+                        sortOrder: ListSortOrder.ASC,
                     },
                     grid: {
                         scrollOffset: 0,

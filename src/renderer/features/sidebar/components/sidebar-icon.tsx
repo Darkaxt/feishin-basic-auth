@@ -23,7 +23,7 @@ import {
 import { generatePath } from 'react-router';
 
 import { AppRoute } from '/@/renderer/router/routes';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface SidebarIconProps {
     active?: boolean;

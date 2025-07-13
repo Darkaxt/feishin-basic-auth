@@ -14,13 +14,10 @@ import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import {
-    AlbumArtistListSort,
-    AlbumListQuery,
-    GenreListSort,
-    LibraryItem,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumListQuery } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtistListSort } from '/@/shared/types/domain/artist-domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 interface JellyfinAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -50,7 +47,7 @@ export const JellyfinAlbumFilters = ({
         query: {
             musicFolderId: filter?.musicFolderId,
             sortBy: GenreListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,
@@ -178,7 +175,7 @@ export const JellyfinAlbumFilters = ({
         },
         query: {
             sortBy: AlbumArtistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,

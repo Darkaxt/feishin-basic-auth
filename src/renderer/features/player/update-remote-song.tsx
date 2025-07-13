@@ -1,6 +1,6 @@
 import isElectron from 'is-electron';
 
-import { QueueSong } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 
 const remote = isElectron() ? window.api.remote : null;
 const mediaSession = navigator.mediaSession;

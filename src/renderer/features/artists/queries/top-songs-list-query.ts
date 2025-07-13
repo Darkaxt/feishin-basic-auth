@@ -1,11 +1,11 @@
 import type { QueryHookArgs } from '/@/renderer/lib/react-query';
-import type { TopSongListQuery } from '/@/shared/types/domain-types';
 
 import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { getServerById } from '/@/renderer/store';
+import { TopSongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 export const useTopSongsList = (args: QueryHookArgs<TopSongListQuery>) => {
     const { options, query, serverId } = args || {};

@@ -24,7 +24,10 @@ import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Slider } from '/@/shared/components/slider/slider';
-import { LibraryItem, QueueSong, ServerType, Song } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 const ipc = isElectron() ? window.api.ipc : null;
 const remote = isElectron() ? window.api.remote : null;

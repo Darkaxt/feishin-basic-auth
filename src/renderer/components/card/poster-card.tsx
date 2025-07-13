@@ -8,12 +8,14 @@ import { GridCardControls } from '/@/renderer/components/virtual-grid/grid-card/
 import { Image } from '/@/shared/components/image/image';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Stack } from '/@/shared/components/stack/stack';
-import { Album, AlbumArtist, Artist, LibraryItem } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { CardRoute, CardRow, Play, PlayQueueAddOptions } from '/@/shared/types/types';
 
 interface BaseGridCardProps {
     controls: {
-        cardRows: CardRow<Album>[] | CardRow<AlbumArtist>[] | CardRow<Artist>[];
+        cardRows: CardRow<Album>[] | CardRow<Artist>[];
         handleFavorite: (options: {
             id: string[];
             isFavorite: boolean;

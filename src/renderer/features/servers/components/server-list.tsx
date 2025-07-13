@@ -19,7 +19,7 @@ import { ContextModalVars } from '/@/shared/components/modal/modal';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
-import { ServerType } from '/@/shared/types/domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

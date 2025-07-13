@@ -17,7 +17,10 @@ import {
     useSeeked,
     useSetCurrentTime,
 } from '/@/renderer/store';
-import { FullLyricsMetadata, SynchronizedLyricsArray } from '/@/shared/types/domain-types';
+import {
+    FullLyricsMetadata,
+    SynchronizedLyricsArray,
+} from '/@/shared/types/domain/lyric-domain-types';
 import { PlaybackType, PlayerStatus } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;

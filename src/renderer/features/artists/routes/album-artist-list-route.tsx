@@ -10,7 +10,8 @@ import { useAlbumArtistListCount } from '/@/renderer/features/artists/queries/al
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer } from '/@/renderer/store/auth.store';
 import { useListFilterByKey } from '/@/renderer/store/list.store';
-import { AlbumArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
+import { AlbumArtistListQuery } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 const AlbumArtistListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);

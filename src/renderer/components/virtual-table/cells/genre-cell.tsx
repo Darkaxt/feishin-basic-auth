@@ -1,4 +1,3 @@
-import type { AlbumArtist, Artist } from '/@/shared/types/domain-types';
 import type { ICellRendererParams } from '@ag-grid-community/core';
 
 import React from 'react';
@@ -8,13 +7,14 @@ import { CellContainer } from '/@/renderer/components/virtual-table/cells/generi
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { Separator } from '/@/shared/components/separator/separator';
 import { Text } from '/@/shared/components/text/text';
+import { Artist } from '/@/shared/types/domain/artist-domain-types';
 
 export const GenreCell = ({ data, value }: ICellRendererParams) => {
     const genrePath = useGenreRoute();
     return (
         <CellContainer position="left">
             <Text isMuted overflow="hidden" size="md">
-                {value?.map((item: AlbumArtist | Artist, index: number) => (
+                {value?.map((item: Artist, index: number) => (
                     <React.Fragment key={`row-${item.id}-${data.uniqueId}`}>
                         {index > 0 && <Separator />}
                         <Text

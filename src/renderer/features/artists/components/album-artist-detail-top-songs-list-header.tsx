@@ -6,7 +6,7 @@ import { LibraryHeaderBar } from '/@/renderer/features/shared';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { Badge } from '/@/shared/components/badge/badge';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
-import { QueueSong } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { Play } from '/@/shared/types/types';
 
 interface AlbumArtistDetailTopSongsListHeaderProps {

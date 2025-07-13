@@ -24,7 +24,7 @@ import { Image } from '/@/shared/components/image/image';
 import { Separator } from '/@/shared/components/separator/separator';
 import { Text } from '/@/shared/components/text/text';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export const LeftControls = () => {
     const { t } = useTranslation();

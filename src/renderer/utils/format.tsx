@@ -1,11 +1,11 @@
-import type { Album, AlbumArtist, Song } from '/@/shared/types/domain-types';
-
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import formatDuration from 'format-duration';
 
 import { Rating } from '/@/shared/components/rating/rating';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);

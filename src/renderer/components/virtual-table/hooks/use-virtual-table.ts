@@ -23,12 +23,9 @@ import { SetContextMenuItems, useHandleTableContextMenu } from '/@/renderer/feat
 import { AppRoute } from '/@/renderer/router/routes';
 import { PersistedTableColumn, useListStoreActions } from '/@/renderer/store';
 import { ListKey, useListStoreByKey } from '/@/renderer/store/list.store';
-import {
-    BasePaginatedResponse,
-    BaseQuery,
-    LibraryItem,
-    ServerListItem,
-} from '/@/shared/types/domain-types';
+import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { ListDisplayType, TablePagination } from '/@/shared/types/types';
 
 export type AgGridFetchFn<TResponse, TFilter> = (

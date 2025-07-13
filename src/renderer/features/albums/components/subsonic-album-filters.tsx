@@ -14,13 +14,10 @@ import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
-import {
-    AlbumArtistListSort,
-    AlbumListQuery,
-    GenreListSort,
-    LibraryItem,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumListQuery } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtistListSort } from '/@/shared/types/domain/artist-domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 interface SubsonicAlbumFiltersProps {
     disableArtistFilter?: boolean;
@@ -47,7 +44,7 @@ export const SubsonicAlbumFilters = ({
         },
         query: {
             sortBy: AlbumArtistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,
@@ -80,7 +77,7 @@ export const SubsonicAlbumFilters = ({
         },
         query: {
             sortBy: GenreListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,

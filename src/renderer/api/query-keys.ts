@@ -1,27 +1,31 @@
-import type {
+import { QueryFunctionContext } from '@tanstack/react-query';
+
+import { AlbumDetailQuery, AlbumListQuery } from '/@/shared/types/domain/album-domain-types';
+import {
     AlbumArtistDetailQuery,
     AlbumArtistListQuery,
-    AlbumDetailQuery,
-    AlbumListQuery,
     ArtistListQuery,
-    GenreListQuery,
+} from '/@/shared/types/domain/artist-domain-types';
+import { GenreListQuery } from '/@/shared/types/domain/genre-domain-types';
+import {
     LyricSearchQuery,
+    LyricSource,
     LyricsQuery,
+} from '/@/shared/types/domain/lyric-domain-types';
+import {
     PlaylistDetailQuery,
     PlaylistListQuery,
     PlaylistSongListQuery,
+} from '/@/shared/types/domain/playlist-domain-types';
+import { SearchQuery } from '/@/shared/types/domain/search-domain-types';
+import {
     RandomSongListQuery,
-    SearchQuery,
     SimilarSongsQuery,
     SongDetailQuery,
     SongListQuery,
     TopSongListQuery,
-    UserListQuery,
-} from '/@/shared/types/domain-types';
-
-import { QueryFunctionContext } from '@tanstack/react-query';
-
-import { LyricSource } from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/song-domain-types';
+import { UserListQuery } from '/@/shared/types/domain/user-domain-types';
 
 export const splitPaginatedQuery = (key: any) => {
     const { limit, startIndex, ...filter } = key || {};

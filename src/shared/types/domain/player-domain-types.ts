@@ -30,7 +30,7 @@ export interface QueueData {
 }
 
 export type QueueSong = Song & {
-    uniqueId: string;
+    _uniqueId: string;
 };
 
 export type TranscodingQuery = {

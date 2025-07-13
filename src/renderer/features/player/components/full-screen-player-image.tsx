@@ -18,7 +18,7 @@ import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { PlayerData, QueueSong } from '/@/shared/types/domain-types';
+import { PlayerData, QueueSong } from '/@/shared/types/domain/player-domain-types';
 
 const imageVariants: Variants = {
     closed: {

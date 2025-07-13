@@ -7,7 +7,7 @@ import {
     InternetProviderLyricSearchResponse,
     LyricSearchQuery,
     LyricSource,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/lyric-domain-types';
 
 const lyricsIpc = isElectron() ? window.api.lyrics : null;
 

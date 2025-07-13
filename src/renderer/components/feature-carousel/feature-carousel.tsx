@@ -20,7 +20,8 @@ import { Image } from '/@/shared/components/image/image';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
-import { Album, LibraryItem } from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
 
 const variants: Variants = {

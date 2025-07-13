@@ -28,7 +28,11 @@ import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
-import { FullLyricsMetadata, LyricSource, LyricsOverride } from '/@/shared/types/domain-types';
+import {
+    FullLyricsMetadata,
+    LyricSource,
+    LyricsOverride,
+} from '/@/shared/types/domain/lyric-domain-types';
 
 export const Lyrics = () => {
     const currentSong = useCurrentSong();

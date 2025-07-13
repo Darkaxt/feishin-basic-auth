@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 import { JFAlbum, JFGenre, JFMusicFolder, JFPlaylist } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
-import { LibraryItem } from '/@/shared/types/domain-types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
 import { Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';

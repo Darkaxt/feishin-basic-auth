@@ -14,7 +14,7 @@ import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { Badge } from '/@/shared/components/badge/badge';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
 
 interface PlaylistDetailHeaderProps {

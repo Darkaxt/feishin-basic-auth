@@ -20,13 +20,10 @@ import { useCurrentServer, usePlayerControls, usePlayerStore } from '/@/renderer
 import { useGeneralSettings, usePlaybackType } from '/@/renderer/store/settings.store';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
 import { toast } from '/@/shared/components/toast/toast';
-import {
-    instanceOfCancellationError,
-    LibraryItem,
-    QueueSong,
-    Song,
-    SongListResponse,
-} from '/@/shared/types/domain-types';
+import { instanceOfCancellationError } from '/@/shared/types/domain/api-domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song, SongListResponse } from '/@/shared/types/domain/song-domain-types';
 import { Play, PlaybackType, PlayQueueAddOptions } from '/@/shared/types/types';
 
 const getRootQueryKey = (itemType: LibraryItem, serverId: string) => {

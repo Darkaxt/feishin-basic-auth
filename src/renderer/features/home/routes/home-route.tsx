@@ -23,13 +23,10 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
-import {
-    AlbumListSort,
-    LibraryItem,
-    ServerType,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumListSort } from '/@/shared/types/domain/album-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { SongListSort } from '/@/shared/types/domain/song-domain-types';
 import { Platform } from '/@/shared/types/types';
 
 const HomeRoute = () => {
@@ -50,7 +47,7 @@ const HomeRoute = () => {
         query: {
             limit: 20,
             sortBy: AlbumListSort.RANDOM,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -67,7 +64,7 @@ const HomeRoute = () => {
         query: {
             limit: itemsPerPage,
             sortBy: AlbumListSort.RANDOM,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -80,7 +77,7 @@ const HomeRoute = () => {
         query: {
             limit: itemsPerPage,
             sortBy: AlbumListSort.RECENTLY_PLAYED,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -93,7 +90,7 @@ const HomeRoute = () => {
         query: {
             limit: itemsPerPage,
             sortBy: AlbumListSort.RECENTLY_ADDED,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -107,7 +104,7 @@ const HomeRoute = () => {
         query: {
             limit: itemsPerPage,
             sortBy: AlbumListSort.PLAY_COUNT,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -122,7 +119,7 @@ const HomeRoute = () => {
             query: {
                 limit: itemsPerPage,
                 sortBy: SongListSort.PLAY_COUNT,
-                sortOrder: SortOrder.DESC,
+                sortOrder: ListSortOrder.DESC,
                 startIndex: 0,
             },
             serverId: server?.id,
@@ -156,14 +153,14 @@ const HomeRoute = () => {
                 server?.type === ServerType.JELLYFIN
                     ? SongListSort.PLAY_COUNT
                     : AlbumListSort.PLAY_COUNT,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             title: t('page.home.mostPlayed', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RANDOM]: {
             data: random?.data?.items,
             itemType: LibraryItem.ALBUM,
             sortBy: AlbumListSort.RANDOM,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             title: t('page.home.explore', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RECENTLY_ADDED]: {
@@ -173,7 +170,7 @@ const HomeRoute = () => {
                 itemsPerPage,
             },
             sortBy: AlbumListSort.RECENTLY_ADDED,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
         },
         [HomeItem.RECENTLY_PLAYED]: {
@@ -183,7 +180,7 @@ const HomeRoute = () => {
                 itemsPerPage,
             },
             sortBy: AlbumListSort.RECENTLY_PLAYED,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
         },
     };
@@ -207,7 +204,7 @@ const HomeRoute = () => {
     const invalidateCarouselQuery = (carousel: {
         itemType: LibraryItem;
         sortBy: AlbumListSort | SongListSort;
-        sortOrder: SortOrder;
+        sortOrder: ListSortOrder;
     }) => {
         if (carousel.itemType === LibraryItem.ALBUM) {
             queryClient.invalidateQueries({

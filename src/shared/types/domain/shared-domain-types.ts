@@ -1,7 +1,7 @@
 import { JFSortOrder } from '/@/shared/api/jellyfin.types';
 import { NDSortOrder } from '/@/shared/api/navidrome.types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
-import { Artist, Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
@@ -14,6 +14,7 @@ export enum LibraryItem {
     PLAYLIST = 'playlist',
     SONG = 'song',
 }
+
 export enum ListSortOrder {
     ASC = 'ASC',
     DESC = 'DESC',

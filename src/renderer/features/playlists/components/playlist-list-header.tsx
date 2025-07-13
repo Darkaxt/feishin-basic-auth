@@ -17,7 +17,8 @@ import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { SpinnerIcon } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import { LibraryItem, PlaylistListQuery } from '/@/shared/types/domain-types';
+import { PlaylistListQuery } from '/@/shared/types/domain/playlist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface PlaylistListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

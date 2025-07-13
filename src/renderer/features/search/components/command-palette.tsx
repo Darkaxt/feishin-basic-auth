@@ -22,7 +22,7 @@ import { Kbd } from '/@/shared/components/kbd/kbd';
 import { Modal } from '/@/shared/components/modal/modal';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { TextInput } from '/@/shared/components/text-input/text-input';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface CommandPaletteProps {
     modalProps: (typeof useDisclosure)['arguments'];

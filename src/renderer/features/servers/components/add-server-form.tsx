@@ -20,8 +20,9 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { AuthenticationResponse } from '/@/shared/types/domain-types';
-import { ServerType, toServerType } from '/@/shared/types/types';
+import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { toServerType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

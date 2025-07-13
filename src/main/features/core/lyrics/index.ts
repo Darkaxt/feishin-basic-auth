@@ -17,35 +17,12 @@ import {
     getSearchResults as searchNetease,
 } from './netease';
 
+import {
+    InternetProviderLyricResponse,
+    InternetProviderLyricSearchResponse,
+    LyricSource,
+} from '/@/shared/types/domain/lyric-domain-types';
 import { Song } from '/@/shared/types/domain/song-domain-types';
-
-export enum LyricSource {
-    GENIUS = 'Genius',
-    LRCLIB = 'lrclib.net',
-    NETEASE = 'NetEase',
-}
-
-export type FullLyricsMetadata = Omit<InternetProviderLyricResponse, 'id' | 'lyrics' | 'source'> & {
-    lyrics: LyricsResponse;
-    remote: boolean;
-    source: string;
-};
-
-export type InternetProviderLyricResponse = {
-    artist: string;
-    id: string;
-    lyrics: string;
-    name: string;
-    source: LyricSource;
-};
-
-export type InternetProviderLyricSearchResponse = {
-    artist: string;
-    id: string;
-    name: string;
-    score?: number;
-    source: LyricSource;
-};
 
 export type LyricGetQuery = {
     remoteSongId: string;

@@ -8,7 +8,7 @@ import { VirtualGridContainer } from '/@/renderer/components/virtual-grid';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { useWindowSettings } from '/@/renderer/store/settings.store';
 import { Box } from '/@/shared/components/box/box';
-import { Song } from '/@/shared/types/domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 import { Platform } from '/@/shared/types/types';
 
 export const SidebarPlayQueue = () => {

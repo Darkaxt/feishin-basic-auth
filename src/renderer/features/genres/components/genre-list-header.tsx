@@ -15,7 +15,8 @@ import { GenreListFilter, useCurrentServer } from '/@/renderer/store';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
-import { GenreListQuery, LibraryItem } from '/@/shared/types/domain-types';
+import { GenreListQuery } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface GenreListHeaderProps {
     gridRef: MutableRefObject<null | VirtualInfiniteGridRef>;

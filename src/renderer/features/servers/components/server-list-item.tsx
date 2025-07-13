@@ -12,7 +12,7 @@ import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Table } from '/@/shared/components/table/table';
-import { ServerListItem as ServerItem } from '/@/shared/types/domain-types';
+import { ServerListItem as ServerItem } from '/@/shared/types/domain/server-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 

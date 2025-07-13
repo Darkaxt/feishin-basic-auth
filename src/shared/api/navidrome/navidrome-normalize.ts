@@ -4,7 +4,6 @@ import z from 'zod';
 import { NDGenre } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
-import { LibraryItem } from '/@/shared/types/domain-types';
 import { Album } from '/@/shared/types/domain/album-domain-types';
 import { Artist, RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { Genre } from '/@/shared/types/domain/genre-domain-types';
@@ -145,13 +144,13 @@ const normalizeSong = (
         album: item.album,
         albumId: item.albumId,
         ...getArtists(item),
+        _itemType: LibraryItem.SONG,
         artistName: item.artist,
         bitDepth: item.bitDepth || null,
         bitRate: item.bitRate,
         bpm: item.bpm ? item.bpm : null,
         channels: item.channels ? item.channels : null,
         comment: item.comment ? item.comment : null,
-        isCompilation: item.compilation,
         container: item.suffix,
         createdDate: item.createdAt.split('T')[0],
         discNumber: item.discNumber,
@@ -170,8 +169,7 @@ const normalizeSong = (
         id,
         imagePlaceholderUrl,
         imageUrl,
-        _itemType: LibraryItem.SONG,
-        userLastPlayedDate: normalizePlayDate(item),
+        isCompilation: item.compilation,
         lyrics: item.lyrics ? item.lyrics : null,
         name: item.title,
         // Thankfully, Windows is merciful and allows a mix of separators. So, we can use the
@@ -198,6 +196,7 @@ const normalizeSong = (
         uniqueId: nanoid(),
         updatedDate: item.updatedAt,
         userFavorite: item.starred || false,
+        userLastPlayedDate: normalizePlayDate(item),
         userRating: item.rating || null,
     };
 };
@@ -223,6 +222,9 @@ const normalizeAlbum = (
     return {
         albumArtist: item.albumArtist,
         ...getArtists(item),
+        _itemType: LibraryItem.ALBUM,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         backdropImageUrl: imageBackdropUrl,
         comment: item.comment || null,
         createdAt: item.createdAt.split('T')[0],
@@ -236,10 +238,9 @@ const normalizeAlbum = (
         id: item.id,
         imagePlaceholderUrl,
         imageUrl,
-        isCompilation: item.compilation,
-        _itemType: LibraryItem.ALBUM,
-        lastPlayedAt: normalizePlayDate(item),
 
+        isCompilation: item.compilation,
+        lastPlayedAt: normalizePlayDate(item),
         mbzId: item.mbzAlbumId || null,
         name: item.name,
         originalDate: item.originalDate
@@ -253,8 +254,6 @@ const normalizeAlbum = (
             : new Date(Date.UTC(item.minYear, 0, 1))
         ).toISOString(),
         releaseYear: item.minYear,
-        _serverId: server?.id || 'unknown',
-        _serverType: ServerType.NAVIDROME,
         size: item.size,
         songCount: item.songCount,
         songs: item.songs ? item.songs.map((song) => normalizeSong(song, server)) : undefined,
@@ -301,6 +300,8 @@ const normalizeAlbumArtist = (
     }
 
     return {
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         albumCount,
         backgroundImageUrl: null,
         biography: item.biography || null,
@@ -314,12 +315,9 @@ const normalizeAlbumArtist = (
         id: item.id,
         imageUrl: imageUrl || null,
         itemType: LibraryItem.ALBUM_ARTIST,
-        userLastPlayedDate: normalizePlayDate(item),
         mbzId: item.mbzArtistId || null,
         name: item.name,
         playCount: item.playCount || 0,
-        _serverId: server?.id || 'unknown',
-        _serverType: ServerType.NAVIDROME,
         similarArtists:
             item.similarArtists?.map((artist) => ({
                 id: artist.id,
@@ -328,6 +326,7 @@ const normalizeAlbumArtist = (
             })) || null,
         songCount,
         userFavorite: item.starred,
+        userLastPlayedDate: normalizePlayDate(item),
         userRating: item.rating,
     };
 };
@@ -347,20 +346,20 @@ const normalizePlaylist = (
     const imagePlaceholderUrl = null;
 
     return {
+        _itemType: LibraryItem.PLAYLIST,
+        _serverId: server?.id || 'unknown',
+        _serverType: ServerType.NAVIDROME,
         description: item.comment,
         duration: item.duration * 1000,
         genres: [],
         id: item.id,
         imagePlaceholderUrl,
         imageUrl,
-        _itemType: LibraryItem.PLAYLIST,
         name: item.name,
         owner: item.ownerName,
         ownerId: item.ownerId,
         public: item.public,
         rules: item?.rules || null,
-        _serverId: server?.id || 'unknown',
-        _serverType: ServerType.NAVIDROME,
         size: item.size,
         songCount: item.songCount,
         sync: item.sync,
@@ -369,10 +368,10 @@ const normalizePlaylist = (
 
 const normalizeGenre = (item: NDGenre): Genre => {
     return {
+        _itemType: LibraryItem.GENRE,
         albumCount: undefined,
         id: item.id,
         imageUrl: null,
-        _itemType: LibraryItem.GENRE,
         name: item.name,
         songCount: undefined,
     };

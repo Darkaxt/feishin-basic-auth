@@ -5,7 +5,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { CreatePlaylistArgs, CreatePlaylistResponse } from '/@/shared/types/domain-types';
+import { CreatePlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
 export const useCreatePlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};

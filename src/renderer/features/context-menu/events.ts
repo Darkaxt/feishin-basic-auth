@@ -1,6 +1,6 @@
 import { GridOptions, RowNode } from '@ag-grid-community/core';
 
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { createUseExternalEvents } from '/@/shared/utils/create-use-external-events';
 
 export type ContextMenuEvents = {

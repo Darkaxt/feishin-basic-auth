@@ -11,12 +11,11 @@ import {
     InternetProviderLyricResponse,
     LyricGetQuery,
     LyricsQuery,
-    QueueSong,
-    ServerType,
     StructuredLyric,
     SynchronizedLyricsArray,
-} from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+} from '/@/shared/types/domain/lyric-domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { ServerFeature, ServerType } from '/@/shared/types/domain/server-domain-types';
 
 const lyricsIpc = isElectron() ? window.api.lyrics : null;
 

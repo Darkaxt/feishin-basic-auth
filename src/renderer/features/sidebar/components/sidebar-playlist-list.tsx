@@ -17,13 +17,9 @@ import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { ButtonProps } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Text } from '/@/shared/components/text/text';
-import {
-    LibraryItem,
-    Playlist,
-    PlaylistListSort,
-    ServerType,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { Playlist, PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
 
 interface PlaylistRowButtonProps extends Omit<ButtonProps, 'onPlay'> {
@@ -145,7 +141,7 @@ export const SidebarPlaylistList = () => {
     const playlistsQuery = usePlaylistList({
         query: {
             sortBy: PlaylistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -261,7 +257,7 @@ export const SidebarSharedPlaylistList = () => {
     const playlistsQuery = usePlaylistList({
         query: {
             sortBy: PlaylistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,

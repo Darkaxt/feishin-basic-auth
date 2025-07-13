@@ -5,7 +5,7 @@ import styles from './combined-title-cell-controls.module.css';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
 
 export const ListCoverControls = ({

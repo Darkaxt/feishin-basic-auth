@@ -35,15 +35,10 @@ import { Group } from '/@/shared/components/group/group';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
 import { TextTitle } from '/@/shared/components/text-title/text-title';
-import {
-    Album,
-    AlbumArtist,
-    AlbumListSort,
-    LibraryItem,
-    QueueSong,
-    ServerType,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { Album, AlbumListSort } from '/@/shared/types/domain/album-domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { CardRow, Play, TableColumn } from '/@/shared/types/types';
 
 interface AlbumArtistDetailContentProps {
@@ -106,7 +101,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             compilation: false,
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -121,7 +116,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             compilation: true,
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,

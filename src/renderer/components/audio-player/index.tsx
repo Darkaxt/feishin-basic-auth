@@ -1,4 +1,3 @@
-import type { Song } from '/@/shared/types/domain-types';
 import type { CrossfadeStyle } from '/@/shared/types/types';
 import type { ReactPlayerProps } from 'react-player';
 
@@ -20,9 +19,11 @@ import {
     gaplessHandler,
 } from '/@/renderer/components/audio-player/utils/list-handlers';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
-import { getServerById, TranscodingConfig, usePlaybackSettings, useSpeed } from '/@/renderer/store';
+import { TranscodingConfig, usePlaybackSettings, useSpeed } from '/@/renderer/store';
 import { useSettingsStore, useSettingsStoreActions } from '/@/renderer/store/settings.store';
 import { toast } from '/@/shared/components/toast/toast';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 import { PlaybackStyle, PlayerStatus } from '/@/shared/types/types';
 
 export type AudioPlayerProgress = {
@@ -57,27 +58,28 @@ const getDuration = (ref: any) => {
 const EMPTY_SOURCE =
     'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjM2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU2LjQxAAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//MUZAAAAAGkAAAAAAAAA0gAAAAATEFN//MUZAMAAAGkAAAAAAAAA0gAAAAARTMu//MUZAYAAAGkAAAAAAAAA0gAAAAAOTku//MUZAkAAAGkAAAAAAAAA0gAAAAANVVV';
 
-const useSongUrl = (transcode: TranscodingConfig, current: boolean, song?: Song): null | string => {
+const useSongUrl = (
+    transcode: TranscodingConfig,
+    current: boolean,
+    song?: QueueSong,
+): null | string => {
     const prior = useRef(['', '']);
 
     return useMemo(() => {
-        if (song?.serverId) {
+        if (song?._serverId) {
             // If we are the current track, we do not want a transcoding
             // reconfiguration to force a restart.
-            if (current && prior.current[0] === song.uniqueId) {
-                return prior.current[1];
+            if (current && prior.current[0] === song._uniqueId) {
+                return prior.current[1] as string;
             }
 
             if (!transcode.enabled) {
                 // transcoding disabled; save the result
-                prior.current = [song.uniqueId, song.streamUrl];
+                prior.current = [song._uniqueId, song.streamUrl];
                 return song.streamUrl;
             }
 
             const result = api.controller.getTranscodingUrl({
-                apiClientProps: {
-                    server: getServerById(song.serverId),
-                },
                 query: {
                     base: song.streamUrl,
                     ...transcode,
@@ -85,14 +87,14 @@ const useSongUrl = (transcode: TranscodingConfig, current: boolean, song?: Song)
             })!;
 
             // transcoding enabled; save the updated result
-            prior.current = [song.uniqueId, result];
+            prior.current = [song._uniqueId, result];
             return result;
         }
 
         // no track; clear result
         prior.current = ['', ''];
         return null;
-    }, [current, song?.uniqueId, song?.serverId, song?.streamUrl, transcode]);
+    }, [song?._serverId, song?._uniqueId, song?.streamUrl, current, transcode]);
 };
 
 export interface AudioPlayerRef {

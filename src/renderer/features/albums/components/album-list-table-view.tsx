@@ -4,7 +4,7 @@ import { useVirtualTable } from '/@/renderer/components/virtual-table/hooks/use-
 import { useListContext } from '/@/renderer/context/list-context';
 import { ALBUM_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { useCurrentServer } from '/@/renderer/store';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export const AlbumListTableView = ({ itemCount, tableRef }: any) => {
     const server = useCurrentServer();

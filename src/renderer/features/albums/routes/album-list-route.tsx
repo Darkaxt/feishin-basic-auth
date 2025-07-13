@@ -16,12 +16,9 @@ import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { queryClient } from '/@/renderer/lib/react-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
-import {
-    AlbumListQuery,
-    GenreListSort,
-    LibraryItem,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumListQuery } from '/@/shared/types/domain/album-domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
 
 const AlbumListRoute = () => {
@@ -60,7 +57,7 @@ const AlbumListRoute = () => {
         },
         query: {
             sortBy: GenreListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,

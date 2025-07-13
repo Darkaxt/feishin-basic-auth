@@ -16,7 +16,9 @@ import { Group } from '/@/shared/components/group/group';
 import { Rating } from '/@/shared/components/rating/rating';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { AlbumDetailResponse, LibraryItem, ServerType } from '/@/shared/types/domain-types';
+import { AlbumDetailResponse } from '/@/shared/types/domain/album-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface AlbumDetailHeaderProps {
     background: {

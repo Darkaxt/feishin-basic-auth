@@ -5,7 +5,7 @@ import { MutableRefObject, useEffect, useMemo, useRef } from 'react';
 
 import { useAppFocus } from '/@/renderer/hooks';
 import { useCurrentSong, usePlayerStore } from '/@/renderer/store';
-import { Song } from '/@/shared/types/domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
 interface UseCurrentSongRowStylesProps {

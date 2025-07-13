@@ -7,7 +7,7 @@ import { Command, CommandPalettePages } from '/@/renderer/features/search/compon
 import { ServerList } from '/@/renderer/features/servers';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useServerList } from '/@/renderer/store';
-import { ServerListItem } from '/@/shared/types/domain-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 
 interface ServerCommandsProps {
     handleClose: () => void;

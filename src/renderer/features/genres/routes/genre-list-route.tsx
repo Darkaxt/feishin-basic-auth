@@ -10,7 +10,7 @@ import { useGenreList } from '/@/renderer/features/genres/queries/genre-list-que
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer } from '/@/renderer/store';
 import { useListStoreByKey } from '/@/renderer/store/list.store';
-import { GenreListQuery } from '/@/shared/types/domain-types';
+import { GenreListQuery } from '/@/shared/types/domain/genre-domain-types';
 
 const GenreListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);

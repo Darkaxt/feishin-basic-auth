@@ -33,7 +33,8 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
-import { LibraryItem, SongDetailResponse } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { SongDetailResponse } from '/@/shared/types/domain/song-domain-types';
 
 const DummyAlbumDetailRoute = () => {
     const cq = useContainerQuery();

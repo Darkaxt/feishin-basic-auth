@@ -5,7 +5,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useCurrentServer } from '/@/renderer/store';
-import { DeletePlaylistArgs, DeletePlaylistResponse } from '/@/shared/types/domain-types';
+import { DeletePlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
 export const useDeletePlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};

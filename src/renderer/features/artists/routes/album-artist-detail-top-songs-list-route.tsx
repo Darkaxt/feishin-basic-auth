@@ -10,7 +10,7 @@ import { useAlbumArtistDetail } from '/@/renderer/features/artists/queries/album
 import { useTopSongsList } from '/@/renderer/features/artists/queries/top-songs-list-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer } from '/@/renderer/store/auth.store';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 const AlbumArtistDetailTopSongsListRoute = () => {
     const tableRef = useRef<AgGridReactType | null>(null);

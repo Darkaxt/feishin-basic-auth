@@ -5,31 +5,29 @@ import { createWithEqualityFn } from 'zustand/traditional';
 
 import { DataTableProps, PersistedTableColumn } from '/@/renderer/store/settings.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
+import { AlbumListRequest, AlbumListSort } from '/@/shared/types/domain/album-domain-types';
 import {
-    AlbumArtistListArgs,
+    AlbumArtistListRequest,
     AlbumArtistListSort,
-    AlbumListArgs,
-    AlbumListSort,
-    ArtistListArgs,
-    GenreListArgs,
-    GenreListSort,
-    LibraryItem,
-    PlaylistListArgs,
+    ArtistListRequest,
+} from '/@/shared/types/domain/artist-domain-types';
+import { GenreListRequest, GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import {
+    PlaylistListRequest,
     PlaylistListSort,
-    SongListArgs,
-    SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/playlist-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { SongListRequest, SongListSort } from '/@/shared/types/domain/song-domain-types';
 import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export const generatePageKey = (page: string, id?: string) => {
     return id ? `${page}_${id}` : page;
 };
 
-export type AlbumArtistListFilter = Omit<AlbumArtistListArgs['query'], 'limit' | 'startIndex'>;
-export type AlbumListFilter = Omit<AlbumListArgs['query'], 'limit' | 'startIndex'>;
-export type ArtistListFilter = Omit<ArtistListArgs['query'], 'limit' | 'startIndex'>;
-export type GenreListFilter = Omit<GenreListArgs['query'], 'limit' | 'startIndex'>;
+export type AlbumArtistListFilter = Omit<AlbumArtistListRequest['query'], 'limit' | 'startIndex'>;
+export type AlbumListFilter = Omit<AlbumListRequest['query'], 'limit' | 'startIndex'>;
+export type ArtistListFilter = Omit<ArtistListRequest['query'], 'limit' | 'startIndex'>;
+export type GenreListFilter = Omit<GenreListRequest['query'], 'limit' | 'startIndex'>;
 export type ListDeterministicArgs = { key: ListKey };
 export type ListGridProps = {
     itemGap?: number;
@@ -95,9 +93,9 @@ export type ListTableProps = DataTableProps & {
     scrollOffset: number;
 };
 
-export type PlaylistListFilter = Omit<PlaylistListArgs['query'], 'limit' | 'startIndex'>;
+export type PlaylistListFilter = Omit<PlaylistListRequest['query'], 'limit' | 'startIndex'>;
 
-export type SongListFilter = Omit<SongListArgs['query'], 'limit' | 'startIndex'>;
+export type SongListFilter = Omit<SongListRequest['query'], 'limit' | 'startIndex'>;
 
 type FilterType =
     | AlbumArtistListFilter
@@ -147,13 +145,13 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                             state.item.album.filter = {
                                 musicFolderId: undefined,
                                 sortBy: AlbumListSort.RECENTLY_ADDED,
-                                sortOrder: SortOrder.DESC,
+                                sortOrder: ListSortOrder.DESC,
                             } as AlbumListFilter;
 
                             state.item.song.filter = {
                                 musicFolderId: undefined,
                                 sortBy: SongListSort.RECENTLY_ADDED,
-                                sortOrder: SortOrder.DESC,
+                                sortOrder: ListSortOrder.DESC,
                             } as SongListFilter;
                         });
                     },
@@ -349,7 +347,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.GRID,
                         filter: {
                             sortBy: AlbumListSort.RECENTLY_ADDED,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -390,7 +388,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.GRID,
                         filter: {
                             sortBy: AlbumArtistListSort.NAME,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -419,7 +417,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.GRID,
                         filter: {
                             sortBy: AlbumListSort.RECENTLY_ADDED,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -460,7 +458,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.TABLE,
                         filter: {
                             sortBy: SongListSort.RECENTLY_ADDED,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -497,7 +495,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.TABLE,
                         filter: {
                             sortBy: SongListSort.ALBUM,
-                            sortOrder: SortOrder.ASC,
+                            sortOrder: ListSortOrder.ASC,
                         },
                         table: {
                             autoFit: true,
@@ -518,7 +516,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         filter: {
                             role: '',
                             sortBy: AlbumArtistListSort.NAME,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -547,7 +545,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.TABLE,
                         filter: {
                             sortBy: GenreListSort.NAME,
-                            sortOrder: SortOrder.ASC,
+                            sortOrder: ListSortOrder.ASC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -576,7 +574,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.GRID,
                         filter: {
                             sortBy: PlaylistListSort.NAME,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {
@@ -609,7 +607,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                         display: ListDisplayType.TABLE,
                         filter: {
                             sortBy: SongListSort.RECENTLY_ADDED,
-                            sortOrder: SortOrder.DESC,
+                            sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
                         table: {

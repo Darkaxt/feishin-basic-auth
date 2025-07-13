@@ -7,13 +7,10 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useSetAlbumListItemDataById, useSetQueueFavorite } from '/@/renderer/store';
 import { useFavoriteEvent } from '/@/renderer/store/event.store';
-import {
-    AlbumArtistDetailResponse,
-    AlbumDetailResponse,
-    FavoriteArgs,
-    FavoriteResponse,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+import { AlbumDetailResponse } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtistDetailResponse } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { FavoriteResponse } from '/@/shared/types/domain/user-domain-types';
 
 const remote = isElectron() ? window.api.remote : null;
 

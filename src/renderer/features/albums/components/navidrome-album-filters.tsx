@@ -16,13 +16,10 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { Text } from '/@/shared/components/text/text';
 import { YesNoSelect } from '/@/shared/components/yes-no-select/yes-no-select';
-import {
-    AlbumArtistListSort,
-    AlbumListQuery,
-    GenreListSort,
-    LibraryItem,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumListQuery } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtistListSort } from '/@/shared/types/domain/artist-domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 interface NavidromeAlbumFiltersProps {
     customFilters?: Partial<AlbumListFilter>;
@@ -50,7 +47,7 @@ export const NavidromeAlbumFilters = ({
         },
         query: {
             sortBy: GenreListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,
@@ -194,7 +191,7 @@ export const NavidromeAlbumFilters = ({
         query: {
             // searchTerm: debouncedSearchTerm,
             sortBy: AlbumArtistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId,

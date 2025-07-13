@@ -13,7 +13,9 @@ import { SongListContent } from '/@/renderer/features/songs/components/song-list
 import { SongListHeader } from '/@/renderer/features/songs/components/song-list-header';
 import { useSongListCount } from '/@/renderer/features/songs/queries/song-list-count-query';
 import { useCurrentServer, useListFilterByKey } from '/@/renderer/store';
-import { GenreListSort, LibraryItem, SongListQuery, SortOrder } from '/@/shared/types/domain-types';
+import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 import { Play } from '/@/shared/types/types';
 
 const TrackListRoute = () => {
@@ -53,7 +55,7 @@ const TrackListRoute = () => {
         },
         query: {
             sortBy: GenreListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,

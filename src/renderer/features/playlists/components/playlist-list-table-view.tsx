@@ -10,7 +10,7 @@ import { useVirtualTable } from '/@/renderer/components/virtual-table/hooks/use-
 import { PLAYLIST_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/context-menu-items';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer } from '/@/renderer/store';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface PlaylistListTableViewProps {
     itemCount?: number;

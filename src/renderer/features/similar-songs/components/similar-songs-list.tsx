@@ -12,7 +12,8 @@ import { useHandlePlayQueueAdd } from '/@/renderer/features/player/hooks/use-han
 import { useSimilarSongs } from '/@/renderer/features/similar-songs/queries/similar-song-queries';
 import { usePlayButtonBehavior, useTableSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { LibraryItem, Song } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export type SimilarSongsListProps = {
     count?: number;

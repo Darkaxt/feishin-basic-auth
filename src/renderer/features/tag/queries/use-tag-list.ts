@@ -5,8 +5,8 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
-import { TagQuery } from '/@/shared/types/domain-types';
-import { ServerFeature } from '/@/shared/types/features-types';
+import { ServerFeature } from '/@/shared/types/domain/server-domain-types';
+import { TagQuery } from '/@/shared/types/domain/tag-domain-types';
 
 export const useTagList = (args: QueryHookArgs<TagQuery>) => {
     const { options, query, serverId } = args || {};

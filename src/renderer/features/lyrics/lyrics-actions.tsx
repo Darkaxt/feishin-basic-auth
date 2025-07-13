@@ -15,7 +15,7 @@ import { Group } from '/@/shared/components/group/group';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Select } from '/@/shared/components/select/select';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
-import { LyricsOverride } from '/@/shared/types/domain-types';
+import { LyricsOverride } from '/@/shared/types/domain/lyric-domain-types';
 
 interface LyricsActionsProps {
     index: number;

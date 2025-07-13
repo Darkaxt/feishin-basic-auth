@@ -7,16 +7,10 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById, useSetAlbumListItemDataById, useSetQueueRating } from '/@/renderer/store';
 import { useRatingEvent } from '/@/renderer/store/event.store';
-import {
-    Album,
-    AlbumArtist,
-    AlbumArtistDetailResponse,
-    AlbumDetailResponse,
-    AnyLibraryItems,
-    LibraryItem,
-    RatingResponse,
-    SetRatingArgs,
-} from '/@/shared/types/domain-types';
+import { Album, AlbumDetailResponse } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtistDetailResponse } from '/@/shared/types/domain/artist-domain-types';
+import { AnyLibraryItems, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { RatingResponse, SetRatingRequest } from '/@/shared/types/domain/user-domain-types';
 
 const remote = isElectron() ? window.api.remote : null;
 
@@ -30,7 +24,7 @@ export const useSetRating = (args: MutationHookArgs) => {
     return useMutation<
         RatingResponse,
         AxiosError,
-        Omit<SetRatingArgs, 'apiClientProps' | 'server'>,
+        Omit<SetRatingRequest, 'apiClientProps' | 'server'>,
         { previous: undefined | { items: AnyLibraryItems } }
     >({
         mutationFn: (args) => {

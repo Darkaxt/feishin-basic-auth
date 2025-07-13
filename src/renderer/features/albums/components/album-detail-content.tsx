@@ -49,13 +49,9 @@ import { Group } from '/@/shared/components/group/group';
 import { Popover } from '/@/shared/components/popover/popover';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Stack } from '/@/shared/components/stack/stack';
-import {
-    AlbumListQuery,
-    AlbumListSort,
-    LibraryItem,
-    QueueSong,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { AlbumListQuery, AlbumListSort } from '/@/shared/types/domain/album-domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
 
 const isFullWidthRow = (node: RowNode) => {
@@ -170,7 +166,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
                 : undefined,
             limit: 15,
             sortBy: AlbumListSort.YEAR,
-            sortOrder: SortOrder.DESC,
+            sortOrder: ListSortOrder.DESC,
             startIndex: 0,
         },
         serverId: server?.id,
@@ -180,7 +176,7 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
         genres: detailQuery.data?.genres.length ? [detailQuery.data.genres[0].id] : undefined,
         limit: 15,
         sortBy: AlbumListSort.RANDOM,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
     };
 

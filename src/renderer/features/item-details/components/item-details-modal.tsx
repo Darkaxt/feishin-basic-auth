@@ -16,18 +16,14 @@ import { Separator } from '/@/shared/components/separator/separator';
 import { Spoiler } from '/@/shared/components/spoiler/spoiler';
 import { Table } from '/@/shared/components/table/table';
 import { Text } from '/@/shared/components/text/text';
-import {
-    Album,
-    AlbumArtist,
-    AnyLibraryItem,
-    LibraryItem,
-    Playlist,
-    RelatedArtist,
-    Song,
-} from '/@/shared/types/domain-types';
+import { Album } from '/@/shared/types/domain/album-domain-types';
+import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
+import { Playlist } from '/@/shared/types/domain/playlist-domain-types';
+import { AnyLibraryItem, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song } from '/@/shared/types/domain/song-domain-types';
 
 export type ItemDetailsModalProps = {
-    item: Album | AlbumArtist | Playlist | Song;
+    item: Album | Playlist | Song;
 };
 
 type ItemDetailRow<T> = {

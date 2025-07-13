@@ -16,12 +16,10 @@ import { Button } from '/@/shared/components/button/button';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
-import {
-    AlbumArtistListQuery,
-    AlbumListQuery,
-    LibraryItem,
-    SongListQuery,
-} from '/@/shared/types/domain-types';
+import { AlbumListQuery } from '/@/shared/types/domain/album-domain-types';
+import { AlbumArtistListQuery } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 interface SearchHeaderProps {
     navigationId: string;

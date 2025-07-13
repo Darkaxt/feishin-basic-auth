@@ -12,7 +12,9 @@ import { SONG_CONTEXT_MENU_ITEMS } from '/@/renderer/features/context-menu/conte
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useCurrentServer } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { LibraryItem, QueueSong, SongListQuery } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 interface AlbumArtistSongListContentProps {
     data: QueueSong[];

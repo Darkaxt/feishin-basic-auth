@@ -18,13 +18,13 @@ import { useHandleFavorite } from '/@/renderer/features/shared/hooks/use-handle-
 import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
 import { useEventStore } from '/@/renderer/store/event.store';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import {
-    LibraryItem,
     Song,
     SongListQuery,
     SongListResponse,
     SongListSort,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/song-domain-types';
 import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 interface SongListGridViewProps {

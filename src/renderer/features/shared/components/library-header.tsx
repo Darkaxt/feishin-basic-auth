@@ -11,7 +11,7 @@ import { useGeneralSettings } from '/@/renderer/store';
 import { Center } from '/@/shared/components/center/center';
 import { Image } from '/@/shared/components/image/image';
 import { Text } from '/@/shared/components/text/text';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 interface LibraryHeaderProps {
     background?: string;

@@ -40,7 +40,8 @@ import {
     useTableSettings,
 } from '/@/renderer/store/settings.store';
 import { setQueue, setQueueNext } from '/@/renderer/utils/set-transcoded-queue-data';
-import { LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { QueueSong } from '/@/shared/types/domain/player-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { PlaybackType, TableType } from '/@/shared/types/types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;

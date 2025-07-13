@@ -32,93 +32,89 @@ import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Flex } from '/@/shared/components/flex/flex';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
-import {
-    LibraryItem,
-    PlaylistListQuery,
-    PlaylistListSort,
-    ServerType,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+import { PlaylistListQuery, PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { ListDisplayType } from '/@/shared/types/types';
 
 const FILTERS = {
     jellyfin: [
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.duration', { postProcess: 'titleCase' }),
             value: PlaylistListSort.DURATION,
         },
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.name', { postProcess: 'titleCase' }),
             value: PlaylistListSort.NAME,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.songCount', { postProcess: 'titleCase' }),
             value: PlaylistListSort.SONG_COUNT,
         },
     ],
     navidrome: [
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.duration', { postProcess: 'titleCase' }),
             value: PlaylistListSort.DURATION,
         },
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.name', { postProcess: 'titleCase' }),
             value: PlaylistListSort.NAME,
         },
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.owner', { postProcess: 'titleCase' }),
             value: PlaylistListSort.OWNER,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.isPublic', { postProcess: 'titleCase' }),
             value: PlaylistListSort.PUBLIC,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.songCount', { postProcess: 'titleCase' }),
             value: PlaylistListSort.SONG_COUNT,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.recentlyUpdated', { postProcess: 'titleCase' }),
             value: PlaylistListSort.UPDATED_AT,
         },
     ],
     subsonic: [
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.duration', { postProcess: 'titleCase' }),
             value: PlaylistListSort.DURATION,
         },
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.name', { postProcess: 'titleCase' }),
             value: PlaylistListSort.NAME,
         },
         {
-            defaultOrder: SortOrder.ASC,
+            defaultOrder: ListSortOrder.ASC,
             name: i18n.t('filter.owner', { postProcess: 'titleCase' }),
             value: PlaylistListSort.OWNER,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.isPublic', { postProcess: 'titleCase' }),
             value: PlaylistListSort.PUBLIC,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.songCount', { postProcess: 'titleCase' }),
             value: PlaylistListSort.SONG_COUNT,
         },
         {
-            defaultOrder: SortOrder.DESC,
+            defaultOrder: ListSortOrder.DESC,
             name: i18n.t('filter.recentlyUpdated', { postProcess: 'titleCase' }),
             value: PlaylistListSort.UPDATED_AT,
         },
@@ -260,7 +256,7 @@ export const PlaylistListHeaderFilters = ({
             const updatedFilters = setFilter({
                 data: {
                     sortBy: e.currentTarget.value as PlaylistListSort,
-                    sortOrder: sortOrder || SortOrder.ASC,
+                    sortOrder: sortOrder || ListSortOrder.ASC,
                 },
                 itemType: LibraryItem.PLAYLIST,
                 key: pageKey,
@@ -272,7 +268,8 @@ export const PlaylistListHeaderFilters = ({
     );
 
     const handleToggleSortOrder = useCallback(() => {
-        const newSortOrder = filter.sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC;
+        const newSortOrder =
+            filter.sortOrder === ListSortOrder.ASC ? ListSortOrder.DESC : ListSortOrder.ASC;
         const updatedFilters = setFilter({
             data: { sortOrder: newSortOrder },
             itemType: LibraryItem.PLAYLIST,

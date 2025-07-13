@@ -18,12 +18,12 @@ import { AppRoute } from '/@/renderer/router/routes';
 import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
 import { useListStoreActions } from '/@/renderer/store/list.store';
 import {
-    LibraryItem,
     Playlist,
     PlaylistListQuery,
     PlaylistListResponse,
     PlaylistListSort,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/playlist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 interface PlaylistListGridViewProps {

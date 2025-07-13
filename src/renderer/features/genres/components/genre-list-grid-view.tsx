@@ -15,13 +15,13 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { usePlayQueueAdd } from '/@/renderer/features/player';
 import { useGenreRoute } from '/@/renderer/hooks/use-genre-route';
 import { useCurrentServer, useListStoreActions, useListStoreByKey } from '/@/renderer/store';
+import { Album } from '/@/shared/types/domain/album-domain-types';
 import {
-    Album,
     Genre,
     GenreListQuery,
     GenreListResponse,
-    LibraryItem,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/genre-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { CardRow, ListDisplayType } from '/@/shared/types/types';
 
 export const GenreListGridView = ({ gridRef, itemCount }: any) => {

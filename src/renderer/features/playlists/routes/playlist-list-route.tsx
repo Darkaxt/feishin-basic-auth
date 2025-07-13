@@ -10,7 +10,11 @@ import { PlaylistListHeader } from '/@/renderer/features/playlists/components/pl
 import { usePlaylistList } from '/@/renderer/features/playlists/queries/playlist-list-query';
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer, useListStoreByKey } from '/@/renderer/store';
-import { PlaylistListSort, PlaylistSongListQuery, SortOrder } from '/@/shared/types/domain-types';
+import {
+    PlaylistListSort,
+    PlaylistSongListQuery,
+} from '/@/shared/types/domain/playlist-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 const PlaylistListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);
@@ -29,7 +33,7 @@ const PlaylistListRoute = () => {
             ...filter,
             limit: 1,
             sortBy: PlaylistListSort.NAME,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
         },
         serverId: server?.id,

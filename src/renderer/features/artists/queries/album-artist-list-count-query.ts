@@ -4,7 +4,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { AlbumArtistListQuery } from '/@/shared/types/domain-types';
+import { AlbumArtistListQuery } from '/@/shared/types/domain/artist-domain-types';
 
 export const useAlbumArtistListCount = (args: QueryHookArgs<AlbumArtistListQuery>) => {
     const { options, query, serverId } = args;

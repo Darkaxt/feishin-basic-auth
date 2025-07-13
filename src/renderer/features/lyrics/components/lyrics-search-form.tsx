@@ -20,7 +20,7 @@ import {
     InternetProviderLyricSearchResponse,
     LyricSource,
     LyricsOverride,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/lyric-domain-types';
 
 interface SearchResultProps {
     data: InternetProviderLyricSearchResponse;

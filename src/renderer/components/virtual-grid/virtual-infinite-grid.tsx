@@ -14,7 +14,8 @@ import {
 import InfiniteLoader from 'react-window-infinite-loader';
 
 import { VirtualGridWrapper } from '/@/renderer/components/virtual-grid/virtual-grid-wrapper';
-import { AnyLibraryItem, Genre, LibraryItem } from '/@/shared/types/domain-types';
+import { Genre } from '/@/shared/types/domain/genre-domain-types';
+import { AnyLibraryItem, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { ListDisplayType } from '/@/shared/types/types';
 
 export type VirtualInfiniteGridRef = {

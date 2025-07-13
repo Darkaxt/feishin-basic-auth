@@ -5,7 +5,7 @@ import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
 import { getServerById } from '/@/renderer/store';
-import { UpdatePlaylistArgs, UpdatePlaylistResponse } from '/@/shared/types/domain-types';
+import { UpdatePlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
 export const useUpdatePlaylist = (args: MutationHookArgs) => {
     const { options } = args || {};

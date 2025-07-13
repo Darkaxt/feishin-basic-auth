@@ -10,7 +10,8 @@ import { useArtistListCount } from '/@/renderer/features/artists/queries/artist-
 import { AnimatedPage } from '/@/renderer/features/shared';
 import { useCurrentServer } from '/@/renderer/store/auth.store';
 import { useListFilterByKey } from '/@/renderer/store/list.store';
-import { ArtistListQuery, LibraryItem } from '/@/shared/types/domain-types';
+import { ArtistListQuery } from '/@/shared/types/domain/artist-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 const ArtistListRoute = () => {
     const gridRef = useRef<null | VirtualInfiniteGridRef>(null);

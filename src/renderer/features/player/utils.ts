@@ -2,15 +2,15 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { PlaylistSongListQuery } from '/@/shared/types/domain/playlist-domain-types';
+import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 import {
-    PlaylistSongListQuery,
-    ServerListItem,
     SongDetailQuery,
     SongListQuery,
     SongListResponse,
     SongListSort,
-    SortOrder,
-} from '/@/shared/types/domain-types';
+} from '/@/shared/types/domain/song-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 export const getPlaylistSongsById = async (args: {
     id: string;
@@ -23,7 +23,7 @@ export const getPlaylistSongsById = async (args: {
     const queryFilter: PlaylistSongListQuery = {
         id,
         sortBy: SongListSort.ID,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
         ...query,
     };
@@ -61,7 +61,7 @@ export const getAlbumSongsById = async (args: {
     const queryFilter: SongListQuery = {
         albumIds: id,
         sortBy: SongListSort.ALBUM,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
         ...query,
     };
@@ -105,7 +105,7 @@ export const getGenreSongsById = async (args: {
         const queryFilter: SongListQuery = {
             genreIds: [genreId],
             sortBy: SongListSort.GENRE,
-            sortOrder: SortOrder.ASC,
+            sortOrder: ListSortOrder.ASC,
             startIndex: 0,
             ...query,
         };
@@ -149,7 +149,7 @@ export const getAlbumArtistSongsById = async (args: {
     const queryFilter: SongListQuery = {
         albumArtistIds: id || [],
         sortBy: SongListSort.ALBUM_ARTIST,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
         ...query,
     };
@@ -186,7 +186,7 @@ export const getArtistSongsById = async (args: {
     const queryFilter: SongListQuery = {
         artistIds: id,
         sortBy: SongListSort.ALBUM,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
         ...query,
     };
@@ -221,7 +221,7 @@ export const getSongsByQuery = async (args: {
 
     const queryFilter: SongListQuery = {
         sortBy: SongListSort.ALBUM,
-        sortOrder: SortOrder.ASC,
+        sortOrder: ListSortOrder.ASC,
         startIndex: 0,
         ...query,
     };

@@ -12,7 +12,7 @@ import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
 import { useFastAverageColor } from '/@/renderer/hooks';
 import { useCurrentServer, useGeneralSettings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 const AlbumDetailRoute = () => {
     const tableRef = useRef<AgGridReactType | null>(null);
