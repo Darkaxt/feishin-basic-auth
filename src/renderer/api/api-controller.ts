@@ -1,7 +1,8 @@
+import { createLoggedApiController } from '/@/renderer/api/api-controller-logger';
 import { getServerById } from '/@/renderer/store';
 import {
-    controller as subsonicAdapter,
     apiClient as subsonicApiClient,
+    controller as subsonicBaseAdapter,
     middleware as subsonicMiddleware,
 } from '/@/shared/api/subsonic/subsonic-controller';
 import { ApiController } from '/@/shared/types/adapter/api-controller-types';
@@ -20,7 +21,7 @@ export const serverApi = {
     },
     [ServerType.SUBSONIC]: {
         apiClient: subsonicApiClient,
-        controller: subsonicAdapter,
+        controller: createLoggedApiController(subsonicBaseAdapter),
         middleware: subsonicMiddleware,
     },
 };

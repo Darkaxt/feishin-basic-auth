@@ -47,7 +47,7 @@ export const middleware: (server: ServerListItem) => Middleware = (server: Serve
     },
 });
 
-const client: SubsonicClient = createClient<paths>({
+const client = createClient<paths>({
     querySerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
 });
 
@@ -55,8 +55,6 @@ type ErrorResponseArgs = {
     code?: number;
     message?: string;
 };
-
-type SubsonicClient = Client<paths, `${string}/${string}`>;
 
 function errorResponse(args: ErrorResponseArgs): [ApiControllerError, null] {
     const message = `${i18n.t('error.genericError', { postProcess: 'sentenceCase' }) as string}${
@@ -131,7 +129,7 @@ function toHttpErrorCode(subsonicErrorCode: number): number {
     }
 }
 
-export const controller: ApiController = {
+const baseController: ApiController = {
     _utility: {
         getImageUrl: (
             args: { id: string; size?: number; type: LibraryItem },
@@ -206,3 +204,5 @@ export const controller: ApiController = {
         // TODO: Implement user methods
     },
 };
+
+export const controller = baseController;
