@@ -1,19 +1,13 @@
-import { z } from 'zod';
-
 import i18n from '/@/i18n/i18n';
-import { JFPlaylistListSort } from '/@/shared/api/jellyfin.types';
-import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
-import { NDPlaylistListSort } from '/@/shared/api/navidrome.types';
-import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import {
     BaseEndpointArgs,
+    BasePaginatedQuery,
     BasePaginatedResponse,
-    BaseQuery,
 } from '/@/shared/types/adapter/api-controller-types';
 import { Genre, RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
-import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
-import { Song, SongListSort } from '/@/shared/types/domain/song-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import { Song, SongListSortOptions } from '/@/shared/types/domain/song-domain-types';
 
 export enum PlaylistListSortOptions {
     DURATION = 'duration',
@@ -32,15 +26,6 @@ export const PlaylistListSortOptionsLabels = {
     [PlaylistListSortOptions.TRACK_COUNT]: i18n.t('filter.trackCount'),
     [PlaylistListSortOptions.UPDATED_AT]: i18n.t('filter.updatedAt'),
 };
-
-export enum PlaylistListSort {
-    DURATION = 'duration',
-    NAME = 'name',
-    OWNER = 'owner',
-    PUBLIC = 'public',
-    SONG_COUNT = 'songCount',
-    UPDATED_AT = 'updatedAt',
-}
 
 export type AddToPlaylistArgs = BaseEndpointArgs & {
     body: AddToPlaylistBody;
@@ -88,6 +73,17 @@ export type DeletePlaylistRequest = {
 
 export type DeletePlaylistResponse = null | undefined;
 
+export type MoveItemQuery = {
+    endingIndex: number;
+    playlistId: string;
+    startingIndex: number;
+    trackId: string;
+};
+
+export type MoveItemRequest = {
+    query: MoveItemQuery;
+};
+
 export type Playlist = {
     _itemType: LibraryItem.PLAYLIST;
     _serverId: string;
@@ -109,23 +105,60 @@ export type Playlist = {
     updatedDate: null | string;
 };
 
-export interface PlaylistListQuery extends BaseQuery<PlaylistListSort> {
-    _custom?: {
-        jellyfin?: Partial<z.infer<typeof jfType._parameters.playlistList>>;
-        navidrome?: Partial<z.infer<typeof ndType._parameters.playlistList>>;
-    };
-    limit?: number;
+export type PlaylistDetailQuery = {
+    id: string;
+};
+
+export type PlaylistDetailRequest = { query: PlaylistDetailQuery };
+
+export type PlaylistDetailResponse = Playlist;
+
+export interface PlaylistListQuery extends BasePaginatedQuery<PlaylistListSortOptions> {
     searchTerm?: string;
-    startIndex: number;
 }
 
-export type PlaylistListRequest = { query: PlaylistListQuery };
+export type PlaylistListRequest = { query: PlaylistListQuery; totalRecordCount?: number };
 
 export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
 
 export type PlaylistSong = Song & {
     playlistItemId: string;
 };
+
+export type PlaylistSongListQuery = BasePaginatedQuery<SongListSortOptions> & {
+    id: string;
+};
+
+export type PlaylistSongListRequest = { query: PlaylistSongListQuery; totalRecordCount?: number };
+
+// export const playlistListSortMap: PlaylistListSortMap = {
+//     jellyfin: {
+//         duration: JFPlaylistListSort.DURATION,
+//         name: JFPlaylistListSort.NAME,
+//         owner: undefined,
+//         public: undefined,
+//         songCount: JFPlaylistListSort.SONG_COUNT,
+//         updatedAt: undefined,
+//     },
+//     navidrome: {
+//         duration: NDPlaylistListSort.DURATION,
+//         name: NDPlaylistListSort.NAME,
+//         owner: NDPlaylistListSort.OWNER,
+//         public: NDPlaylistListSort.PUBLIC,
+//         songCount: NDPlaylistListSort.SONG_COUNT,
+//         updatedAt: NDPlaylistListSort.UPDATED_AT,
+//     },
+//     subsonic: {
+//         duration: undefined,
+//         name: undefined,
+//         owner: undefined,
+//         public: undefined,
+//         songCount: undefined,
+//         updatedAt: undefined,
+//     },
+// };
+
+export type PlaylistSongListResponse = BasePaginatedResponse<PlaylistSong[]>;
 
 export type RemoveFromPlaylistQuery = {
     id: string;
@@ -165,66 +198,3 @@ export type UpdatePlaylistRequest = {
 };
 
 export type UpdatePlaylistResponse = null | undefined;
-
-type PlaylistListSortMap = {
-    jellyfin: Record<PlaylistListSort, JFPlaylistListSort | undefined>;
-    navidrome: Record<PlaylistListSort, NDPlaylistListSort | undefined>;
-    subsonic: Record<PlaylistListSort, undefined>;
-};
-
-export const playlistListSortMap: PlaylistListSortMap = {
-    jellyfin: {
-        duration: JFPlaylistListSort.DURATION,
-        name: JFPlaylistListSort.NAME,
-        owner: undefined,
-        public: undefined,
-        songCount: JFPlaylistListSort.SONG_COUNT,
-        updatedAt: undefined,
-    },
-    navidrome: {
-        duration: NDPlaylistListSort.DURATION,
-        name: NDPlaylistListSort.NAME,
-        owner: NDPlaylistListSort.OWNER,
-        public: NDPlaylistListSort.PUBLIC,
-        songCount: NDPlaylistListSort.SONG_COUNT,
-        updatedAt: NDPlaylistListSort.UPDATED_AT,
-    },
-    subsonic: {
-        duration: undefined,
-        name: undefined,
-        owner: undefined,
-        public: undefined,
-        songCount: undefined,
-        updatedAt: undefined,
-    },
-};
-export type MoveItemQuery = {
-    endingIndex: number;
-    playlistId: string;
-    startingIndex: number;
-    trackId: string;
-};
-
-export type MoveItemRequest = {
-    query: MoveItemQuery;
-};
-
-export type PlaylistDetailQuery = {
-    id: string;
-};
-
-export type PlaylistDetailRequest = { query: PlaylistDetailQuery };
-
-export type PlaylistDetailResponse = Playlist;
-
-export type PlaylistSongListQuery = {
-    id: string;
-    limit?: number;
-    sortBy?: SongListSort;
-    sortOrder?: ListSortOrder;
-    startIndex: number;
-};
-
-export type PlaylistSongListRequest = { query: PlaylistSongListQuery };
-
-export type PlaylistSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;

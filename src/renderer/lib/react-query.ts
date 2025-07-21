@@ -22,16 +22,12 @@ const queryConfig: DefaultOptions = {
         retry: process.env.NODE_ENV === 'production',
     },
     queries: {
-        cacheTime: 1000 * 60 * 3,
-        onError: (err) => {
-            console.error('react query error:', err);
-        },
+        gcTime: 1000 * 60 * 3,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
         refetchOnWindowFocus: false,
         retry: process.env.NODE_ENV === 'production',
         staleTime: 1000 * 5,
-        useErrorBoundary: (error: any) => {
-            return error?.response?.status >= 500;
-        },
     },
 };
 
@@ -41,9 +37,8 @@ export const queryClient = new QueryClient({
 });
 
 export type InfiniteQueryOptions = {
-    cacheTime?: UseInfiniteQueryOptions['cacheTime'];
     enabled?: UseInfiniteQueryOptions['enabled'];
-    keepPreviousData?: UseInfiniteQueryOptions['keepPreviousData'];
+    gcTime?: UseInfiniteQueryOptions['gcTime'];
     meta?: UseInfiniteQueryOptions['meta'];
     onError?: (err: any) => void;
     onSettled?: any;
@@ -55,7 +50,6 @@ export type InfiniteQueryOptions = {
     retry?: UseInfiniteQueryOptions['retry'];
     retryDelay?: UseInfiniteQueryOptions['retryDelay'];
     staleTime?: UseInfiniteQueryOptions['staleTime'];
-    suspense?: UseInfiniteQueryOptions['suspense'];
     useErrorBoundary?: boolean;
 };
 
@@ -80,9 +74,8 @@ export type QueryHookArgs<T> = {
 };
 
 export type QueryOptions = {
-    cacheTime?: UseQueryOptions['cacheTime'];
     enabled?: UseQueryOptions['enabled'];
-    keepPreviousData?: UseQueryOptions['keepPreviousData'];
+    gcTime?: UseQueryOptions['gcTime'];
     meta?: UseQueryOptions['meta'];
     onError?: (err: any) => void;
     onSettled?: any;
@@ -94,6 +87,5 @@ export type QueryOptions = {
     retry?: UseQueryOptions['retry'];
     retryDelay?: UseQueryOptions['retryDelay'];
     staleTime?: UseQueryOptions['staleTime'];
-    suspense?: UseQueryOptions['suspense'];
     useErrorBoundary?: boolean;
 };

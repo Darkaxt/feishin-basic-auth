@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { PlaylistListQuery } from '/@/shared/types/domain/playlist-domain-types';
 
 export const usePlaylistList = (args: {
@@ -13,7 +13,7 @@ export const usePlaylistList = (args: {
     serverId?: string;
 }) => {
     const { options, query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         cacheTime: 1000 * 60 * 60,

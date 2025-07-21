@@ -6,9 +6,9 @@ import { api } from '/@/renderer/api';
 import { useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
 import { toast } from '/@/shared/components/toast/toast';
 import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { SongListSort } from '/@/shared/types/domain/song-domain-types';
 import { AuthState } from '/@/shared/types/types';
-import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -33,7 +33,7 @@ export const useServerAuthenticated = () => {
                         limit: 1,
                         sortBy: SongListSort.NAME,
                         sortOrder: ListSortOrder.ASC,
-                        startIndex: 0,
+                        offset: 0,
                     },
                 });
 

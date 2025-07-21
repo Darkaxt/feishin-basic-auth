@@ -150,8 +150,8 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
 
     const artistQuery = useAlbumList({
         options: {
-            cacheTime: 1000 * 60,
             enabled: detailQuery?.data?.albumArtists[0]?.id !== undefined,
+            gcTime: 1000 * 60,
             keepPreviousData: true,
             staleTime: 1000 * 60,
         },
@@ -165,9 +165,9 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
                 ? [detailQuery?.data?.albumArtists[0].id]
                 : undefined,
             limit: 15,
+            offset: 0,
             sortBy: AlbumListSort.YEAR,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
         },
         serverId: server?.id,
     });
@@ -175,15 +175,15 @@ export const AlbumDetailContent = ({ background, tableRef }: AlbumDetailContentP
     const relatedAlbumGenresRequest: AlbumListQuery = {
         genres: detailQuery.data?.genres.length ? [detailQuery.data.genres[0].id] : undefined,
         limit: 15,
+        offset: 0,
         sortBy: AlbumListSort.RANDOM,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
     };
 
     const relatedAlbumGenresQuery = useAlbumList({
         options: {
-            cacheTime: 1000 * 60,
             enabled: !!detailQuery?.data?.genres?.[0],
+            gcTime: 1000 * 60,
             queryKey: queryKeys.albums.related(
                 server?.id || '',
                 albumId,

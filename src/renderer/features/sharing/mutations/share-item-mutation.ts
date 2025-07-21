@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { AnyLibraryItems } from '/@/shared/types/domain/shared-domain-types';
 import { ShareItemRequest, ShareItemResponse } from '/@/shared/types/domain/user-domain-types';
 
@@ -17,7 +17,7 @@ export const useShareItem = (args: MutationHookArgs) => {
         { previous: undefined | { items: AnyLibraryItems } }
     >({
         mutationFn: (args) => {
-            const server = getServerById(args.serverId);
+            const server = useServerById(args.serverId);
             if (!server) throw new Error('Server not found');
             return api.controller.shareItem({ ...args, apiClientProps: { server } });
         },

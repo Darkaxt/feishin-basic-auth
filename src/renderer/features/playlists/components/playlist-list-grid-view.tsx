@@ -88,15 +88,11 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
         const itemData: Playlist[] = [];
 
         for (const [, data] of queriesFromCache) {
-            const { items, startIndex } = data || {};
+            const { items, offset } = data || {};
 
-            if (items && items.length !== 1 && startIndex !== undefined) {
+            if (items && items.length !== 1 && offset !== undefined) {
                 let itemIndex = 0;
-                for (
-                    let rowIndex = startIndex;
-                    rowIndex < startIndex + items.length;
-                    rowIndex += 1
-                ) {
+                for (let rowIndex = offset; rowIndex < offset + items.length; rowIndex += 1) {
                     itemData[rowIndex] = items[itemIndex];
                     itemIndex += 1;
                 }
@@ -116,7 +112,7 @@ export const PlaylistListGridView = ({ gridRef, itemCount }: PlaylistListGridVie
                 limit: take,
                 ...filter,
                 _custom: {},
-                startIndex: skip,
+                offset: skip,
             };
 
             const queryKey = queryKeys.playlists.list(server?.id || '', query);

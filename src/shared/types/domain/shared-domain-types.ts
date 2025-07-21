@@ -13,11 +13,12 @@ export enum LibraryItem {
     GENRE = 'genre',
     PLAYLIST = 'playlist',
     SONG = 'song',
+    USER = 'user',
 }
 
 export enum ListSortOrder {
-    ASC = 'ASC',
-    DESC = 'DESC',
+    ASC = 'asc',
+    DESC = 'desc',
 }
 
 export type AnyLibraryItem = Album | Artist | Artist | Playlist | QueueSong | Song;

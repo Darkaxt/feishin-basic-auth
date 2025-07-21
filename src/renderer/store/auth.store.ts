@@ -1,84 +1,83 @@
 import merge from 'lodash/merge';
 import { nanoid } from 'nanoid/non-secure';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from 'zustand';
+import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { createWithEqualityFn } from 'zustand/traditional';
 
 import { useAlbumArtistListDataStore } from '/@/renderer/store/album-artist-list-data.store';
 import { useAlbumListDataStore } from '/@/renderer/store/album-list-data.store';
 import { useListStore } from '/@/renderer/store/list.store';
+import { createSelectors } from '/@/renderer/store/utils';
 import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 
 export interface AuthSlice extends AuthState {
-    actions: {
-        addServer: (args: ServerListItem) => void;
-        deleteServer: (id: string) => void;
-        getServer: (id: string) => null | ServerListItem;
-        setCurrentServer: (server: null | ServerListItem) => void;
-        updateServer: (id: string, args: Partial<ServerListItem>) => void;
-    };
+    actions: Actions;
 }
 
 export interface AuthState {
-    currentServer: null | ServerListItem;
+    currentServerId: null | string;
     deviceId: string;
     serverList: Record<string, ServerListItem>;
 }
 
-export const useAuthStore = createWithEqualityFn<AuthSlice>()(
+interface Actions {
+    addServer: (args: ServerListItem) => void;
+    deleteServer: (id: string) => void;
+    setCurrentServer: (server: null | ServerListItem) => void;
+    updateServer: (id: string, args: Partial<ServerListItem>) => void;
+}
+
+const authStoreBase = create<AuthSlice>()(
     persist(
         devtools(
-            immer((set, get) => ({
-                actions: {
-                    addServer: (args) => {
-                        set((state) => {
-                            state.serverList[args.id] = args;
-                        });
-                    },
-                    deleteServer: (id) => {
-                        set((state) => {
-                            delete state.serverList[id];
+            subscribeWithSelector(
+                immer((set) => ({
+                    actions: {
+                        addServer: (args) => {
+                            set((state) => {
+                                state.serverList[args.id] = args;
+                                state.currentServerId = args.id;
+                            });
+                        },
+                        deleteServer: (id) => {
+                            set((state) => {
+                                delete state.serverList[id];
 
-                            if (state.currentServer?.id === id) {
-                                state.currentServer = null;
-                            }
-                        });
-                    },
-                    getServer: (id) => {
-                        const server = get().serverList[id];
-                        if (server) return server;
-                        return null;
-                    },
-                    setCurrentServer: (server) => {
-                        set((state) => {
-                            state.currentServer = server;
+                                if (state.currentServerId === id) {
+                                    state.currentServerId = null;
+                                }
+                            });
+                        },
+                        setCurrentServer: (server) => {
+                            set((state) => {
+                                state.currentServerId = server?.id || null;
 
-                            if (server) {
-                                // Reset list filters
-                                useListStore.getState()._actions.resetFilter();
+                                if (server) {
+                                    // Reset list filters
+                                    useListStore.getState()._actions.resetFilter();
 
-                                // Reset persisted grid list stores
-                                useAlbumListDataStore.getState().actions.setItemData([]);
-                                useAlbumArtistListDataStore.getState().actions.setItemData([]);
-                            }
-                        });
-                    },
-                    updateServer: (id: string, args: Partial<ServerListItem>) => {
-                        set((state) => {
-                            const updatedServer = {
-                                ...state.serverList[id],
-                                ...args,
-                            };
+                                    // Reset persisted grid list stores
+                                    useAlbumListDataStore.getState().actions.setItemData([]);
+                                    useAlbumArtistListDataStore.getState().actions.setItemData([]);
+                                }
+                            });
+                        },
+                        updateServer: (id: string, args: Partial<ServerListItem>) => {
+                            set((state) => {
+                                const updatedServer = {
+                                    ...state.serverList[id],
+                                    ...args,
+                                };
 
-                            state.serverList[id] = updatedServer as ServerListItem;
-                            state.currentServer = updatedServer as ServerListItem;
-                        });
+                                state.serverList[id] = updatedServer as ServerListItem;
+                            });
+                        },
                     },
-                },
-                currentServer: null,
-                deviceId: nanoid(),
-                serverList: {},
-            })),
+                    currentServerId: null,
+                    deviceId: nanoid(),
+                    serverList: {},
+                })),
+            ),
             { name: 'store_authentication' },
         ),
         {
@@ -89,18 +88,40 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
     ),
 );
 
-export const useCurrentServerId = () => useAuthStore((state) => state.currentServer)?.id || '';
+export const useAuthStore = createSelectors(authStoreBase);
 
-export const useCurrentServer = () => useAuthStore((state) => state.currentServer);
+export const useCurrentServerId = () => {
+    return useAuthStore.use.currentServerId();
+};
 
-export const useServerList = () => useAuthStore((state) => state.serverList);
+export const useCurrentServer = () => {
+    const currentServerId = useCurrentServerId();
 
-export const useAuthStoreActions = () => useAuthStore((state) => state.actions);
-
-export const getServerById = (id?: string) => {
-    if (!id) {
+    if (!currentServerId) {
         return null;
     }
 
-    return useAuthStore.getState().actions.getServer(id);
+    const servers = useAuthStore.use.serverList();
+    const server = servers[currentServerId];
+
+    if (!server) {
+        return null;
+    }
+
+    return server;
+};
+
+export const useServerList = () => useAuthStore.use.serverList();
+
+export const useAuthStoreActions = () => useAuthStore.use.actions();
+
+export const useServerById = (id: string) => {
+    const servers = useAuthStore.use.serverList();
+    const server = servers[id];
+
+    if (!server) {
+        return null;
+    }
+
+    return server;
 };

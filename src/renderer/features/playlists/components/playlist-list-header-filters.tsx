@@ -160,7 +160,7 @@ export const PlaylistListHeaderFilters = ({
                     },
                 },
                 limit: take,
-                startIndex: skip,
+                offset: skip,
                 ...filters,
             };
 
@@ -213,7 +213,7 @@ export const PlaylistListHeaderFilters = ({
                                     },
                                     query: {
                                         limit,
-                                        startIndex,
+                                        offset,
                                         ...pageFilters,
                                     },
                                 }),

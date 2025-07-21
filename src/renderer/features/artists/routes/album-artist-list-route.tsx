@@ -23,7 +23,7 @@ const AlbumArtistListRoute = () => {
 
     const itemCountCheck = useAlbumArtistListCount({
         options: {
-            cacheTime: 1000 * 60,
+            gcTime: 1000 * 60,
             staleTime: 1000 * 60,
         },
         query: albumArtistListFilter,

@@ -167,7 +167,7 @@ export const openUpdatePlaylistModal = async (args: {
     const query: UserListQuery = {
         sortBy: UserListSort.NAME,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
+        offset: 0,
     };
 
     if (!server) return;

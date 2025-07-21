@@ -50,13 +50,13 @@ const TrackListRoute = () => {
 
     const genreList = useGenreList({
         options: {
-            cacheTime: 1000 * 60 * 60,
+            gcTime: 1000 * 60 * 60,
             enabled: !!genreId,
         },
         query: {
             sortBy: GenreListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -72,7 +72,7 @@ const TrackListRoute = () => {
 
     const itemCountCheck = useSongListCount({
         options: {
-            cacheTime: 1000 * 60,
+            gcTime: 1000 * 60,
             staleTime: 1000 * 60,
         },
         query: songListFilter,
@@ -85,7 +85,7 @@ const TrackListRoute = () => {
         async (args: { initialSongId?: string; playType: Play }) => {
             if (!itemCount || itemCount === 0) return;
             const { initialSongId, playType } = args;
-            const query: SongListQuery = { ...songListFilter, limit: itemCount, startIndex: 0 };
+            const query: SongListQuery = { ...songListFilter, limit: itemCount, offset: 0 };
 
             if (albumArtistId) {
                 handlePlayQueueAdd?.({

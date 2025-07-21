@@ -42,7 +42,7 @@ export const JellyfinSongFilters = ({
             musicFolderId: filter?.musicFolderId,
             sortBy: GenreListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId,
     });

@@ -1,71 +1,17 @@
 import i18n from '/@/i18n/i18n';
-import { NDUserListSort } from '/@/shared/api/navidrome.types';
-import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
-import { AnyLibraryItems, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
+import {
+    BasePaginatedQuery,
+    BasePaginatedResponse,
+} from '/@/shared/types/adapter/api-controller-types';
+import { ServerType } from '/@/shared/types/domain/server-domain-types';
+import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 
 export enum UserListSortOptions {
-    CREATED_AT = 'createdAt',
-    EMAIL = 'email',
     NAME = 'name',
-    UPDATED_AT = 'updatedAt',
 }
 
 export const UserListSortOptionsLabels = {
-    [UserListSortOptions.CREATED_AT]: i18n.t('filter.createdAt'),
-    [UserListSortOptions.EMAIL]: i18n.t('filter.email'),
     [UserListSortOptions.NAME]: i18n.t('filter.name'),
-    [UserListSortOptions.UPDATED_AT]: i18n.t('filter.updatedAt'),
-};
-
-export type FavoriteQuery = {
-    id: string[];
-    type: LibraryItem;
-};
-
-export type FavoriteRequest = { query: FavoriteQuery; serverId?: string };
-
-export type FavoriteResponse = null;
-
-export type RatingQuery = {
-    item: AnyLibraryItems;
-    rating: number;
-};
-
-export type RatingResponse = null;
-
-export type SetRatingRequest = { query: RatingQuery; serverId?: string };
-
-export interface UserListQuery extends BaseQuery<UserListSort> {
-    _custom?: {
-        navidrome?: {
-            owner_id?: string;
-        };
-    };
-    limit?: number;
-    searchTerm?: string;
-    startIndex: number;
-}
-
-export type UserListRequest = { query: UserListQuery };
-
-export type UserListResponse = BasePaginatedResponse<User[]> | null | undefined;
-
-type UserListSortMap = {
-    jellyfin: Record<UserListSort, undefined>;
-    navidrome: Record<UserListSort, NDUserListSort | undefined>;
-    subsonic: Record<UserListSort, undefined>;
-};
-
-export const userListSortMap: UserListSortMap = {
-    jellyfin: {
-        name: undefined,
-    },
-    navidrome: {
-        name: NDUserListSort.NAME,
-    },
-    subsonic: {
-        name: undefined,
-    },
 };
 
 export enum UserListSort {
@@ -93,20 +39,41 @@ export type ShareItemBody = {
     description: string;
     downloadable: boolean;
     expires: number;
-    resourceIds: string;
+    resourceIds: string[];
     resourceType: string;
 };
 
 export type ShareItemRequest = { body: ShareItemBody; serverId?: string };
 
-export type ShareItemResponse = null | { id: string };
+export type ShareItemResponse = null | { id: string; url: string };
 
 export type User = {
-    createdAt: null | string;
-    email: null | string;
+    _itemType: LibraryItem.USER;
+    _serverId: string;
+    _serverType: ServerType;
     id: string;
-    isAdmin: boolean | null;
-    lastLoginAt: null | string;
-    name: string;
-    updatedAt: null | string;
+    permissions: UserPermissions;
+    username: string;
+};
+
+export interface UserListQuery extends BasePaginatedQuery<UserListSortOptions> {
+    searchTerm?: string;
+}
+
+export type UserListRequest = { query: UserListQuery; totalRecordCount?: number };
+
+export type UserListResponse = BasePaginatedResponse<User[]>;
+
+export type UserPermissions = {
+    'jukebox.manage': boolean; // Allow managing the jukebox
+    'media.download': boolean; // Allow downloading media
+    'media.folder': string[]; // Viewable folders
+    'media.share': boolean; // Allow sharing media
+    'media.stream': boolean; // Allow streaming media
+    'media.upload': boolean; // Allow uploading media
+    'playlist.create': boolean; // Allow creating playlists
+    'playlist.delete': boolean; // Allow deleting playlists
+    'playlist.edit': boolean; // Allow editing playlists
+    'server.admin': boolean; // Allow managing the server (user management / server settings)
+    'user.edit': boolean; // Allow editing own user account
 };

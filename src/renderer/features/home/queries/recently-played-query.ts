@@ -3,19 +3,19 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { AlbumListQuery, AlbumListSort } from '/@/shared/types/domain/album-domain-types';
 import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 export const useRecentlyPlayed = (args: QueryHookArgs<Partial<AlbumListQuery>>) => {
     const { options, query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     const requestQuery: AlbumListQuery = {
         limit: 5,
         sortBy: AlbumListSort.RECENTLY_PLAYED,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
+        offset: 0,
         ...query,
     };
 

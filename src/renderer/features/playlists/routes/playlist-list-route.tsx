@@ -26,7 +26,7 @@ const PlaylistListRoute = () => {
 
     const itemCountCheck = usePlaylistList({
         options: {
-            cacheTime: 1000 * 60 * 60 * 2,
+            gcTime: 1000 * 60 * 60 * 2,
             staleTime: 1000 * 60 * 60 * 2,
         },
         query: {
@@ -34,7 +34,7 @@ const PlaylistListRoute = () => {
             limit: 1,
             sortBy: PlaylistListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });

@@ -6,7 +6,10 @@ import { JFAlbumListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
+import {
+    BasePaginatedQuery,
+    BasePaginatedResponse,
+} from '/@/shared/types/adapter/api-controller-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
@@ -75,24 +78,18 @@ export enum AlbumListSort {
     YEAR = 'year',
 }
 
-export interface AlbumListQuery extends BaseQuery<AlbumListSort> {
-    _custom?: {
-        jellyfin?: Partial<z.infer<typeof jfType._parameters.albumList>>;
-        navidrome?: Partial<z.infer<typeof ndType._parameters.albumList>>;
-    };
+export interface AlbumListQuery extends BasePaginatedQuery<AlbumListSortOptions> {
     artistIds?: string[];
     compilation?: boolean;
     favorite?: boolean;
     genres?: string[];
-    limit?: number;
     maxYear?: number;
     minYear?: number;
     musicFolderId?: string;
     searchTerm?: string;
-    startIndex: number;
 }
 
-export type AlbumListRequest = { query: AlbumListQuery };
+export type AlbumListRequest = { query: AlbumListQuery; totalRecordCount?: number };
 
 export type AlbumListResponse = BasePaginatedResponse<Album[]> | null | undefined;
 

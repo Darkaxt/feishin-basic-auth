@@ -384,7 +384,7 @@ const normalizeUser = (item: z.infer<typeof ndType._response.user>): User => {
         id: item.id,
         isAdmin: item.isAdmin,
         lastLoginAt: item.lastLoginAt,
-        name: item.userName,
+        username: item.userName,
         updatedAt: item.updatedAt,
     };
 };

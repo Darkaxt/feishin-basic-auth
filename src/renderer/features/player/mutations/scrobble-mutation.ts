@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { MutationOptions } from '/@/renderer/lib/react-query';
-import { getServerById, useIncrementQueuePlayCount } from '/@/renderer/store';
+import { useServerById, useIncrementQueuePlayCount } from '/@/renderer/store';
 import { usePlayEvent } from '/@/renderer/store/event.store';
 import { ScrobbleRequest, ScrobbleResponse } from '/@/shared/types/domain/user-domain-types';
 
@@ -18,7 +18,7 @@ export const useSendScrobble = (options?: MutationOptions) => {
         null
     >({
         mutationFn: (args) => {
-            const server = getServerById(args.serverId);
+            const server = useServerById(args.serverId);
             if (!server) throw new Error('Server not found');
             return api.controller.scrobble({ ...args, apiClientProps: { server } });
         },

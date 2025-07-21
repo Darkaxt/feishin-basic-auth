@@ -3,12 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { ServerMusicFolderListQuery } from '/@/shared/types/domain/server-domain-types';
 
 export const useMusicFolders = (args: QueryHookArgs<ServerMusicFolderListQuery>) => {
     const { options, serverId } = args || {};
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     const query = useQuery({
         enabled: !!server,

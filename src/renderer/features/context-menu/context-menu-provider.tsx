@@ -37,7 +37,7 @@ import { useRemoveFromPlaylist } from '/@/renderer/features/playlists/mutations/
 import { useCreateFavorite, useDeleteFavorite, useSetRating } from '/@/renderer/features/shared';
 import { AppRoute } from '/@/renderer/router/routes';
 import {
-    getServerById,
+    useServerById,
     useAuthStore,
     useCurrentServer,
     usePlayerStore,
@@ -712,7 +712,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
         const item = ctx.data[0];
         const songs = await controller.getSimilarSongs({
             apiClientProps: {
-                server: getServerById(item.serverId),
+                server: useServerById(item.serverId),
                 signal: undefined,
             },
             query: { albumArtistIds: item.albumArtistIds, songId: item.id },

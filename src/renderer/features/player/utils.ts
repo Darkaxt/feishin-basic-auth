@@ -62,7 +62,7 @@ export const getAlbumSongsById = async (args: {
         albumIds: id,
         sortBy: SongListSort.ALBUM,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
+        offset: 0,
         ...query,
     };
 
@@ -98,7 +98,7 @@ export const getGenreSongsById = async (args: {
 
     const data: SongListResponse = {
         items: [],
-        startIndex: 0,
+        offset: 0,
         totalRecordCount: 0,
     };
     for (const genreId of id) {
@@ -106,7 +106,7 @@ export const getGenreSongsById = async (args: {
             genreIds: [genreId],
             sortBy: SongListSort.GENRE,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
             ...query,
         };
 
@@ -150,7 +150,7 @@ export const getAlbumArtistSongsById = async (args: {
         albumArtistIds: id || [],
         sortBy: SongListSort.ALBUM_ARTIST,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
+        offset: 0,
         ...query,
     };
 
@@ -187,7 +187,7 @@ export const getArtistSongsById = async (args: {
         artistIds: id,
         sortBy: SongListSort.ALBUM,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
+        offset: 0,
         ...query,
     };
 
@@ -222,7 +222,7 @@ export const getSongsByQuery = async (args: {
     const queryFilter: SongListQuery = {
         sortBy: SongListSort.ALBUM,
         sortOrder: ListSortOrder.ASC,
-        startIndex: 0,
+        offset: 0,
         ...query,
     };
 
@@ -279,7 +279,7 @@ export const getSongById = async (args: {
 
     return {
         items: [res],
-        startIndex: 0,
+        offset: 0,
         totalRecordCount: 1,
     };
 };

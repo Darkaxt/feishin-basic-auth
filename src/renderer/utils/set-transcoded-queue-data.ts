@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
-import { getServerById, useSettingsStore } from '/@/renderer/store';
+import { useServerById, useSettingsStore } from '/@/renderer/store';
 import { PlayerData, QueueSong, QueueSong } from '/@/shared/types/domain/player-domain-types';
 
 const mpvPlayer = isElectron() ? window.api.mpvPlayer : null;
@@ -11,7 +11,7 @@ const modifyUrl = (song: QueueSong): string => {
     if (transcode.enabled) {
         const streamUrl = api.controller.getTranscodingUrl({
             apiClientProps: {
-                server: getServerById(song.serverId),
+                server: useServerById(song.serverId),
             },
             query: {
                 base: song.streamUrl,

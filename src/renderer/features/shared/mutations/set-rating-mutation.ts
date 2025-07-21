@@ -5,10 +5,10 @@ import isElectron from 'is-electron';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById, useSetAlbumListItemDataById, useSetQueueRating } from '/@/renderer/store';
+import { useServerById, useSetAlbumListItemDataById, useSetQueueRating } from '/@/renderer/store';
 import { useRatingEvent } from '/@/renderer/store/event.store';
 import { Album, AlbumDetailResponse } from '/@/shared/types/domain/album-domain-types';
-import { AlbumArtistDetailResponse } from '/@/shared/types/domain/artist-domain-types';
+import { ArtistDetailResponse } from '/@/shared/types/domain/artist-domain-types';
 import { AnyLibraryItems, LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { RatingResponse, SetRatingRequest } from '/@/shared/types/domain/user-domain-types';
 
@@ -28,7 +28,7 @@ export const useSetRating = (args: MutationHookArgs) => {
         { previous: undefined | { items: AnyLibraryItems } }
     >({
         mutationFn: (args) => {
-            const server = getServerById(args.serverId);
+            const server = useServerById(args.serverId);
             if (!server) throw new Error('Server not found');
             return api.controller.setRating({ ...args, apiClientProps: { server } });
         },
@@ -104,9 +104,9 @@ export const useSetRating = (args: MutationHookArgs) => {
                 const queryKey = queryKeys.albumArtists.detail(serverId || '', {
                     id: albumArtistId,
                 });
-                const previous = queryClient.getQueryData<AlbumArtistDetailResponse>(queryKey);
+                const previous = queryClient.getQueryData<ArtistDetailResponse>(queryKey);
                 if (previous) {
-                    queryClient.setQueryData<AlbumArtistDetailResponse>(queryKey, {
+                    queryClient.setQueryData<ArtistDetailResponse>(queryKey, {
                         ...previous,
                         userRating: variables.query.rating,
                     });

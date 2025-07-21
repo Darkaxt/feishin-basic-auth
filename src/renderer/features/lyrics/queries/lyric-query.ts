@@ -4,7 +4,7 @@ import isElectron from 'is-electron';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById, useLyricsSettings } from '/@/renderer/store';
+import { useServerById, useLyricsSettings } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import {
     FullLyricsMetadata,
@@ -64,7 +64,7 @@ export const useServerLyrics = (
     args: QueryHookArgs<LyricsQuery>,
 ): UseQueryResult<null | string> => {
     const { query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         // Note: This currently fetches for every song, even if it shouldn't have
@@ -86,7 +86,7 @@ export const useSongLyricsBySong = (
 ): UseQueryResult<FullLyricsMetadata | StructuredLyric[]> => {
     const { query } = args;
     const { fetch, preferLocalLyrics } = useLyricsSettings();
-    const server = getServerById(song?.serverId);
+    const server = useServerById(song?.serverId);
 
     return useQuery({
         cacheTime: Infinity,

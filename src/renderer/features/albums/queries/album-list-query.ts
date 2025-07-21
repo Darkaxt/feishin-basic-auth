@@ -5,12 +5,12 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from '/@/renderer/api';
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { AlbumListQuery, AlbumListResponse } from '/@/shared/types/domain/album-domain-types';
 
 export const useAlbumList = (args: QueryHookArgs<AlbumListQuery>) => {
     const { options, query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         enabled: !!serverId,
@@ -35,7 +35,7 @@ export const useAlbumList = (args: QueryHookArgs<AlbumListQuery>) => {
 
 export const useAlbumListInfinite = (args: QueryHookArgs<AlbumListQuery>) => {
     const { options, query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useInfiniteQuery({
         enabled: !!serverId,
@@ -57,7 +57,7 @@ export const useAlbumListInfinite = (args: QueryHookArgs<AlbumListQuery>) => {
                 query: {
                     ...query,
                     limit: query.limit || 50,
-                    startIndex: pageParam * (query.limit || 50),
+                    offset: pageParam * (query.limit || 50),
                 },
             });
         },

@@ -6,7 +6,10 @@ import { JFSongListSort } from '/@/shared/api/jellyfin.types';
 import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDSongListSort } from '/@/shared/api/navidrome.types';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
+import {
+    BasePaginatedQuery,
+    BasePaginatedResponse,
+} from '/@/shared/types/adapter/api-controller-types';
 import { RelatedArtist } from '/@/shared/types/domain/artist-domain-types';
 import { RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { Played, QueueSong } from '/@/shared/types/domain/player-domain-types';
@@ -134,27 +137,21 @@ export type Song = {
     userRating: null | number;
 };
 
-export interface SongListQuery extends BaseQuery<SongListSort> {
-    _custom?: {
-        jellyfin?: Partial<z.infer<typeof jfType._parameters.songList>>;
-        navidrome?: Partial<z.infer<typeof ndType._parameters.songList>>;
-    };
+export interface SongListQuery extends BasePaginatedQuery<SongListSort> {
     albumArtistIds?: string[];
     albumIds?: string[];
     artistIds?: string[];
     favorite?: boolean;
     genreIds?: string[];
     imageSize?: number;
-    limit?: number;
     maxYear?: number;
     minYear?: number;
     musicFolderId?: string;
     role?: string;
     searchTerm?: string;
-    startIndex: number;
 }
 
-export type SongListRequest = { query: SongListQuery };
+export type SongListRequest = { query: SongListQuery; totalRecordCount?: number };
 
 export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 type SongListSortMap = {
@@ -240,7 +237,7 @@ export type RandomSongListQuery = {
     played: Played;
 };
 
-export type RandomSongListRequest = { query: RandomSongListQuery };
+export type RandomSongListRequest = { query: RandomSongListQuery; totalRecordCount?: number };
 
 export type RandomSongListResponse = SongListResponse;
 
@@ -264,7 +261,7 @@ export type TopSongListQuery = {
     limit?: number;
 };
 
-export type TopSongListRequest = { query: TopSongListQuery };
+export type TopSongListRequest = { query: TopSongListQuery; totalRecordCount?: number };
 
 export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
 

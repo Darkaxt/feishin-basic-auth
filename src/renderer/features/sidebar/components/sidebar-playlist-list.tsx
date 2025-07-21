@@ -142,7 +142,7 @@ export const SidebarPlaylistList = () => {
         query: {
             sortBy: PlaylistListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -258,7 +258,7 @@ export const SidebarSharedPlaylistList = () => {
         query: {
             sortBy: PlaylistListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });

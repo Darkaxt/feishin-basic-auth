@@ -269,7 +269,7 @@ export const SubsonicController: ControllerEndpoint = {
             const res = await ssApiClient(apiClientProps).search3({
                 query: {
                     albumCount: query.limit,
-                    albumOffset: query.startIndex,
+                    albumOffset: query.offset,
                     artistCount: 0,
                     artistOffset: 0,
                     query: query.searchTerm || '',
@@ -289,7 +289,7 @@ export const SubsonicController: ControllerEndpoint = {
 
             return {
                 items: results,
-                startIndex: query.startIndex,
+                offset: query.offset,
                 totalRecordCount: null,
             };
         }
@@ -323,7 +323,7 @@ export const SubsonicController: ControllerEndpoint = {
 
             return {
                 items: sortAlbumList(items, query.sortBy, query.sortOrder),
-                startIndex: 0,
+                offset: 0,
                 totalRecordCount: albums.length,
             };
         }
@@ -346,7 +346,7 @@ export const SubsonicController: ControllerEndpoint = {
 
             return {
                 items: sortAlbumList(results, query.sortBy, query.sortOrder),
-                startIndex: 0,
+                offset: 0,
                 totalRecordCount: res.body.starred?.album?.length || 0,
             };
         }
@@ -390,7 +390,7 @@ export const SubsonicController: ControllerEndpoint = {
                 fromYear,
                 genre: query.genres?.length ? query.genres[0] : undefined,
                 musicFolderId: query.musicFolderId,
-                offset: query.startIndex,
+                offset: query.offset,
                 size: query.limit,
                 toYear,
                 type,
@@ -406,7 +406,7 @@ export const SubsonicController: ControllerEndpoint = {
                 res.body.albumList2.album?.map((album) =>
                     normalize.album(album, apiClientProps.server, 300),
                 ) || [],
-            startIndex: query.startIndex,
+            offset: query.offset,
             totalRecordCount: null,
         };
     },
@@ -591,7 +591,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return {
             items: results,
-            startIndex: query.startIndex,
+            offset: query.offset,
             totalRecordCount: results?.length || 0,
         };
     },
@@ -639,7 +639,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return {
             items: genres,
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: genres.length,
         };
     },
@@ -657,7 +657,7 @@ export const SubsonicController: ControllerEndpoint = {
                 id: folder.id.toString(),
                 name: folder.name,
             })),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: res.body.musicFolders.musicFolder.length,
         };
     },
@@ -720,7 +720,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return {
             items: results.map((playlist) => normalize.playlist(playlist, apiClientProps.server)),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: results.length,
         };
     },
@@ -764,7 +764,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return {
             items: results,
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: results?.length || 0,
         };
     },
@@ -789,7 +789,7 @@ export const SubsonicController: ControllerEndpoint = {
 
         return {
             items: results.map((song) => normalize.song(song, apiClientProps.server)),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: res.body.randomSongs?.song?.length || 0,
         };
     },
@@ -907,7 +907,7 @@ export const SubsonicController: ControllerEndpoint = {
                     artistOffset: 0,
                     query: query.searchTerm || '',
                     songCount: query.limit,
-                    songOffset: query.startIndex,
+                    songOffset: query.offset,
                 },
             });
 
@@ -920,7 +920,7 @@ export const SubsonicController: ControllerEndpoint = {
                     res.body.searchResult3?.song?.map((song) =>
                         normalize.song(song, apiClientProps.server),
                     ) || [],
-                startIndex: query.startIndex,
+                offset: query.offset,
                 totalRecordCount: null,
             };
         }
@@ -931,7 +931,7 @@ export const SubsonicController: ControllerEndpoint = {
                     count: query.limit,
                     genre: query.genreIds[0],
                     musicFolderId: query.musicFolderId,
-                    offset: query.startIndex,
+                    offset: query.offset,
                 },
             });
 
@@ -943,7 +943,7 @@ export const SubsonicController: ControllerEndpoint = {
 
             return {
                 items: results.map((song) => normalize.song(song, apiClientProps.server)) || [],
-                startIndex: 0,
+                offset: 0,
                 totalRecordCount: null,
             };
         }
@@ -966,7 +966,7 @@ export const SubsonicController: ControllerEndpoint = {
 
             return {
                 items: sortSongList(results, query.sortBy, query.sortOrder),
-                startIndex: 0,
+                offset: 0,
                 totalRecordCount: (res.body.starred?.song || []).length || 0,
             };
         }
@@ -1036,7 +1036,7 @@ export const SubsonicController: ControllerEndpoint = {
 
             return {
                 items: results.map((song) => normalize.song(song, apiClientProps.server)),
-                startIndex: 0,
+                offset: 0,
                 totalRecordCount: results.length,
             };
         }
@@ -1049,7 +1049,7 @@ export const SubsonicController: ControllerEndpoint = {
                 artistOffset: 0,
                 query: query.searchTerm || '',
                 songCount: query.limit,
-                songOffset: query.startIndex,
+                songOffset: query.offset,
             },
         });
 
@@ -1062,7 +1062,7 @@ export const SubsonicController: ControllerEndpoint = {
                 res.body.searchResult3?.song?.map((song) =>
                     normalize.song(song, apiClientProps.server),
                 ) || [],
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: null,
         };
     },
@@ -1299,7 +1299,7 @@ export const SubsonicController: ControllerEndpoint = {
                 res.body.topSongs?.song?.map((song) =>
                     normalize.song(song, apiClientProps.server),
                 ) || [],
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: res.body.topSongs?.song?.length || 0,
         };
     },

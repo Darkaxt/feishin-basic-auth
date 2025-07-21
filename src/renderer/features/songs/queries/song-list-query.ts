@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { SongListQuery } from '/@/shared/types/domain/song-domain-types';
 
 export const useSongList = (args: QueryHookArgs<SongListQuery>, imageSize?: number) => {
     const { options, query, serverId } = args || {};
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         enabled: !!server?.id,

@@ -46,7 +46,7 @@ export const AddToPlaylistContextModal = ({
             },
             sortBy: PlaylistListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -72,7 +72,7 @@ export const AddToPlaylistContextModal = ({
             albumIds: [albumId],
             sortBy: SongListSort.ALBUM,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         };
 
         const queryKey = queryKeys.songs.list(server?.id || '', query);
@@ -90,7 +90,7 @@ export const AddToPlaylistContextModal = ({
             artistIds: [artistId],
             sortBy: SongListSort.ARTIST,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         };
 
         const queryKey = queryKeys.songs.list(server?.id || '', query);

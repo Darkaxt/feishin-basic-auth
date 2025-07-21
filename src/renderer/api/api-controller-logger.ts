@@ -73,7 +73,7 @@ function createLoggedFunction<TRequest, TResponse>(
         return undefined;
     }
 
-    return async (request: TRequest, server: ServerListItem, options?: any) => {
+    return async (request: TRequest, requestOptions?: any) => {
         const startTime = Date.now();
         const requestId = Math.random().toString(36).substring(2, 15);
 
@@ -96,13 +96,11 @@ function createLoggedFunction<TRequest, TResponse>(
             logger.info(`[API] ${functionName} called`, {
                 request: truncatedRequest,
                 requestId,
-                serverId: server.id,
-                serverType: server.type,
             });
         }
 
         try {
-            const result = await originalFn(request, server, options);
+            const result = await originalFn(request, requestOptions);
             const duration = Date.now() - startTime;
 
             if (result[0]) {

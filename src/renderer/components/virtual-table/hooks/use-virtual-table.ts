@@ -23,7 +23,10 @@ import { SetContextMenuItems, useHandleTableContextMenu } from '/@/renderer/feat
 import { AppRoute } from '/@/renderer/router/routes';
 import { PersistedTableColumn, useListStoreActions } from '/@/renderer/store';
 import { ListKey, useListStoreByKey } from '/@/renderer/store/list.store';
-import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
+import {
+    BasePaginatedResponse,
+    BasePaginatedQuery,
+} from '/@/shared/types/adapter/api-controller-types';
 import { ServerListItem } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem } from '/@/shared/types/domain/shared-domain-types';
 import { ListDisplayType, TablePagination } from '/@/shared/types/types';
@@ -49,7 +52,7 @@ interface UseAgGridProps<TFilter> {
 
 const BLOCK_SIZE = 500;
 
-export const useVirtualTable = <TFilter extends BaseQuery<any>>({
+export const useVirtualTable = <TFilter extends BasePaginatedQuery<any>>({
     columnType,
     contextMenu,
     customFilters,

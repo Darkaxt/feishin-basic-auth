@@ -41,14 +41,14 @@ export const JellyfinAlbumFilters = ({
     // TODO - eventually replace with /items/filters endpoint to fetch genres and tags specific to the selected library
     const genreListQuery = useGenreList({
         options: {
-            cacheTime: 1000 * 60 * 2,
+            gcTime: 1000 * 60 * 2,
             staleTime: 1000 * 60 * 1,
         },
         query: {
             musicFolderId: filter?.musicFolderId,
             sortBy: GenreListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId,
     });
@@ -63,7 +63,7 @@ export const JellyfinAlbumFilters = ({
 
     const tagsQuery = useTagList({
         options: {
-            cacheTime: 1000 * 60 * 2,
+            gcTime: 1000 * 60 * 2,
             staleTime: 1000 * 60 * 1,
         },
         query: {
@@ -170,7 +170,7 @@ export const JellyfinAlbumFilters = ({
 
     const albumArtistListQuery = useAlbumArtistList({
         options: {
-            cacheTime: 1000 * 60 * 2,
+            gcTime: 1000 * 60 * 2,
             staleTime: 1000 * 60 * 1,
         },
         query: {

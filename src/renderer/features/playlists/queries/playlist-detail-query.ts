@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { PlaylistDetailQuery } from '/@/shared/types/domain/playlist-domain-types';
 
 export const usePlaylistDetail = (args: QueryHookArgs<PlaylistDetailQuery>) => {
     const { options, query, serverId } = args || {};
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         enabled: !!server?.id,

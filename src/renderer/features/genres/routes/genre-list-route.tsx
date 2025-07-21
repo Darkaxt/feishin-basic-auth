@@ -23,7 +23,7 @@ const GenreListRoute = () => {
         query: {
             ...filter,
             limit: 1,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });

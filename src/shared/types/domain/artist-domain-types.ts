@@ -1,12 +1,12 @@
 import { orderBy } from 'lodash';
-import { z } from 'zod';
 
 import i18n from '/@/i18n/i18n';
 import { JFAlbumArtistListSort, JFArtistListSort } from '/@/shared/api/jellyfin.types';
-import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumArtistListSort } from '/@/shared/api/navidrome.types';
-import { ndType } from '/@/shared/api/navidrome/navidrome-types';
-import { BasePaginatedResponse, BaseQuery } from '/@/shared/types/adapter/api-controller-types';
+import {
+    BasePaginatedQuery,
+    BasePaginatedResponse,
+} from '/@/shared/types/adapter/api-controller-types';
 import { RelatedGenre } from '/@/shared/types/domain/genre-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
@@ -121,23 +121,17 @@ export enum ArtistListSort {
 
 export type AlbumArtistDetailQuery = { id: string };
 
-export type AlbumArtistDetailRequest = { query: AlbumArtistDetailQuery };
+export type ArtistDetailRequest = { query: AlbumArtistDetailQuery };
 
-export type AlbumArtistDetailResponse = Artist | null;
+export type ArtistDetailResponse = Artist | null;
 
-export interface ArtistListQuery extends BaseQuery<ArtistListSort> {
-    _custom?: {
-        jellyfin?: Partial<z.infer<typeof jfType._parameters.albumArtistList>>;
-        navidrome?: Partial<z.infer<typeof ndType._parameters.albumArtistList>>;
-    };
-    limit?: number;
+export interface ArtistListQuery extends BasePaginatedQuery<ArtistListSortOptions> {
     musicFolderId?: string;
     role?: string;
     searchTerm?: string;
-    startIndex: number;
 }
 
-export type ArtistListRequest = { query: ArtistListQuery };
+export type ArtistListRequest = { query: ArtistListQuery; totalRecordCount?: number };
 
 export type ArtistListResponse = BasePaginatedResponse<Artist[]> | null | undefined;
 type ArtistListSortMap = {
@@ -200,21 +194,6 @@ export enum AlbumArtistListSort {
     RELEASE_DATE = 'releaseDate',
     SONG_COUNT = 'songCount',
 }
-
-export interface AlbumArtistListQuery extends BaseQuery<AlbumArtistListSort> {
-    _custom?: {
-        jellyfin?: Partial<z.infer<typeof jfType._parameters.albumArtistList>>;
-        navidrome?: Partial<z.infer<typeof ndType._parameters.albumArtistList>>;
-    };
-    limit?: number;
-    musicFolderId?: string;
-    searchTerm?: string;
-    startIndex: number;
-}
-
-export type AlbumArtistListRequest = { query: AlbumArtistListQuery };
-
-export type AlbumArtistListResponse = BasePaginatedResponse<Artist[]> | null | undefined;
 
 export type ArtistInfoQuery = {
     artistId: string;

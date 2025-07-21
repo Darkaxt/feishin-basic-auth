@@ -42,13 +42,13 @@ export const NavidromeAlbumFilters = ({
 
     const genreListQuery = useGenreList({
         options: {
-            cacheTime: 1000 * 60 * 2,
+            gcTime: 1000 * 60 * 2,
             staleTime: 1000 * 60 * 1,
         },
         query: {
             sortBy: GenreListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId,
     });
@@ -76,7 +76,7 @@ export const NavidromeAlbumFilters = ({
 
     const tagsQuery = useTagList({
         options: {
-            cacheTime: 1000 * 60 * 2,
+            gcTime: 1000 * 60 * 2,
             staleTime: 1000 * 60 * 1,
         },
         query: {
@@ -185,7 +185,7 @@ export const NavidromeAlbumFilters = ({
 
     const albumArtistListQuery = useAlbumArtistList({
         options: {
-            cacheTime: 1000 * 60 * 2,
+            gcTime: 1000 * 60 * 2,
             staleTime: 1000 * 60 * 1,
         },
         query: {

@@ -4,7 +4,7 @@ import { AxiosError, AxiosError } from 'axios';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationOptions } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { RemoveFromPlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
 export const useRemoveFromPlaylist = (options?: MutationOptions) => {
@@ -17,7 +17,7 @@ export const useRemoveFromPlaylist = (options?: MutationOptions) => {
         null
     >({
         mutationFn: (args) => {
-            const server = getServerById(args.serverId);
+            const server = useServerById(args.serverId);
             if (!server) throw new Error('Server not found');
             return api.controller.removeFromPlaylist({ ...args, apiClientProps: { server } });
         },

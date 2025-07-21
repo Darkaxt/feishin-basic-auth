@@ -322,7 +322,7 @@ export const JellyfinController: ControllerEndpoint = {
                 SearchTerm: query.searchTerm,
                 SortBy: albumListSortMap.jellyfin[query.sortBy] || 'SortName',
                 SortOrder: sortOrderMap.jellyfin[query.sortOrder],
-                StartIndex: query.startIndex,
+                StartIndex: query.offset,
                 ...query._custom?.jellyfin,
                 Years: yearsFilter,
             },
@@ -334,14 +334,14 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: res.body.Items.map((item) => jfNormalize.album(item, apiClientProps.server)),
-            startIndex: query.startIndex,
+            offset: query.offset,
             totalRecordCount: res.body.TotalRecordCount,
         };
     },
     getAlbumListCount: async ({ apiClientProps, query }) =>
         JellyfinController.getAlbumList({
             apiClientProps,
-            query: { ...query, limit: 1, startIndex: 0 },
+            query: { ...query, limit: 1, offset: 0 },
         }).then((result) => result!.totalRecordCount!),
     getArtistList: async (args) => {
         const { apiClientProps, query } = args;
@@ -356,7 +356,7 @@ export const JellyfinController: ControllerEndpoint = {
                 SearchTerm: query.searchTerm,
                 SortBy: albumArtistListSortMap.jellyfin[query.sortBy] || 'SortName,Name',
                 SortOrder: sortOrderMap.jellyfin[query.sortOrder],
-                StartIndex: query.startIndex,
+                StartIndex: query.offset,
                 UserId: apiClientProps.server?.userId || undefined,
             },
         });
@@ -369,14 +369,14 @@ export const JellyfinController: ControllerEndpoint = {
             items: res.body.Items.map((item) =>
                 jfNormalize.albumArtist(item, apiClientProps.server),
             ),
-            startIndex: query.startIndex,
+            offset: query.offset,
             totalRecordCount: res.body.TotalRecordCount,
         };
     },
     getArtistListCount: async ({ apiClientProps, query }) =>
         JellyfinController.getArtistList({
             apiClientProps,
-            query: { ...query, limit: 1, startIndex: 0 },
+            query: { ...query, limit: 1, offset: 0 },
         }).then((result) => result!.totalRecordCount!),
     getDownloadUrl: (args) => {
         const { apiClientProps, query } = args;
@@ -398,7 +398,7 @@ export const JellyfinController: ControllerEndpoint = {
                 SearchTerm: query?.searchTerm,
                 SortBy: genreListSortMap.jellyfin[query.sortBy] || 'SortName',
                 SortOrder: sortOrderMap.jellyfin[query.sortOrder],
-                StartIndex: query.startIndex,
+                StartIndex: query.offset,
                 UserId: apiClientProps.server?.userId,
             },
         });
@@ -409,7 +409,7 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: res.body.Items.map((item) => jfNormalize.genre(item, apiClientProps.server)),
-            startIndex: query.startIndex || 0,
+            offset: query.offset || 0,
             totalRecordCount: res.body?.TotalRecordCount || 0,
         };
     },
@@ -458,7 +458,7 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: musicFolders.map(jfNormalize.musicFolder),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: musicFolders?.length || 0,
         };
     },
@@ -505,7 +505,7 @@ export const JellyfinController: ControllerEndpoint = {
                 SearchTerm: query.searchTerm,
                 SortBy: playlistListSortMap.jellyfin[query.sortBy],
                 SortOrder: sortOrderMap.jellyfin[query.sortOrder],
-                StartIndex: query.startIndex,
+                StartIndex: query.offset,
             },
         });
 
@@ -515,14 +515,14 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: res.body.Items.map((item) => jfNormalize.playlist(item, apiClientProps.server)),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: res.body.TotalRecordCount,
         };
     },
     getPlaylistListCount: async ({ apiClientProps, query }) =>
         JellyfinController.getPlaylistList({
             apiClientProps,
-            query: { ...query, limit: 1, startIndex: 0 },
+            query: { ...query, limit: 1, offset: 0 },
         }).then((result) => result!.totalRecordCount!),
     getPlaylistSongList: async (args) => {
         const { apiClientProps, query } = args;
@@ -552,7 +552,7 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
-            startIndex: query.startIndex,
+            offset: query.startIndex,
             totalRecordCount: res.body.TotalRecordCount,
         };
     },
@@ -602,7 +602,7 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: res.body.Items.length || 0,
         };
     },
@@ -742,7 +742,7 @@ export const JellyfinController: ControllerEndpoint = {
                         SearchTerm: query.searchTerm,
                         SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
                         SortOrder: sortOrderMap.jellyfin[query.sortOrder],
-                        StartIndex: query.startIndex,
+                        StartIndex: query.offset,
                         ...query._custom?.jellyfin,
                         Years: yearsFilter,
                     },
@@ -777,7 +777,7 @@ export const JellyfinController: ControllerEndpoint = {
                     SearchTerm: query.searchTerm,
                     SortBy: songListSortMap.jellyfin[query.sortBy] || 'Album,SortName',
                     SortOrder: sortOrderMap.jellyfin[query.sortOrder],
-                    StartIndex: query.startIndex,
+                    StartIndex: query.offset,
                     ...query._custom?.jellyfin,
                     Years: yearsFilter,
                 },
@@ -806,14 +806,14 @@ export const JellyfinController: ControllerEndpoint = {
             items: items.map((item) =>
                 jfNormalize.song(item, apiClientProps.server, '', query.imageSize),
             ),
-            startIndex: query.startIndex,
+            offset: query.offset,
             totalRecordCount,
         };
     },
     getSongListCount: async ({ apiClientProps, query }) =>
         JellyfinController.getSongList({
             apiClientProps,
-            query: { ...query, limit: 1, startIndex: 0 },
+            query: { ...query, limit: 1, offset: 0 },
         }).then((result) => result!.totalRecordCount!),
     getTags: async (args) => {
         const { apiClientProps, query } = args;
@@ -869,7 +869,7 @@ export const JellyfinController: ControllerEndpoint = {
 
         return {
             items: res.body.Items.map((item) => jfNormalize.song(item, apiClientProps.server, '')),
-            startIndex: 0,
+            offset: 0,
             totalRecordCount: res.body.TotalRecordCount,
         };
     },

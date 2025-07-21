@@ -140,7 +140,7 @@ export const ArtistListHeaderFilters = ({ gridRef, tableRef }: ArtistListHeaderF
     const cq = useContainerQuery();
     const roles = useRoles({
         options: {
-            cacheTime: 1000 * 60 * 60 * 2,
+            gcTime: 1000 * 60 * 60 * 2,
             staleTime: 1000 * 60 * 60 * 2,
         },
         query: {},
@@ -188,7 +188,7 @@ export const ArtistListHeaderFilters = ({ gridRef, tableRef }: ArtistListHeaderF
                         },
                         query: {
                             limit,
-                            startIndex,
+                            offset,
                             ...filters,
                         },
                     }),
@@ -224,7 +224,7 @@ export const ArtistListHeaderFilters = ({ gridRef, tableRef }: ArtistListHeaderF
                                     },
                                     query: {
                                         limit,
-                                        startIndex,
+                                        offset,
                                         ...filters,
                                     },
                                 }),

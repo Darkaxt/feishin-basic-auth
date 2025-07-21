@@ -40,7 +40,7 @@ const HomeRoute = () => {
 
     const feature = useAlbumList({
         options: {
-            cacheTime: 1000 * 60,
+            gcTime: 1000 * 60,
             enabled: homeFeature,
             staleTime: 1000 * 60,
         },
@@ -48,7 +48,7 @@ const HomeRoute = () => {
             limit: 20,
             sortBy: AlbumListSort.RANDOM,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -65,7 +65,7 @@ const HomeRoute = () => {
             limit: itemsPerPage,
             sortBy: AlbumListSort.RANDOM,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -78,7 +78,7 @@ const HomeRoute = () => {
             limit: itemsPerPage,
             sortBy: AlbumListSort.RECENTLY_PLAYED,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -91,7 +91,7 @@ const HomeRoute = () => {
             limit: itemsPerPage,
             sortBy: AlbumListSort.RECENTLY_ADDED,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -105,7 +105,7 @@ const HomeRoute = () => {
             limit: itemsPerPage,
             sortBy: AlbumListSort.PLAY_COUNT,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -120,7 +120,7 @@ const HomeRoute = () => {
                 limit: itemsPerPage,
                 sortBy: SongListSort.PLAY_COUNT,
                 sortOrder: ListSortOrder.DESC,
-                startIndex: 0,
+                offset: 0,
             },
             serverId: server?.id,
         },

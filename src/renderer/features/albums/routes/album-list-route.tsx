@@ -52,13 +52,13 @@ const AlbumListRoute = () => {
 
     const genreList = useGenreList({
         options: {
-            cacheTime: 1000 * 60 * 60,
+            gcTime: 1000 * 60 * 60,
             enabled: !!genreId,
         },
         query: {
             sortBy: GenreListSort.NAME,
             sortOrder: ListSortOrder.ASC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -74,7 +74,7 @@ const AlbumListRoute = () => {
 
     const itemCountCheck = useAlbumListCount({
         options: {
-            cacheTime: 1000 * 60,
+            gcTime: 1000 * 60,
             staleTime: 1000 * 60,
         },
         query: {

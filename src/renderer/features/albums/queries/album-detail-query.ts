@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { AlbumDetailQuery } from '/@/shared/types/domain/album-domain-types';
 
 export const useAlbumDetail = (args: QueryHookArgs<AlbumDetailQuery>) => {
     const { options, query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         queryFn: ({ signal }) => {

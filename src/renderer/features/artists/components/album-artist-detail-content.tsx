@@ -102,7 +102,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });
@@ -117,7 +117,7 @@ export const AlbumArtistDetailContent = ({ background }: AlbumArtistDetailConten
             limit: 15,
             sortBy: AlbumListSort.RELEASE_DATE,
             sortOrder: ListSortOrder.DESC,
-            startIndex: 0,
+            offset: 0,
         },
         serverId: server?.id,
     });

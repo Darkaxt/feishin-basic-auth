@@ -3,12 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { SearchQuery } from '/@/shared/types/domain/search-domain-types';
 
 export const useSearch = (args: QueryHookArgs<SearchQuery>) => {
     const { options, query, serverId } = args;
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         enabled: !!serverId,

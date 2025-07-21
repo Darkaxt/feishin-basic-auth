@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { GenreListQuery } from '/@/shared/types/domain/genre-domain-types';
 
 export const useGenreList = (args: QueryHookArgs<GenreListQuery>) => {
     const { options, query, serverId } = args || {};
-    const server = getServerById(serverId);
+    const server = useServerById(serverId);
 
     return useQuery({
         enabled: !!server,

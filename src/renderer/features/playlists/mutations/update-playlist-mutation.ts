@@ -4,7 +4,7 @@ import { AxiosError } from 'axios';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { UpdatePlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
 export const useUpdatePlaylist = (args: MutationHookArgs) => {
@@ -18,7 +18,7 @@ export const useUpdatePlaylist = (args: MutationHookArgs) => {
         null
     >({
         mutationFn: (args) => {
-            const server = getServerById(args.serverId);
+            const server = useServerById(args.serverId);
             if (!server) throw new Error('Server not found');
             return api.controller.updatePlaylist({ ...args, apiClientProps: { server } });
         },

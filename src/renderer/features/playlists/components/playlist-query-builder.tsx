@@ -111,7 +111,7 @@ export const PlaylistQueryBuilder = forwardRef(
         );
 
         const { data: playlists } = usePlaylistList({
-            query: { sortBy: PlaylistListSort.NAME, sortOrder: ListSortOrder.ASC, startIndex: 0 },
+            query: { sortBy: PlaylistListSort.NAME, sortOrder: ListSortOrder.ASC, offset: 0 },
             serverId: server?.id,
         });
 

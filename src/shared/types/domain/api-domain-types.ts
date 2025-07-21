@@ -7,8 +7,8 @@ import {
     AlbumListResponse,
 } from '/@/shared/types/domain/album-domain-types';
 import {
-    AlbumArtistDetailRequest,
-    AlbumArtistDetailResponse,
+    ArtistDetailRequest,
+    ArtistDetailResponse,
     AlbumArtistListRequest,
     AlbumArtistListResponse,
     ArtistListRequest,
@@ -62,17 +62,19 @@ import {
 import { TagRequest, TagsResponse } from '/@/shared/types/domain/tag-domain-types';
 import {
     DownloadRequest,
-    FavoriteRequest,
-    FavoriteResponse,
-    RatingResponse,
     ScrobbleRequest,
     ScrobbleResponse,
-    SetRatingRequest,
     ShareItemRequest,
     ShareItemResponse,
     UserListRequest,
     UserListResponse,
 } from '/@/shared/types/domain/user-domain-types';
+import {
+    FavoriteRequest,
+    FavoriteResponse,
+    RatingResponse,
+    SetRatingRequest,
+} from './metadata-domain-types';
 
 export const instanceOfCancellationError = (error: any) => {
     return 'revert' in error;
@@ -88,7 +90,7 @@ export type ControllerEndpoint = {
     createPlaylist: (args: CreatePlaylistRequest) => Promise<CreatePlaylistResponse>;
     deleteFavorite: (args: FavoriteRequest) => Promise<FavoriteResponse>;
     deletePlaylist: (args: DeletePlaylistRequest) => Promise<DeletePlaylistResponse>;
-    getAlbumArtistDetail: (args: AlbumArtistDetailRequest) => Promise<AlbumArtistDetailResponse>;
+    getAlbumArtistDetail: (args: ArtistDetailRequest) => Promise<ArtistDetailResponse>;
     getAlbumArtistList: (args: AlbumArtistListRequest) => Promise<AlbumArtistListResponse>;
     getAlbumArtistListCount: (args: AlbumArtistListRequest) => Promise<number>;
     getAlbumDetail: (args: AlbumDetailRequest) => Promise<AlbumDetailResponse>;

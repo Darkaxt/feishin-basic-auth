@@ -5,15 +5,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { controller } from '/@/renderer/api/controller';
 import {
     DiscordDisplayType,
-    getServerById,
     useAppStore,
     useDiscordSettings,
+    useServerById,
     useGeneralSettings,
     usePlayerStore,
 } from '/@/renderer/store';
 import { QueueSong } from '/@/shared/types/domain/player-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
-import { PlayerStatus, PlayerStatus } from '/@/shared/types/types';
+import { PlayerStatus } from '/@/shared/types/types';
 
 const discordRpc = isElectron() ? window.api.discordRpc : null;
 
@@ -93,7 +93,7 @@ export const useDiscordRpc = () => {
                     if (song.serverType === ServerType.JELLYFIN && song.imageUrl) {
                         activity.largeImageKey = song.imageUrl;
                     } else if (song.serverType === ServerType.NAVIDROME) {
-                        const server = getServerById(song.serverId);
+                        const server = useServerById(song.serverId);
 
                         try {
                             const info = await controller.getAlbumInfo({

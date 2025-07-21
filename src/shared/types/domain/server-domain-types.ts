@@ -46,11 +46,9 @@ export type ServerListItem = {
     features?: ServerFeatures;
     id: string;
     name: string;
-    ndCredential?: string;
     savePassword?: boolean;
     type: ServerType;
     url: string;
-    userId: null | string;
     username: string;
     version?: string;
 };

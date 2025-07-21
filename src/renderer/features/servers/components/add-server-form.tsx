@@ -6,7 +6,8 @@ import { nanoid } from 'nanoid/non-secure';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { api } from '/@/renderer/api';
+import { useSignIn } from '../mutations/sign-in-mutation';
+
 import JellyfinIcon from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
@@ -20,7 +21,6 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
-import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { toServerType } from '/@/shared/types/types';
 
@@ -59,6 +59,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const focusTrapRef = useFocusTrap(true);
     const [isLoading, setIsLoading] = useState(false);
     const { addServer, setCurrentServer } = useAuthStoreActions();
+    const { isPending, mutateAsync: signIn } = useSignIn();
 
     const form = useForm({
         initialValues: {
@@ -87,7 +88,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const isSubmitDisabled = !form.values.name || !form.values.url || !form.values.username;
 
     const handleSubmit = form.onSubmit(async (values) => {
-        const authFunction = api.controller.authenticate;
+        const authFunction = signIn;
 
         if (!authFunction) {
             return toast.error({
@@ -97,35 +98,33 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
 
         try {
             setIsLoading(true);
-            const data: AuthenticationResponse | undefined = await authFunction(
-                values.url,
-                {
-                    legacy: values.legacyAuth,
-                    password: values.password,
-                    username: values.username,
+            const [err, response] = await signIn({
+                request: {
+                    body: {
+                        password: values.password,
+                        username: values.username,
+                    },
+                    url: values.url,
                 },
-                values.type as ServerType,
-            );
+                serverType: values.type as ServerType,
+            });
 
-            if (!data) {
+            if (err || !response) {
                 return toast.error({
                     message: t('error.authenticationFailed', { postProcess: 'sentenceCase' }),
                 });
             }
 
             const serverItem = {
-                credential: data.credential,
+                credential: response.credential,
                 id: nanoid(),
                 name: values.name,
-                ndCredential: data.ndCredential,
                 type: values.type as ServerType,
                 url: values.url.replace(/\/$/, ''),
-                userId: data.userId,
-                username: data.username,
+                username: response.username,
             };
 
             addServer(serverItem);
-            setCurrentServer(serverItem);
             closeAllModals();
 
             toast.success({

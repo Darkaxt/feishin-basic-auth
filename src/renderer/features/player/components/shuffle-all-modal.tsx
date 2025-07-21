@@ -258,7 +258,7 @@ export const openShuffleAllModal = async (
                 query: {
                     sortBy: GenreListSort.NAME,
                     sortOrder: ListSortOrder.ASC,
-                    startIndex: 0,
+                    offset: 0,
                 },
             }),
         queryKey: queryKeys.genres.list(server?.id),

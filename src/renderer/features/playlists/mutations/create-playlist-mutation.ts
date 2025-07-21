@@ -4,7 +4,7 @@ import { AxiosError } from 'axios';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
-import { getServerById } from '/@/renderer/store';
+import { useServerById } from '/@/renderer/store';
 import { CreatePlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
 export const useCreatePlaylist = (args: MutationHookArgs) => {
@@ -18,12 +18,12 @@ export const useCreatePlaylist = (args: MutationHookArgs) => {
         null
     >({
         mutationFn: (args) => {
-            const server = getServerById(args.serverId);
+            const server = useServerById(args.serverId);
             if (!server) throw new Error('Server not found');
             return api.controller.createPlaylist({ ...args, apiClientProps: { server } });
         },
         onSuccess: (_args, variables) => {
-            const server = getServerById(variables.serverId);
+            const server = useServerById(variables.serverId);
             if (server) {
                 queryClient.invalidateQueries(queryKeys.playlists.list(server.id));
             }

@@ -6,14 +6,15 @@ import {
     AlbumListResponse,
 } from '/@/shared/types/domain/album-domain-types';
 import {
-    AlbumArtistDetailRequest,
-    AlbumArtistDetailResponse,
-    AlbumArtistListRequest,
-    AlbumArtistListResponse,
+    ArtistDetailRequest,
+    ArtistDetailResponse,
     ArtistListRequest,
     ArtistListResponse,
 } from '/@/shared/types/domain/artist-domain-types';
-import { AuthenticationResponse } from '/@/shared/types/domain/auth-domain-types';
+import {
+    AuthenticationRequest,
+    AuthenticationResponse,
+} from '/@/shared/types/domain/auth-domain-types';
 import { GenreListRequest, GenreListResponse } from '/@/shared/types/domain/genre-domain-types';
 import {
     LyricsRequest,
@@ -21,6 +22,12 @@ import {
     StructuredLyric,
     StructuredLyricsRequest,
 } from '/@/shared/types/domain/lyric-domain-types';
+import {
+    FavoriteRequest,
+    FavoriteResponse,
+    RatingResponse,
+    SetRatingRequest,
+} from '/@/shared/types/domain/metadata-domain-types';
 import { TranscodingRequest } from '/@/shared/types/domain/player-domain-types';
 import {
     AddToPlaylistArgs,
@@ -64,17 +71,15 @@ import {
 import { TagRequest, TagsResponse } from '/@/shared/types/domain/tag-domain-types';
 import {
     DownloadRequest,
-    FavoriteRequest,
-    FavoriteResponse,
-    RatingResponse,
     ScrobbleRequest,
     ScrobbleResponse,
-    SetRatingRequest,
     ShareItemRequest,
     ShareItemResponse,
     UserListRequest,
     UserListResponse,
 } from '/@/shared/types/domain/user-domain-types';
+
+export type ApiAuthentication = (args: AuthenticationRequest) => Promise<AuthenticationResponse>;
 
 export type ApiClientProps = {
     baseUrl?: string;
@@ -119,20 +124,22 @@ export type ApiController = {
         getListCount?: ApiControllerFn<AlbumListRequest, number>;
     };
     albumArtist: {
-        getDetail?: ApiControllerFn<AlbumArtistDetailRequest, AlbumArtistDetailResponse>;
-        getList?: ApiControllerFn<AlbumArtistListRequest, AlbumArtistListResponse>;
-        getListCount?: ApiControllerFn<AlbumArtistListRequest, number>;
-    };
-    artist: {
+        getDetail?: ApiControllerFn<ArtistDetailRequest, ArtistDetailResponse>;
         getList?: ApiControllerFn<ArtistListRequest, ArtistListResponse>;
         getListCount?: ApiControllerFn<ArtistListRequest, number>;
     };
-    favorite: {
-        create?: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
-        delete?: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
+    artist: {
+        getDetail?: ApiControllerFn<ArtistDetailRequest, ArtistDetailResponse>;
+        getList?: ApiControllerFn<ArtistListRequest, ArtistListResponse>;
+        getListCount?: ApiControllerFn<ArtistListRequest, number>;
     };
     genre: {
         getList?: ApiControllerFn<GenreListRequest, GenreListResponse>;
+    };
+    metadata: {
+        addFavorite?: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
+        removeFavorite?: ApiControllerFn<FavoriteRequest, FavoriteResponse>;
+        setRating?: ApiControllerFn<SetRatingRequest, RatingResponse>;
     };
     musicFolder: {
         getList?: ApiControllerFn<ServerMusicFolderListRequest, ServerMusicFolderListResponse>;
@@ -150,14 +157,6 @@ export type ApiController = {
         update?: ApiControllerFn<UpdatePlaylistRequest, UpdatePlaylistResponse>;
     };
     server: {
-        authenticate: (
-            url: string,
-            body: { legacy?: boolean; password: string; username: string },
-        ) => Promise<AuthenticationResponse>;
-        getRoles?: ApiControllerFn<
-            BaseEndpointArgs,
-            Array<string | { label: string; value: string }>
-        >;
         getServerInfo?: ApiControllerFn<ServerInfoRequest, ServerInfo>;
         getTags?: ApiControllerFn<TagRequest, TagsResponse>;
         getTranscodingUrl?: ApiControllerFn<TranscodingRequest, string>;
@@ -177,7 +176,7 @@ export type ApiController = {
     };
     user: {
         getList?: ApiControllerFn<UserListRequest, UserListResponse>;
-        setRating?: ApiControllerFn<SetRatingRequest, RatingResponse>;
+        getListCount?: ApiControllerFn<UserListRequest, number>;
         shareItem?: ApiControllerFn<ShareItemRequest, ShareItemResponse>;
     };
 };
@@ -189,7 +188,6 @@ export interface ApiControllerError {
 
 export type ApiControllerFn<TRequest, TResponse> = (
     request: TRequest,
-    server: ServerListItem,
     options?: ApiClientProps,
 ) => Promise<[ApiControllerError, null] | [null, TResponse]>;
 
@@ -198,16 +196,17 @@ export type BaseEndpointArgs = {
         signal?: AbortSignal;
     };
 };
-export interface BasePaginatedResponse<T> {
-    error?: any | string;
-    items: T;
-    startIndex: number;
-    totalRecordCount: null | number;
-}
-
-export interface BaseQuery<T> {
+export interface BasePaginatedQuery<T> {
+    limit: number;
+    offset: number;
     sortBy: T;
     sortOrder: ListSortOrder;
+}
+
+export interface BasePaginatedResponse<T> {
+    items: T;
+    offset: number;
+    totalRecordCount: null | number;
 }
 
 export type ExtractControllerResponse<T> = T extends ApiControllerFn<any, infer R> ? R : never;
