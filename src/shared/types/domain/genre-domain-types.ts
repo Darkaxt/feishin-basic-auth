@@ -36,7 +36,7 @@ export interface GenreListQuery extends BasePaginatedQuery<GenreListSortOptions>
 
 export type GenreListRequest = { query: GenreListQuery; totalRecordCount?: number };
 
-export type GenreListResponse = BasePaginatedResponse<Genre[]> | null | undefined;
+export type GenreListResponse = BasePaginatedResponse<Genre[]>;
 
 export type RelatedGenre = {
     id: string;

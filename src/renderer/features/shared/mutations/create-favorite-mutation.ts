@@ -4,7 +4,7 @@ import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { RMutationHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById, useSetAlbumListItemDataById, useSetQueueFavorite } from '/@/renderer/store';
 import { useFavoriteEvent } from '/@/renderer/store/event.store';
 import { AlbumDetailResponse } from '/@/shared/types/domain/album-domain-types';
@@ -14,7 +14,7 @@ import { FavoriteResponse } from '/@/shared/types/domain/user-domain-types';
 
 const remote = isElectron() ? window.api.remote : null;
 
-export const useCreateFavorite = (args: MutationHookArgs) => {
+export const useCreateFavorite = (args: RMutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
     const setAlbumListData = useSetAlbumListItemDataById();

@@ -16,9 +16,9 @@ import { MultiSelect } from '/@/shared/components/multi-select/multi-select';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { toast } from '/@/shared/components/toast/toast';
-import { PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
-import { SongListQuery, SongListSort } from '/@/shared/types/domain/song-domain-types';
+import { PlaylistListSortOptions } from '/@/shared/types/domain/playlist-domain-types';
 import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { SongListQuery, SongListSort } from '/@/shared/types/domain/song-domain-types';
 
 export const AddToPlaylistContextModal = ({
     id,
@@ -44,9 +44,9 @@ export const AddToPlaylistContextModal = ({
                     smart: false,
                 },
             },
-            sortBy: PlaylistListSort.NAME,
-            sortOrder: ListSortOrder.ASC,
             offset: 0,
+            sortBy: PlaylistListSortOptions.NAME,
+            sortOrder: ListSortOrder.ASC,
         },
         serverId: server?.id,
     });
@@ -70,9 +70,9 @@ export const AddToPlaylistContextModal = ({
     const getSongsByAlbum = async (albumId: string) => {
         const query: SongListQuery = {
             albumIds: [albumId],
+            offset: 0,
             sortBy: SongListSort.ALBUM,
             sortOrder: ListSortOrder.ASC,
-            offset: 0,
         };
 
         const queryKey = queryKeys.songs.list(server?.id || '', query);
@@ -88,9 +88,9 @@ export const AddToPlaylistContextModal = ({
     const getSongsByArtist = async (artistId: string) => {
         const query: SongListQuery = {
             artistIds: [artistId],
+            offset: 0,
             sortBy: SongListSort.ARTIST,
             sortOrder: ListSortOrder.ASC,
-            offset: 0,
         };
 
         const queryKey = queryKeys.songs.list(server?.id || '', query);

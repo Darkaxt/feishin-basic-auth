@@ -19,12 +19,12 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Select } from '/@/shared/components/select/select';
 import { Stack } from '/@/shared/components/stack/stack';
-import { GenreListResponse, GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { GenreListResponse } from '/@/shared/types/domain/genre-domain-types';
 import { Played } from '/@/shared/types/domain/player-domain-types';
 import { ServerListItem, ServerType } from '/@/shared/types/domain/server-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { RandomSongListQuery } from '/@/shared/types/domain/song-domain-types';
 import { Play, PlayQueueAddOptions } from '/@/shared/types/types';
-import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 interface ShuffleAllSlice extends RandomSongListQuery {
     actions: {
@@ -256,9 +256,9 @@ export const openShuffleAllModal = async (
                     signal,
                 },
                 query: {
+                    offset: 0,
                     sortBy: GenreListSort.NAME,
                     sortOrder: ListSortOrder.ASC,
-                    offset: 0,
                 },
             }),
         queryKey: queryKeys.genres.list(server?.id),

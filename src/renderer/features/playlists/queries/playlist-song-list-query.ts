@@ -1,4 +1,4 @@
-import type { QueryHookArgs } from '/@/renderer/lib/react-query';
+import type { RQueryHookArgs } from '/@/renderer/lib/react-query';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -7,7 +7,7 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { useServerById } from '/@/renderer/store';
 import { PlaylistSongListQuery } from '/@/shared/types/domain/playlist-domain-types';
 
-export const usePlaylistSongList = (args: QueryHookArgs<PlaylistSongListQuery>) => {
+export const usePlaylistSongList = (args: RQueryHookArgs<PlaylistSongListQuery>) => {
     const { options, query, serverId } = args || {};
     const server = useServerById(serverId);
 

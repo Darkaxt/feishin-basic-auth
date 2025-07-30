@@ -24,6 +24,15 @@ export enum Platform {
     WINDOWS = 'windows',
 }
 
+export type Breakpoints = {
+    isLargerThan2xl: boolean;
+    isLargerThan3xl: boolean;
+    isLargerThanLg: boolean;
+    isLargerThanMd: boolean;
+    isLargerThanSm: boolean;
+    isLargerThanXl: boolean;
+};
+
 export type CardRoute = {
     route: AppRoute | string;
     slugs?: RouteSlug[];

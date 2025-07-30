@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { RQueryHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById } from '/@/renderer/store';
 import { AlbumArtistDetailQuery } from '/@/shared/types/domain/artist-domain-types';
 
-export const useAlbumArtistInfo = (args: QueryHookArgs<AlbumArtistDetailQuery>) => {
+export const useAlbumArtistInfo = (args: RQueryHookArgs<AlbumArtistDetailQuery>) => {
     const { options, query, serverId } = args || {};
     const server = useServerById(serverId);
 

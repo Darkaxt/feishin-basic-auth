@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { RQueryHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById } from '/@/renderer/store';
 
-export const useRoles = (args: QueryHookArgs<object>) => {
+export const useRoles = (args: RQueryHookArgs<object>) => {
     const { options, serverId } = args;
     const server = useServerById(serverId);
 

@@ -119,7 +119,7 @@ export interface PlaylistListQuery extends BasePaginatedQuery<PlaylistListSortOp
 
 export type PlaylistListRequest = { query: PlaylistListQuery; totalRecordCount?: number };
 
-export type PlaylistListResponse = BasePaginatedResponse<Playlist[]> | null | undefined;
+export type PlaylistListResponse = BasePaginatedResponse<Playlist[]>;
 
 export type PlaylistSong = Song & {
     playlistItemId: string;

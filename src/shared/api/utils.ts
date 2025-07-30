@@ -2,7 +2,6 @@ import { AxiosHeaders } from 'axios';
 import dayjs from 'dayjs';
 import isElectron from 'is-electron';
 import { orderBy, shuffle } from 'lodash';
-import { stringify } from 'querystring';
 import semverCoerce from 'semver/functions/coerce';
 import semverGte from 'semver/functions/gte';
 import { z } from 'zod';
@@ -388,7 +387,7 @@ function getListCountKey(options: {
     serverId: string;
     type: LibraryItem | string;
 }) {
-    const hash = stringify(options.query as Record<string, boolean | null | number | string>);
+    const hash = JSON.stringify(options.query as Record<string, boolean | null | number | string>);
     return `${options.serverId}::${options.type}::${hash}`;
 }
 

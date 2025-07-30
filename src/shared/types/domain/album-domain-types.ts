@@ -1,11 +1,8 @@
 import { orderBy, shuffle } from 'lodash';
-import { z } from 'zod';
 
 import i18n from '/@/i18n/i18n';
 import { JFAlbumListSort } from '/@/shared/api/jellyfin.types';
-import { jfType } from '/@/shared/api/jellyfin/jellyfin-types';
 import { NDAlbumListSort } from '/@/shared/api/navidrome.types';
-import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import {
     BasePaginatedQuery,
     BasePaginatedResponse,
@@ -91,7 +88,7 @@ export interface AlbumListQuery extends BasePaginatedQuery<AlbumListSortOptions>
 
 export type AlbumListRequest = { query: AlbumListQuery; totalRecordCount?: number };
 
-export type AlbumListResponse = BasePaginatedResponse<Album[]> | null | undefined;
+export type AlbumListResponse = BasePaginatedResponse<Album[]>;
 
 type AlbumListSortMap = {
     jellyfin: Record<AlbumListSort, JFAlbumListSort | undefined>;
@@ -199,7 +196,7 @@ export type AlbumDetailQuery = { id: string };
 
 export type AlbumDetailRequest = { query: AlbumDetailQuery };
 
-export type AlbumDetailResponse = Album | null | undefined;
+export type AlbumDetailResponse = Album;
 
 export type AlbumInfo = {
     imageUrl: null | string;

@@ -32,10 +32,9 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { ScrollArea } from '/@/shared/components/scroll-area/scroll-area';
 import { Select } from '/@/shared/components/select/select';
-import { PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
+import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { SongListSort } from '/@/shared/types/domain/song-domain-types';
 import { QueryBuilderGroup, QueryBuilderRule } from '/@/shared/types/types';
-import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 type AddArgs = {
     groupIndex: number[];
@@ -111,7 +110,7 @@ export const PlaylistQueryBuilder = forwardRef(
         );
 
         const { data: playlists } = usePlaylistList({
-            query: { sortBy: PlaylistListSort.NAME, sortOrder: ListSortOrder.ASC, offset: 0 },
+            query: { offset: 0, sortBy: PlaylistListSort.NAME, sortOrder: ListSortOrder.ASC },
             serverId: server?.id,
         });
 

@@ -3,14 +3,14 @@ import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { RMutationHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById } from '/@/renderer/store';
 import {
     AddToPlaylistArgs,
     AddToPlaylistResponse,
 } from '/@/shared/types/domain/playlist-domain-types';
 
-export const useAddToPlaylist = (args: MutationHookArgs) => {
+export const useAddToPlaylist = (args: RMutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
 

@@ -55,7 +55,7 @@ export const createApiClient = (
 };
 
 const authMiddleware: (server: ServerListItem) => Middleware = (server: ServerListItem) => ({
-    onRequest: async ({ params }) => {
+    onRequest: async ({ params, request }) => {
         const credential = deserializeCredential(server.credential);
 
         if (params.query) {
@@ -67,6 +67,18 @@ const authMiddleware: (server: ServerListItem) => Middleware = (server: ServerLi
                 params.query[key] = value;
             }
         }
+
+        const stringifiedParams = qs.stringify(params.query, { arrayFormat: 'repeat' });
+
+        const url = new URL(request.url);
+        url.search = stringifiedParams;
+
+        return new Request(url.toString(), {
+            body: request.body,
+            headers: request.headers,
+            method: request.method,
+            signal: request.signal,
+        });
     },
 });
 

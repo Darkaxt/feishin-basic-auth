@@ -3,11 +3,11 @@ import { AxiosError, AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { MutationOptions } from '/@/renderer/lib/react-query';
+import { RMutationOptions } from '/@/renderer/lib/react-query';
 import { useServerById } from '/@/renderer/store';
 import { RemoveFromPlaylistResponse } from '/@/shared/types/domain/playlist-domain-types';
 
-export const useRemoveFromPlaylist = (options?: MutationOptions) => {
+export const useRemoveFromPlaylist = (options?: RMutationOptions) => {
     const queryClient = useQueryClient();
 
     return useMutation<

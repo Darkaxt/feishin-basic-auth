@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import isElectron from 'is-electron';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { RQueryHookArgs } from '/@/renderer/lib/react-query';
 import {
     InternetProviderLyricSearchResponse,
     LyricSearchQuery,
@@ -11,7 +11,7 @@ import {
 
 const lyricsIpc = isElectron() ? window.api.lyrics : null;
 
-export const useLyricSearch = (args: Omit<QueryHookArgs<LyricSearchQuery>, 'serverId'>) => {
+export const useLyricSearch = (args: Omit<RQueryHookArgs<LyricSearchQuery>, 'serverId'>) => {
     const { options, query } = args;
 
     return useQuery<Record<LyricSource, InternetProviderLyricSearchResponse[]>>({

@@ -5,9 +5,12 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import { PlaylistListFilter, SongListFilter } from '/@/renderer/store/list.store';
 import { DataTableProps } from '/@/renderer/store/settings.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
-import { PlaylistListSort, PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
-import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
+import {
+    PlaylistListSortOptions,
+    PlaylistListSortOptions,
+} from '/@/shared/types/domain/playlist-domain-types';
 import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
+import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export interface PlaylistSlice extends PlaylistState {
     actions: {
@@ -155,8 +158,8 @@ export const usePlaylistStore = createWithEqualityFn<PlaylistSlice>()(
                 list: {
                     display: ListDisplayType.TABLE,
                     filter: {
-                        musicFolderId: undefined,
-                        sortBy: PlaylistListSort.NAME,
+                        offset: 0,
+                        sortBy: PlaylistListSortOptions.NAME,
                         sortOrder: ListSortOrder.ASC,
                     },
                     table: {

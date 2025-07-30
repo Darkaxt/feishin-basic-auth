@@ -1,0 +1,54 @@
+.grid-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: base.$gap-md;
+    width: 100%;
+    margin: 0 auto;
+    container-name: grid-carousel;
+    container-type: inline-size;
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(20%, 1fr));
+    gap: 1rem;
+    height: calc(var(--row-count) * (100cqw / 2 + 3rem));
+    margin-bottom: 1rem;
+    overflow: hidden;
+
+    /* @mixin larger-than-sm {
+        grid-template-columns: repeat(4, minmax(20%, 1fr));
+        height: calc(var(--row-count) * (100cqw / 4 + 3rem));
+    }
+
+    @mixin larger-than-md {
+        grid-template-columns: repeat(5, minmax(15%, 1fr));
+        height: calc(var(--row-count) * (100cqw / 5 + 3rem));
+    }
+
+    @mixin larger-than-lg {
+        grid-template-columns: repeat(6, minmax(15%, 1fr));
+        height: calc(var(--row-count) * (100cqw / 6 + 3rem));
+    }
+
+    @mixin larger-than-xl {
+        grid-template-columns: repeat(7, minmax(10%, 1fr));
+        height: calc(var(--row-count) * (100cqw / 7 + 3rem));
+    }
+
+    @mixin larger-than-2xl {
+        grid-template-columns: repeat(8, minmax(5%, 1fr));
+        height: calc(var(--row-count) * (100cqw / 8 + 3rem));
+    }
+
+    @mixin larger-than-3xl {
+        grid-template-columns: repeat(9, minmax(5%, 1fr));
+        height: calc(var(--row-count) * (100cqw / 9 + 3rem));
+    } */
+}

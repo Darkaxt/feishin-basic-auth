@@ -2,12 +2,12 @@ import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 import { api } from '/@/renderer/api';
-import { MutationOptions } from '/@/renderer/lib/react-query';
+import { RMutationOptions } from '/@/renderer/lib/react-query';
 import { useServerById, useIncrementQueuePlayCount } from '/@/renderer/store';
 import { usePlayEvent } from '/@/renderer/store/event.store';
 import { ScrobbleRequest, ScrobbleResponse } from '/@/shared/types/domain/user-domain-types';
 
-export const useSendScrobble = (options?: MutationOptions) => {
+export const useSendScrobble = (options?: RMutationOptions) => {
     const incrementPlayCount = useIncrementQueuePlayCount();
     const sendPlayEvent = usePlayEvent();
 

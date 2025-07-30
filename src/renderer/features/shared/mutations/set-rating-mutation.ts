@@ -4,7 +4,7 @@ import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { RMutationHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById, useSetAlbumListItemDataById, useSetQueueRating } from '/@/renderer/store';
 import { useRatingEvent } from '/@/renderer/store/event.store';
 import { Album, AlbumDetailResponse } from '/@/shared/types/domain/album-domain-types';
@@ -14,7 +14,7 @@ import { RatingResponse, SetRatingRequest } from '/@/shared/types/domain/user-do
 
 const remote = isElectron() ? window.api.remote : null;
 
-export const useSetRating = (args: MutationHookArgs) => {
+export const useSetRating = (args: RMutationHookArgs) => {
     const { options } = args || {};
     const queryClient = useQueryClient();
     const setAlbumListData = useSetAlbumListItemDataById();

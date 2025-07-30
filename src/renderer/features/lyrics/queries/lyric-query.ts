@@ -3,7 +3,7 @@ import isElectron from 'is-electron';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { RQueryHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById, useLyricsSettings } from '/@/renderer/store';
 import { hasFeature } from '/@/shared/api/utils';
 import {
@@ -61,7 +61,7 @@ const formatLyrics = (lyrics: string) => {
 };
 
 export const useServerLyrics = (
-    args: QueryHookArgs<LyricsQuery>,
+    args: RQueryHookArgs<LyricsQuery>,
 ): UseQueryResult<null | string> => {
     const { query, serverId } = args;
     const server = useServerById(serverId);
@@ -81,7 +81,7 @@ export const useServerLyrics = (
 };
 
 export const useSongLyricsBySong = (
-    args: QueryHookArgs<LyricsQuery>,
+    args: RQueryHookArgs<LyricsQuery>,
     song: QueueSong | undefined,
 ): UseQueryResult<FullLyricsMetadata | StructuredLyric[]> => {
     const { query } = args;
@@ -170,7 +170,7 @@ export const useSongLyricsBySong = (
 };
 
 export const useSongLyricsByRemoteId = (
-    args: QueryHookArgs<Partial<LyricGetQuery>>,
+    args: RQueryHookArgs<Partial<LyricGetQuery>>,
 ): UseQueryResult<null | string> => {
     const queryClient = useQueryClient();
     const { query, serverId } = args;

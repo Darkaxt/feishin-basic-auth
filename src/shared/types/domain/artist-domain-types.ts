@@ -133,7 +133,7 @@ export interface ArtistListQuery extends BasePaginatedQuery<ArtistListSortOption
 
 export type ArtistListRequest = { query: ArtistListQuery; totalRecordCount?: number };
 
-export type ArtistListResponse = BasePaginatedResponse<Artist[]> | null | undefined;
+export type ArtistListResponse = BasePaginatedResponse<Artist[]>;
 type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;
     navidrome: Record<ArtistListSort, undefined>;

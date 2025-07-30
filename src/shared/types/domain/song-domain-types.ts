@@ -153,7 +153,7 @@ export interface SongListQuery extends BasePaginatedQuery<SongListSort> {
 
 export type SongListRequest = { query: SongListQuery; totalRecordCount?: number };
 
-export type SongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export type SongListResponse = BasePaginatedResponse<Song[]>;
 type SongListSortMap = {
     jellyfin: Record<SongListSort, JFSongListSort | undefined>;
     navidrome: Record<SongListSort, NDSongListSort | undefined>;
@@ -263,7 +263,7 @@ export type TopSongListQuery = {
 
 export type TopSongListRequest = { query: TopSongListQuery; totalRecordCount?: number };
 
-export type TopSongListResponse = BasePaginatedResponse<Song[]> | null | undefined;
+export type TopSongListResponse = BasePaginatedResponse<Song[]>;
 
 export const sortSongList = (
     songs: QueueSong[],

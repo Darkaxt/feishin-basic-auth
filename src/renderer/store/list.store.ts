@@ -6,28 +6,28 @@ import { createWithEqualityFn } from 'zustand/traditional';
 import { DataTableProps, PersistedTableColumn } from '/@/renderer/store/settings.store';
 import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { AlbumListRequest, AlbumListSort } from '/@/shared/types/domain/album-domain-types';
-import {
-    AlbumArtistListRequest,
-    AlbumArtistListSort,
-    ArtistListRequest,
-} from '/@/shared/types/domain/artist-domain-types';
-import { GenreListRequest, GenreListSort } from '/@/shared/types/domain/genre-domain-types';
+import { AlbumArtistListSort, ArtistListRequest } from '/@/shared/types/domain/artist-domain-types';
+import { GenreListRequest, GenreListSortOptions } from '/@/shared/types/domain/genre-domain-types';
 import {
     PlaylistListRequest,
-    PlaylistListSort,
+    PlaylistListSortOptions,
 } from '/@/shared/types/domain/playlist-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
-import { SongListRequest, SongListSort } from '/@/shared/types/domain/song-domain-types';
+import {
+    SongListRequest,
+    SongListSort,
+    SongListSortOptions,
+} from '/@/shared/types/domain/song-domain-types';
 import { ListDisplayType, TableColumn, TablePagination } from '/@/shared/types/types';
 
 export const generatePageKey = (page: string, id?: string) => {
     return id ? `${page}_${id}` : page;
 };
 
-export type AlbumArtistListFilter = Omit<AlbumArtistListRequest['query'], 'limit' | 'startIndex'>;
-export type AlbumListFilter = Omit<AlbumListRequest['query'], 'limit' | 'startIndex'>;
-export type ArtistListFilter = Omit<ArtistListRequest['query'], 'limit' | 'startIndex'>;
-export type GenreListFilter = Omit<GenreListRequest['query'], 'limit' | 'startIndex'>;
+export type AlbumArtistListFilter = Omit<ArtistListRequest['query'], 'limit' | 'offset'>;
+export type AlbumListFilter = Omit<AlbumListRequest['query'], 'limit' | 'offset'>;
+export type ArtistListFilter = Omit<ArtistListRequest['query'], 'limit' | 'offset'>;
+export type GenreListFilter = Omit<GenreListRequest['query'], 'limit' | 'offset'>;
 export type ListDeterministicArgs = { key: ListKey };
 export type ListGridProps = {
     itemGap?: number;
@@ -544,7 +544,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                     genre: {
                         display: ListDisplayType.TABLE,
                         filter: {
-                            sortBy: GenreListSort.NAME,
+                            sortBy: GenreListSortOptions.NAME,
                             sortOrder: ListSortOrder.ASC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
@@ -573,7 +573,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                     playlist: {
                         display: ListDisplayType.GRID,
                         filter: {
-                            sortBy: PlaylistListSort.NAME,
+                            sortBy: PlaylistListSortOptions.NAME,
                             sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },
@@ -606,7 +606,7 @@ export const useListStore = createWithEqualityFn<ListSlice>()(
                     song: {
                         display: ListDisplayType.TABLE,
                         filter: {
-                            sortBy: SongListSort.RECENTLY_ADDED,
+                            sortBy: SongListSortOptions.RECENTLY_ADDED,
                             sortOrder: ListSortOrder.DESC,
                         },
                         grid: { itemGap: 10, itemSize: 200, scrollOffset: 0 },

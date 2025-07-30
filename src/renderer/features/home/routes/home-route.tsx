@@ -4,26 +4,21 @@ import { useTranslation } from 'react-i18next';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { FeatureCarousel } from '/@/renderer/components/feature-carousel/feature-carousel';
-import { MemoizedSwiperGridCarousel } from '/@/renderer/components/grid-carousel/grid-carousel';
 import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/native-scroll-area';
 import { useAlbumList } from '/@/renderer/features/albums';
 import { useRecentlyPlayed } from '/@/renderer/features/home/queries/recently-played-query';
 import { AnimatedPage, LibraryHeaderBar } from '/@/renderer/features/shared';
+import { AlbumInfiniteCarousel } from '/@/renderer/features/shared/components/infinite-album-carousel/infinite-album-carousel';
 import { useSongList } from '/@/renderer/features/songs';
-import { AppRoute } from '/@/renderer/router/routes';
 import {
     HomeItem,
     useCurrentServer,
     useGeneralSettings,
     useWindowSettings,
 } from '/@/renderer/store';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
-import { Group } from '/@/shared/components/group/group';
-import { Icon } from '/@/shared/components/icon/icon';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Stack } from '/@/shared/components/stack/stack';
-import { TextTitle } from '/@/shared/components/text-title/text-title';
-import { AlbumListSort } from '/@/shared/types/domain/album-domain-types';
+import { AlbumListSort, AlbumListSortOptions } from '/@/shared/types/domain/album-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { SongListSort } from '/@/shared/types/domain/song-domain-types';
@@ -40,15 +35,15 @@ const HomeRoute = () => {
 
     const feature = useAlbumList({
         options: {
-            gcTime: 1000 * 60,
             enabled: homeFeature,
+            gcTime: 1000 * 60,
             staleTime: 1000 * 60,
         },
         query: {
             limit: 20,
+            offset: 0,
             sortBy: AlbumListSort.RANDOM,
             sortOrder: ListSortOrder.DESC,
-            offset: 0,
         },
         serverId: server?.id,
     });
@@ -63,9 +58,9 @@ const HomeRoute = () => {
         },
         query: {
             limit: itemsPerPage,
+            offset: 0,
             sortBy: AlbumListSort.RANDOM,
             sortOrder: ListSortOrder.ASC,
-            offset: 0,
         },
         serverId: server?.id,
     });
@@ -76,9 +71,9 @@ const HomeRoute = () => {
         },
         query: {
             limit: itemsPerPage,
+            offset: 0,
             sortBy: AlbumListSort.RECENTLY_PLAYED,
             sortOrder: ListSortOrder.DESC,
-            offset: 0,
         },
         serverId: server?.id,
     });
@@ -89,9 +84,9 @@ const HomeRoute = () => {
         },
         query: {
             limit: itemsPerPage,
+            offset: 0,
             sortBy: AlbumListSort.RECENTLY_ADDED,
             sortOrder: ListSortOrder.DESC,
-            offset: 0,
         },
         serverId: server?.id,
     });
@@ -103,9 +98,9 @@ const HomeRoute = () => {
         },
         query: {
             limit: itemsPerPage,
+            offset: 0,
             sortBy: AlbumListSort.PLAY_COUNT,
             sortOrder: ListSortOrder.DESC,
-            offset: 0,
         },
         serverId: server?.id,
     });
@@ -118,9 +113,9 @@ const HomeRoute = () => {
             },
             query: {
                 limit: itemsPerPage,
+                offset: 0,
                 sortBy: SongListSort.PLAY_COUNT,
                 sortOrder: ListSortOrder.DESC,
-                offset: 0,
             },
             serverId: server?.id,
         },
@@ -253,7 +248,15 @@ const HomeRoute = () => {
                     px="2rem"
                 >
                     {homeFeature && <FeatureCarousel data={featureItemsWithImage} />}
-                    {sortedCarousel.map((carousel) => (
+
+                    <AlbumInfiniteCarousel
+                        serverId={server?.id ?? ''}
+                        sortBy={AlbumListSortOptions.NAME}
+                        sortOrder={ListSortOrder.ASC}
+                        title={t('page.home.explore', { postProcess: 'sentenceCase' })}
+                    />
+
+                    {/* {sortedCarousel.map((carousel) => (
                         <MemoizedSwiperGridCarousel
                             cardRows={[
                                 {
@@ -317,7 +320,7 @@ const HomeRoute = () => {
                             }}
                             uniqueId={carousel.uniqueId}
                         />
-                    ))}
+                    ))} */}
                 </Stack>
             </NativeScrollArea>
         </AnimatedPage>

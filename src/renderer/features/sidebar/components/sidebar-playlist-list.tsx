@@ -17,7 +17,7 @@ import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { ButtonProps } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { Text } from '/@/shared/components/text/text';
-import { Playlist, PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
+import { Playlist, PlaylistListSortOptions } from '/@/shared/types/domain/playlist-domain-types';
 import { ServerType } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Play } from '/@/shared/types/types';
@@ -140,9 +140,9 @@ export const SidebarPlaylistList = () => {
 
     const playlistsQuery = usePlaylistList({
         query: {
-            sortBy: PlaylistListSort.NAME,
-            sortOrder: ListSortOrder.ASC,
             offset: 0,
+            sortBy: PlaylistListSortOptions.NAME,
+            sortOrder: ListSortOrder.ASC,
         },
         serverId: server?.id,
     });
@@ -256,9 +256,9 @@ export const SidebarSharedPlaylistList = () => {
 
     const playlistsQuery = usePlaylistList({
         query: {
-            sortBy: PlaylistListSort.NAME,
-            sortOrder: ListSortOrder.ASC,
             offset: 0,
+            sortBy: PlaylistListSortOptions.NAME,
+            sortOrder: ListSortOrder.ASC,
         },
         serverId: server?.id,
     });

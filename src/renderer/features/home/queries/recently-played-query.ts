@@ -2,12 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { QueryHookArgs } from '/@/renderer/lib/react-query';
+import { RQueryHookArgs } from '/@/renderer/lib/react-query';
 import { useServerById } from '/@/renderer/store';
 import { AlbumListQuery, AlbumListSort } from '/@/shared/types/domain/album-domain-types';
 import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
-export const useRecentlyPlayed = (args: QueryHookArgs<Partial<AlbumListQuery>>) => {
+export const useRecentlyPlayed = (args: RQueryHookArgs<Partial<AlbumListQuery>>) => {
     const { options, query, serverId } = args;
     const server = useServerById(serverId);
 

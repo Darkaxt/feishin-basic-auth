@@ -1,4 +1,4 @@
-import type { QueryOptions } from '/@/renderer/lib/react-query';
+import type { RQueryOptions } from '/@/renderer/lib/react-query';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -8,7 +8,7 @@ import { useServerById } from '/@/renderer/store';
 import { PlaylistListQuery } from '/@/shared/types/domain/playlist-domain-types';
 
 export const usePlaylistList = (args: {
-    options?: QueryOptions;
+    options?: RQueryOptions;
     query: PlaylistListQuery;
     serverId?: string;
 }) => {

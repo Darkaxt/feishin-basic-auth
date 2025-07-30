@@ -41,8 +41,6 @@ export type InfiniteQueryOptions = {
     gcTime?: UseInfiniteQueryOptions['gcTime'];
     meta?: UseInfiniteQueryOptions['meta'];
     onError?: (err: any) => void;
-    onSettled?: any;
-    onSuccess?: any;
     queryKey?: UseInfiniteQueryOptions['queryKey'];
     refetchInterval?: number;
     refetchIntervalInBackground?: UseInfiniteQueryOptions['refetchIntervalInBackground'];
@@ -53,11 +51,11 @@ export type InfiniteQueryOptions = {
     useErrorBoundary?: boolean;
 };
 
-export type MutationHookArgs = {
-    options?: MutationOptions;
+export type RMutationHookArgs = {
+    options?: RMutationOptions;
 };
 
-export type MutationOptions = {
+export type RMutationOptions = {
     mutationKey: UseMutationOptions['mutationKey'];
     onError?: (err: any) => void;
     onSettled?: any;
@@ -67,19 +65,17 @@ export type MutationOptions = {
     useErrorBoundary?: boolean;
 };
 
-export type QueryHookArgs<T> = {
-    options?: QueryOptions;
+export type RQueryHookArgs<T> = {
+    options?: RQueryOptions;
     query: T;
     serverId: string | undefined;
 };
 
-export type QueryOptions = {
+export type RQueryOptions = {
     enabled?: UseQueryOptions['enabled'];
     gcTime?: UseQueryOptions['gcTime'];
     meta?: UseQueryOptions['meta'];
     onError?: (err: any) => void;
-    onSettled?: any;
-    onSuccess?: any;
     queryKey?: UseQueryOptions['queryKey'];
     refetchInterval?: number;
     refetchIntervalInBackground?: UseQueryOptions['refetchIntervalInBackground'];

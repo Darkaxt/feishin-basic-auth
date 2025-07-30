@@ -17,8 +17,6 @@ import {
 import { AlbumListSort, sortAlbumList } from '/@/shared/types/domain/album-domain-types';
 import { ControllerEndpoint } from '/@/shared/types/domain/api-domain-types';
 import { sortAlbumArtistList } from '/@/shared/types/domain/artist-domain-types';
-import { GenreListSort } from '/@/shared/types/domain/genre-domain-types';
-import { PlaylistListSort } from '/@/shared/types/domain/playlist-domain-types';
 import { ServerFeatures } from '/@/shared/types/domain/server-domain-types';
 import { LibraryItem, ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 import { Song, sortSongList } from '/@/shared/types/domain/song-domain-types';
