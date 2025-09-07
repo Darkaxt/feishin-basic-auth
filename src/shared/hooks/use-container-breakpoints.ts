@@ -6,12 +6,12 @@ import { Breakpoints } from '/@/shared/types/types';
 export function useContainerBreakpoints() {
     const [ref, rect] = useResizeObserver();
     const [globalBreakpoints, setGlobalBreakpoints] = useState({
+        '2xl': 0,
+        '3xl': 0,
         lg: 0,
         md: 0,
         sm: 0,
         xl: 0,
-        xxl: 0,
-        xxxl: 0,
     });
 
     useEffect(() => {
@@ -25,12 +25,12 @@ export function useContainerBreakpoints() {
         };
 
         setGlobalBreakpoints({
+            '2xl': getBreakpointValue('2xl'),
+            '3xl': getBreakpointValue('3xl'),
             lg: getBreakpointValue('lg'),
             md: getBreakpointValue('md'),
             sm: getBreakpointValue('sm'),
             xl: getBreakpointValue('xl'),
-            xxl: getBreakpointValue('xxl'),
-            xxxl: getBreakpointValue('xxxl'),
         });
     }, []);
 
@@ -38,8 +38,8 @@ export function useContainerBreakpoints() {
     const isLargerThanMd = rect?.width >= globalBreakpoints.md;
     const isLargerThanLg = rect?.width >= globalBreakpoints.lg;
     const isLargerThanXl = rect?.width >= globalBreakpoints.xl;
-    const isLargerThan2xl = rect?.width >= globalBreakpoints.xxl;
-    const isLargerThan3xl = rect?.width >= globalBreakpoints.xxxl;
+    const isLargerThan2xl = rect?.width >= globalBreakpoints['2xl'];
+    const isLargerThan3xl = rect?.width >= globalBreakpoints['3xl'];
 
     const breakpoints: Breakpoints = {
         isLargerThan2xl,

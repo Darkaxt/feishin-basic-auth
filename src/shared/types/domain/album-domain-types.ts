@@ -165,7 +165,6 @@ export type Album = {
     explicit: boolean | null;
     genres: RelatedGenre[];
     id: string;
-    imagePlaceholderUrl: null | string;
     imageUrl: null | string;
     isCompilation: boolean | null;
     mbzId: null | string;

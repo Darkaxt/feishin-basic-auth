@@ -62,7 +62,6 @@ export const normalize = {
             explicit: item.explicitStatus === 'explicit',
             genres: getGenres(item),
             id: item.id.toString(),
-            imagePlaceholderUrl: null,
             imageUrl,
             isCompilation: getIsCompilation(item),
             mbzId: item.musicBrainzId || null,

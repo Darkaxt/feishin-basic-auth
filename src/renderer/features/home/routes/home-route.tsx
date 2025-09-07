@@ -33,198 +33,198 @@ const HomeRoute = () => {
     const { windowBarStyle } = useWindowSettings();
     const { homeFeature, homeItems } = useGeneralSettings();
 
-    const feature = useAlbumList({
-        options: {
-            enabled: homeFeature,
-            gcTime: 1000 * 60,
-            staleTime: 1000 * 60,
-        },
-        query: {
-            limit: 20,
-            offset: 0,
-            sortBy: AlbumListSort.RANDOM,
-            sortOrder: ListSortOrder.DESC,
-        },
-        serverId: server?.id,
-    });
+    // const feature = useAlbumList({
+    //     options: {
+    //         enabled: homeFeature,
+    //         gcTime: 1000 * 60,
+    //         staleTime: 1000 * 60,
+    //     },
+    //     query: {
+    //         limit: 20,
+    //         offset: 0,
+    //         sortBy: AlbumListSort.RANDOM,
+    //         sortOrder: ListSortOrder.DESC,
+    //     },
+    //     serverId: server?.id,
+    // });
 
-    const featureItemsWithImage = useMemo(() => {
-        return feature.data?.items?.filter((item) => item.imageUrl) ?? [];
-    }, [feature.data?.items]);
+    // const featureItemsWithImage = useMemo(() => {
+    //     return feature.data?.items?.filter((item) => item.imageUrl) ?? [];
+    // }, [feature.data?.items]);
 
-    const random = useAlbumList({
-        options: {
-            staleTime: 1000 * 60 * 5,
-        },
-        query: {
-            limit: itemsPerPage,
-            offset: 0,
-            sortBy: AlbumListSort.RANDOM,
-            sortOrder: ListSortOrder.ASC,
-        },
-        serverId: server?.id,
-    });
+    // const random = useAlbumList({
+    //     options: {
+    //         staleTime: 1000 * 60 * 5,
+    //     },
+    //     query: {
+    //         limit: itemsPerPage,
+    //         offset: 0,
+    //         sortBy: AlbumListSort.RANDOM,
+    //         sortOrder: ListSortOrder.ASC,
+    //     },
+    //     serverId: server?.id,
+    // });
 
-    const recentlyPlayed = useRecentlyPlayed({
-        options: {
-            staleTime: 0,
-        },
-        query: {
-            limit: itemsPerPage,
-            offset: 0,
-            sortBy: AlbumListSort.RECENTLY_PLAYED,
-            sortOrder: ListSortOrder.DESC,
-        },
-        serverId: server?.id,
-    });
+    // const recentlyPlayed = useRecentlyPlayed({
+    //     options: {
+    //         staleTime: 0,
+    //     },
+    //     query: {
+    //         limit: itemsPerPage,
+    //         offset: 0,
+    //         sortBy: AlbumListSort.RECENTLY_PLAYED,
+    //         sortOrder: ListSortOrder.DESC,
+    //     },
+    //     serverId: server?.id,
+    // });
 
-    const recentlyAdded = useAlbumList({
-        options: {
-            staleTime: 1000 * 60 * 5,
-        },
-        query: {
-            limit: itemsPerPage,
-            offset: 0,
-            sortBy: AlbumListSort.RECENTLY_ADDED,
-            sortOrder: ListSortOrder.DESC,
-        },
-        serverId: server?.id,
-    });
+    // const recentlyAdded = useAlbumList({
+    //     options: {
+    //         staleTime: 1000 * 60 * 5,
+    //     },
+    //     query: {
+    //         limit: itemsPerPage,
+    //         offset: 0,
+    //         sortBy: AlbumListSort.RECENTLY_ADDED,
+    //         sortOrder: ListSortOrder.DESC,
+    //     },
+    //     serverId: server?.id,
+    // });
 
-    const mostPlayedAlbums = useAlbumList({
-        options: {
-            enabled: server?.type === ServerType.SUBSONIC || server?.type === ServerType.NAVIDROME,
-            staleTime: 1000 * 60 * 5,
-        },
-        query: {
-            limit: itemsPerPage,
-            offset: 0,
-            sortBy: AlbumListSort.PLAY_COUNT,
-            sortOrder: ListSortOrder.DESC,
-        },
-        serverId: server?.id,
-    });
+    // const mostPlayedAlbums = useAlbumList({
+    //     options: {
+    //         enabled: server?.type === ServerType.SUBSONIC || server?.type === ServerType.NAVIDROME,
+    //         staleTime: 1000 * 60 * 5,
+    //     },
+    //     query: {
+    //         limit: itemsPerPage,
+    //         offset: 0,
+    //         sortBy: AlbumListSort.PLAY_COUNT,
+    //         sortOrder: ListSortOrder.DESC,
+    //     },
+    //     serverId: server?.id,
+    // });
 
-    const mostPlayedSongs = useSongList(
-        {
-            options: {
-                enabled: server?.type === ServerType.JELLYFIN,
-                staleTime: 1000 * 60 * 5,
-            },
-            query: {
-                limit: itemsPerPage,
-                offset: 0,
-                sortBy: SongListSort.PLAY_COUNT,
-                sortOrder: ListSortOrder.DESC,
-            },
-            serverId: server?.id,
-        },
-        300,
-    );
+    // const mostPlayedSongs = useSongList(
+    //     {
+    //         options: {
+    //             enabled: server?.type === ServerType.JELLYFIN,
+    //             staleTime: 1000 * 60 * 5,
+    //         },
+    //         query: {
+    //             limit: itemsPerPage,
+    //             offset: 0,
+    //             sortBy: SongListSort.PLAY_COUNT,
+    //             sortOrder: ListSortOrder.DESC,
+    //         },
+    //         serverId: server?.id,
+    //     },
+    //     300,
+    // );
 
-    const isLoading =
-        random.isLoading ||
-        recentlyPlayed.isLoading ||
-        recentlyAdded.isLoading ||
-        (server?.type === ServerType.JELLYFIN && mostPlayedSongs.isLoading) ||
-        ((server?.type === ServerType.SUBSONIC || server?.type === ServerType.NAVIDROME) &&
-            mostPlayedAlbums.isLoading);
+    // const isLoading =
+    //     random.isLoading ||
+    //     recentlyPlayed.isLoading ||
+    //     recentlyAdded.isLoading ||
+    //     (server?.type === ServerType.JELLYFIN && mostPlayedSongs.isLoading) ||
+    //     ((server?.type === ServerType.SUBSONIC || server?.type === ServerType.NAVIDROME) &&
+    //         mostPlayedAlbums.isLoading);
 
-    if (isLoading) {
-        return <Spinner container />;
-    }
+    // if (isLoading) {
+    //     return <Spinner container />;
+    // }
 
-    const carousels = {
-        [HomeItem.MOST_PLAYED]: {
-            data:
-                server?.type === ServerType.JELLYFIN
-                    ? mostPlayedSongs?.data?.items
-                    : mostPlayedAlbums?.data?.items,
-            itemType: server?.type === ServerType.JELLYFIN ? LibraryItem.SONG : LibraryItem.ALBUM,
-            pagination: {
-                itemsPerPage,
-            },
-            sortBy:
-                server?.type === ServerType.JELLYFIN
-                    ? SongListSort.PLAY_COUNT
-                    : AlbumListSort.PLAY_COUNT,
-            sortOrder: ListSortOrder.DESC,
-            title: t('page.home.mostPlayed', { postProcess: 'sentenceCase' }),
-        },
-        [HomeItem.RANDOM]: {
-            data: random?.data?.items,
-            itemType: LibraryItem.ALBUM,
-            sortBy: AlbumListSort.RANDOM,
-            sortOrder: ListSortOrder.ASC,
-            title: t('page.home.explore', { postProcess: 'sentenceCase' }),
-        },
-        [HomeItem.RECENTLY_ADDED]: {
-            data: recentlyAdded?.data?.items,
-            itemType: LibraryItem.ALBUM,
-            pagination: {
-                itemsPerPage,
-            },
-            sortBy: AlbumListSort.RECENTLY_ADDED,
-            sortOrder: ListSortOrder.DESC,
-            title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
-        },
-        [HomeItem.RECENTLY_PLAYED]: {
-            data: recentlyPlayed?.data?.items,
-            itemType: LibraryItem.ALBUM,
-            pagination: {
-                itemsPerPage,
-            },
-            sortBy: AlbumListSort.RECENTLY_PLAYED,
-            sortOrder: ListSortOrder.DESC,
-            title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
-        },
-    };
+    // const carousels = {
+    //     [HomeItem.MOST_PLAYED]: {
+    //         data:
+    //             server?.type === ServerType.JELLYFIN
+    //                 ? mostPlayedSongs?.data?.items
+    //                 : mostPlayedAlbums?.data?.items,
+    //         itemType: server?.type === ServerType.JELLYFIN ? LibraryItem.SONG : LibraryItem.ALBUM,
+    //         pagination: {
+    //             itemsPerPage,
+    //         },
+    //         sortBy:
+    //             server?.type === ServerType.JELLYFIN
+    //                 ? SongListSort.PLAY_COUNT
+    //                 : AlbumListSort.PLAY_COUNT,
+    //         sortOrder: ListSortOrder.DESC,
+    //         title: t('page.home.mostPlayed', { postProcess: 'sentenceCase' }),
+    //     },
+    //     [HomeItem.RANDOM]: {
+    //         data: random?.data?.items,
+    //         itemType: LibraryItem.ALBUM,
+    //         sortBy: AlbumListSort.RANDOM,
+    //         sortOrder: ListSortOrder.ASC,
+    //         title: t('page.home.explore', { postProcess: 'sentenceCase' }),
+    //     },
+    //     [HomeItem.RECENTLY_ADDED]: {
+    //         data: recentlyAdded?.data?.items,
+    //         itemType: LibraryItem.ALBUM,
+    //         pagination: {
+    //             itemsPerPage,
+    //         },
+    //         sortBy: AlbumListSort.RECENTLY_ADDED,
+    //         sortOrder: ListSortOrder.DESC,
+    //         title: t('page.home.newlyAdded', { postProcess: 'sentenceCase' }),
+    //     },
+    //     [HomeItem.RECENTLY_PLAYED]: {
+    //         data: recentlyPlayed?.data?.items,
+    //         itemType: LibraryItem.ALBUM,
+    //         pagination: {
+    //             itemsPerPage,
+    //         },
+    //         sortBy: AlbumListSort.RECENTLY_PLAYED,
+    //         sortOrder: ListSortOrder.DESC,
+    //         title: t('page.home.recentlyPlayed', { postProcess: 'sentenceCase' }),
+    //     },
+    // };
 
-    const sortedCarousel = homeItems
-        .filter((item) => {
-            if (item.disabled) {
-                return false;
-            }
-            if (server?.type === ServerType.JELLYFIN && item.id === HomeItem.RECENTLY_PLAYED) {
-                return false;
-            }
+    // const sortedCarousel = homeItems
+    //     .filter((item) => {
+    //         if (item.disabled) {
+    //             return false;
+    //         }
+    //         if (server?.type === ServerType.JELLYFIN && item.id === HomeItem.RECENTLY_PLAYED) {
+    //             return false;
+    //         }
 
-            return true;
-        })
-        .map((item) => ({
-            ...carousels[item.id],
-            uniqueId: item.id,
-        }));
+    //         return true;
+    //     })
+    //     .map((item) => ({
+    //         ...carousels[item.id],
+    //         uniqueId: item.id,
+    //     }));
 
-    const invalidateCarouselQuery = (carousel: {
-        itemType: LibraryItem;
-        sortBy: AlbumListSort | SongListSort;
-        sortOrder: ListSortOrder;
-    }) => {
-        if (carousel.itemType === LibraryItem.ALBUM) {
-            queryClient.invalidateQueries({
-                exact: false,
-                queryKey: queryKeys.albums.list(server?.id, {
-                    limit: itemsPerPage,
-                    sortBy: carousel.sortBy,
-                    sortOrder: carousel.sortOrder,
-                    startIndex: 0,
-                }),
-            });
-        }
+    // const invalidateCarouselQuery = (carousel: {
+    //     itemType: LibraryItem;
+    //     sortBy: AlbumListSort | SongListSort;
+    //     sortOrder: ListSortOrder;
+    // }) => {
+    //     if (carousel.itemType === LibraryItem.ALBUM) {
+    //         queryClient.invalidateQueries({
+    //             exact: false,
+    //             queryKey: queryKeys.albums.list(server?.id, {
+    //                 limit: itemsPerPage,
+    //                 sortBy: carousel.sortBy,
+    //                 sortOrder: carousel.sortOrder,
+    //                 startIndex: 0,
+    //             }),
+    //         });
+    //     }
 
-        if (carousel.itemType === LibraryItem.SONG) {
-            queryClient.invalidateQueries({
-                exact: false,
-                queryKey: queryKeys.songs.list(server?.id, {
-                    limit: itemsPerPage,
-                    sortBy: carousel.sortBy,
-                    sortOrder: carousel.sortOrder,
-                    startIndex: 0,
-                }),
-            });
-        }
-    };
+    //     if (carousel.itemType === LibraryItem.SONG) {
+    //         queryClient.invalidateQueries({
+    //             exact: false,
+    //             queryKey: queryKeys.songs.list(server?.id, {
+    //                 limit: itemsPerPage,
+    //                 sortBy: carousel.sortBy,
+    //                 sortOrder: carousel.sortOrder,
+    //                 startIndex: 0,
+    //             }),
+    //         });
+    //     }
+    // };
 
     return (
         <AnimatedPage>
@@ -247,7 +247,7 @@ const HomeRoute = () => {
                     pt={windowBarStyle === Platform.WEB ? '5rem' : '3rem'}
                     px="2rem"
                 >
-                    {homeFeature && <FeatureCarousel data={featureItemsWithImage} />}
+                    {/* {homeFeature && <FeatureCarousel data={featureItemsWithImage} />} */}
 
                     <AlbumInfiniteCarousel
                         serverId={server?.id ?? ''}

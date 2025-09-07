@@ -8,7 +8,11 @@ import {
     getInfiniteAlbumListQueryKey,
 } from '/@/renderer/features/albums/api/queries/get-album-list-query';
 import { GridCarousel } from '/@/shared/components/grid-carousel/grid-carousel';
-import { AlbumListResponse, AlbumListSortOptions } from '/@/shared/types/domain/album-domain-types';
+import {
+    Album,
+    AlbumListResponse,
+    AlbumListSortOptions,
+} from '/@/shared/types/domain/album-domain-types';
 import { ListSortOrder } from '/@/shared/types/domain/shared-domain-types';
 
 interface AlbumCarouselProps {
@@ -19,7 +23,7 @@ interface AlbumCarouselProps {
     title: string;
 }
 
-const MemoizedAlbumCard = memo(PosterCard);
+const MemoizedAlbumCard = memo(({ data }: { data: Album }) => <div>{data.name}</div>);
 
 export function AlbumInfiniteCarousel(props: AlbumCarouselProps) {
     const { rowCount = 1, serverId, sortBy, sortOrder, title } = props;

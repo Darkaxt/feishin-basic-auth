@@ -86,22 +86,20 @@ export function GridCarousel(props: GridCarouselProps) {
     return (
         <motion.div className={styles.gridCarousel} ref={containerRef}>
             <div className={styles.navigation}>
-                <TextTitle order={1} size="lg">
-                    {title}
-                </TextTitle>
+                <TextTitle order={1}>{title}</TextTitle>
                 <Group gap="xs" justify="end">
                     <ActionIcon
                         disabled={isPrevDisabled}
                         icon="arrowLeftS"
                         onClick={handlePrevPage}
-                        size="lg"
+                        size="xs"
                         variant="default"
                     />
                     <ActionIcon
                         disabled={isNextDisabled}
                         icon="arrowRightS"
                         onClick={handleNextPage}
-                        size="lg"
+                        size="xs"
                         variant="default"
                     />
                 </Group>
