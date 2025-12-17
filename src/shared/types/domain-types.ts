@@ -1364,6 +1364,7 @@ export type ControllerEndpoint = {
     // getArtistInfo?: (args: any) => void;
     getUserInfo: (args: UserInfoArgs) => Promise<UserInfoResponse>;
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
+    jukeboxControl: (args: JukeboxControlArgs) => Promise<JukeboxControlResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
     removeFromPlaylist: (args: RemoveFromPlaylistArgs) => Promise<RemoveFromPlaylistResponse>;
     replacePlaylist: (args: ReplacePlaylistArgs) => Promise<ReplacePlaylistResponse>;
@@ -1486,6 +1487,9 @@ export type InternalControllerEndpoint = {
     getTopSongs: (args: ReplaceApiClientProps<TopSongListArgs>) => Promise<TopSongListResponse>;
     getUserInfo: (args: ReplaceApiClientProps<UserInfoArgs>) => Promise<UserInfoResponse>;
     getUserList?: (args: ReplaceApiClientProps<UserListArgs>) => Promise<UserListResponse>;
+    jukeboxControl: (
+        args: ReplaceApiClientProps<JukeboxControlArgs>,
+    ) => Promise<JukeboxControlResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;
     removeFromPlaylist: (
         args: ReplaceApiClientProps<RemoveFromPlaylistArgs>,
@@ -1504,6 +1508,37 @@ export type InternalControllerEndpoint = {
     updatePlaylist: (
         args: ReplaceApiClientProps<UpdatePlaylistArgs>,
     ) => Promise<UpdatePlaylistResponse>;
+};
+
+export type JukeboxControlArgs = BaseEndpointArgs & {
+    query: JukeboxControlQuery;
+};
+
+export type JukeboxControlQuery = {
+    action:
+        | 'add'
+        | 'clear'
+        | 'get'
+        | 'remove'
+        | 'set'
+        | 'setGain'
+        | 'shuffle'
+        | 'skip'
+        | 'start'
+        | 'status'
+        | 'stop';
+    gain?: number;
+    id?: string;
+    index?: number;
+    offset?: number;
+};
+
+export type JukeboxControlResponse = {
+    currentIndex: number;
+    gain: number;
+    playing: boolean;
+    position: number;
+    songs: Song[];
 };
 
 export type LyricGetQuery = {

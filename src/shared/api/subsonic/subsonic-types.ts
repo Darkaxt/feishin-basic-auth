@@ -692,6 +692,61 @@ const getInternetRadioStations = z.object({
         .optional(),
 });
 
+const jukeboxStatus = z.object({
+    jukeboxStatus: z.object({
+        currentIndex: z.number().describe('The index of the current song in the queue'),
+        gain: z.number().describe('Volume, in a range of [0.0, 1.0]'),
+        playing: z.boolean().describe('Whether the jukebox is playing'),
+        position: z.number().optional().describe('The position of the current song in seconds'),
+    }),
+});
+
+const jukeboxPlaylist = z.object({
+    jukeboxPlaylist: z.object({
+        currentIndex: z.number().describe('The index of the current song in the queue'),
+        entry: z.array(song).optional(),
+        gain: z.number().describe('Volume, in a range of [0.0, 1.0]'),
+        playing: z.boolean().describe('Whether the jukebox is playing'),
+        position: z.number().optional().describe('The position of the current song in seconds'),
+    }),
+});
+
+const jukeboxControlParameters = z.object({
+    action: z.enum([
+        'get',
+        'status',
+        'set',
+        'start',
+        'stop',
+        'skip',
+        'add',
+        'clear',
+        'remove',
+        'shuffle',
+        'setGain',
+    ]),
+    gain: z
+        .number()
+        .optional()
+        .describe(
+            'Used by setGain to control the playback volume. A float value between 0.0 and 1.0.',
+        ),
+    id: z
+        .string()
+        .optional()
+        .describe(
+            'Used by add and set. ID of song to add to the jukebox playlist. Use multiple id parameters to add many songs in the same request. (set is similar to a clear followed by a add, but will not change the currently playing track.)',
+        ),
+    index: z
+        .number()
+        .optional()
+        .describe('Used by skip and remove. Zero-based index of the song to skip to or remove.'),
+    offset: z
+        .number()
+        .optional()
+        .describe('Used by skip. Start playing this many seconds into the track.'),
+});
+
 export const ssType = {
     _parameters: {
         albumInfo: albumInfoParameters,
@@ -716,6 +771,7 @@ export const ssType = {
         getSong: getSongParameters,
         getSongsByGenre: getSongsByGenreParameters,
         getStarred: getStarredParameters,
+        jukeboxControl: jukeboxControlParameters,
         randomSongList: randomSongListParameters,
         removeFavorite: removeFavoriteParameters,
         savePlayQueueByIndex: savePlayQueueByIndexParameters,
@@ -761,6 +817,8 @@ export const ssType = {
         getSongsByGenre,
         getStarred,
         internetRadioStation,
+        jukeboxPlaylist,
+        jukeboxStatus,
         musicFolderList,
         ping,
         playlist,

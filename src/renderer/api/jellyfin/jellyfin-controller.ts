@@ -1202,6 +1202,9 @@ export const JellyfinController: InternalControllerEndpoint = {
             name: res.body.Name,
         };
     },
+    jukeboxControl: async () => {
+        throw new Error('Not implemented');
+    },
     movePlaylistItem: async (args) => {
         const { apiClientProps, query } = args;
 

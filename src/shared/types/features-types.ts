@@ -2,6 +2,7 @@
 // For example: <FEATURE GROUP>: "Playlists", <FEATURE NAME>: "Smart" = "PLAYLISTS_SMART"
 export enum ServerFeature {
     BFR = 'bfr',
+    JUKEBOX = 'jukebox',
     LYRICS_MULTIPLE_STRUCTURED = 'lyricsMultipleStructured',
     LYRICS_SINGLE_STRUCTURED = 'lyricsSingleStructured',
     MUSIC_FOLDER_MULTISELECT = 'musicFolderMultiselect',

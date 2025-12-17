@@ -6,6 +6,7 @@ import type {
     ArtistListQuery,
     FolderQuery,
     GenreListQuery,
+    JukeboxControlQuery,
     LyricSearchQuery,
     LyricsQuery,
     PlaylistDetailQuery,
@@ -261,6 +262,12 @@ export const queryKeys: Record<
             return [serverId, 'genres', 'list'] as const;
         },
         root: (serverId: string) => [serverId, 'genres'] as const,
+    },
+    jukebox: {
+        control: (serverId: string, query?: JukeboxControlQuery) => {
+            if (query) return [serverId, 'jukebox', 'control', query] as const;
+            return [serverId, 'jukebox', 'control'] as const;
+        },
     },
     musicFolders: {
         list: (serverId: string) => [serverId, 'musicFolders', 'list'] as const,

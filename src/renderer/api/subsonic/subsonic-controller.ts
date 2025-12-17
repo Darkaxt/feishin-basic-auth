@@ -867,7 +867,6 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return ssNormalize.playlist(res.body.playlist, apiClientProps.server);
     },
-
     getPlaylistList: async ({ apiClientProps, query }) => {
         const sortOrder = query.sortOrder.toLowerCase() as 'asc' | 'desc';
 
@@ -1060,7 +1059,9 @@ export const SubsonicController: InternalControllerEndpoint = {
             throw new Error('Failed to ping server');
         }
 
-        const features: ServerFeatures = {};
+        const features: ServerFeatures = {
+            jukebox: [1],
+        };
 
         if (!ping.body.openSubsonic || !ping.body.serverVersion) {
             return { features, version: ping.body.version };
@@ -1577,6 +1578,30 @@ export const SubsonicController: InternalControllerEndpoint = {
             id: res.body.user.username,
             isAdmin: Boolean(res.body.user.adminRole),
             name: res.body.user.username,
+        };
+    },
+    jukeboxControl: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const res = await ssApiClient(apiClientProps).jukeboxControl({
+            query: query,
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to control jukebox');
+        }
+
+        const jukeboxPlaylist = res.body.jukeboxPlaylist;
+
+        return {
+            currentIndex: jukeboxPlaylist.currentIndex,
+            gain: jukeboxPlaylist.gain,
+            playing: jukeboxPlaylist.playing,
+            position: jukeboxPlaylist.position ?? 0,
+            songs:
+                jukeboxPlaylist.entry?.map((song) =>
+                    ssNormalize.song(song, apiClientProps.server),
+                ) || [],
         };
     },
     removeFromPlaylist: async ({ apiClientProps, query }) => {

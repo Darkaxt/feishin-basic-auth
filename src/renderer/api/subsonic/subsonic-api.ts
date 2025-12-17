@@ -249,6 +249,14 @@ export const contract = c.router({
             200: ssType._response.user,
         },
     },
+    jukeboxControl: {
+        method: 'GET',
+        path: 'jukeboxControl.view',
+        query: ssType._parameters.jukeboxControl,
+        responses: {
+            200: ssType._response.jukeboxPlaylist,
+        },
+    },
     ping: {
         method: 'GET',
         path: 'ping.view',
