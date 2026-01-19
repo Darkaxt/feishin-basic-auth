@@ -271,7 +271,26 @@ export const queryKeys: Record<
         root: (serverId: string) => [serverId, 'genres'] as const,
     },
     musicbrainz: {
-        artist: (mbzArtistId: string) => ['musicbrainz', 'artist', mbzArtistId] as const,
+        artist: (
+            limit: number | undefined,
+            mbzArtistId: string,
+            config?: {
+                excludeReleaseTypes: string[];
+                prioritizeCountries: string[];
+            },
+        ) =>
+            [
+                'musicbrainz',
+                'artist',
+                mbzArtistId,
+                limit,
+                config
+                    ? [
+                          [...config.excludeReleaseTypes].sort().join(','),
+                          [...config.prioritizeCountries].sort().join(','),
+                      ]
+                    : null,
+            ] as const,
         root: () => ['musicbrainz'] as const,
     },
     musicFolders: {

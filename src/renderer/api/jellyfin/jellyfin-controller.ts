@@ -242,7 +242,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                     userId: apiClientProps.server?.userId,
                 },
                 query: {
-                    Fields: JF_FIELDS.ALBUM_ARTIST_DETAIL,
+                    Fields: 'Genres, Overview, SortName, ProviderIds',
                 },
             }),
             jfApiClient(apiClientProps).getSimilarArtistList({
@@ -269,7 +269,7 @@ export const JellyfinController: InternalControllerEndpoint = {
 
         const res = await jfApiClient(apiClientProps).getAlbumArtistList({
             query: {
-                Fields: JF_FIELDS.ALBUM_ARTIST_LIST,
+                Fields: 'Genres, DateCreated, ExternalUrls, Overview, SortName, ProviderIds',
                 ImageTypeLimit: 1,
                 Limit: query.limit,
                 ParentId: getLibraryId(query.musicFolderId),
@@ -321,7 +321,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server.userId,
             },
             query: {
-                Fields: JF_FIELDS.SONG,
+                Fields: 'Genres, DateCreated, MediaSources, ParentId, People, Tags, SortName, ProviderIds',
                 IncludeItemTypes: 'Audio',
                 ParentId: query.id,
                 SortBy: 'ParentIndexNumber,IndexNumber,SortName',

@@ -1358,6 +1358,12 @@ interface ArtistAlbumsProps {
 const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const { t } = useTranslation();
     const artistReleaseTypeItems = useArtistReleaseTypeItems();
+    const musicBrainzExcludeReleaseTypes = useSettingsStore(
+        (state) => state.general.musicBrainzExcludeReleaseTypes,
+    );
+    const musicBrainzPrioritizeCountries = useSettingsStore(
+        (state) => state.general.musicBrainzPrioritizeCountries,
+    );
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
     const albumArtistDetailSort = useAppStore((state) => state.albumArtistDetailSort);
@@ -1382,9 +1388,16 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     );
 
     const musicbrainzArtistQuery = useQuery({
-        ...musicbrainzQueries.artist({ mbzArtistId: detailQuery.data?.mbz as string }),
+        ...musicbrainzQueries.artist({
+            excludeReleaseTypes: musicBrainzExcludeReleaseTypes,
+            mbzArtistId: detailQuery.data?.mbz as string,
+            prioritizeCountries: musicBrainzPrioritizeCountries,
+        }),
         meta: {
             albumArtist: detailQuery.data,
+            albums: albumsQuery.data?.items || [],
+            excludeReleaseTypes: musicBrainzExcludeReleaseTypes,
+            prioritizeCountries: musicBrainzPrioritizeCountries,
         },
     });
 
