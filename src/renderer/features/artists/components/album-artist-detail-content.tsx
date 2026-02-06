@@ -1070,18 +1070,38 @@ const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumS
     const { t } = useTranslation();
 
     const itemsPerRow = getItemsPerRow(cq);
-    const albumCount = albums.length;
     const [showAll, setShowAll] = useState(false);
     const player = usePlayer();
     const serverId = useCurrentServerId();
 
+    const { albumCountBadge, nonExternalAlbums } = useMemo(() => {
+        const { external, nonExternal } = albums.reduce<{
+            external: typeof albums;
+            nonExternal: typeof albums;
+        }>(
+            (acc, album) => {
+                if (album._serverType === ServerType.EXTERNAL) {
+                    acc.external.push(album);
+                } else {
+                    acc.nonExternal.push(album);
+                }
+                return acc;
+            },
+            { external: [], nonExternal: [] },
+        );
+
+        const originalCount = nonExternal.length;
+        const externalCount = external.length;
+
+        return {
+            albumCountBadge:
+                externalCount > 0 ? `${originalCount} + ${externalCount}` : String(originalCount),
+            nonExternalAlbums: nonExternal,
+        };
+    }, [albums]);
+
     const displayedAlbums = showAll ? albums : albums.slice(0, MAX_SECTION_CARDS);
     const hasMoreAlbums = albums.length > MAX_SECTION_CARDS;
-
-    const nonExternalAlbums = useMemo(
-        () => albums.filter((album) => album._serverType !== ServerType.EXTERNAL),
-        [albums],
-    );
 
     const handlePlay = useCallback(
         (playType: Play) => {
@@ -1126,7 +1146,7 @@ const AlbumSection = ({ albums, controls, cq, releaseType, rows, title }: AlbumS
                     <TextTitle fw={700} order={3}>
                         {title}
                     </TextTitle>
-                    <Badge variant="default">{albumCount}</Badge>
+                    <Badge variant="default">{albumCountBadge}</Badge>
                 </Group>
                 <div className={styles.albumSectionDividerContainer}>
                     <div className={styles.albumSectionDivider} />
