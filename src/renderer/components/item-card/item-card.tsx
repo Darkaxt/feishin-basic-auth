@@ -585,6 +585,7 @@ const DefaultItemCard = ({
         const isExternal = data._serverType === ServerType.EXTERNAL;
 
         const imageContainerClassName = clsx(styles.imageContainer, {
+            [styles.external]: isExternal,
             [styles.isRound]: isRound,
             [styles.noHoverOverlay]: isExternal,
         });
@@ -888,6 +889,7 @@ const PosterItemCard = ({
         const isExternal = data._serverType === ServerType.EXTERNAL;
 
         const imageContainerClassName = clsx(styles.imageContainer, {
+            [styles.external]: isExternal,
             [styles.isRound]: isRound,
             [styles.noHoverOverlay]: isExternal,
         });
@@ -947,6 +949,9 @@ const PosterItemCard = ({
                 {enableNavigation && navigationPath && (imageAsLink ?? !internalState) ? (
                     <Link
                         className={imageContainerClassName}
+                        data-unavailable-text={i18n.t('common.unavailable', {
+                            postProcess: 'titleCase',
+                        })}
                         draggable={false}
                         onClick={handleImageClick}
                         onContextMenu={handleContextMenu}
@@ -961,6 +966,9 @@ const PosterItemCard = ({
                 ) : (
                     <div
                         className={imageContainerClassName}
+                        data-unavailable-text={i18n.t('common.unavailable', {
+                            postProcess: 'titleCase',
+                        })}
                         onClick={handleImageClick}
                         onContextMenu={handleContextMenu}
                         onMouseEnter={handleMouseEnter}
