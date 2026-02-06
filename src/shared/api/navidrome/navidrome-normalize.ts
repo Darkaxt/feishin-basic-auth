@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { ServerType } from '../../types/domain-types';
+
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import { replacePathPrefix } from '/@/shared/api/utils';
@@ -14,7 +16,7 @@ import {
     Song,
     User,
 } from '/@/shared/types/domain-types';
-import { ServerListItem, ServerType } from '/@/shared/types/types';
+import { ServerListItem } from '/@/shared/types/types';
 
 const getImageUrl = (args: { url: null | string }) => {
     const { url } = args;

@@ -1,7 +1,8 @@
 import { createSocket } from 'dgram';
 import { ipcMain } from 'electron';
 
-import { DiscoveredServerItem, ServerType } from '/@/shared/types/types';
+import { ServerType } from '/@/shared/types/domain-types';
+import { DiscoveredServerItem } from '/@/shared/types/types';
 
 type JellyfinResponse = {
     Address: string;

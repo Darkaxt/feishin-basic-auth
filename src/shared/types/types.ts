@@ -9,6 +9,7 @@ import {
     LibraryItem,
     Playlist,
     QueueSong,
+    ServerType,
     Song,
 } from '/@/shared/types/domain-types';
 import { ServerFeatures } from '/@/shared/types/features-types';
@@ -49,12 +50,6 @@ export enum Platform {
     MACOS = 'macos',
     WEB = 'web',
     WINDOWS = 'windows',
-}
-
-export enum ServerType {
-    JELLYFIN = 'jellyfin',
-    NAVIDROME = 'navidrome',
-    SUBSONIC = 'subsonic',
 }
 
 export type CardRoute = {

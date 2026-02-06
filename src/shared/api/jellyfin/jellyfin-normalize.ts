@@ -11,9 +11,10 @@ import {
     MusicFolder,
     Playlist,
     RelatedArtist,
+    ServerType,
     Song,
 } from '/@/shared/types/domain-types';
-import { ServerListItem, ServerType } from '/@/shared/types/types';
+import { ServerListItem } from '/@/shared/types/types';
 
 const TICKS_PER_MS = 10000;
 

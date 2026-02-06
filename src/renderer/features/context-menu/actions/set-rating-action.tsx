@@ -5,8 +5,7 @@ import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { useCurrentServer, useCurrentServerId, useShowRatings } from '/@/renderer/store';
 import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
 import { Rating } from '/@/shared/components/rating/rating';
-import { LibraryItem } from '/@/shared/types/domain-types';
-import { ServerType } from '/@/shared/types/types';
+import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
 interface SetRatingActionProps {
     ids: string[];

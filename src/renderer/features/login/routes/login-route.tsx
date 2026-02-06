@@ -29,18 +29,22 @@ import { TextTitle } from '/@/shared/components/text-title/text-title';
 import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { useForm } from '/@/shared/hooks/use-form';
-import { AuthenticationResponse, ServerListItemWithCredential } from '/@/shared/types/domain-types';
-import { ServerType, toServerType } from '/@/shared/types/types';
+import {
+    AuthenticationResponse,
+    ServerListItemWithCredential,
+    ServerType,
+} from '/@/shared/types/domain-types';
+import { toServerType } from '/@/shared/types/types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
-const SERVER_ICONS: Record<ServerType, string> = {
+const SERVER_ICONS: Record<Exclude<ServerType, ServerType.EXTERNAL>, string> = {
     [ServerType.JELLYFIN]: JellyfinIcon,
     [ServerType.NAVIDROME]: NavidromeIcon,
     [ServerType.SUBSONIC]: SubsonicIcon,
 };
 
-const SERVER_NAMES: Record<ServerType, string> = {
+const SERVER_NAMES: Record<Exclude<ServerType, ServerType.EXTERNAL>, string> = {
     [ServerType.JELLYFIN]: 'Jellyfin',
     [ServerType.NAVIDROME]: 'Navidrome',
     [ServerType.SUBSONIC]: 'OpenSubsonic',
