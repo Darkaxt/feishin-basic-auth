@@ -7,7 +7,7 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { updateQueueSong } from '/@/renderer/store/player.store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { QueueSong, SongDetailQuery } from '/@/shared/types/domain-types';
+import { QueueSong, ServerType, SongDetailQuery } from '/@/shared/types/domain-types';
 
 export const useUpdateCurrentSong = () => {
     const queryClient = useQueryClient();
@@ -16,7 +16,11 @@ export const useUpdateCurrentSong = () => {
         async (properties: { index: number; song: QueueSong | undefined }) => {
             const currentSong = properties.song;
 
-            if (!currentSong?.id || !currentSong?._serverId) {
+            if (
+                !currentSong?.id ||
+                !currentSong?._serverId ||
+                currentSong?._serverType === ServerType.EXTERNAL
+            ) {
                 return;
             }
 

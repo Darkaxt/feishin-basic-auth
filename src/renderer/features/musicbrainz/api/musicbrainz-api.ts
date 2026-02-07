@@ -3,11 +3,9 @@ import memoize from 'lodash/memoize';
 import {
     IArtist,
     IBrowseReleasesResult,
-    IMedium,
     IRelation,
     IRelease,
     IReleaseGroup,
-    ITrack,
     IWork,
     MusicBrainzApi,
 } from 'musicbrainz-api';
@@ -15,14 +13,17 @@ import {
 import packageJson from '../../../../../package.json';
 
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { getImageUrl } from '/@/renderer/features/musicbrainz/utils';
+import {
+    collectWorksFromRelease,
+    getImageUrl,
+    normalizeReleaseToAlbum,
+} from '/@/renderer/features/musicbrainz/utils';
 import {
     Album,
     AlbumArtist,
     LibraryItem,
     RelatedArtist,
     ServerType,
-    Song,
 } from '/@/shared/types/domain-types';
 
 export const musicbrainzApi = new MusicBrainzApi({
@@ -33,14 +34,14 @@ export const musicbrainzApi = new MusicBrainzApi({
 
 const CACHE_TIME = 1000 * 60 * 5;
 
+export type IRelationWithWork = IRelation & { work?: IWork };
+
 export type MusicBrainzArtistSelectMeta = {
     albumArtist: AlbumArtist;
     albums?: Album[];
     excludeReleaseTypes?: string[];
     prioritizeCountries?: string[];
 };
-
-type IRelationWithWork = IRelation & { work?: IWork };
 
 const artistSelect = memoize(
     ({
@@ -222,27 +223,6 @@ const artistSelect = memoize(
     },
 );
 
-function collectWorksFromRelease(release: IRelease): IWork[] {
-    const works: IWork[] = [];
-    const seenIds = new Set<string>();
-
-    for (const medium of release.media ?? []) {
-        for (const track of medium.tracks ?? []) {
-            const recording = track.recording;
-            const relations = (recording as { relations?: IRelationWithWork[] })?.relations ?? [];
-            for (const rel of relations) {
-                const work = (rel as IRelationWithWork).work;
-                if (work?.id && !seenIds.has(work.id)) {
-                    seenIds.add(work.id);
-                    works.push(work);
-                }
-            }
-        }
-    }
-
-    return works;
-}
-
 async function fetchMbzReleasesByArtistId(mbzArtistId: string): Promise<IBrowseReleasesResult> {
     const PAGE_SIZE = 100;
     const includes: Array<'media' | 'release-groups'> = ['media', 'release-groups'];
@@ -302,187 +282,6 @@ const RELEASE_INCLUDES: Array<
     | 'recordings'
     | 'release-groups'
 > = ['artist-credits', 'artists', 'media', 'recording-level-rels', 'recordings', 'release-groups'];
-
-function normalizeArtistCreditToRelatedArtists(
-    artistCredit: Array<{ artist: IArtist; name: string }>,
-): RelatedArtist[] {
-    return artistCredit.map((ac) => ({
-        id: `musicbrainz-${ac.artist.id}`,
-        imageId: null,
-        imageUrl: null,
-        name: ac.name || ac.artist.name,
-        userFavorite: false,
-        userRating: null,
-    }));
-}
-
-function normalizeRecordingToSong(
-    release: IRelease,
-    medium: IMedium,
-    track: ITrack,
-    albumArtistName: string,
-    albumArtists: RelatedArtist[],
-    albumId: string,
-    imageUrl: null | string,
-    releaseDate: null | string,
-    releaseYear: null | number,
-): Song {
-    const recording = track.recording;
-    const trackArtistCredit = track['artist-credit'] ?? recording['artist-credit'] ?? [];
-
-    const artistName =
-        trackArtistCredit.map((ac) => ac.name).join('') || recording.title || track.title;
-
-    const artists = normalizeArtistCreditToRelatedArtists(
-        trackArtistCredit as Array<{ artist: IArtist; name: string }>,
-    );
-
-    const durationMilliseconds = track.length || recording.length || 0;
-    const trackNumber = track.position || parseInt(track.number, 10) || 0;
-
-    return {
-        _itemType: LibraryItem.SONG,
-        _serverId: 'musicbrainz',
-        _serverType: ServerType.EXTERNAL,
-        album: release.title,
-        albumArtistName,
-        albumArtists,
-        albumId,
-        artistName,
-        artists,
-        bitDepth: null,
-        bitRate: 0,
-        bpm: null,
-        channels: null,
-        comment: null,
-        compilation: null,
-        container: null,
-        createdAt: '',
-        discNumber: medium.position || 1,
-        discSubtitle: medium.title || null,
-        duration: durationMilliseconds,
-        explicitStatus: null,
-        gain: null,
-        genres: [],
-        id: `musicbrainz-${release.id}-${recording.id}-${track.position}-${track.number}`,
-        imageId: null,
-        imageUrl,
-        lastPlayedAt: null,
-        lyrics: null,
-        mbzRecordingId: recording.id,
-        mbzTrackId: track.id,
-        name: track.title || recording.title,
-        participants: {},
-        path: null,
-        peak: null,
-        playCount: 0,
-        releaseDate,
-        releaseYear,
-        sampleRate: null,
-        size: 0,
-        sortName: track.title || recording.title,
-        tags: null,
-        trackNumber,
-        trackSubtitle: null,
-        updatedAt: '',
-        userFavorite: false,
-        userRating: null,
-    };
-}
-
-function normalizeReleaseToAlbum(release: IRelease): Album {
-    const releaseGroup = release['release-group'];
-    const artistCredit = release['artist-credit'] ?? releaseGroup?.['artist-credit'] ?? [];
-    const albumArtistName = artistCredit.map((ac) => ac.name).join('') || release.title;
-    const albumArtists: RelatedArtist[] = (artistCredit as { artist: IArtist; name: string }[]).map(
-        (ac) => ({
-            id: `musicbrainz-${ac.artist.id}`,
-            imageId: null,
-            imageUrl: null,
-            name: ac.name || ac.artist.name,
-            userFavorite: false,
-            userRating: null,
-        }),
-    );
-
-    const hasArtwork =
-        release['cover-art-archive']?.artwork === true &&
-        release['cover-art-archive']?.front === true;
-    const primaryReleaseType = releaseGroup?.['primary-type']?.toLowerCase() || null;
-    const secondaryReleaseTypes =
-        releaseGroup?.['secondary-types']?.map((type) => type.toLowerCase()) || [];
-    const releaseTypes = [primaryReleaseType, ...secondaryReleaseTypes].filter(
-        (type) => type !== null,
-    ) as string[];
-    const isCompilation = releaseTypes.includes('compilation');
-    const originalDate = releaseGroup?.['first-release-date'] || null;
-    const originalYear = originalDate ? Number(originalDate.split('-')[0]) : null;
-    const releaseDate = release.date ? release.date : null;
-    const releaseYear = release.date ? Number(release.date.split('-')[0]) : null;
-    const imageUrl = hasArtwork ? getImageUrl(release.id) : null;
-    const albumId = `musicbrainz-${release.id}`;
-
-    const songs: Song[] = [];
-    for (const medium of release.media ?? []) {
-        for (const track of medium.tracks ?? []) {
-            songs.push(
-                normalizeRecordingToSong(
-                    release,
-                    medium,
-                    track,
-                    albumArtistName,
-                    albumArtists,
-                    albumId,
-                    imageUrl,
-                    releaseDate,
-                    releaseYear,
-                ),
-            );
-        }
-    }
-
-    const totalDuration = songs.reduce((sum, s) => sum + s.duration, 0);
-
-    return {
-        _itemType: LibraryItem.ALBUM,
-        _serverId: 'musicbrainz',
-        _serverType: ServerType.EXTERNAL,
-        albumArtistName,
-        albumArtists,
-        artists: [],
-        comment: null,
-        createdAt: '',
-        duration: totalDuration || null,
-        explicitStatus: null,
-        genres: [],
-        id: albumId,
-        imageId: null,
-        imageUrl,
-        isCompilation,
-        lastPlayedAt: null,
-        mbzId: release.id,
-        mbzReleaseGroupId: releaseGroup?.id || null,
-        name: release.title,
-        originalDate,
-        originalYear,
-        participants: {},
-        playCount: null,
-        recordLabels: [],
-        releaseDate,
-        releaseType: primaryReleaseType,
-        releaseTypes,
-        releaseYear,
-        size: null,
-        songCount: songs.length,
-        songs,
-        sortName: release.title,
-        tags: {},
-        updatedAt: '',
-        userFavorite: false,
-        userRating: null,
-        version: null,
-    };
-}
 
 export const musicbrainzQueries = {
     artist: (args: {

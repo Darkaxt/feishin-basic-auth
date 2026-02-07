@@ -135,6 +135,7 @@
         "string-to-color": "^2.2.2",
         "wavesurfer.js": "^7.11.1",
         "ws": "^8.18.2",
+        "ytmusic-api": "^5.3.0",
         "zod": "^3.22.3",
         "zustand": "^5.0.5"
     },
