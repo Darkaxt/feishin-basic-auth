@@ -24,6 +24,14 @@ const HotkeysTab = lazy(() =>
     })),
 );
 
+const IntegrationsTab = lazy(() =>
+    import('/@/renderer/features/settings/components/integrations/integrations-tab').then(
+        (module) => ({
+            default: module.IntegrationsTab,
+        }),
+    ),
+);
+
 const WindowTab = lazy(() =>
     import('/@/renderer/features/settings/components/window/window-tab').then((module) => ({
         default: module.WindowTab,
@@ -61,6 +69,9 @@ export const SettingsContent = () => {
                         <Tabs.Tab value="hotkeys">
                             {t('page.setting.hotkeysTab', { postProcess: 'sentenceCase' })}
                         </Tabs.Tab>
+                        <Tabs.Tab value="integrations">
+                            {t('page.setting.integrationsTab', { postProcess: 'sentenceCase' })}
+                        </Tabs.Tab>
                         {isElectron() && (
                             <Tabs.Tab value="window">
                                 {t('page.setting.windowTab', { postProcess: 'sentenceCase' })}
@@ -83,6 +94,11 @@ export const SettingsContent = () => {
                     <Tabs.Panel value="hotkeys">
                         <Suspense fallback={null}>
                             <HotkeysTab />
+                        </Suspense>
+                    </Tabs.Panel>
+                    <Tabs.Panel value="integrations">
+                        <Suspense fallback={null}>
+                            <IntegrationsTab />
                         </Suspense>
                     </Tabs.Panel>
                     {isElectron() && (

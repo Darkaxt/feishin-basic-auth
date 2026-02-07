@@ -3,7 +3,7 @@ import { useMemo, useRef } from 'react';
 
 import { api } from '/@/renderer/api';
 import { youtubeQueries } from '/@/renderer/features/musicbrainz/api/youtube-api';
-import { TranscodingConfig } from '/@/renderer/store';
+import { TranscodingConfig, useSettingsStore } from '/@/renderer/store';
 import { QueueSong, ServerType } from '/@/shared/types/domain-types';
 
 const YOUTUBE_WATCH_BASE = 'https://www.youtube.com/watch?v=';
@@ -16,12 +16,13 @@ export function useSongUrl(
     const prior = useRef(['', '']);
 
     const isExternal = song?._serverType === ServerType.EXTERNAL;
+    const youtubeEnabled = useSettingsStore((state) => state.integrations.youtube);
     const searchQuery =
-        song && isExternal ? `${song.artistName ?? ''} ${song.name ?? ''}`.trim() : '';
+        song && isExternal ? buildYoutubeSearchQuery(song.name, song.artistName) : '';
 
     const youtubeSearch = useQuery({
         ...youtubeQueries.search({ query: searchQuery }),
-        enabled: Boolean(song && isExternal && searchQuery),
+        enabled: Boolean(song && isExternal && searchQuery && youtubeEnabled),
     });
 
     const externalUrl = useMemo(() => {
@@ -77,6 +78,16 @@ export function useSongUrl(
     ]);
 }
 
+function buildYoutubeSearchQuery(
+    title: string | undefined,
+    artistName: string | undefined,
+): string {
+    const t = (title ?? '').trim();
+    const a = (artistName ?? '').trim();
+    if (t && a) return `${t} by ${a}`;
+    return t || a || '';
+}
+
 function getYoutubeUrlFromSearchResults(
     results: Array<{ type: string; videoId?: string }> | undefined,
 ): string | undefined {
@@ -112,10 +123,11 @@ export async function getSongUrlAsync(
     }
 
     if (song._serverType === ServerType.EXTERNAL) {
-        if (typeof window === 'undefined' || !window.api?.youtube) {
+        const youtubeEnabled = useSettingsStore.getState().integrations?.youtube ?? true;
+        if (!youtubeEnabled || typeof window === 'undefined' || !window.api?.youtube) {
             return undefined;
         }
-        const searchQuery = `${song.artistName ?? ''} ${song.name ?? ''}`.trim();
+        const searchQuery = buildYoutubeSearchQuery(song.name, song.artistName);
         if (!searchQuery) {
             return undefined;
         }

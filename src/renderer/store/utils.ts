@@ -34,17 +34,18 @@ export const idbStateStorage: StateStorage = {
 const settingsKeys = [
     'store_settings_autoDJ',
     'store_settings_general',
-    'store_settings_lists',
     'store_settings_hotkeys',
-    'store_settings_playback',
+    'store_settings_integrations',
+    'store_settings_lists',
     'store_settings_lyrics',
+    'store_settings_playback',
+    'store_settings_queryBuilder',
+    'store_settings_remote',
+    'store_settings_tab',
     'store_settings_window',
     'store_settings_discord',
     'store_settings_font',
     'store_settings_css',
-    'store_settings_remote',
-    'store_settings_queryBuilder',
-    'store_settings_tab',
 ];
 
 export const splitSettingsStorage: StateStorage = {

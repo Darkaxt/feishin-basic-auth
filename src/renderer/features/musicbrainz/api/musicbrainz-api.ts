@@ -18,6 +18,7 @@ import {
     getImageUrl,
     normalizeReleaseToAlbum,
 } from '/@/renderer/features/musicbrainz/utils';
+import { logFn } from '/@/renderer/utils/logger';
 import {
     Album,
     AlbumArtist,
@@ -283,6 +284,12 @@ const RELEASE_INCLUDES: Array<
     | 'release-groups'
 > = ['artist-credits', 'artists', 'media', 'recording-level-rels', 'recordings', 'release-groups'];
 
+const EMPTY_BROWSE_RELEASES: IBrowseReleasesResult = {
+    'release-count': 0,
+    'release-offset': 0,
+    releases: [],
+};
+
 export const musicbrainzQueries = {
     artist: (args: {
         excludeReleaseTypes?: string[];
@@ -297,13 +304,30 @@ export const musicbrainzQueries = {
         return queryOptions({
             gcTime: CACHE_TIME,
             queryFn: async ({ meta }) => {
-                const artist = await musicbrainzApi.lookup('artist', args.mbzArtistId);
-                const releases = await fetchMbzReleasesByArtistId(args.mbzArtistId);
+                try {
+                    const artist = await musicbrainzApi.lookup('artist', args.mbzArtistId);
+                    const releases = await fetchMbzReleasesByArtistId(args.mbzArtistId);
 
-                return {
-                    data: { artist, releases },
-                    meta: meta as MusicBrainzArtistSelectMeta,
-                };
+                    logFn.debug('MusicBrainz artist lookup API queried', {
+                        meta: { artistId: args.mbzArtistId, releases },
+                    });
+
+                    return {
+                        data: { artist, releases },
+                        meta: meta as MusicBrainzArtistSelectMeta,
+                    };
+                } catch (error) {
+                    logFn.warn('MusicBrainz artist lookup failed', {
+                        meta: { artistId: args.mbzArtistId, error },
+                    });
+                    return {
+                        data: {
+                            artist: {} as IArtist,
+                            releases: EMPTY_BROWSE_RELEASES,
+                        },
+                        meta: meta as MusicBrainzArtistSelectMeta,
+                    };
+                }
             },
             queryKey: queryKeys.musicbrainz.artist(undefined, args.mbzArtistId, config),
             select: artistSelect,
@@ -314,14 +338,26 @@ export const musicbrainzQueries = {
         queryOptions({
             gcTime: CACHE_TIME,
             queryFn: async () => {
-                const mbzRelease = await musicbrainzApi.lookup(
-                    'release',
-                    args.releaseId,
-                    RELEASE_INCLUDES,
-                );
-                const release = normalizeReleaseToAlbum(mbzRelease);
-                const works = collectWorksFromRelease(mbzRelease);
-                return { release, works };
+                try {
+                    const mbzRelease = await musicbrainzApi.lookup(
+                        'release',
+                        args.releaseId,
+                        RELEASE_INCLUDES,
+                    );
+                    const release = normalizeReleaseToAlbum(mbzRelease);
+                    const works = collectWorksFromRelease(mbzRelease);
+
+                    logFn.debug('MusicBrainz release lookup API queried', {
+                        meta: { release, releaseId: args.releaseId },
+                    });
+
+                    return { release, works };
+                } catch (error) {
+                    logFn.warn('MusicBrainz release lookup failed', {
+                        meta: { error, releaseId: args.releaseId },
+                    });
+                    return { release: null, works: [] };
+                }
             },
             queryKey: queryKeys.musicbrainz.release(args.releaseId),
             staleTime: CACHE_TIME,
@@ -331,6 +367,52 @@ export const musicbrainzQueries = {
 export const MUSICBRAINZ_ID_PREFIX = 'musicbrainz-';
 
 export async function fetchMbzReleaseAsAlbum(releaseId: string): Promise<Album> {
-    const mbzRelease = await musicbrainzApi.lookup('release', releaseId, RELEASE_INCLUDES);
-    return normalizeReleaseToAlbum(mbzRelease);
+    try {
+        const mbzRelease = await musicbrainzApi.lookup('release', releaseId, RELEASE_INCLUDES);
+        return normalizeReleaseToAlbum(mbzRelease);
+    } catch (error) {
+        logFn.warn('MusicBrainz release fetch failed', { meta: { error, releaseId } });
+        return createEmptyMbzAlbum(releaseId);
+    }
+}
+
+function createEmptyMbzAlbum(releaseId: string): Album {
+    return {
+        _itemType: LibraryItem.ALBUM,
+        _serverId: 'musicbrainz',
+        _serverType: ServerType.EXTERNAL,
+        albumArtistName: '',
+        albumArtists: [],
+        artists: [],
+        comment: null,
+        createdAt: '',
+        duration: null,
+        explicitStatus: null,
+        genres: [],
+        id: `musicbrainz-${releaseId}`,
+        imageId: null,
+        imageUrl: null,
+        isCompilation: null,
+        lastPlayedAt: null,
+        mbzId: releaseId,
+        mbzReleaseGroupId: null,
+        name: '',
+        originalDate: null,
+        originalYear: null,
+        participants: {},
+        playCount: null,
+        recordLabels: [],
+        releaseDate: null,
+        releaseType: null,
+        releaseTypes: [],
+        releaseYear: null,
+        size: null,
+        songCount: null,
+        sortName: '',
+        tags: {},
+        updatedAt: '',
+        userFavorite: false,
+        userRating: null,
+        version: null,
+    };
 }

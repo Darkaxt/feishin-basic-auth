@@ -440,8 +440,6 @@ export const GeneralSettingsSchema = z.object({
     lastFM: z.boolean(),
     lastfmApiKey: z.string(),
     musicBrainz: z.boolean(),
-    musicBrainzExcludeReleaseTypes: z.array(z.string()),
-    musicBrainzPrioritizeCountries: z.array(z.string()),
     nativeAspectRatio: z.boolean(),
     passwordStore: z.string().optional(),
     pathReplace: z.string(),
@@ -615,6 +613,13 @@ const QueryBuilderSettingsSchema = z.object({
     tag: z.array(QueryBuilderCustomFieldSchema),
 });
 
+const IntegrationsSettingsSchema = z.object({
+    musicBrainz: z.boolean(),
+    musicBrainzExcludeReleaseTypes: z.array(z.string()),
+    musicBrainzPrioritizeCountries: z.array(z.string()),
+    youtube: z.boolean(),
+});
+
 const AutoDJSettingsSchema = z.object({
     enabled: z.boolean(),
     itemCount: z.number(),
@@ -631,6 +636,7 @@ export const ValidationSettingsStateSchema = z.object({
     font: FontSettingsSchema,
     general: GeneralSettingsSchema,
     hotkeys: HotkeysSettingsSchema,
+    integrations: IntegrationsSettingsSchema,
     lists: z.record(z.nativeEnum(ItemListKey), ItemListConfigSchema),
     lyrics: LyricsSettingsSchema,
     lyricsDisplay: z.record(z.string(), LyricsDisplaySettingsSchema),
@@ -640,6 +646,7 @@ export const ValidationSettingsStateSchema = z.object({
     tab: z.union([
         z.literal('general'),
         z.literal('hotkeys'),
+        z.literal('integrations'),
         z.literal('playback'),
         z.literal('window'),
         z.string(),
@@ -1015,8 +1022,6 @@ const initialState: SettingsState = {
         lastFM: true,
         lastfmApiKey: '',
         musicBrainz: true,
-        musicBrainzExcludeReleaseTypes: [],
-        musicBrainzPrioritizeCountries: [],
         nativeAspectRatio: false,
         passwordStore: undefined,
         pathReplace: '',
@@ -1098,6 +1103,12 @@ const initialState: SettingsState = {
             zoomOut: { allowGlobal: true, hotkey: '', isGlobal: false },
         },
         globalMediaHotkeys: true,
+    },
+    integrations: {
+        musicBrainz: true,
+        musicBrainzExcludeReleaseTypes: [],
+        musicBrainzPrioritizeCountries: [],
+        youtube: true,
     },
     lists: {
         ['albumDetail']: {
@@ -2093,10 +2104,36 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
+                if (version <= 24) {
+                    // Move MusicBrainz release/country options to Integrations; keep musicBrainz in general
+                    const general = state.general as Record<string, unknown>;
+                    state.integrations = {
+                        musicBrainz: initialState.integrations.musicBrainz,
+                        musicBrainzExcludeReleaseTypes:
+                            (general?.musicBrainzExcludeReleaseTypes as string[]) ??
+                            initialState.integrations.musicBrainzExcludeReleaseTypes,
+                        musicBrainzPrioritizeCountries:
+                            (general?.musicBrainzPrioritizeCountries as string[]) ??
+                            initialState.integrations.musicBrainzPrioritizeCountries,
+                        youtube: initialState.integrations.youtube,
+                    };
+                    delete general.musicBrainzExcludeReleaseTypes;
+                    delete general.musicBrainzPrioritizeCountries;
+                }
+
+                if (version <= 25) {
+                    // Add integrations.musicBrainz to enable/disable MusicBrainz API queries
+                    state.integrations = {
+                        ...state.integrations,
+                        musicBrainz:
+                            (state.integrations as { musicBrainz?: boolean })?.musicBrainz ?? true,
+                    };
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 24,
+            version: 26,
         },
     ),
 );
@@ -2251,6 +2288,9 @@ export const useAlbumBackground = () =>
         }),
         shallow,
     );
+
+export const useIntegrationsSettings = () =>
+    useSettingsStore((state) => state.integrations, shallow);
 
 export const useExternalLinks = () =>
     useSettingsStore(

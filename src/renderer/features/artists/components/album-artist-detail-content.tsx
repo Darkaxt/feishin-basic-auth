@@ -1379,10 +1379,10 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const { t } = useTranslation();
     const artistReleaseTypeItems = useArtistReleaseTypeItems();
     const musicBrainzExcludeReleaseTypes = useSettingsStore(
-        (state) => state.general.musicBrainzExcludeReleaseTypes,
+        (state) => state.integrations.musicBrainzExcludeReleaseTypes,
     );
     const musicBrainzPrioritizeCountries = useSettingsStore(
-        (state) => state.general.musicBrainzPrioritizeCountries,
+        (state) => state.integrations.musicBrainzPrioritizeCountries,
     );
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
@@ -1407,12 +1407,14 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
         }),
     );
 
+    const musicBrainzEnabled = useSettingsStore((state) => state.integrations.musicBrainz);
     const musicbrainzArtistQuery = useQuery({
         ...musicbrainzQueries.artist({
             excludeReleaseTypes: musicBrainzExcludeReleaseTypes,
             mbzArtistId: detailQuery.data?.mbz as string,
             prioritizeCountries: musicBrainzPrioritizeCountries,
         }),
+        enabled: Boolean(musicBrainzEnabled && detailQuery.data?.mbz),
         meta: {
             albumArtist: detailQuery.data,
             albums: albumsQuery.data?.items || [],
