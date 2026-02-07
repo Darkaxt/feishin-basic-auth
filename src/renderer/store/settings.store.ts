@@ -614,8 +614,8 @@ const QueryBuilderSettingsSchema = z.object({
 });
 
 const IntegrationsSettingsSchema = z.object({
-    musicbrainzAutoCountryPriority: z.boolean(),
     musicBrainz: z.boolean(),
+    musicbrainzAutoCountryPriority: z.boolean(),
     musicBrainzExcludeReleaseTypes: z.array(z.string()),
     musicBrainzPrioritizeCountries: z.array(z.string()),
     youtube: z.boolean(),
@@ -1106,8 +1106,8 @@ const initialState: SettingsState = {
         globalMediaHotkeys: true,
     },
     integrations: {
-        musicbrainzAutoCountryPriority: false,
         musicBrainz: true,
+        musicbrainzAutoCountryPriority: false,
         musicBrainzExcludeReleaseTypes: [],
         musicBrainzPrioritizeCountries: [],
         youtube: true,
@@ -2106,46 +2106,10 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
-                if (version <= 24) {
-                    // Move MusicBrainz release/country options to Integrations; keep musicBrainz in general
-                    const general = state.general as Record<string, unknown>;
-                    state.integrations = {
-                        musicbrainzAutoCountryPriority: initialState.integrations.musicbrainzAutoCountryPriority,
-                        musicBrainz: initialState.integrations.musicBrainz,
-                        musicBrainzExcludeReleaseTypes:
-                            (general?.musicBrainzExcludeReleaseTypes as string[]) ??
-                            initialState.integrations.musicBrainzExcludeReleaseTypes,
-                        musicBrainzPrioritizeCountries:
-                            (general?.musicBrainzPrioritizeCountries as string[]) ??
-                            initialState.integrations.musicBrainzPrioritizeCountries,
-                        youtube: initialState.integrations.youtube,
-                    };
-                    delete general.musicBrainzExcludeReleaseTypes;
-                    delete general.musicBrainzPrioritizeCountries;
-                }
-
-                if (version <= 25) {
-                    // Add integrations.musicBrainz to enable/disable MusicBrainz API queries
-                    state.integrations = {
-                        ...state.integrations,
-                        musicBrainz:
-                            (state.integrations as { musicBrainz?: boolean })?.musicBrainz ?? true,
-                    };
-                }
-
-                if (version <= 26) {
-                    state.integrations = {
-                        ...state.integrations,
-                        musicbrainzAutoCountryPriority:
-                            (state.integrations as { musicbrainzAutoCountryPriority?: boolean })
-                                ?.musicbrainzAutoCountryPriority ?? false,
-                    };
-                }
-
                 return persistedState;
             },
             name: 'store_settings',
-            version: 27,
+            version: 24,
         },
     ),
 );
