@@ -61,7 +61,7 @@
 
 .image-container.external {
     img {
-        opacity: 0.3;
+        opacity: 0.5;
         filter: grayscale(0.5) saturate(0.7);
         transition: all 0.2s ease-in-out;
     }

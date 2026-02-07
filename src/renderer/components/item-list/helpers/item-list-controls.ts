@@ -1,14 +1,16 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getTitlePath } from '/@/renderer/components/item-list/helpers/get-title-path';
 import { ItemListStateItemWithRequiredProperties } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { DefaultItemControlProps, ItemControls } from '/@/renderer/components/item-list/types';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
 import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
-import { LibraryItem, QueueSong, Song } from '/@/shared/types/domain-types';
+import { LibraryItem, QueueSong, ServerType, Song } from '/@/shared/types/domain-types';
 import { Play, TableColumn } from '/@/shared/types/types';
 
 interface UseDefaultItemListControlsArgs {
@@ -34,6 +36,7 @@ const itemTypeMapping = {
 
 export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs) => {
     const player = usePlayer();
+    const queryClient = useQueryClient();
     const navigate = useNavigate();
     const navigateRef = useRef(navigate);
     const setFavorite = useSetFavorite();
@@ -384,6 +387,40 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     return;
                 }
 
+                const isExternal =
+                    (item as Song & { _serverType?: ServerType })._serverType ===
+                    ServerType.EXTERNAL;
+
+                if (isExternal) {
+                    if (
+                        itemType === LibraryItem.SONG ||
+                        itemType === LibraryItem.PLAYLIST_SONG ||
+                        (item as { _itemType?: LibraryItem })._itemType === LibraryItem.SONG
+                    ) {
+                        player.addToQueueByData([item as Song], playType, item.id);
+                        return;
+                    }
+                    if (itemType === LibraryItem.ALBUM) {
+                        (async () => {
+                            try {
+                                const album = await queryClient.fetchQuery(
+                                    albumQueries.detail({
+                                        query: { id: item.id },
+                                        serverId: 'musicbrainz',
+                                    }),
+                                );
+                                const songs = album?.songs ?? [];
+                                if (songs.length > 0) {
+                                    player.addToQueueByData(songs, playType);
+                                }
+                            } catch {
+                                console.error('Error fetching album songs for item', item);
+                            }
+                        })();
+                        return;
+                    }
+                }
+
                 player.addToQueueByFetch(item._serverId, [item.id], itemType, playType);
             },
 
@@ -417,10 +454,11 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
         };
     }, [
         enableMultiSelect,
-        overrides,
         onColumnReordered,
         onColumnResized,
+        overrides,
         player,
+        queryClient,
         setFavorite,
         setRating,
     ]);

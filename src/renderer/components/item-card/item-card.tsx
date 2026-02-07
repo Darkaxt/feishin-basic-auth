@@ -19,7 +19,7 @@ import { ItemControls } from '/@/renderer/components/item-list/types';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { useDragDrop } from '/@/renderer/hooks/use-drag-drop';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useShowRatings } from '/@/renderer/store';
+import { useIntegrationsSettings, useShowRatings } from '/@/renderer/store';
 import {
     formatDateAbsolute,
     formatDateAbsoluteUTC,
@@ -179,6 +179,7 @@ const CompactItemCard = ({
     showRating,
     withControls,
 }: ItemCardDerivativeProps) => {
+    const { youtube: youtubeIntegrationEnabled } = useIntegrationsSettings();
     const [showControls, setShowControls] = useState(false);
     const itemRowId =
         data && internalState && typeof data === 'object' && 'id' in data
@@ -342,9 +343,12 @@ const CompactItemCard = ({
         const hasRating = showRating && userRating !== null && userRating > 0;
         const isExternal = data._serverType === ServerType.EXTERNAL;
 
+        const showItemCardControls =
+            withControls && showControls && data && (!isExternal || youtubeIntegrationEnabled);
+
         const imageContainerClassName = clsx(styles.imageContainer, {
             [styles.isRound]: isRound,
-            [styles.noHoverOverlay]: isExternal,
+            [styles.noHoverOverlay]: isExternal && !showItemCardControls,
         });
 
         const imageContainerContent = (
@@ -377,7 +381,7 @@ const CompactItemCard = ({
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
-                    {withControls && showControls && data && !isExternal && (
+                    {showItemCardControls && (
                         <ItemCardControls
                             controls={controls}
                             enableExpansion={enableExpansion}
@@ -486,6 +490,7 @@ const DefaultItemCard = ({
     showRating,
     withControls,
 }: ItemCardDerivativeProps) => {
+    const { youtube: youtubeIntegrationEnabled } = useIntegrationsSettings();
     const [showControls, setShowControls] = useState(false);
     const itemRowId =
         data && internalState && typeof data === 'object' && 'id' in data
@@ -584,10 +589,13 @@ const DefaultItemCard = ({
         const hasRating = showRating && userRating !== null && userRating > 0;
         const isExternal = data._serverType === ServerType.EXTERNAL;
 
+        const showItemCardControls =
+            withControls && showControls && data && (!isExternal || youtubeIntegrationEnabled);
+
         const imageContainerClassName = clsx(styles.imageContainer, {
             [styles.external]: isExternal,
             [styles.isRound]: isRound,
-            [styles.noHoverOverlay]: isExternal,
+            [styles.noHoverOverlay]: isExternal && !showItemCardControls,
         });
 
         const imageContainerContent = (
@@ -618,7 +626,7 @@ const DefaultItemCard = ({
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
-                    {withControls && showControls && !isExternal && (
+                    {showItemCardControls && (
                         <ItemCardControls
                             controls={controls}
                             enableExpansion={enableExpansion}
@@ -725,6 +733,7 @@ const PosterItemCard = ({
     showRating,
     withControls,
 }: ItemCardDerivativeProps) => {
+    const { youtube: youtubeIntegrationEnabled } = useIntegrationsSettings();
     const [showControls, setShowControls] = useState(false);
     const itemRowId =
         data && internalState && typeof data === 'object' && 'id' in data
@@ -888,10 +897,13 @@ const PosterItemCard = ({
         const hasRating = showRating && userRating !== null && userRating > 0;
         const isExternal = data._serverType === ServerType.EXTERNAL;
 
+        const showItemCardControls =
+            withControls && showControls && data && (!isExternal || youtubeIntegrationEnabled);
+
         const imageContainerClassName = clsx(styles.imageContainer, {
             [styles.external]: isExternal,
             [styles.isRound]: isRound,
-            [styles.noHoverOverlay]: isExternal,
+            [styles.noHoverOverlay]: isExternal && !showItemCardControls,
         });
 
         const imageContainerContent = (
@@ -922,7 +934,7 @@ const PosterItemCard = ({
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
                 <AnimatePresence>
-                    {withControls && showControls && data && !isExternal && (
+                    {showItemCardControls && (
                         <ItemCardControls
                             controls={controls}
                             enableExpansion={enableExpansion}
@@ -949,7 +961,7 @@ const PosterItemCard = ({
                 {enableNavigation && navigationPath && (imageAsLink ?? !internalState) ? (
                     <Link
                         className={imageContainerClassName}
-                        data-unavailable-text={i18n.t('common.unavailable', {
+                        data-unavailable-text={i18n.t('common.external', {
                             postProcess: 'titleCase',
                         })}
                         draggable={false}
@@ -966,7 +978,7 @@ const PosterItemCard = ({
                 ) : (
                     <div
                         className={imageContainerClassName}
-                        data-unavailable-text={i18n.t('common.unavailable', {
+                        data-unavailable-text={i18n.t('common.external', {
                             postProcess: 'titleCase',
                         })}
                         onClick={handleImageClick}

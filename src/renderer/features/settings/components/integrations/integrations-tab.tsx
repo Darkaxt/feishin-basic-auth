@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -116,6 +117,7 @@ export const IntegrationsTab = memo(() => {
                 <Switch
                     aria-label={t('setting.youtube', { postProcess: 'sentenceCase' })}
                     defaultChecked={settings.youtube}
+                    disabled={!isElectron()}
                     onChange={(e) => updateIntegrations({ youtube: e.currentTarget.checked })}
                 />
             ),
