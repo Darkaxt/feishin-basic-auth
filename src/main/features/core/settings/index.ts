@@ -38,6 +38,7 @@ export const store = new Store<any>({
         lyrics: ['NetEase', 'lrclib.net'],
         mediaSession: false,
         playbackType: 'web',
+        renderer_server_port: 38472,
         should_prompt_accessibility: true,
         shown_accessibility_warning: false,
         window_enable_tray: true,

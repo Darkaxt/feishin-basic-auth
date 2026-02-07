@@ -19,6 +19,7 @@ import {
 import electronLocalShortcut from 'electron-localshortcut';
 import log from 'electron-log/main';
 import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
+import express from 'express';
 import { access, constants } from 'fs';
 import path, { join } from 'path';
 
@@ -216,6 +217,37 @@ const RESOURCES_PATH = app.isPackaged
 
 const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
+};
+
+const DEFAULT_RENDERER_SERVER_PORT = 38472;
+
+const getRendererServerPort = (): number => {
+    const port = Number(store.get('renderer_server_port', DEFAULT_RENDERER_SERVER_PORT));
+    if (!Number.isInteger(port) || port < 1024 || port > 65535) {
+        return DEFAULT_RENDERER_SERVER_PORT;
+    }
+    return port;
+};
+
+let rendererServerUrl: null | string = null;
+let rendererHttpServer: null | ReturnType<express.Application['listen']> = null;
+
+const startRendererServer = (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        if (rendererServerUrl) {
+            resolve(rendererServerUrl);
+            return;
+        }
+        const port = getRendererServerPort();
+        const rendererPath = join(__dirname, '../renderer');
+        const app = express();
+        app.use(express.static(rendererPath));
+        rendererHttpServer = app.listen(port, () => {
+            rendererServerUrl = `http://localhost:${port}`;
+            resolve(rendererServerUrl);
+        });
+        rendererHttpServer.on('error', reject);
+    });
 };
 
 export const getMainWindow = () => {
@@ -580,12 +612,11 @@ async function createWindow(first = true): Promise<void> {
         return { action: 'deny' };
     });
 
-    // HMR for renderer base on electron-vite cli.
-    // Load the remote URL for development or the local html file for production.
+    // HMR for renderer: use Vite dev server URL in development, otherwise the local HTTP server.
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
     } else {
-        mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+        mainWindow.loadURL(rendererServerUrl!);
     }
 }
 
@@ -739,6 +770,14 @@ app.on('window-all-closed', () => {
     }
 });
 
+app.on('before-quit', () => {
+    if (rendererHttpServer) {
+        rendererHttpServer.close();
+        rendererHttpServer = null;
+        rendererServerUrl = null;
+    }
+});
+
 const FONT_HEADERS = [
     'font/collection',
     'font/otf',
@@ -766,7 +805,7 @@ if (!singleInstance) {
     });
 
     app.whenReady()
-        .then(() => {
+        .then(async () => {
             protocol.handle('feishin', async (request) => {
                 const filePath = `file://${request.url.slice('feishin://'.length)}`;
                 const response = await net.fetch(filePath);
@@ -783,6 +822,10 @@ if (!singleInstance) {
 
                 return response;
             });
+
+            if (!(is.dev && process.env['ELECTRON_RENDERER_URL'])) {
+                await startRendererServer();
+            }
 
             createWindow();
             if (store.get('window_enable_tray', true)) {
