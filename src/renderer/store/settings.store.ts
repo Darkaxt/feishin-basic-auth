@@ -614,6 +614,7 @@ const QueryBuilderSettingsSchema = z.object({
 });
 
 const IntegrationsSettingsSchema = z.object({
+    musicbrainzAutoCountryPriority: z.boolean(),
     musicBrainz: z.boolean(),
     musicBrainzExcludeReleaseTypes: z.array(z.string()),
     musicBrainzPrioritizeCountries: z.array(z.string()),
@@ -1105,6 +1106,7 @@ const initialState: SettingsState = {
         globalMediaHotkeys: true,
     },
     integrations: {
+        musicbrainzAutoCountryPriority: false,
         musicBrainz: true,
         musicBrainzExcludeReleaseTypes: [],
         musicBrainzPrioritizeCountries: [],
@@ -2108,6 +2110,7 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     // Move MusicBrainz release/country options to Integrations; keep musicBrainz in general
                     const general = state.general as Record<string, unknown>;
                     state.integrations = {
+                        musicbrainzAutoCountryPriority: initialState.integrations.musicbrainzAutoCountryPriority,
                         musicBrainz: initialState.integrations.musicBrainz,
                         musicBrainzExcludeReleaseTypes:
                             (general?.musicBrainzExcludeReleaseTypes as string[]) ??
@@ -2130,10 +2133,19 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     };
                 }
 
+                if (version <= 26) {
+                    state.integrations = {
+                        ...state.integrations,
+                        musicbrainzAutoCountryPriority:
+                            (state.integrations as { musicbrainzAutoCountryPriority?: boolean })
+                                ?.musicbrainzAutoCountryPriority ?? false,
+                    };
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 26,
+            version: 27,
         },
     ),
 );

@@ -381,6 +381,27 @@ export const IntegrationsTab = memo(() => {
         {
             control: (
                 <Switch
+                    aria-label={t('setting.musicbrainzAutoCountryPriority', {
+                        postProcess: 'sentenceCase',
+                    })}
+                    defaultChecked={settings.musicbrainzAutoCountryPriority}
+                    onChange={(e) =>
+                        updateIntegrations({
+                            musicbrainzAutoCountryPriority: e.currentTarget.checked,
+                        })
+                    }
+                />
+            ),
+            description: t('setting.musicbrainzAutoCountryPriority', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !musicBrainz || !settings.musicBrainz,
+            title: t('setting.musicbrainzAutoCountryPriority', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <Switch
                     aria-label={t('setting.youtube', { postProcess: 'sentenceCase' })}
                     defaultChecked={settings.youtube}
                     disabled={!isElectron()}
@@ -397,10 +418,7 @@ export const IntegrationsTab = memo(() => {
 
     return (
         <Stack gap="md">
-            <SettingsSection
-                options={options}
-                title={t('page.setting.integrationsTab', { postProcess: 'sentenceCase' })}
-            />
+            <SettingsSection options={options} title={'MusicBrainz'} />
         </Stack>
     );
 });

@@ -40,6 +40,7 @@ export type IRelationWithWork = IRelation & { work?: IWork };
 export type MusicBrainzArtistSelectMeta = {
     albumArtist: AlbumArtist;
     albums?: Album[];
+    autoCountryPriority?: boolean;
     excludeReleaseTypes?: string[];
     prioritizeCountries?: string[];
 };
@@ -123,7 +124,22 @@ const artistSelect = memoize(
 
         const excludeReleaseTypes = (meta.excludeReleaseTypes ?? []).map((t) => t.toLowerCase());
         const excludeSet = new Set(excludeReleaseTypes);
-        const prioritizeCountries = (meta.prioritizeCountries ?? []).map((c) => c.toUpperCase());
+
+        let prioritizeCountries: string[];
+        if (meta.autoCountryPriority) {
+            const countryCounts = new Map<string, number>();
+            for (const release of data.releases.releases) {
+                const country = release.country?.toUpperCase();
+                if (country) {
+                    countryCounts.set(country, (countryCounts.get(country) ?? 0) + 1);
+                }
+            }
+            prioritizeCountries = [...countryCounts.entries()]
+                .sort(([, a], [, b]) => b - a)
+                .map(([code]) => code);
+        } else {
+            prioritizeCountries = (meta.prioritizeCountries ?? []).map((c) => c.toUpperCase());
+        }
 
         const releaseEntries = Array.from(unownedReleases.entries())
             .filter(([, release]) => {
@@ -290,11 +306,13 @@ const EMPTY_BROWSE_RELEASES: IBrowseReleasesResult = {
 
 export const musicbrainzQueries = {
     artist: (args: {
+        autoCountryPriority?: boolean;
         excludeReleaseTypes?: string[];
         mbzArtistId: string;
         prioritizeCountries?: string[];
     }) => {
         const config = {
+            autoCountryPriority: args.autoCountryPriority ?? false,
             excludeReleaseTypes: args.excludeReleaseTypes ?? [],
             prioritizeCountries: args.prioritizeCountries ?? [],
         };

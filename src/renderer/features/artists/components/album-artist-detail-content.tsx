@@ -1381,6 +1381,9 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const musicBrainzExcludeReleaseTypes = useSettingsStore(
         (state) => state.integrations.musicBrainzExcludeReleaseTypes,
     );
+    const musicbrainzAutoCountryPriority = useSettingsStore(
+        (state) => state.integrations.musicbrainzAutoCountryPriority,
+    );
     const musicBrainzPrioritizeCountries = useSettingsStore(
         (state) => state.integrations.musicBrainzPrioritizeCountries,
     );
@@ -1410,6 +1413,7 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
     const musicBrainzEnabled = useSettingsStore((state) => state.integrations.musicBrainz);
     const musicbrainzArtistQuery = useQuery({
         ...musicbrainzQueries.artist({
+            autoCountryPriority: musicbrainzAutoCountryPriority,
             excludeReleaseTypes: musicBrainzExcludeReleaseTypes,
             mbzArtistId: detailQuery.data?.mbz as string,
             prioritizeCountries: musicBrainzPrioritizeCountries,
@@ -1418,6 +1422,7 @@ const ArtistAlbums = ({ albumsQuery }: ArtistAlbumsProps) => {
         meta: {
             albumArtist: detailQuery.data,
             albums: albumsQuery.data?.items || [],
+            autoCountryPriority: musicbrainzAutoCountryPriority,
             excludeReleaseTypes: musicBrainzExcludeReleaseTypes,
             prioritizeCountries: musicBrainzPrioritizeCountries,
         },

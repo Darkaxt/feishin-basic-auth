@@ -275,6 +275,7 @@ export const queryKeys: Record<
             limit: number | undefined,
             mbzArtistId: string,
             config?: {
+                autoCountryPriority: boolean;
                 excludeReleaseTypes: string[];
                 prioritizeCountries: string[];
             },
@@ -286,6 +287,7 @@ export const queryKeys: Record<
                 limit,
                 config
                     ? [
+                          String(config.autoCountryPriority),
                           [...config.excludeReleaseTypes].sort().join(','),
                           [...config.prioritizeCountries].sort().join(','),
                       ]
