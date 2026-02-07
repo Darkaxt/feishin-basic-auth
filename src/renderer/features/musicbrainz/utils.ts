@@ -30,13 +30,15 @@ export function collectWorksFromRelease(release: IRelease): IWork[] {
 export function getImageUrl(releaseId: string): string {
     return `https://coverartarchive.org/release/${releaseId}/front-250.jpg`;
 }
+
+export function getImageUrlByReleaseGroupId(releaseGroupId: string): string {
+    return `https://coverartarchive.org/release-group/${releaseGroupId}/front-250.jpg`;
+}
+
 export function getMbzReleaseIdFromAlbumId(albumId: string): null | string {
     if (!albumId.startsWith(MUSICBRAINZ_ID_PREFIX)) return null;
     return albumId.slice(MUSICBRAINZ_ID_PREFIX.length);
 }
-// function getImageUrlByReleaseGroupId(releaseGroupId: string): string {
-//     return `https://coverartarchive.org/release-group/${releaseGroupId}/front-250.jpg`;
-// }
 
 // const MBZ_COUNTRY_CODES = {
 //     AD: 'Andorra',

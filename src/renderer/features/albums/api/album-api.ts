@@ -1,12 +1,11 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { getMbzReleaseIdFromAlbumId } from '../../musicbrainz/utils';
-
 import { api } from '/@/renderer/api';
 import { controller } from '/@/renderer/api/controller';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { getOptimizedListCount } from '/@/renderer/api/utils-list-count';
 import { fetchMbzReleaseAsAlbum } from '/@/renderer/features/musicbrainz/api/musicbrainz-api';
+import { getMbzReleaseIdFromAlbumId } from '/@/renderer/features/musicbrainz/utils';
 import { QueryHookArgs } from '/@/renderer/lib/react-query';
 import { AlbumDetailQuery, AlbumListQuery, ListCountQuery } from '/@/shared/types/domain-types';
 

@@ -15,7 +15,7 @@ import packageJson from '../../../../../package.json';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import {
     collectWorksFromRelease,
-    getImageUrl,
+    getImageUrlByReleaseGroupId,
     normalizeReleaseToAlbum,
 } from '/@/renderer/features/musicbrainz/utils';
 import { logFn } from '/@/renderer/utils/logger';
@@ -158,11 +158,9 @@ const artistSelect = memoize(
         });
 
         const albums: Album[] = releaseEntriesUniqueByGroup
-            .map(([releaseId, release]) => {
+            .map(([, release]) => {
                 const releaseGroup = release['release-group'];
-                const hasArtwork =
-                    release['cover-art-archive']?.artwork === true &&
-                    release['cover-art-archive']?.front === true;
+                const hasArtwork = releaseGroup;
 
                 const primaryReleaseType = releaseGroup?.['primary-type']?.toLowerCase() || null;
                 const secondaryReleaseTypes =
@@ -175,7 +173,7 @@ const artistSelect = memoize(
                 const originalYear = originalDate ? Number(originalDate.split('-')[0]) : null;
                 const releaseDate = release.date ? release.date : null;
                 const releaseYear = release.date ? Number(release.date.split('-')[0]) : null;
-                const imageUrl = hasArtwork ? getImageUrl(releaseId) : null;
+                const imageUrl = hasArtwork ? getImageUrlByReleaseGroupId(releaseGroup.id) : null;
 
                 const album: Album = {
                     _itemType: LibraryItem.ALBUM,
