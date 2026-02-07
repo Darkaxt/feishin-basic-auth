@@ -21,8 +21,10 @@ import { PlayerStatus } from '/@/shared/types/types';
 export interface MpvPlayerEngineHandle extends AudioPlayer {}
 
 interface MpvPlayerEngineProps {
+    currentSongUrl: string | undefined;
     isMuted: boolean;
     isTransitioning: boolean;
+    nextSongUrl: string | undefined;
     onEnded: () => void;
     onProgress: (e: PlayerOnProgressProps) => void;
     playerRef: RefObject<MpvPlayerEngineHandle | null>;
@@ -39,8 +41,10 @@ const PROGRESS_UPDATE_INTERVAL = 250;
 
 export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const {
+        currentSongUrl: currentSongUrlProp,
         isMuted,
         isTransitioning,
+        nextSongUrl: nextSongUrlProp,
         onEnded,
         onProgress,
         playerRef,
@@ -56,6 +60,11 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const isInitializedRef = useRef<boolean>(false);
     const hasPopulatedQueueRef = useRef<boolean>(false);
     const isMountedRef = useRef<boolean>(true);
+    const currentSongUrlRef = useRef<string | undefined>(currentSongUrlProp);
+    const nextSongUrlRef = useRef<string | undefined>(nextSongUrlProp);
+
+    currentSongUrlRef.current = currentSongUrlProp;
+    nextSongUrlRef.current = nextSongUrlProp;
 
     const { mpvAudioDeviceId, transcode } = usePlaybackSettings();
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
@@ -124,15 +133,17 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
             if (!radioState.currentStreamUrl) {
                 const playerData = usePlayerStore.getState().getPlayerData();
-                const currentSongUrl = playerData.currentSong
-                    ? getSongUrl(playerData.currentSong, transcode)
-                    : undefined;
-                const nextSongUrl = playerData.nextSong
-                    ? getSongUrl(playerData.nextSong, transcode)
-                    : undefined;
+                const currentResolved =
+                    currentSongUrlProp ??
+                    (playerData.currentSong
+                        ? getSongUrl(playerData.currentSong, transcode)
+                        : undefined);
+                const nextResolved =
+                    nextSongUrlProp ??
+                    (playerData.nextSong ? getSongUrl(playerData.nextSong, transcode) : undefined);
 
-                if (currentSongUrl && nextSongUrl && !hasPopulatedQueueRef.current && mpvPlayer) {
-                    mpvPlayer.setQueue(currentSongUrl, nextSongUrl, true);
+                if (currentResolved && !hasPopulatedQueueRef.current && mpvPlayer) {
+                    mpvPlayer.setQueue(currentResolved, nextResolved ?? currentResolved, true);
                     hasPopulatedQueueRef.current = true;
                 }
             }
@@ -156,6 +167,30 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         // reloadTrigger is included to allow manual reload via MPV_RELOAD event.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mpvExtraParameters, mpvProperties, mpvAudioDeviceId, reloadTrigger]);
+
+    // Sync queue when current/next song URLs change (e.g. user selects song, or external URL resolves from useSongUrl)
+    useEffect(() => {
+        if (!mpvPlayer || !isInitializedRef.current) {
+            return;
+        }
+
+        const radioState = useRadioStore.getState();
+        if (radioState.currentStreamUrl) {
+            return;
+        }
+
+        const playerData = usePlayerStore.getState().getPlayerData();
+        const currentResolved =
+            currentSongUrlProp ??
+            (playerData.currentSong ? getSongUrl(playerData.currentSong, transcode) : undefined);
+        const nextResolved =
+            nextSongUrlProp ??
+            (playerData.nextSong ? getSongUrl(playerData.nextSong, transcode) : undefined);
+
+        if (currentResolved) {
+            mpvPlayer.setQueue(currentResolved, nextResolved ?? currentResolved, false);
+        }
+    }, [currentSongUrlProp, nextSongUrlProp, currentSong?.id, currentSong?._uniqueId, transcode]);
 
     // Update volume
     useEffect(() => {
@@ -257,7 +292,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
         const handleOnAutoNext = () => {
             mediaAutoNext();
-            handleMpvAutoNext(transcode);
+            handleMpvAutoNext(transcode, nextSongUrlRef.current);
         };
 
         mpvPlayerListener.rendererAutoNext(handleOnAutoNext);
@@ -270,10 +305,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     usePlayerEvents(
         {
             onMediaNext: () => {
-                replaceMpvQueue(transcode);
+                replaceMpvQueue(transcode, currentSongUrlRef.current, nextSongUrlRef.current);
             },
             onMediaPrev: () => {
-                replaceMpvQueue(transcode);
+                replaceMpvQueue(transcode, currentSongUrlRef.current, nextSongUrlRef.current);
             },
             onNextSongInsertion: (song) => {
                 const radioState = useRadioStore.getState();
@@ -282,11 +317,12 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                     return;
                 }
 
-                const nextSongUrl = song ? getSongUrl(song, transcode) : undefined;
+                const nextSongUrl =
+                    nextSongUrlRef.current ?? (song ? getSongUrl(song, transcode) : undefined);
                 mpvPlayer?.setQueueNext(nextSongUrl);
             },
             onPlayerPlay: () => {
-                replaceMpvQueue(transcode);
+                replaceMpvQueue(transcode, currentSongUrlRef.current, nextSongUrlRef.current);
             },
             onQueueCleared: () => {},
         },
@@ -337,24 +373,30 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
 MpvPlayerEngine.displayName = 'MpvPlayerEngine';
 
-function handleMpvAutoNext(transcode: {
-    bitrate?: number | undefined;
-    enabled: boolean;
-    format?: string | undefined;
-}) {
+function handleMpvAutoNext(
+    transcode: {
+        bitrate?: number | undefined;
+        enabled: boolean;
+        format?: string | undefined;
+    },
+    nextUrlOverride?: string,
+) {
     const playerData = usePlayerStore.getState().getPlayerData();
-    const nextSongUrl = playerData.nextSong
-        ? getSongUrl(playerData.nextSong, transcode)
-        : undefined;
+    const nextSongUrl =
+        nextUrlOverride ??
+        (playerData.nextSong ? getSongUrl(playerData.nextSong, transcode) : undefined);
     mpvPlayer?.autoNext(nextSongUrl);
 }
 
-function replaceMpvQueue(transcode: {
-    bitrate?: number | undefined;
-    enabled: boolean;
-    format?: string | undefined;
-}) {
-    // Don't override queue if radio is active
+function replaceMpvQueue(
+    transcode: {
+        bitrate?: number | undefined;
+        enabled: boolean;
+        format?: string | undefined;
+    },
+    currentUrlOverride?: string,
+    nextUrlOverride?: string,
+) {
     const radioState = useRadioStore.getState();
 
     if (radioState.currentStreamUrl) {
@@ -362,11 +404,14 @@ function replaceMpvQueue(transcode: {
     }
 
     const playerData = usePlayerStore.getState().getPlayerData();
-    const currentSongUrl = playerData.currentSong
-        ? getSongUrl(playerData.currentSong, transcode)
-        : undefined;
-    const nextSongUrl = playerData.nextSong
-        ? getSongUrl(playerData.nextSong, transcode)
-        : undefined;
-    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
+    const currentSongUrl =
+        currentUrlOverride ??
+        (playerData.currentSong ? getSongUrl(playerData.currentSong, transcode) : undefined);
+    const nextSongUrl =
+        nextUrlOverride ??
+        (playerData.nextSong ? getSongUrl(playerData.nextSong, transcode) : undefined);
+
+    if (currentSongUrl) {
+        mpvPlayer?.setQueue(currentSongUrl, nextSongUrl ?? currentSongUrl, false);
+    }
 }

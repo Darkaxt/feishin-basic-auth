@@ -10,14 +10,17 @@ import { logMsg } from '/@/renderer/utils/logger-message';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface WebPlayerEngineHandle extends AudioPlayer {
-    player1(): {
-        ref: null | ReactPlayer;
-        setVolume: (volume: number) => void;
-    };
-    player2(): {
-        ref: null | ReactPlayer;
-        setVolume: (volume: number) => void;
-    };
+    player1(): WebPlayerEnginePlayerHandle;
+    player2(): WebPlayerEnginePlayerHandle;
+}
+
+export interface WebPlayerEnginePlayerHandle {
+    getCurrentTime: () => number;
+    getDuration: () => number;
+    pause: () => void;
+    play: () => void;
+    ref: null | ReactPlayer;
+    setVolume: (volume: number) => void;
 }
 
 interface WebPlayerEngineProps {
@@ -37,6 +40,70 @@ interface WebPlayerEngineProps {
     src1: string | undefined;
     src2: string | undefined;
     volume: number;
+}
+
+interface YouTubePlayer {
+    getCurrentTime?: () => number;
+    getDuration?: () => number;
+    pauseVideo?: () => void;
+    playVideo?: () => void;
+}
+
+function getInternalCurrentTime(ref: null | ReactPlayer): number {
+    const internal = ref?.getInternalPlayer();
+    if (!internal) return 0;
+    if (internal instanceof HTMLMediaElement) {
+        return (internal as HTMLMediaElement).currentTime ?? 0;
+    }
+    if (isYouTubePlayer(internal) && typeof internal.getCurrentTime === 'function') {
+        return internal.getCurrentTime() ?? 0;
+    }
+    return 0;
+}
+
+function getInternalDuration(ref: null | ReactPlayer): number {
+    const internal = ref?.getInternalPlayer();
+    if (!internal) return 0;
+    if (internal instanceof HTMLMediaElement) {
+        return (internal as HTMLMediaElement).duration ?? 0;
+    }
+    if (isYouTubePlayer(internal) && typeof internal.getDuration === 'function') {
+        return internal.getDuration() ?? 0;
+    }
+    return 0;
+}
+
+function isYouTubePlayer(internal: unknown): internal is YouTubePlayer {
+    return (
+        typeof internal === 'object' &&
+        internal !== null &&
+        'playVideo' in internal &&
+        typeof (internal as YouTubePlayer).playVideo === 'function'
+    );
+}
+
+function pauseInternalPlayer(ref: null | ReactPlayer): void {
+    const internal = ref?.getInternalPlayer();
+    if (!internal) return;
+    if (internal instanceof HTMLMediaElement) {
+        (internal as HTMLMediaElement).pause();
+        return;
+    }
+    if (isYouTubePlayer(internal)) {
+        internal.pauseVideo?.();
+    }
+}
+
+function playInternalPlayer(ref: null | ReactPlayer): void {
+    const internal = ref?.getInternalPlayer();
+    if (!internal) return;
+    if (internal instanceof HTMLMediaElement) {
+        void (internal as HTMLMediaElement).play().catch(() => {});
+        return;
+    }
+    if (isYouTubePlayer(internal)) {
+        internal.playVideo?.();
+    }
 }
 
 // Credits: https://gist.github.com/novwhisky/8a1a0168b94f3b6abfaa?permalink_comment_id=1551393#gistcomment-1551393
@@ -108,25 +175,33 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
             setInternalVolume2(Math.min(1, internalVolume2 + by / 100));
         },
         pause() {
-            player1Ref.current?.getInternalPlayer()?.pause();
-            player2Ref.current?.getInternalPlayer()?.pause();
+            pauseInternalPlayer(player1Ref.current);
+            pauseInternalPlayer(player2Ref.current);
         },
         play() {
             if (playerNum === 1) {
-                player1Ref.current?.getInternalPlayer()?.play();
+                playInternalPlayer(player1Ref.current);
             } else {
-                player2Ref.current?.getInternalPlayer()?.play();
+                playInternalPlayer(player2Ref.current);
             }
         },
-        player1() {
+        player1(): WebPlayerEnginePlayerHandle {
             return {
-                ref: player1Ref?.current,
+                getCurrentTime: () => getInternalCurrentTime(player1Ref.current),
+                getDuration: () => getInternalDuration(player1Ref.current),
+                pause: () => pauseInternalPlayer(player1Ref.current),
+                play: () => playInternalPlayer(player1Ref.current),
+                ref: player1Ref?.current ?? null,
                 setVolume: (volume: number) => setInternalVolume1(volume / 100 || 0),
             };
         },
-        player2() {
+        player2(): WebPlayerEnginePlayerHandle {
             return {
-                ref: player2Ref?.current,
+                getCurrentTime: () => getInternalCurrentTime(player2Ref.current),
+                getDuration: () => getInternalDuration(player2Ref.current),
+                pause: () => pauseInternalPlayer(player2Ref.current),
+                play: () => playInternalPlayer(player2Ref.current),
+                ref: player2Ref?.current ?? null,
                 setVolume: (volume: number) => setInternalVolume2(volume / 100 || 0),
             };
         },

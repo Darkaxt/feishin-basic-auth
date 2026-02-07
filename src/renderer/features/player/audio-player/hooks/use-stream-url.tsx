@@ -30,6 +30,7 @@ export function useSongUrl(
             return prior.current[1];
         }
         const url = getYoutubeUrlFromSearchResults(youtubeSearch.data);
+
         if (url) prior.current = [song._uniqueId, url];
         return url;
     }, [song, isExternal, current, youtubeSearch.data]);
@@ -81,12 +82,16 @@ function getYoutubeUrlFromSearchResults(
 ): string | undefined {
     if (!results?.length) return undefined;
     const first = results.find((r) => r.type === 'SONG' || r.type === 'VIDEO');
+
     return first && 'videoId' in first && first.videoId
         ? `${YOUTUBE_WATCH_BASE}${first.videoId}`
         : undefined;
 }
 
-export const getSongUrl = (song: QueueSong, transcode: TranscodingConfig) => {
+export const getSongUrl = (song: QueueSong, transcode: TranscodingConfig): string => {
+    if (song._serverType === ServerType.EXTERNAL) {
+        return '';
+    }
     return api.controller.getStreamUrl({
         apiClientProps: { serverId: song._serverId },
         query: {
@@ -97,3 +102,32 @@ export const getSongUrl = (song: QueueSong, transcode: TranscodingConfig) => {
         },
     });
 };
+
+export async function getSongUrlAsync(
+    song: QueueSong | undefined,
+    transcode: TranscodingConfig,
+): Promise<string | undefined> {
+    if (!song) {
+        return undefined;
+    }
+
+    if (song._serverType === ServerType.EXTERNAL) {
+        if (typeof window === 'undefined' || !window.api?.youtube) {
+            return undefined;
+        }
+        const searchQuery = `${song.artistName ?? ''} ${song.name ?? ''}`.trim();
+        if (!searchQuery) {
+            return undefined;
+        }
+        try {
+            const results = await window.api.youtube.search(searchQuery);
+            console.log('results', results);
+            return getYoutubeUrlFromSearchResults(results);
+        } catch {
+            return undefined;
+        }
+    }
+
+    const url = getSongUrl(song, transcode);
+    return url || undefined;
+}

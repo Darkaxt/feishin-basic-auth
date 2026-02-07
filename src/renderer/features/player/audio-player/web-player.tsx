@@ -106,7 +106,7 @@ export function WebPlayer() {
                         currentPlayer: playerRef.current.player1(),
                         currentPlayerNum: num,
                         currentTime: e.playedSeconds,
-                        duration: getDuration(playerRef.current.player1().ref),
+                        duration: getDuration(playerRef.current.player1()),
                         hasNextSong: Boolean(player2),
                         isTransitioning,
                         nextPlayer: playerRef.current.player2(),
@@ -118,7 +118,7 @@ export function WebPlayer() {
                 case PlayerStyle.GAPLESS:
                     gaplessHandler({
                         currentTime: e.playedSeconds,
-                        duration: getDuration(playerRef.current.player1().ref),
+                        duration: getDuration(playerRef.current.player1()),
                         isFlac: false,
                         isTransitioning,
                         nextPlayer: playerRef.current.player2(),
@@ -144,7 +144,7 @@ export function WebPlayer() {
                         currentPlayer: playerRef.current.player2(),
                         currentPlayerNum: num,
                         currentTime: e.playedSeconds,
-                        duration: getDuration(playerRef.current.player2().ref),
+                        duration: getDuration(playerRef.current.player2()),
                         hasNextSong: Boolean(player1),
                         isTransitioning,
                         nextPlayer: playerRef.current.player1(),
@@ -156,7 +156,7 @@ export function WebPlayer() {
                 case PlayerStyle.GAPLESS:
                     gaplessHandler({
                         currentTime: e.playedSeconds,
-                        duration: getDuration(playerRef.current.player2().ref),
+                        duration: getDuration(playerRef.current.player2()),
                         isFlac: false,
                         isTransitioning,
                         nextPlayer: playerRef.current.player1(),
@@ -175,7 +175,7 @@ export function WebPlayer() {
         });
 
         promise.then(() => {
-            playerRef.current?.player1()?.ref?.getInternalPlayer().pause();
+            playerRef.current?.player1()?.pause();
             playerRef.current?.setVolume(volume);
             setIsTransitioning(false);
         });
@@ -188,7 +188,7 @@ export function WebPlayer() {
         });
 
         promise.then(() => {
-            playerRef.current?.player2()?.ref?.getInternalPlayer().pause();
+            playerRef.current?.player2()?.pause();
             playerRef.current?.setVolume(volume);
             setIsTransitioning(false);
         });
@@ -213,11 +213,11 @@ export function WebPlayer() {
                     if (num === 1) {
                         playerRef.current?.player1()?.setVolume(volume);
                         playerRef.current?.player2()?.setVolume(0);
-                        playerRef.current?.player2()?.ref?.getInternalPlayer()?.pause();
+                        playerRef.current?.player2()?.pause();
                     } else {
                         playerRef.current?.player2()?.setVolume(volume);
                         playerRef.current?.player1()?.setVolume(0);
-                        playerRef.current?.player1()?.ref?.getInternalPlayer()?.pause();
+                        playerRef.current?.player1()?.pause();
                     }
                 }
 
@@ -241,11 +241,11 @@ export function WebPlayer() {
                     if (num === 1) {
                         playerRef.current?.player1()?.setVolume(volume);
                         playerRef.current?.player2()?.setVolume(0);
-                        playerRef.current?.player2()?.ref?.getInternalPlayer()?.pause();
+                        playerRef.current?.player2()?.pause();
                     } else {
                         playerRef.current?.player2()?.setVolume(volume);
                         playerRef.current?.player1()?.setVolume(0);
-                        playerRef.current?.player1()?.ref?.getInternalPlayer()?.pause();
+                        playerRef.current?.player1()?.pause();
                     }
                 }
 
@@ -294,14 +294,12 @@ export function WebPlayer() {
         const interval = setInterval(() => {
             const activePlayer =
                 num === 1 ? playerRef.current?.player1() : playerRef.current?.player2();
-            const internalPlayer =
-                activePlayer?.ref?.getInternalPlayer() as HTMLAudioElement | null;
 
-            if (!internalPlayer) {
+            if (!activePlayer) {
                 return;
             }
 
-            const currentTime = internalPlayer.currentTime;
+            const currentTime = activePlayer.getCurrentTime();
 
             if (
                 transitionType === PlayerStyle.CROSSFADE ||
@@ -468,6 +466,7 @@ function crossfadeHandler(args: {
     crossfadeDuration: number;
     crossfadeStyle: CrossfadeStyle;
     currentPlayer: {
+        pause: () => void;
         ref: null | ReactPlayer;
         setVolume: (volume: number) => void;
     };
@@ -477,6 +476,8 @@ function crossfadeHandler(args: {
     hasNextSong: boolean;
     isTransitioning: boolean | string;
     nextPlayer: {
+        pause: () => void;
+        play: () => void;
         ref: null | ReactPlayer;
         setVolume: (volume: number) => void;
     };
@@ -504,7 +505,7 @@ function crossfadeHandler(args: {
     if (!hasNextSong) {
         currentPlayer.setVolume(volume);
         nextPlayer.setVolume(0);
-        nextPlayer.ref?.getInternalPlayer()?.pause();
+        nextPlayer.pause();
 
         if (isTransitioning) {
             setIsTransitioning(false);
@@ -516,7 +517,7 @@ function crossfadeHandler(args: {
     if (!isTransitioning) {
         if (duration > 0 && currentTime > duration - crossfadeDuration) {
             nextPlayer.setVolume(0);
-            nextPlayer.ref?.getInternalPlayer().play();
+            nextPlayer.play();
             return setIsTransitioning(player);
         }
 
@@ -586,6 +587,7 @@ function gaplessHandler(args: {
     isFlac: boolean;
     isTransitioning: boolean | string;
     nextPlayer: {
+        play: () => void;
         ref: null | ReactPlayer;
         setVolume: (volume: number) => void;
     };
@@ -604,10 +606,8 @@ function gaplessHandler(args: {
     const durationPadding = getDurationPadding(isFlac);
 
     if (currentTime + durationPadding >= duration) {
-        return nextPlayer.ref
-            ?.getInternalPlayer()
-            ?.play()
-            .catch(() => {});
+        nextPlayer.play();
+        return;
     }
 
     return null;
@@ -647,8 +647,14 @@ function getCrossfadeEasing(style: CrossfadeStyle): {
     }
 }
 
-function getDuration(ref: null | ReactPlayer | undefined) {
-    return ref?.getInternalPlayer()?.duration || 0;
+function getDuration(
+    player:
+        | undefined
+        | {
+              getDuration: () => number;
+          },
+) {
+    return player?.getDuration?.() ?? 0;
 }
 
 function getDurationPadding(isFlac: boolean) {

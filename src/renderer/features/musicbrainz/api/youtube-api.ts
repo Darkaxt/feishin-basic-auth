@@ -10,8 +10,10 @@ async function searchYoutube(query: string): Promise<Array<{ type: string; video
 export const youtubeQueries = {
     search: (args: { query: string }) => {
         return queryOptions({
+            gcTime: 1000 * 60 * 1,
             queryFn: () => searchYoutube(args.query),
             queryKey: ['youtube', 'search', args.query],
+            staleTime: 1000 * 60 * 1,
         });
     },
 };
