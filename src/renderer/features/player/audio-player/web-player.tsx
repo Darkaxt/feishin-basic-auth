@@ -46,6 +46,26 @@ export function WebPlayer() {
     const [player1Source, setPlayer1Source] = useState<MediaElementAudioSourceNode | null>(null);
     const [player2Source, setPlayer2Source] = useState<MediaElementAudioSourceNode | null>(null);
 
+    // `react-player` may swap its underlying internal player when switching URLs
+    // (e.g. file/http streams => HTMLMediaElement, YouTube => iframe player). A
+    // MediaElementAudioSourceNode is permanently bound to a specific element, so we
+    // must recreate the node when the element changes (or disconnect when it stops
+    // being a media element).
+    const player1InternalRef = useRef<HTMLMediaElement | null>(null);
+    const player2InternalRef = useRef<HTMLMediaElement | null>(null);
+    const player1SourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const player2SourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const player1ConnectInFlightRef = useRef<null | Promise<void>>(null);
+    const player2ConnectInFlightRef = useRef<null | Promise<void>>(null);
+
+    useEffect(() => {
+        player1SourceRef.current = player1Source;
+    }, [player1Source]);
+
+    useEffect(() => {
+        player2SourceRef.current = player2Source;
+    }, [player2Source]);
+
     const fadeAndSetStatus = useCallback(
         async (startVolume: number, endVolume: number, duration: number, status: PlayerStatus) => {
             // Cancel any in-progress fade
@@ -398,46 +418,110 @@ export function WebPlayer() {
     const player1Url = useSongUrl(player1, num === 1, transcode);
     const player2Url = useSongUrl(player2, num === 2, transcode);
 
-    const handlePlayer1Start = useCallback(
-        async (player: ReactPlayer) => {
-            if (!webAudio || player1Source) return;
-            if (player1Url) {
-                // This should fire once, only if the source is real (meaning we
-                // saw the dummy source) and the context is not ready
-                if (webAudio.context.state !== 'running') {
-                    await webAudio.context.resume();
+    const disconnectPlayerSource = useCallback(
+        (playerNum: 1 | 2) => {
+            const sourceRef = playerNum === 1 ? player1SourceRef : player2SourceRef;
+            const setSource = playerNum === 1 ? setPlayer1Source : setPlayer2Source;
+            const internalRef = playerNum === 1 ? player1InternalRef : player2InternalRef;
+
+            if (sourceRef.current) {
+                try {
+                    sourceRef.current.disconnect();
+                } catch {
+                    // ignore
                 }
             }
 
-            const internal = player.getInternalPlayer() as HTMLMediaElement | undefined;
-            if (internal) {
-                const { context, gains } = webAudio;
-                const source = context.createMediaElementSource(internal);
-                source.connect(gains[0]);
-                setPlayer1Source(source);
-            }
+            sourceRef.current = null;
+            internalRef.current = null;
+            setSource(null);
         },
-        [player1Source, player1Url, webAudio],
+        [setPlayer1Source, setPlayer2Source],
+    );
+
+    const connectPlayerToWebAudio = useCallback(
+        async (playerNum: 1 | 2, player: ReactPlayer) => {
+            if (!webAudio) return;
+
+            const inFlightRef =
+                playerNum === 1 ? player1ConnectInFlightRef : player2ConnectInFlightRef;
+            if (inFlightRef.current) {
+                await inFlightRef.current;
+                return;
+            }
+
+            const internalRef = playerNum === 1 ? player1InternalRef : player2InternalRef;
+            const sourceRef = playerNum === 1 ? player1SourceRef : player2SourceRef;
+            const setSource = playerNum === 1 ? setPlayer1Source : setPlayer2Source;
+            const gain = webAudio.gains[playerNum === 1 ? 0 : 1];
+
+            const task = (async () => {
+                const internal = player.getInternalPlayer() as unknown;
+
+                // YouTube (and some other sources) are not HTMLMediaElements, so WebAudio
+                // can't attach; ensure we drop any stale node from a prior media element.
+                if (!(internal instanceof HTMLMediaElement)) {
+                    disconnectPlayerSource(playerNum);
+                    return;
+                }
+
+                if (webAudio.context.state !== 'running') {
+                    try {
+                        await webAudio.context.resume();
+                    } catch {
+                        // ignore resume failures; we'll try again on next ready
+                    }
+                }
+
+                // If the internal media element changed, we must recreate the source node.
+                if (internalRef.current === internal && sourceRef.current) {
+                    return;
+                }
+
+                if (sourceRef.current) {
+                    try {
+                        sourceRef.current.disconnect();
+                    } catch {
+                        // ignore
+                    }
+                }
+
+                internalRef.current = internal;
+
+                try {
+                    const source = webAudio.context.createMediaElementSource(internal);
+                    source.connect(gain);
+                    sourceRef.current = source;
+                    setSource(source);
+                } catch (error) {
+                    // Most commonly: trying to create another MediaElementSourceNode for the
+                    // same element, or attempting to attach a tainted/cross-origin element.
+                    console.error('Error connecting WebAudio source', { error, playerNum });
+                    disconnectPlayerSource(playerNum);
+                }
+            })();
+
+            inFlightRef.current = task.finally(() => {
+                inFlightRef.current = null;
+            });
+
+            await inFlightRef.current;
+        },
+        [disconnectPlayerSource, webAudio],
+    );
+
+    const handlePlayer1Start = useCallback(
+        async (player: ReactPlayer) => {
+            await connectPlayerToWebAudio(1, player);
+        },
+        [connectPlayerToWebAudio],
     );
 
     const handlePlayer2Start = useCallback(
         async (player: ReactPlayer) => {
-            if (!webAudio || player2Source) return;
-            if (player2Url) {
-                if (webAudio.context.state !== 'running') {
-                    await webAudio.context.resume();
-                }
-            }
-
-            const internal = player.getInternalPlayer() as HTMLMediaElement | undefined;
-            if (internal) {
-                const { context, gains } = webAudio;
-                const source = context.createMediaElementSource(internal);
-                source.connect(gains[1]);
-                setPlayer2Source(source);
-            }
+            await connectPlayerToWebAudio(2, player);
         },
-        [player2Source, player2Url, webAudio],
+        [connectPlayerToWebAudio],
     );
 
     return (
