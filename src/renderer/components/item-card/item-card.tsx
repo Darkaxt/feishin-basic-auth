@@ -29,6 +29,7 @@ import {
 } from '/@/renderer/utils/format';
 import { SEPARATOR_STRING } from '/@/shared/api/utils';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
+import { ExternalSongIndicator } from '/@/shared/components/external-song-indicator/external-song-indicator';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Separator } from '/@/shared/components/separator/separator';
@@ -347,6 +348,7 @@ const CompactItemCard = ({
             withControls && showControls && data && (!isExternal || youtubeIntegrationEnabled);
 
         const imageContainerClassName = clsx(styles.imageContainer, {
+            [styles.external]: isExternal,
             [styles.isRound]: isRound,
             [styles.noHoverOverlay]: isExternal && !showItemCardControls,
         });
@@ -380,6 +382,11 @@ const CompactItemCard = ({
                 )}
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
+                {isExternal && (
+                    <div className={styles.externalBadge} title={i18n.t('common.external')}>
+                        <ExternalSongIndicator isExternal size="sm" withSpace={false} />
+                    </div>
+                )}
                 <AnimatePresence>
                     {showItemCardControls && (
                         <ItemCardControls
@@ -625,6 +632,11 @@ const DefaultItemCard = ({
                 )}
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
+                {isExternal && (
+                    <div className={styles.externalBadge} title={i18n.t('common.external')}>
+                        <ExternalSongIndicator isExternal size="sm" withSpace={false} />
+                    </div>
+                )}
                 <AnimatePresence>
                     {showItemCardControls && (
                         <ItemCardControls
@@ -933,6 +945,11 @@ const PosterItemCard = ({
                 )}
                 {isFavorite && <div className={styles.favoriteBadge} />}
                 {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
+                {isExternal && (
+                    <div className={styles.externalBadge}>
+                        <ExternalSongIndicator isExternal size="xl" withSpace={false} />
+                    </div>
+                )}
                 <AnimatePresence>
                     {showItemCardControls && (
                         <ItemCardControls
@@ -961,9 +978,6 @@ const PosterItemCard = ({
                 {enableNavigation && navigationPath && (imageAsLink ?? !internalState) ? (
                     <Link
                         className={imageContainerClassName}
-                        data-unavailable-text={i18n.t('common.external', {
-                            postProcess: 'titleCase',
-                        })}
                         draggable={false}
                         onClick={handleImageClick}
                         onContextMenu={handleContextMenu}
@@ -978,9 +992,6 @@ const PosterItemCard = ({
                 ) : (
                     <div
                         className={imageContainerClassName}
-                        data-unavailable-text={i18n.t('common.external', {
-                            postProcess: 'titleCase',
-                        })}
                         onClick={handleImageClick}
                         onContextMenu={handleContextMenu}
                         onMouseEnter={handleMouseEnter}

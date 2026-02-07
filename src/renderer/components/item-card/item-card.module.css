@@ -62,32 +62,12 @@
 .image-container.external {
     img {
         opacity: 0.5;
-        filter: grayscale(0.5) saturate(0.7);
-        transition: all 0.2s ease-in-out;
-    }
-
-    &::after {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 1rem;
-        font-size: var(--theme-font-size-sm);
-        font-weight: 500;
-        color: white;
-        text-align: center;
-        text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
-        pointer-events: none;
-        content: attr(data-unavailable-text);
-        background-color: alpha(var(--theme-colors-state-error), 0.5);
-        opacity: 1;
         transition: all 0.2s ease-in-out;
     }
 
     &:hover {
         img {
             opacity: 1;
-            filter: grayscale(0) saturate(1);
         }
     }
 }
@@ -141,9 +121,19 @@
     transition: opacity 0.2s ease-in-out;
 }
 
-.image-container:hover .favorite-badge,
-.image-container:hover .rating-badge {
-    opacity: 0;
+.external-badge {
+    position: absolute;
+    bottom: var(--theme-spacing-sm);
+    left: var(--theme-spacing-sm);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--theme-spacing-xs) var(--theme-spacing-sm);
+    pointer-events: none;
+    background-color: alpha(var(--theme-colors-state-error), 0.85);
+    border-radius: var(--theme-radius-md);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
 }
 
 .image {
