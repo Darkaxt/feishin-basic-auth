@@ -890,6 +890,9 @@ export const usePlayer = () => {
  * @param args - The arguments to use to fetch the data
  * @returns The songs to add to the queue
  */
+
+const EXTERNAL_SERVER_ID = 'musicbrainz';
+
 export async function fetchSongsByItemType(
     queryClient: QueryClient,
     serverId: string,
@@ -900,6 +903,23 @@ export async function fetchSongsByItemType(
     },
 ) {
     const songs: Song[] = [];
+
+    if (serverId === EXTERNAL_SERVER_ID) {
+        if (args.itemType === LibraryItem.ALBUM) {
+            for (const albumId of args.id) {
+                const album = await queryClient.fetchQuery(
+                    albumQueries.detail({
+                        query: { id: albumId },
+                        serverId: EXTERNAL_SERVER_ID,
+                    }),
+                );
+                songs.push(...(album?.songs ?? []));
+            }
+            return songs;
+        }
+
+        return songs;
+    }
 
     switch (args.itemType) {
         case LibraryItem.ALBUM: {

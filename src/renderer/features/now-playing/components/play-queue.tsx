@@ -237,7 +237,6 @@ const EmptyQueueDropZone = () => {
                     const sourceServerId = (
                         args.source.item?.[0] as unknown as { _serverId: string }
                     )?._serverId;
-
                     const sourceItemType = args.source.itemType as LibraryItem;
 
                     switch (args.source.type) {
@@ -297,7 +296,7 @@ const EmptyQueueDropZone = () => {
                             const folderIds = folders.map((folder) => folder.id);
 
                             // Handle folders: fetch and add to queue
-                            if (folderIds.length > 0) {
+                            if (folderIds.length > 0 && sourceServerId) {
                                 playerContext.addToQueueByFetch(
                                     sourceServerId,
                                     folderIds,
