@@ -84,7 +84,7 @@ function buildYoutubeSearchQuery(
 ): string {
     const t = (title ?? '').trim();
     const a = (artistName ?? '').trim();
-    if (t && a) return `${t} by ${a}`;
+    if (t && a) return `${a} - ${t}`;
     return t || a || '';
 }
 
