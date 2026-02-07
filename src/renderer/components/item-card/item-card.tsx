@@ -1043,18 +1043,20 @@ export const getDataRows = (type?: 'compact' | 'default' | 'poster'): DataRow[] 
                     if ('id' in data && data.id) {
                         if ('_itemType' in data) {
                             switch (data._itemType) {
-                                case LibraryItem.ALBUM:
-                                    return (
-                                        <Link
-                                            state={{ item: data }}
-                                            to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
-                                                albumId: data.id,
-                                            })}
-                                        >
+                                case LibraryItem.ALBUM: {
+                                    const albumPath = getTitlePath(LibraryItem.ALBUM, data.id);
+                                    return albumPath ? (
+                                        <Link state={{ item: data }} to={albumPath}>
                                             <ExplicitIndicator explicitStatus={explicitStatus} />
                                             {data.name}
                                         </Link>
+                                    ) : (
+                                        <>
+                                            <ExplicitIndicator explicitStatus={explicitStatus} />
+                                            {data.name}
+                                        </>
                                     );
+                                }
                                 case LibraryItem.ALBUM_ARTIST:
                                     return (
                                         <Link
@@ -1351,7 +1353,6 @@ const getItemNavigationPath = (
     }
 
     const effectiveItemType = '_itemType' in data && data._itemType ? data._itemType : itemType;
-
     return getTitlePath(effectiveItemType, data.id);
 };
 

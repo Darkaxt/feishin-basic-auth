@@ -20,6 +20,7 @@ import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumInfiniteCarousel } from '/@/renderer/features/albums/components/album-infinite-carousel';
+import { isMbzAlbumId } from '/@/renderer/features/musicbrainz/utils';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import {
@@ -29,7 +30,7 @@ import {
 import { ListSortOrderToggleButtonControlled } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { FILTER_KEYS, searchLibraryItems } from '/@/renderer/features/shared/utils';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, usePlayerSong } from '/@/renderer/store';
+import { useCurrentServerId, usePlayerSong } from '/@/renderer/store';
 import { useExternalLinks, useSettingsStore } from '/@/renderer/store/settings.store';
 import { sentenceCase, titleCase } from '/@/renderer/utils';
 import { replaceURLWithHTMLLinks } from '/@/renderer/utils/linkify';
@@ -118,6 +119,13 @@ const AlbumMetadataTags = ({ album }: AlbumMetadataTagsProps) => {
             })) || [];
 
         const items: Array<{ id: string; value: ReactNode | string | undefined }> = [];
+
+        if (album._serverType === ServerType.EXTERNAL) {
+            items.push({
+                id: 'unavailable',
+                value: t('common.unavailable', { postProcess: 'sentenceCase' }),
+            });
+        }
 
         items.push(
             ...releaseTypes,
@@ -362,9 +370,14 @@ const AlbumMetadataExternalLinks = ({
 
 export const AlbumDetailContent = () => {
     const { albumId } = useParams() as { albumId: string };
-    const server = useCurrentServer();
+    const serverId = useCurrentServerId();
+    const isMbz = isMbzAlbumId(albumId);
+
     const detailQuery = useSuspenseQuery(
-        albumQueries.detail({ query: { id: albumId }, serverId: server.id }),
+        albumQueries.detail({
+            query: { id: albumId },
+            serverId: isMbz ? 'musicbrainz' : serverId,
+        }),
     );
 
     const { externalLinks, lastFM, musicBrainz } = useExternalLinks();

@@ -45,6 +45,7 @@ interface TextPlayButtonProps extends ButtonProps {
 
 export const PlayTextButton = ({
     className,
+    disabled,
     showTooltip = true,
     variant = 'default',
     ...props
@@ -58,6 +59,7 @@ export const PlayTextButton = ({
                 label: styles.wideTextButtonLabel,
                 root: styles.wideTextButton,
             }}
+            disabled={disabled}
             variant="subtle"
             {...props}
         >

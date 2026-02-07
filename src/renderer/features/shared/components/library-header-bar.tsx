@@ -32,6 +32,7 @@ const LibraryHeaderBarComponent = ({ children, ignoreMaxWidth }: LibraryHeaderBa
 
 interface HeaderPlayButtonProps {
     className?: string;
+    disabled?: boolean;
     ids?: string[];
     itemType: LibraryItem;
     listQuery?: Record<string, any>;
@@ -46,6 +47,7 @@ interface TitleProps {
 
 const HeaderPlayButton = ({
     className,
+    disabled,
     ids,
     itemType,
     listQuery,
@@ -58,6 +60,8 @@ const HeaderPlayButton = ({
 
     const handlePlay = useCallback(
         (playType: Play) => {
+            if (disabled) return;
+
             if (listQuery) {
                 player.addToQueueByListQuery(serverId, listQuery, itemType, playType);
             } else if (ids) {
@@ -68,7 +72,7 @@ const HeaderPlayButton = ({
 
             closeAllModals();
         },
-        [listQuery, ids, songs, player, serverId, itemType],
+        [disabled, listQuery, ids, songs, player, serverId, itemType],
     );
 
     const isPlayerFetching = useIsPlayerFetching();
@@ -80,6 +84,7 @@ const HeaderPlayButton = ({
         <div className={styles.playButtonContainer}>
             <DefaultPlayButton
                 className={className}
+                disabled={disabled}
                 loading={isPlayerFetching}
                 onClick={() => setIsOpen((prev) => !prev)}
                 ref={buttonRef}

@@ -7,6 +7,7 @@ import { NativeScrollArea } from '/@/renderer/components/native-scroll-area/nati
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { AlbumDetailContent } from '/@/renderer/features/albums/components/album-detail-content';
 import { AlbumDetailHeader } from '/@/renderer/features/albums/components/album-detail-header';
+import { isMbzAlbumId } from '/@/renderer/features/musicbrainz/utils';
 import { AnimatedPage } from '/@/renderer/features/shared/components/animated-page';
 import {
     LibraryBackgroundImage,
@@ -16,9 +17,9 @@ import { LibraryContainer } from '/@/renderer/features/shared/components/library
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { useFastAverageColor } from '/@/renderer/hooks';
-import { useAlbumBackground, useCurrentServer } from '/@/renderer/store';
+import { useAlbumBackground, useCurrentServerId } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
 const AlbumDetailRoute = () => {
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -26,18 +27,23 @@ const AlbumDetailRoute = () => {
     const { albumBackground, albumBackgroundBlur } = useAlbumBackground();
 
     const { albumId } = useParams() as { albumId: string };
-    const server = useCurrentServer();
+    const serverId = useCurrentServerId();
+    const isMbz = isMbzAlbumId(albumId);
 
     const location = useLocation();
 
     const detailQuery = useQuery({
-        ...albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
+        ...albumQueries.detail({
+            query: { id: albumId },
+            serverId: isMbz ? 'musicbrainz' : serverId,
+        }),
         placeholderData: location.state?.item,
     });
 
     const imageUrl =
         useItemImageUrl({
             id: detailQuery?.data?.imageId || undefined,
+            imageUrl: detailQuery?.data?.imageUrl || undefined,
             itemType: LibraryItem.ALBUM,
             type: 'itemCard',
         }) || '';
@@ -52,9 +58,11 @@ const AlbumDetailRoute = () => {
 
     const showBlurredImage = albumBackground;
 
-    if (isColorLoading) {
+    if (isColorLoading || (detailQuery.isLoading && !detailQuery.data)) {
         return <Spinner container />;
     }
+
+    const isExternal = detailQuery?.data?._serverType === ServerType.EXTERNAL;
 
     return (
         <AnimatedPage key={`album-detail-${albumId}`}>
@@ -64,6 +72,7 @@ const AlbumDetailRoute = () => {
                     children: (
                         <LibraryHeaderBar>
                             <LibraryHeaderBar.PlayButton
+                                disabled={isExternal}
                                 ids={[albumId]}
                                 itemType={LibraryItem.ALBUM}
                                 variant="default"

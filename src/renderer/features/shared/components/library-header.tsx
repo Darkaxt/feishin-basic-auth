@@ -49,11 +49,13 @@ interface LibraryHeaderProps {
 
 export const LibraryHeader = forwardRef(
     (
-        { children, containerClassName, imageUrl, item, title }: LibraryHeaderProps,
+        { children, containerClassName, imageUrl: imageUrlProp, item, title }: LibraryHeaderProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
         const [isImageError, setIsImageError] = useState<boolean | null>(false);
+
+        const effectiveImageUrl = imageUrlProp ?? item.imageUrl ?? undefined;
 
         const onImageError = () => {
             setIsImageError(true);
@@ -77,20 +79,18 @@ export const LibraryHeader = forwardRef(
         };
 
         const openImage = useCallback(() => {
-            const imageId = item.imageId;
             const itemType = item.type as LibraryItem;
 
-            if (!imageId || !itemType) {
-                return;
+            let modalImageUrl = effectiveImageUrl;
+
+            if (!modalImageUrl && item.imageId && itemType) {
+                modalImageUrl = getItemImageUrl({
+                    id: item.imageId,
+                    itemType,
+                });
             }
 
-            const imageUrl = getItemImageUrl({
-                id: imageId,
-                itemType,
-            });
-
-            if (!imageUrl) {
-                console.error('No image URL found');
+            if (!modalImageUrl) {
                 return;
             }
 
@@ -110,7 +110,7 @@ export const LibraryHeader = forwardRef(
                             enableViewport={false}
                             fetchPriority="high"
                             isExplicit={item.explicitStatus === ExplicitStatus.EXPLICIT}
-                            src={imageUrl}
+                            src={modalImageUrl}
                             style={{
                                 maxHeight: '100%',
                                 maxWidth: '100%',
@@ -122,7 +122,7 @@ export const LibraryHeader = forwardRef(
                 ),
                 fullScreen: true,
             });
-        }, [item.explicitStatus, item.imageId, item.type]);
+        }, [effectiveImageUrl, item.explicitStatus, item.imageId, item.type]);
 
         return (
             <div className={clsx(styles.libraryHeader, containerClassName)} ref={ref}>
@@ -149,7 +149,7 @@ export const LibraryHeader = forwardRef(
                             id={item.imageId}
                             itemType={item.type as LibraryItem}
                             onError={onImageError}
-                            src={imageUrl || ''}
+                            src={effectiveImageUrl ?? ''}
                             type="header"
                         />
                     )}
@@ -263,6 +263,7 @@ export const calculateTitleSize = (title: string) => {
 };
 
 interface LibraryHeaderMenuProps {
+    disabled?: boolean;
     favorite?: boolean;
     onArtistRadio?: () => void;
     onFavorite?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -274,6 +275,7 @@ interface LibraryHeaderMenuProps {
 }
 
 export const LibraryHeaderMenu = ({
+    disabled,
     favorite,
     onArtistRadio,
     onFavorite,
@@ -319,15 +321,30 @@ export const LibraryHeaderMenu = ({
     return (
         <div className={styles.libraryHeaderMenu}>
             <Group wrap="nowrap">
-                {onPlay && <PlayTextButton {...handlePlayNow.handlers} {...handlePlayNow.props} />}
                 {onPlay && (
-                    <PlayNextTextButton {...handlePlayNext.handlers} {...handlePlayNext.props} />
+                    <PlayTextButton
+                        {...handlePlayNow.handlers}
+                        {...handlePlayNow.props}
+                        disabled={disabled}
+                    />
                 )}
                 {onPlay && (
-                    <PlayLastTextButton {...handlePlayLast.handlers} {...handlePlayLast.props} />
+                    <PlayNextTextButton
+                        {...handlePlayNext.handlers}
+                        {...handlePlayNext.props}
+                        disabled={disabled}
+                    />
+                )}
+                {onPlay && (
+                    <PlayLastTextButton
+                        {...handlePlayLast.handlers}
+                        {...handlePlayLast.props}
+                        disabled={disabled}
+                    />
                 )}
                 {onArtistRadio && (
                     <Button
+                        disabled={disabled}
                         leftSection={
                             isPlayerFetching ? (
                                 <Spinner color="white" />
@@ -344,17 +361,17 @@ export const LibraryHeaderMenu = ({
                 )}
             </Group>
             <Group gap="sm" wrap="nowrap">
-                {onRating && (
+                {onRating && !disabled && (
                     <Rating
                         onChange={onRating}
-                        readOnly={isMutatingRating}
+                        readOnly={isMutatingRating || disabled}
                         size="lg"
                         value={rating || 0}
                     />
                 )}
-                {onFavorite && (
+                {onFavorite && !disabled && (
                     <ActionIcon
-                        disabled={isMutatingFavorite}
+                        disabled={isMutatingFavorite || disabled}
                         icon="favorite"
                         iconProps={{
                             fill: favorite ? 'primary' : undefined,
@@ -364,8 +381,9 @@ export const LibraryHeaderMenu = ({
                         variant="transparent"
                     />
                 )}
-                {onMore && (
+                {onMore && !disabled && (
                     <ActionIcon
+                        disabled={disabled}
                         icon="ellipsisHorizontal"
                         onClick={onMore}
                         size="lg"

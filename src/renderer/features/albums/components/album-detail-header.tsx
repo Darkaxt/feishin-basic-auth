@@ -8,6 +8,7 @@ import styles from './album-detail-header.module.css';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
+import { isMbzAlbumId } from '/@/renderer/features/musicbrainz/utils';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
     LibraryHeader,
@@ -16,7 +17,7 @@ import {
 import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
 import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServer, useShowRatings } from '/@/renderer/store';
+import { useCurrentServerId, useShowRatings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
@@ -30,13 +31,21 @@ import { Play } from '/@/shared/types/types';
 export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     const { albumId } = useParams() as { albumId: string };
     const { t } = useTranslation();
-    const server = useCurrentServer();
+    const serverId = useCurrentServerId();
     const showRatings = useShowRatings();
+
+    const isMbz = isMbzAlbumId(albumId);
     const detailQuery = useQuery(
-        albumQueries.detail({ query: { id: albumId }, serverId: server?.id }),
+        albumQueries.detail({
+            query: { id: albumId },
+            serverId: isMbz ? 'musicbrainz' : serverId,
+        }),
     );
 
+    const isExternal = detailQuery?.data?._serverType === ServerType.EXTERNAL;
+
     const showRating =
+        !isExternal &&
         showRatings &&
         (detailQuery?.data?._serverType === ServerType.NAVIDROME ||
             detailQuery?.data?._serverType === ServerType.SUBSONIC);
@@ -80,8 +89,8 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
         : undefined;
 
     const handlePlay = (type?: Play) => {
-        if (!server?.id || !albumId) return;
-        addToQueueByFetch(server.id, [albumId], LibraryItem.ALBUM, type || playButtonBehavior);
+        if (isExternal || !serverId || !albumId) return;
+        addToQueueByFetch(serverId, [albumId], LibraryItem.ALBUM, type || playButtonBehavior);
     };
 
     const handleMoreOptions = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -248,6 +257,7 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
                         />
                     </Group>
                     <LibraryHeaderMenu
+                        disabled={isExternal}
                         favorite={detailQuery?.data?.userFavorite}
                         onFavorite={handleFavorite}
                         onMore={handleMoreOptions}

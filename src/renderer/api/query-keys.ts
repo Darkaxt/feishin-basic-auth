@@ -291,6 +291,7 @@ export const queryKeys: Record<
                       ]
                     : null,
             ] as const,
+        release: (releaseId: string) => ['musicbrainz', 'release', releaseId] as const,
         root: () => ['musicbrainz'] as const,
     },
     musicFolders: {
