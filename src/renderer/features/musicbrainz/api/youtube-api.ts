@@ -12,14 +12,14 @@ async function searchYoutube(query: string): Promise<Array<{ type: string; video
 export const youtubeQueries = {
     search: (args: { query: string }) => {
         return queryOptions({
-            gcTime: 1000 * 60 * 1,
+            gcTime: 1000 * 60 * 5,
             queryFn: async () => {
                 const results = await searchYoutube(args.query);
                 logFn.debug('Youtube API queried', { meta: { query: args.query, results } });
                 return results;
             },
             queryKey: ['youtube', 'search', args.query],
-            staleTime: 1000 * 60 * 1,
+            staleTime: 1000 * 60 * 5,
         });
     },
 };
