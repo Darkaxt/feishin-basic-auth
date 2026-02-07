@@ -24,29 +24,16 @@ const getItemName = (item: unknown): string => {
     return 'Item';
 };
 
-const getItemImage = (item: unknown): null | string => {
-    if (item && typeof item === 'object') {
-        if ('imageId' in item && typeof item.imageId === 'string') {
-            return item.imageId;
-        }
-
-        if ('imageUrl' in item && typeof item.imageUrl === 'string') {
-            return item.imageUrl;
-        }
-    }
-    return null;
-};
-
 export const ContextMenuPreview = ({ items, itemType }: ContextMenuPreviewProps) => {
     const { t } = useTranslation();
     const itemCount = items.length;
     const firstItem = items[0];
     const itemName = firstItem ? getItemName(firstItem) : 'Item';
-    const itemImage = firstItem ? getItemImage(firstItem) : null;
     const isMultiple = itemCount > 1;
 
     const imageUrl = useItemImageUrl({
         id: (firstItem as { imageId?: string })?.imageId,
+        imageUrl: (firstItem as { imageUrl?: string })?.imageUrl,
         itemType: itemType || LibraryItem.SONG,
         serverId: (firstItem as { _serverId?: string })?._serverId,
         type: 'table',
@@ -61,7 +48,7 @@ export const ContextMenuPreview = ({ items, itemType }: ContextMenuPreviewProps)
             <div className={styles.divider} />
             <div className={styles.preview}>
                 <div className={styles.content}>
-                    {itemImage ? (
+                    {imageUrl ? (
                         <div className={styles.imageContainer}>
                             <img alt={itemName} className={styles.image} src={imageUrl} />
                             <div className={styles.imageOverlay} />

@@ -32,8 +32,10 @@ export const DragPreview = memo(({ data }: DragPreviewProps) => {
     const itemName = firstItem ? getItemName(firstItem) : 'Item';
 
     const itemImage = useItemImageUrl({
-        id: (firstItem as { imageId: string })?.imageId,
+        id: (firstItem as { imageId?: string })?.imageId,
+        imageUrl: (firstItem as { imageUrl?: string })?.imageUrl,
         itemType: data.itemType || LibraryItem.SONG,
+        serverId: (firstItem as { _serverId?: string })?._serverId,
         type: 'table',
     });
 
