@@ -341,9 +341,7 @@ export function normalizeReleaseToAlbum(release: IRelease): Album {
         }),
     );
 
-    const hasArtwork =
-        release['cover-art-archive']?.artwork === true &&
-        release['cover-art-archive']?.front === true;
+    const hasArtwork = releaseGroup;
     const primaryReleaseType = releaseGroup?.['primary-type']?.toLowerCase() || null;
     const secondaryReleaseTypes =
         releaseGroup?.['secondary-types']?.map((type) => type.toLowerCase()) || [];
@@ -355,7 +353,7 @@ export function normalizeReleaseToAlbum(release: IRelease): Album {
     const originalYear = originalDate ? Number(originalDate.split('-')[0]) : null;
     const releaseDate = release.date ? release.date : null;
     const releaseYear = release.date ? Number(release.date.split('-')[0]) : null;
-    const imageUrl = hasArtwork ? getImageUrl(release.id) : null;
+    const imageUrl = hasArtwork ? getImageUrlByReleaseGroupId(releaseGroup.id) : null;
     const albumId = `musicbrainz-${release.id}`;
 
     const songs: Song[] = [];
