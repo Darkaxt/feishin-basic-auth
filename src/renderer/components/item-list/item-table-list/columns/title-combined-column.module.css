@@ -42,7 +42,6 @@ a.title {
     width: auto;
 }
 
-
 .artists {
     display: block;
     width: 100%;
@@ -94,3 +93,4 @@ a.title {
 .active {
     color: var(--theme-colors-primary);
 }
+

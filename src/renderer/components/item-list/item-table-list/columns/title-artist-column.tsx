@@ -14,9 +14,10 @@ import {
 import { useIsActiveRow } from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
+import { ExternalSongIndicator } from '/@/shared/components/external-song-indicator/external-song-indicator';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Text } from '/@/shared/components/text/text';
-import { Folder, LibraryItem, QueueSong } from '/@/shared/types/domain-types';
+import { Folder, LibraryItem, QueueSong, ServerType } from '/@/shared/types/domain-types';
 
 export const DefaultTitleArtistColumn = (props: ItemTableListInnerColumn) => {
     const rowItem = props.getRowItem?.(props.rowIndex) ?? (props.data as any[])[props.rowIndex];
@@ -54,6 +55,10 @@ export const DefaultTitleArtistColumn = (props: ItemTableListInnerColumn) => {
                 >
                     <Text className={styles.title} isNoSelect size="md" {...titleLinkProps}>
                         <ExplicitIndicator explicitStatus={item?.explicitStatus} />
+                        <ExternalSongIndicator
+                            isExternal={item?._serverType === ServerType.EXTERNAL}
+                            size="sm"
+                        />
                         {item.name as string}
                     </Text>
                     <div className={styles.artists}>
@@ -123,6 +128,10 @@ export const QueueSongTitleArtistColumn = (props: ItemTableListInnerColumn) => {
                         {...titleLinkProps}
                     >
                         <ExplicitIndicator explicitStatus={song?.explicitStatus} />
+                        <ExternalSongIndicator
+                            isExternal={song?._serverType === ServerType.EXTERNAL}
+                            size="sm"
+                        />
                         {row.name as string}
                         {song?.trackSubtitle && props.itemType !== LibraryItem.QUEUE_SONG && (
                             <Text

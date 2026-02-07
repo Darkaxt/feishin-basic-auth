@@ -115,6 +115,7 @@ import {
     LuWifi,
     LuWifiOff,
     LuX,
+    LuYoutube,
 } from 'react-icons/lu';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md';
 import { PiMouseLeftClickFill, PiMouseRightClickFill } from 'react-icons/pi';
@@ -173,6 +174,7 @@ export const AppIcon = {
     error: LuShieldAlert,
     expand: LuExpand,
     externalLink: LuExternalLink,
+    externalSong: LuYoutube,
     favorite: LuHeart,
     fileJson: LuFileJson,
     filter: LuListFilter,
