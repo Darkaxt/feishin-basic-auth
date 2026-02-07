@@ -17,7 +17,7 @@ import {
 import { useSetFavorite } from '/@/renderer/features/shared/hooks/use-set-favorite';
 import { useSetRating } from '/@/renderer/features/shared/hooks/use-set-rating';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useCurrentServerId, useShowRatings } from '/@/renderer/store';
+import { useCurrentServerId, useIntegrationsSettings, useShowRatings } from '/@/renderer/store';
 import { usePlayButtonBehavior } from '/@/renderer/store/settings.store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { normalizeReleaseTypes } from '/@/renderer/utils/normalize-release-types';
@@ -43,6 +43,7 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
     );
 
     const isExternal = detailQuery?.data?._serverType === ServerType.EXTERNAL;
+    const { youtube: youtubeEnabled } = useIntegrationsSettings();
 
     const showRating =
         !isExternal &&
@@ -257,7 +258,7 @@ export const AlbumDetailHeader = forwardRef<HTMLDivElement>((_props, ref) => {
                         />
                     </Group>
                     <LibraryHeaderMenu
-                        disabled={isExternal}
+                        disabled={isExternal && !youtubeEnabled}
                         favorite={detailQuery?.data?.userFavorite}
                         onFavorite={handleFavorite}
                         onMore={handleMoreOptions}

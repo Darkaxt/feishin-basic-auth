@@ -17,7 +17,7 @@ import { LibraryContainer } from '/@/renderer/features/shared/components/library
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { useFastAverageColor } from '/@/renderer/hooks';
-import { useAlbumBackground, useCurrentServerId } from '/@/renderer/store';
+import { useAlbumBackground, useCurrentServerId, useIntegrationsSettings } from '/@/renderer/store';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { LibraryItem, ServerType } from '/@/shared/types/domain-types';
 
@@ -28,6 +28,7 @@ const AlbumDetailRoute = () => {
 
     const { albumId } = useParams() as { albumId: string };
     const serverId = useCurrentServerId();
+    const { youtube: youtubeEnabled } = useIntegrationsSettings();
     const isMbz = isMbzAlbumId(albumId);
 
     const location = useLocation();
@@ -72,7 +73,7 @@ const AlbumDetailRoute = () => {
                     children: (
                         <LibraryHeaderBar>
                             <LibraryHeaderBar.PlayButton
-                                disabled={isExternal}
+                                disabled={isExternal && !youtubeEnabled}
                                 ids={[albumId]}
                                 itemType={LibraryItem.ALBUM}
                                 variant="default"
