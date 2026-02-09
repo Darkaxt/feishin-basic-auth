@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
 import throttle from 'lodash/throttle';
 import { AnimatePresence } from 'motion/react';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
@@ -38,7 +39,6 @@ import { ItemListKey, TableColumn } from '/@/shared/types/types';
 interface ItemDetailListProps {
     currentPage?: number;
     data?: unknown[];
-    dataVersion?: number;
     getItem?: (index: number) => unknown;
     internalState?: ItemListStateActions;
     itemCount?: number;
@@ -50,13 +50,12 @@ interface ItemDetailListProps {
 interface RowData {
     controls?: ItemControls;
     data: unknown[];
-    enableTrackTableHeader: boolean;
     getItem?: (index: number) => unknown;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
-    queryClient: ReturnType<typeof useQueryClient>;
     registerSongs: (albumId: string, songs: Song[]) => void;
     trackColumns: ItemTableListColumnConfig[];
+    trackTableSize: 'compact' | 'default' | 'large';
 }
 
 interface TrackRowProps {
@@ -65,6 +64,7 @@ interface TrackRowProps {
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
     rowIndex: number;
+    size: 'compact' | 'default' | 'large';
     song: Song;
 }
 
@@ -78,6 +78,7 @@ const TrackRow = memo(
         isMutatingFavorite,
         onFavoriteClick,
         rowIndex,
+        size,
         song,
     }: TrackRowProps) => {
         const playerContext = usePlayer();
@@ -173,13 +174,13 @@ const TrackRow = memo(
 
         return (
             <tr
-                className={
-                    isSelected
-                        ? styles.trackRowSelected
-                        : isDragging
-                          ? styles.trackRowDragging
-                          : undefined
-                }
+                className={clsx({
+                    [styles.trackRowDragging]: isDragging,
+                    [styles.trackRowSelected]: isSelected,
+                    [styles.trackRowSizeCompact]: size === 'compact',
+                    [styles.trackRowSizeDefault]: size === 'default',
+                    [styles.trackRowSizeLarge]: size === 'large',
+                })}
                 onClick={handleRowClick}
                 ref={dragRef ?? undefined}
             >
@@ -210,8 +211,16 @@ const TrackRow = memo(
                         />
                     );
 
+                    const isTitleColumn = col.id === TableColumn.TITLE;
                     return (
-                        <td className={styles.trackCell} key={col.id} style={style}>
+                        <td
+                            className={clsx(
+                                styles.trackCell,
+                                !isTitleColumn && styles.trackCellMuted,
+                            )}
+                            key={col.id}
+                            style={style}
+                        >
                             {content}
                         </td>
                     );
@@ -229,14 +238,13 @@ const RowContent = memo(
     ({
         controls,
         data,
-        enableTrackTableHeader,
         getItem,
         index,
         internalState,
         isMutatingFavorite,
-        queryClient,
         registerSongs,
         trackColumns,
+        trackTableSize,
     }: RowContentProps) => {
         const [showControls, setShowControls] = useState(false);
         const item = useMemo(() => {
@@ -291,7 +299,13 @@ const RowContent = memo(
                         </div>
                     </div>
                     <div className={styles.right}>
-                        <div className={styles.skeletonTracks}>
+                        <div
+                            className={clsx(styles.skeletonTracks, {
+                                [styles.skeletonTracksSizeCompact]: trackTableSize === 'compact',
+                                [styles.skeletonTracksSizeDefault]: trackTableSize === 'default',
+                                [styles.skeletonTracksSizeLarge]: trackTableSize === 'large',
+                            })}
+                        >
                             {Array.from({ length: 10 }).map((_, i) => (
                                 <div className={styles.skeletonTrackRow} key={i}>
                                     <Skeleton className={styles.skeletonTrackCell} />
@@ -354,6 +368,7 @@ const RowContent = memo(
                                     key={song.id}
                                     onFavoriteClick={onFavoriteClick}
                                     rowIndex={rowIndex}
+                                    size={trackTableSize}
                                     song={song as Song}
                                 />
                             ))}
@@ -366,14 +381,13 @@ const RowContent = memo(
     (prev, next) =>
         prev.index === next.index &&
         prev.data === next.data &&
-        prev.enableTrackTableHeader === next.enableTrackTableHeader &&
         prev.getItem === next.getItem &&
         prev.internalState === next.internalState &&
-        prev.queryClient === next.queryClient &&
         prev.isMutatingFavorite === next.isMutatingFavorite &&
         prev.controls === next.controls &&
         prev.registerSongs === next.registerSongs &&
-        prev.trackColumns === next.trackColumns,
+        prev.trackColumns === next.trackColumns &&
+        prev.trackTableSize === next.trackTableSize,
 );
 
 RowContent.displayName = 'RowContent';
@@ -392,7 +406,6 @@ RowComponent.displayName = 'ItemDetailRow';
 export const ItemDetailList = ({
     currentPage,
     data,
-    dataVersion,
     getItem,
     itemCount: externalItemCount,
     items,
@@ -462,7 +475,7 @@ export const ItemDetailList = ({
             ],
         });
     }, [tableConfig?.columns]);
-    const enableTrackTableHeader = tableConfig?.enableHeader ?? false;
+    const trackTableSize = tableConfig?.size ?? 'default';
 
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
@@ -492,24 +505,24 @@ export const ItemDetailList = ({
         () => ({
             controls,
             data: dataSource,
-            enableTrackTableHeader,
             getItem,
             internalState,
             isMutatingFavorite,
             queryClient,
             registerSongs,
             trackColumns,
+            trackTableSize,
         }),
         [
             controls,
             dataSource,
-            enableTrackTableHeader,
             getItem,
             internalState,
             isMutatingFavorite,
             queryClient,
             registerSongs,
             trackColumns,
+            trackTableSize,
         ],
     );
 

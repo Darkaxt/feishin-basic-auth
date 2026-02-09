@@ -104,7 +104,6 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
                             enableHeader: { hidden: true },
                             itemsPerPage: { hidden: true },
                             pagination: { hidden: true },
-                            size: { hidden: true },
                         },
                         tableColumnsData: SONG_TABLE_COLUMNS,
                     }}

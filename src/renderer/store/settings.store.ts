@@ -203,7 +203,7 @@ const ItemTableListPropsSchema = z.object({
     enableHorizontalBorders: z.boolean(),
     enableRowHoverHighlight: z.boolean(),
     enableVerticalBorders: z.boolean(),
-    size: z.enum(['compact', 'default']),
+    size: z.enum(['compact', 'default', 'large']),
 });
 
 const ItemListConfigSchema = z.object({
