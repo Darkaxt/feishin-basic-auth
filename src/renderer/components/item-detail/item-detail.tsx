@@ -11,21 +11,24 @@ import styles from './item-detail.module.css';
 
 import { ItemCardControls } from '/@/renderer/components/item-card/item-card-controls';
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
-import { createExtractRowId } from '/@/renderer/components/item-list/helpers/extract-row-id';
 import { useDefaultItemListControls } from '/@/renderer/components/item-list/helpers/item-list-controls';
 import {
     ItemListStateActions,
+    ItemListStateItemWithRequiredProperties,
     useItemListState,
+    useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
+import { useItemDragDropState } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-drag-drop-state';
 import { ItemControls } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { AppRoute } from '/@/renderer/router/routes';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ReadOnlyRating } from '/@/shared/components/read-only-rating/read-only-rating';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
-import { Album, Song } from '/@/shared/types/domain-types';
+import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
 
 interface ItemDetailListProps {
     currentPage?: number;
@@ -46,59 +49,159 @@ interface RowData {
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     queryClient: ReturnType<typeof useQueryClient>;
+    registerSongs: (albumId: string, songs: Song[]) => void;
 }
 
 interface TrackRowProps {
+    internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
     song: Song;
 }
 
-const TrackRow = memo(({ isMutatingFavorite, onFavoriteClick, song }: TrackRowProps) => {
-    const discAndCol =
-        `${song.discNumber ?? 1}` + ' - ' + song.trackNumber.toString().padStart(2, '0');
+const TrackRow = memo(
+    ({ internalState, isMutatingFavorite, onFavoriteClick, song }: TrackRowProps) => {
+        const playerContext = usePlayer();
+        const { dragRef, isDragging } = useItemDragDropState<HTMLTableRowElement>({
+            enableDrag: true,
+            internalState,
+            isDataRow: true,
+            item: song,
+            itemType: LibraryItem.SONG,
+            playerContext,
+        });
+        const discAndCol =
+            `${song.discNumber ?? 1}` + ' - ' + song.trackNumber.toString().padStart(2, '0');
+        const isSelected = useItemSelectionState(internalState, song.id);
 
-    return (
-        <tr>
-            <td className={styles.trackColNumber} style={{ fontFamily: 'monospace' }}>
-                {discAndCol}
-            </td>
-            <td className={styles.trackColTitle}>{song.name}</td>
-            <td className={styles.trackColDuration} style={{ fontFamily: 'monospace' }}>
-                {formatDuration(song.duration)}
-            </td>
-            <td className={styles.trackColFavorite}>
-                <div
-                    aria-disabled={isMutatingFavorite}
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        onFavoriteClick(song);
-                    }}
-                    onDoubleClick={(event) => {
-                        event.stopPropagation();
-                        event.preventDefault();
-                    }}
-                    role="button"
-                >
-                    <Icon icon="favorite" size="xs" />
-                </div>
-            </td>
-            <td className={styles.trackColRating}>
-                <ReadOnlyRating size="md" value={song.userRating} />
-            </td>
-        </tr>
-    );
-});
+        const handleRowClick = useCallback(
+            (e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.ctrlKey || e.metaKey) {
+                    internalState.toggleSelected(song);
+                } else if (e.shiftKey) {
+                    const selectedItems = internalState.getSelected();
+                    const lastSelectedItem = selectedItems[selectedItems.length - 1];
+
+                    if (
+                        lastSelectedItem &&
+                        typeof lastSelectedItem === 'object' &&
+                        lastSelectedItem !== null
+                    ) {
+                        const data = internalState.getData();
+                        const validData = data.filter((d) => d && typeof d === 'object');
+                        const lastRowId = internalState.extractRowId(lastSelectedItem);
+                        if (!lastRowId) {
+                            internalState.setSelected([song]);
+                            return;
+                        }
+                        const lastIndex = internalState.findItemIndex(lastRowId);
+                        const currentIndex = internalState.findItemIndex(song.id);
+
+                        if (lastIndex !== -1 && currentIndex !== -1) {
+                            const startIndex = Math.min(lastIndex, currentIndex);
+                            const stopIndex = Math.max(lastIndex, currentIndex);
+                            const rangeItems: ItemListStateItemWithRequiredProperties[] = [];
+                            for (let i = startIndex; i <= stopIndex; i++) {
+                                const rangeItem = validData[i];
+                                if (
+                                    rangeItem &&
+                                    typeof rangeItem === 'object' &&
+                                    '_serverId' in rangeItem &&
+                                    '_itemType' in rangeItem
+                                ) {
+                                    const rangeRowId = internalState.extractRowId(rangeItem);
+                                    if (rangeRowId) {
+                                        rangeItems.push(
+                                            rangeItem as ItemListStateItemWithRequiredProperties,
+                                        );
+                                    }
+                                }
+                            }
+                            const currentSelected = internalState.getSelected();
+                            const newSelected = [
+                                ...currentSelected.filter(
+                                    (
+                                        selectedItem,
+                                    ): selectedItem is ItemListStateItemWithRequiredProperties =>
+                                        typeof selectedItem === 'object' && selectedItem !== null,
+                                ),
+                            ];
+                            rangeItems.forEach((rangeItem) => {
+                                const rangeRowId = internalState.extractRowId(rangeItem);
+                                if (
+                                    rangeRowId &&
+                                    !newSelected.some(
+                                        (selected) =>
+                                            internalState.extractRowId(selected) === rangeRowId,
+                                    )
+                                ) {
+                                    newSelected.push(rangeItem);
+                                }
+                            });
+                            internalState.setSelected(newSelected);
+                        } else {
+                            internalState.setSelected([song]);
+                        }
+                    } else {
+                        internalState.setSelected([song]);
+                    }
+                } else {
+                    internalState.setSelected([song]);
+                }
+            },
+            [internalState, song],
+        );
+
+        return (
+            <tr
+                className={
+                    isSelected
+                        ? styles.trackRowSelected
+                        : isDragging
+                          ? styles.trackRowDragging
+                          : undefined
+                }
+                onClick={handleRowClick}
+                ref={dragRef ?? undefined}
+            >
+                <td className={styles.trackColNumber} style={{ fontFamily: 'monospace' }}>
+                    {discAndCol}
+                </td>
+                <td className={styles.trackColTitle}>{song.name}</td>
+                <td className={styles.trackColDuration} style={{ fontFamily: 'monospace' }}>
+                    {formatDuration(song.duration)}
+                </td>
+                <td className={styles.trackColFavorite}>
+                    <div
+                        aria-disabled={isMutatingFavorite}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            onFavoriteClick(song);
+                        }}
+                        onDoubleClick={(event) => {
+                            event.stopPropagation();
+                            event.preventDefault();
+                        }}
+                        role="button"
+                    >
+                        <Icon icon="favorite" size="xs" />
+                    </div>
+                </td>
+                <td className={styles.trackColRating}>
+                    <ReadOnlyRating size="md" value={song.userRating} />
+                </td>
+            </tr>
+        );
+    },
+);
 
 TrackRow.displayName = 'TrackRow';
 
 type RowContentProps = Omit<RowComponentProps<RowData>, 'style'>;
 
-/**
- * Inner row content – memoized with custom comparator so it does NOT re-render when only
- * `style` or `ariaAttributes` change (e.g. on scroll). Only re-renders when data/index/mutation state change.
- */
 const RowContent = memo(
     ({
         controls,
@@ -108,6 +211,7 @@ const RowContent = memo(
         internalState,
         isMutatingFavorite,
         queryClient,
+        registerSongs,
     }: RowContentProps) => {
         const [showControls, setShowControls] = useState(false);
         const item = useMemo(() => {
@@ -139,6 +243,12 @@ const RowContent = memo(
                 }))
             );
         }, [songData, item?.id, item?.songCount]);
+
+        useEffect(() => {
+            if (item?.id && songData?.songs?.length) {
+                registerSongs(item.id, songData.songs as Song[]);
+            }
+        }, [item?.id, registerSongs, songData?.songs]);
 
         const onFavoriteClick = useCallback((song: Song) => {
             // TODO: toggle favorite for song
@@ -213,6 +323,7 @@ const RowContent = memo(
                         <tbody>
                             {songs.map((song) => (
                                 <TrackRow
+                                    internalState={internalState}
                                     isMutatingFavorite={isMutatingFavorite}
                                     key={song.id}
                                     onFavoriteClick={onFavoriteClick}
@@ -232,7 +343,8 @@ const RowContent = memo(
         prev.internalState === next.internalState &&
         prev.queryClient === next.queryClient &&
         prev.isMutatingFavorite === next.isMutatingFavorite &&
-        prev.controls === next.controls,
+        prev.controls === next.controls &&
+        prev.registerSongs === next.registerSongs,
 );
 
 RowContent.displayName = 'RowContent';
@@ -288,14 +400,21 @@ export const ItemDetailList = ({
         return dataSource.length;
     }, [dataSource.length, externalItemCount]);
 
-    // Create extract row ID function
-    const extractRowId = useMemo(() => createExtractRowId(), []);
+    // Accumulate songs from each row for selection/drag state (keyed by album id)
+    const songsByAlbumRef = useRef<Map<string, Song[]>>(new Map());
+    const registerSongs = useCallback((albumId: string, songs: Song[]) => {
+        songsByAlbumRef.current.set(albumId, songs);
+    }, []);
 
-    // Create getData function
-    const getDataFn = useCallback(() => dataSource, [dataSource]);
+    // Flattened songs in album order for ItemListState (selection/drag are per-song)
+    const getDataFn = useCallback(() => {
+        const map = songsByAlbumRef.current;
+        return dataSource.flatMap((album) => map.get((album as Album).id) ?? []);
+    }, [dataSource]);
 
-    // Create internal state
-    const internalState = useItemListState(getDataFn, extractRowId);
+    const extractRowIdSong = useCallback((item: unknown) => (item as Song).id, []);
+
+    const internalState = useItemListState(getDataFn, extractRowIdSong);
 
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
@@ -329,8 +448,17 @@ export const ItemDetailList = ({
             internalState,
             isMutatingFavorite,
             queryClient,
+            registerSongs,
         }),
-        [controls, dataSource, getItem, internalState, isMutatingFavorite, queryClient],
+        [
+            controls,
+            dataSource,
+            getItem,
+            internalState,
+            isMutatingFavorite,
+            queryClient,
+            registerSongs,
+        ],
     );
 
     const [initialize, osInstance] = useOverlayScrollbars({

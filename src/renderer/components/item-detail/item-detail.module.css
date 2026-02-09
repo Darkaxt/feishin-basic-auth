@@ -95,7 +95,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--theme-colors-foreground-muted);
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -108,13 +108,13 @@
 }
 
 .row .track-col-duration {
-    width: 8rem;
-    min-width: 8rem;
-    max-width: 8rem;
+    width: 4rem;
+    min-width: 4rem;
+    max-width: 4rem;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--theme-colors-foreground-muted);
-    text-align: right;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -134,7 +134,22 @@
     max-width: 5.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
     white-space: nowrap;
+}
+
+.track-row-selected {
+    @mixin dark {
+        background-color: lighten(var(--theme-colors-surface), 5%);
+    }
+
+    @mixin light {
+        background-color: darken(var(--theme-colors-surface), 5%);
+    }
+}
+
+.track-row-dragging {
+    opacity: 0.5;
 }
 
 .skeleton-image {
