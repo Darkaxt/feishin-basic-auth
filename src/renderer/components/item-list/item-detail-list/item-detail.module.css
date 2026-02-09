@@ -104,6 +104,12 @@
     padding: 0 var(--theme-spacing-md) var(--theme-spacing-xl) var(--theme-spacing-md);
 }
 
+/* Height constraint for skeleton columns; row grid gets two direct children (left, right) */
+.skeleton-column-wrapper {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
 .image-wrapper {
     position: relative;
     display: block;
@@ -395,15 +401,27 @@
     opacity: 0.7;
 }
 
+.skeleton-image-container {
+    justify-content: center;
+}
+
 .skeleton-image {
     width: 100%;
     aspect-ratio: 1;
     border-radius: var(--theme-radius-md);
 }
 
+.skeleton-title-container {
+    justify-content: center;
+}
+
 .skeleton-title {
     width: 75%;
     height: 1.25rem;
+}
+
+.skeleton-artist-container {
+    justify-content: center;
 }
 
 .skeleton-artist {

@@ -58,6 +58,10 @@ import { Text } from '/@/shared/components/text/text';
 import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
 import { ItemListKey, TableColumn } from '/@/shared/types/types';
 
+const DEFAULT_ROW_HEIGHT = 300;
+
+const SKELETON_TRACK_ROW_COUNT = 6;
+
 interface ItemDetailListProps {
     currentPage?: number;
     data?: unknown[];
@@ -74,6 +78,7 @@ interface RowData {
     columnWidthPercents: number[];
     controls?: ItemControls;
     data: unknown[];
+    defaultRowHeight: number;
     enableAlternateRowColors: boolean;
     enableHorizontalBorders: boolean;
     enableRowHoverHighlight: boolean;
@@ -96,7 +101,7 @@ interface TrackRowProps {
     enableVerticalBorders: boolean;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
-    onFavoriteClick: (song: Song) => void;
+    isSongsLoading?: boolean;
     rowIndex: number;
     size: 'compact' | 'default' | 'large';
     song: Song;
@@ -116,7 +121,7 @@ const TrackRow = memo(
         enableVerticalBorders,
         internalState,
         isMutatingFavorite,
-        onFavoriteClick,
+        isSongsLoading,
         rowIndex,
         size,
         song,
@@ -260,14 +265,13 @@ const TrackRow = memo(
                         song,
                     );
 
-                    const content = showHoverContent ? (
+                    const content = isSongsLoading ? null : showHoverContent ? (
                         <CellComponent
                             columnId={col.id}
                             controls={controls}
                             internalState={internalState}
                             isMutatingFavorite={isMutatingFavorite}
                             isRowHovered={isRowHovered}
-                            onFavoriteClick={onFavoriteClick}
                             rowIndex={rowIndex}
                             size={size}
                             song={song}
@@ -447,6 +451,88 @@ const MetadataSection = memo(
 
 MetadataSection.displayName = 'MetadataSection';
 
+interface ItemDetailSkeletonRowProps {
+    defaultRowHeight: number;
+    enableAlternateRowColors: boolean;
+    enableHorizontalBorders: boolean;
+    enableVerticalBorders: boolean;
+    trackTableSize: 'compact' | 'default' | 'large';
+}
+
+const ItemDetailSkeletonRow = memo(
+    ({
+        defaultRowHeight,
+        enableAlternateRowColors,
+        enableHorizontalBorders,
+        enableVerticalBorders,
+        trackTableSize,
+    }: ItemDetailSkeletonRowProps) => {
+        const heightStyle = {
+            height: defaultRowHeight,
+            minHeight: defaultRowHeight,
+            overflow: 'hidden' as const,
+        };
+        return (
+            <>
+                <div className={styles.skeletonColumnWrapper} style={heightStyle}>
+                    <div className={styles.left}>
+                        <div className={styles.metadata}>
+                            <Skeleton
+                                className={styles.skeletonImage}
+                                containerClassName={styles.skeletonImageContainer}
+                            />
+                            <Skeleton
+                                className={styles.skeletonTitle}
+                                containerClassName={styles.skeletonTitleContainer}
+                            />
+                            <Skeleton
+                                className={styles.skeletonArtist}
+                                containerClassName={styles.skeletonArtistContainer}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className={styles.skeletonColumnWrapper} style={heightStyle}>
+                    <div className={styles.right}>
+                        <div className={styles.tracksTable} role="table">
+                            {Array.from({ length: SKELETON_TRACK_ROW_COUNT }).map((_, i) => (
+                                <div
+                                    className={clsx(styles.trackRow, {
+                                        [styles.trackRowAlternateEven]:
+                                            enableAlternateRowColors && i % 2 === 0,
+                                        [styles.trackRowAlternateOdd]:
+                                            enableAlternateRowColors && i % 2 === 1,
+                                        [styles.trackRowHorizontalBorderVisible]:
+                                            enableHorizontalBorders && i > 0,
+                                        [styles.trackRowSizeCompact]: trackTableSize === 'compact',
+                                        [styles.trackRowSizeDefault]: trackTableSize === 'default',
+                                        [styles.trackRowSizeLarge]: trackTableSize === 'large',
+                                        [styles.trackRowWithHorizontalBorder]: i > 0,
+                                    })}
+                                    key={i}
+                                    role="row"
+                                >
+                                    <div
+                                        className={clsx(styles.trackCell, {
+                                            [styles.trackCellVerticalBorderVisible]:
+                                                enableVerticalBorders,
+                                            [styles.trackCellWithVerticalBorder]: true,
+                                        })}
+                                        role="cell"
+                                        style={{ flex: 1, minWidth: 0 }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    },
+);
+
+ItemDetailSkeletonRow.displayName = 'ItemDetailSkeletonRow';
+
 type RowContentProps = Omit<RowComponentProps<RowData>, 'style'>;
 
 const RowContent = memo(
@@ -454,6 +540,7 @@ const RowContent = memo(
         columnWidthPercents,
         controls,
         data,
+        defaultRowHeight,
         enableAlternateRowColors,
         enableHorizontalBorders,
         enableRowHoverHighlight,
@@ -474,7 +561,7 @@ const RowContent = memo(
             return (data?.[index] as Album | undefined) || undefined;
         }, [data, getItem, index]);
 
-        const { data: songData } = useQuery({
+        const { data: songData, isLoading: isSongsQueryLoading } = useQuery({
             enabled: !!item && !!item.id,
             ...albumQueries.detail({
                 query: {
@@ -483,6 +570,8 @@ const RowContent = memo(
                 serverId: item?._serverId || '',
             }),
         });
+
+        const isSongsLoading = !!item && isSongsQueryLoading && !songData;
 
         const songs = useMemo(() => {
             return (
@@ -502,39 +591,15 @@ const RowContent = memo(
             }
         }, [item?.id, registerSongs, songData?.songs]);
 
-        const onFavoriteClick = useCallback((song: Song) => {
-            // TODO: toggle favorite for song
-            void song;
-        }, []);
-
         if (!item) {
             return (
-                <>
-                    <div className={styles.left}>
-                        <div className={styles.metadata}>
-                            <Skeleton className={styles.skeletonImage} />
-                            <Skeleton className={styles.skeletonTitle} />
-                            <Skeleton className={styles.skeletonArtist} />
-                        </div>
-                    </div>
-                    <div className={styles.right}>
-                        <div
-                            className={clsx(styles.skeletonTracks, {
-                                [styles.skeletonTracksSizeCompact]: trackTableSize === 'compact',
-                                [styles.skeletonTracksSizeDefault]: trackTableSize === 'default',
-                                [styles.skeletonTracksSizeLarge]: trackTableSize === 'large',
-                            })}
-                        >
-                            {Array.from({ length: 10 }).map((_, i) => (
-                                <div className={styles.skeletonTrackRow} key={i}>
-                                    <Skeleton className={styles.skeletonTrackCell} />
-                                    <Skeleton className={styles.skeletonTrackCellTitle} />
-                                    <Skeleton className={styles.skeletonTrackCell} />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </>
+                <ItemDetailSkeletonRow
+                    defaultRowHeight={defaultRowHeight}
+                    enableAlternateRowColors={enableAlternateRowColors}
+                    enableHorizontalBorders={enableHorizontalBorders}
+                    enableVerticalBorders={enableVerticalBorders}
+                    trackTableSize={trackTableSize}
+                />
             );
         }
 
@@ -561,8 +626,8 @@ const RowContent = memo(
                                 enableVerticalBorders={enableVerticalBorders}
                                 internalState={internalState}
                                 isMutatingFavorite={isMutatingFavorite}
+                                isSongsLoading={isSongsLoading}
                                 key={song.id}
-                                onFavoriteClick={onFavoriteClick}
                                 rowIndex={rowIndex}
                                 size={trackTableSize}
                                 song={song as Song}
@@ -577,6 +642,7 @@ const RowContent = memo(
         prev.index === next.index &&
         prev.data === next.data &&
         prev.columnWidthPercents === next.columnWidthPercents &&
+        prev.defaultRowHeight === next.defaultRowHeight &&
         prev.enableAlternateRowColors === next.enableAlternateRowColors &&
         prev.enableHorizontalBorders === next.enableHorizontalBorders &&
         prev.enableRowHoverHighlight === next.enableRowHoverHighlight &&
@@ -706,7 +772,7 @@ export const ItemDetailList = ({
     const isMutatingFavorite = isMutatingCreateFavorite || isMutatingDeleteFavorite;
 
     const rowHeight = useDynamicRowHeight({
-        defaultRowHeight: 300,
+        defaultRowHeight: DEFAULT_ROW_HEIGHT,
     });
 
     const isInfinite = data !== undefined || getItem !== undefined;
@@ -817,6 +883,7 @@ export const ItemDetailList = ({
             columnWidthPercents,
             controls,
             data: dataSource,
+            defaultRowHeight: DEFAULT_ROW_HEIGHT,
             enableAlternateRowColors,
             enableHorizontalBorders,
             enableRowHoverHighlight,
