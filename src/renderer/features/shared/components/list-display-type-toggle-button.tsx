@@ -17,7 +17,6 @@ export const ListDisplayTypeToggleButton = ({
     const { setList } = useSettingsStoreActions();
 
     const handleToggleDisplayType = () => {
-        console.log('enableDetail', enableDetail);
         let newDisplayType: ListDisplayType;
 
         if (enableDetail) {
@@ -39,8 +38,6 @@ export const ListDisplayTypeToggleButton = ({
                 newDisplayType = ListDisplayType.GRID;
             }
         }
-
-        console.log('newDisplayType', newDisplayType);
 
         setList(listKey, {
             display: newDisplayType,
