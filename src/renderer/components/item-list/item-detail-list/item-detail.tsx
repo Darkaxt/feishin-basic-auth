@@ -53,6 +53,7 @@ import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutatio
 import { AppRoute } from '/@/renderer/router/routes';
 import { useSettingsStore, useShowRatings } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
+import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Text } from '/@/shared/components/text/text';
 import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
@@ -401,8 +402,10 @@ const MetadataSection = memo(
                 >
                     <ItemImage
                         className={styles.image}
+                        explicitStatus={item.explicitStatus}
                         id={item.imageId}
                         itemType={item._itemType}
+                        serverId={item._serverId}
                         type="itemCard"
                     />
                     {isFavorite && <div className={styles.favoriteBadge} />}
@@ -428,6 +431,7 @@ const MetadataSection = memo(
                         albumId: item.id,
                     })}
                 >
+                    <ExplicitIndicator explicitStatus={item.explicitStatus} />
                     {item.name}
                 </Link>
                 <div className={styles.artist}>

@@ -8,8 +8,10 @@ export const ImageColumn = ({ song }: ItemDetailListCellProps) => (
     <ItemImage
         className={styles.compactImage}
         containerClassName={styles.compactContainer}
+        explicitStatus={song.explicitStatus}
         id={song.imageId}
         itemType={LibraryItem.SONG}
+        serverId={song._serverId}
         type="table"
     />
 );
