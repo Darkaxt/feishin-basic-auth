@@ -164,6 +164,28 @@
     opacity: 0.5;
 }
 
+.track-row.track-row-hover-highlight-enabled {
+    position: relative;
+}
+
+.track-row.track-row-hover-highlight-enabled .track-cell {
+    position: relative;
+    z-index: 2;
+}
+
+.track-row.track-row-hover-highlight-enabled:hover::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+    content: '';
+    background-color: var(--theme-colors-surface);
+    opacity: 0.7;
+}
+
 .skeleton-image {
     width: 100%;
     aspect-ratio: 1;
