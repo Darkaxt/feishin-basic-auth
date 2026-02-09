@@ -520,6 +520,28 @@ export const applyFavoriteOptimisticUpdates = (
                 }
             });
 
+            const songListQueryKey = queryKeys.songs.list(variables.apiClientProps.serverId);
+            const songListQueries = queryClient.getQueriesData({
+                exact: false,
+                queryKey: songListQueryKey,
+            });
+
+            songListQueries.forEach(([queryKey, data]) => {
+                if (data) {
+                    pendingUpdates.push({
+                        previousData: data,
+                        queryKey,
+                        updater: (prev: { items: Song[] } | undefined) => {
+                            if (!prev) return prev;
+                            const updatedItems = updateItemInArray(prev.items, itemIdSet, (item) =>
+                                createFavoriteUpdater<Song>(item),
+                            );
+                            return updatedItems ? { ...prev, items: updatedItems } : prev;
+                        },
+                    });
+                }
+            });
+
             const topSongsQueryKey = queryKeys.albumArtists.topSongs(
                 variables.apiClientProps.serverId,
             );
@@ -680,6 +702,10 @@ export const applyFavoriteOptimisticUpdatesDeferred = (
                 'playlist-song-list',
             );
             collectQueries(
+                queryKeys.songs.list(variables.apiClientProps.serverId),
+                'song-list',
+            );
+            collectQueries(
                 queryKeys.albumArtists.topSongs(variables.apiClientProps.serverId),
                 'top-songs',
             );
@@ -742,6 +768,7 @@ export const applyFavoriteOptimisticUpdatesDeferred = (
                     case 'album-list':
                     case 'artist-list':
                     case 'playlist-song-list':
+                    case 'song-list':
                     case 'top-songs': {
                         const updatedItems = updateItemInArray(
                             prev.items || [],
