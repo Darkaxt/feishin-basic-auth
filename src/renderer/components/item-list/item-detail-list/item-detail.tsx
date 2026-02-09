@@ -32,6 +32,7 @@ import { parseTableColumns } from '/@/renderer/components/item-list/helpers/pars
 import { getDetailListCellComponent } from '/@/renderer/components/item-list/item-detail-list/columns';
 import {
     getTrackColumnFixed,
+    isNoHorizontalPaddingColumn,
     shouldShowHoverOnlyColumnContent,
 } from '/@/renderer/components/item-list/item-detail-list/utils';
 import {
@@ -250,6 +251,7 @@ const TrackRow = memo(
                     const CellComponent = getDetailListCellComponent(col.id);
                     const isTitleColumn = col.id === TableColumn.TITLE;
                     const isImageColumn = col.id === TableColumn.IMAGE;
+                    const isIconActionColumn = isNoHorizontalPaddingColumn(col.id);
                     const showHoverContent = shouldShowHoverOnlyColumnContent(
                         col.id,
                         isRowHovered,
@@ -278,6 +280,7 @@ const TrackRow = memo(
                             className={clsx(styles.trackCell, {
                                 [styles.trackCellImage]: isImageColumn,
                                 [styles.trackCellMuted]: !isTitleColumn,
+                                [styles.trackCellNoHPadding]: isIconActionColumn,
                                 [styles.trackCellVerticalBorderVisible]:
                                     enableVerticalBorders && !isLastColumn,
                                 [styles.trackCellWithVerticalBorder]: !isLastColumn,

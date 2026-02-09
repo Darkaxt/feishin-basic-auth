@@ -1,13 +1,19 @@
 import { TableColumn } from '/@/shared/types/types';
 
 const FIXED_TRACK_COLUMN_WIDTHS: Partial<Record<TableColumn, number>> = {
-    [TableColumn.ACTIONS]: 48,
+    [TableColumn.ACTIONS]: 32,
     [TableColumn.TRACK_NUMBER]: 56,
-    [TableColumn.USER_FAVORITE]: 48,
-    [TableColumn.USER_RATING]: 76,
+    [TableColumn.USER_FAVORITE]: 32,
+    [TableColumn.USER_RATING]: 64,
 };
 
 const HOVER_ONLY_COLUMNS: TableColumn[] = [
+    TableColumn.ACTIONS,
+    TableColumn.USER_FAVORITE,
+    TableColumn.USER_RATING,
+];
+
+const NO_HORIZONTAL_PADDING_COLUMNS: TableColumn[] = [
     TableColumn.ACTIONS,
     TableColumn.USER_FAVORITE,
     TableColumn.USER_RATING,
@@ -21,6 +27,10 @@ export function getTrackColumnFixed(columnId: TableColumn): {
     return width !== undefined
         ? { fixedWidth: width, isFixedColumn: true }
         : { fixedWidth: 0, isFixedColumn: false };
+}
+
+export function isNoHorizontalPaddingColumn(columnId: TableColumn): boolean {
+    return NO_HORIZONTAL_PADDING_COLUMNS.includes(columnId);
 }
 
 export function isTrackColumnHoverOnly(columnId: TableColumn): boolean {

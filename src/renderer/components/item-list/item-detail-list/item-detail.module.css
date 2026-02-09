@@ -246,6 +246,11 @@
     overflow: hidden;
 }
 
+.row .track-cell-no-h-padding {
+    padding-right: 0;
+    padding-left: 0;
+}
+
 .track-row-dragging {
     opacity: 0.5;
 }
