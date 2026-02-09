@@ -34,7 +34,19 @@
 }
 
 .header-left {
+    display: flex;
+    align-items: center;
     min-width: 0;
+    overflow: hidden;
+}
+
+.header-left-album-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--theme-font-size-sm);
+    font-weight: 500;
+    color: var(--theme-colors-foreground);
+    white-space: nowrap;
 }
 
 .header-right {

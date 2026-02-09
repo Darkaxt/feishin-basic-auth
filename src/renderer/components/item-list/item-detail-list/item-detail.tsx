@@ -606,6 +606,7 @@ RowComponent.displayName = 'ItemDetailRow';
 interface DetailListHeaderProps {
     columnWidthPercents: number[];
     enableVerticalBorders: boolean;
+    headerLeftRef: React.RefObject<HTMLSpanElement | null>;
     trackColumns: ItemTableListColumnConfig[];
     trackTableSize: 'compact' | 'default' | 'large';
 }
@@ -626,12 +627,19 @@ const DetailListHeader = memo(
     ({
         columnWidthPercents,
         enableVerticalBorders,
+        headerLeftRef,
         trackColumns,
         trackTableSize,
     }: DetailListHeaderProps) => {
         return (
             <header className={styles.detailListHeader} role="rowgroup">
-                <div aria-hidden className={styles.headerLeft} />
+                <div className={styles.headerLeft}>
+                    <span
+                        className={styles.headerLeftAlbumName}
+                        data-title=""
+                        ref={headerLeftRef}
+                    />
+                </div>
                 <div className={styles.headerRight}>
                     <div
                         className={clsx(styles.tracksTableHeader, {
@@ -768,8 +776,20 @@ export const ItemDetailList = ({
         return trackColumns.map((c) => (c.width / total) * 100);
     }, [trackColumns]);
 
+    const headerLeftRef = useRef<HTMLSpanElement>(null);
+    const dataSourceRef = useRef(dataSource);
+    dataSourceRef.current = dataSource;
+
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
+            const el = headerLeftRef.current;
+            if (el) {
+                const album = dataSourceRef.current[range.startIndex] as Album | undefined;
+                const name = album?.name ?? '';
+                el.textContent = name;
+                el.setAttribute('data-title', name);
+                el.title = name;
+            }
             if (onRangeChanged) {
                 onRangeChanged(range);
             }
@@ -871,6 +891,7 @@ export const ItemDetailList = ({
                 <DetailListHeader
                     columnWidthPercents={columnWidthPercents}
                     enableVerticalBorders={enableVerticalBorders}
+                    headerLeftRef={headerLeftRef}
                     trackColumns={trackColumns}
                     trackTableSize={trackTableSize}
                 />
