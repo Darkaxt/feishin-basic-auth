@@ -885,7 +885,7 @@ export const TableColumnHeaderContainer = (
     );
 };
 
-const columnLabelMap: Record<TableColumn, ReactNode | string> = {
+export const columnLabelMap: Record<TableColumn, ReactNode | string> = {
     [TableColumn.ACTIONS]: (
         <Flex className={styles.headerIconWrapper}>
             <Icon fill="default" icon="ellipsisHorizontal" />

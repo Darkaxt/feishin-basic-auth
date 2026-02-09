@@ -40,6 +40,7 @@ import {
     SONG_TABLE_COLUMNS,
 } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useItemDragDropState } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-drag-drop-state';
+import { columnLabelMap } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls, ItemTableListColumnConfig } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {
@@ -60,6 +61,7 @@ import { ItemListKey, TableColumn } from '/@/shared/types/types';
 interface ItemDetailListProps {
     currentPage?: number;
     data?: unknown[];
+    enableHeader?: boolean;
     getItem?: (index: number) => unknown;
     internalState?: ItemListStateActions;
     itemCount?: number;
@@ -601,9 +603,75 @@ const RowComponent = memo((props: RowComponentProps<RowData>): ReactElement => {
 
 RowComponent.displayName = 'ItemDetailRow';
 
+interface DetailListHeaderProps {
+    columnWidthPercents: number[];
+    enableVerticalBorders: boolean;
+    trackColumns: ItemTableListColumnConfig[];
+    trackTableSize: 'compact' | 'default' | 'large';
+}
+
+const DetailListHeader = memo(
+    ({
+        columnWidthPercents,
+        enableVerticalBorders,
+        trackColumns,
+        trackTableSize,
+    }: DetailListHeaderProps) => {
+        return (
+            <header className={styles.detailListHeader} role="rowgroup">
+                <div aria-hidden className={styles.headerLeft} />
+                <div className={styles.headerRight}>
+                    <div
+                        className={clsx(styles.tracksTableHeader, {
+                            [styles.tracksTableHeaderSizeCompact]: trackTableSize === 'compact',
+                            [styles.tracksTableHeaderSizeDefault]: trackTableSize === 'default',
+                            [styles.tracksTableHeaderSizeLarge]: trackTableSize === 'large',
+                        })}
+                        role="row"
+                    >
+                        {trackColumns.map((col, colIndex) => {
+                            const percent = columnWidthPercents[colIndex] ?? 0;
+                            const { fixedWidth, isFixedColumn } = getTrackColumnFixed(col.id);
+                            const isLastColumn = colIndex === trackColumns.length - 1;
+                            const style: React.CSSProperties = {
+                                flex: isFixedColumn ? `0 0 ${fixedWidth}px` : `${percent} 1 0`,
+                                minWidth: isFixedColumn ? fixedWidth : 0,
+                                textAlign:
+                                    col.align === 'start'
+                                        ? 'left'
+                                        : col.align === 'end'
+                                          ? 'right'
+                                          : 'center',
+                            };
+                            return (
+                                <div
+                                    className={clsx(styles.trackHeaderCell, {
+                                        [styles.trackHeaderCellNoHPadding]:
+                                            isNoHorizontalPaddingColumn(col.id),
+                                        [styles.trackHeaderCellWithVerticalBorder]:
+                                            enableVerticalBorders && !isLastColumn,
+                                    })}
+                                    key={col.id}
+                                    role="columnheader"
+                                    style={style}
+                                >
+                                    {columnLabelMap[col.id] ?? ''}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </header>
+        );
+    },
+);
+
+DetailListHeader.displayName = 'DetailListHeader';
+
 export const ItemDetailList = ({
     currentPage,
     data,
+    enableHeader = true,
     getItem,
     itemCount: externalItemCount,
     items,
@@ -785,14 +853,26 @@ export const ItemDetailList = ({
     }, [initialize, osInstance]);
 
     return (
-        <div className={styles.container} ref={containerRef}>
-            <List
-                onRowsRendered={throttledHandleRowsRendered}
-                rowComponent={RowComponent as (props: RowComponentProps<RowData>) => ReactElement}
-                rowCount={itemCount}
-                rowHeight={rowHeight}
-                rowProps={rowProps}
-            />
+        <div className={styles.wrapper}>
+            {enableHeader && (
+                <DetailListHeader
+                    columnWidthPercents={columnWidthPercents}
+                    enableVerticalBorders={enableVerticalBorders}
+                    trackColumns={trackColumns}
+                    trackTableSize={trackTableSize}
+                />
+            )}
+            <div className={styles.container} ref={containerRef}>
+                <List
+                    onRowsRendered={throttledHandleRowsRendered}
+                    rowComponent={
+                        RowComponent as (props: RowComponentProps<RowData>) => ReactElement
+                    }
+                    rowCount={itemCount}
+                    rowHeight={rowHeight}
+                    rowProps={rowProps}
+                />
+            </div>
         </div>
     );
 };

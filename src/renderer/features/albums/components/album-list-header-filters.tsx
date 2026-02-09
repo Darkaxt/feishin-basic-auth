@@ -101,7 +101,6 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
                         listKey: ItemListKey.ALBUM_DETAIL,
                         optionsConfig: {
                             autoFitColumns: { hidden: true },
-                            enableHeader: { hidden: true },
                         },
                         tableColumnsData: SONG_TABLE_COLUMNS,
                     }}
