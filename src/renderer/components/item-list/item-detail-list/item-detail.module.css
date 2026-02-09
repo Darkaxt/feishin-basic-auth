@@ -246,16 +246,6 @@
     overflow: hidden;
 }
 
-.track-row-selected {
-    @mixin dark {
-        background-color: lighten(var(--theme-colors-surface), 5%);
-    }
-
-    @mixin light {
-        background-color: darken(var(--theme-colors-surface), 5%);
-    }
-}
-
 .track-row-dragging {
     opacity: 0.5;
 }
@@ -271,6 +261,16 @@
 
     @mixin light {
         background-color: darken(var(--theme-colors-background), 2%);
+    }
+}
+
+.track-row.track-row-selected {
+    @mixin dark {
+        background-color: lighten(var(--theme-colors-surface), 5%);
+    }
+
+    @mixin light {
+        background-color: darken(var(--theme-colors-surface), 5%);
     }
 }
 
