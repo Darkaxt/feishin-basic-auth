@@ -1,9 +1,9 @@
 import { UseSuspenseQueryOptions } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
-import { ItemDetailList } from '/@/renderer/components/item-detail/item-detail';
 import { useItemListInfiniteLoader } from '/@/renderer/components/item-list/helpers/item-list-infinite-loader';
 import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpers/use-item-list-scroll-persist';
+import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail';
 import { ItemListComponentProps } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {

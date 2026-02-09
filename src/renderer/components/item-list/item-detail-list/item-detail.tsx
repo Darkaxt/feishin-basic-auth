@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import formatDuration from 'format-duration';
 import throttle from 'lodash/throttle';
 import { AnimatePresence } from 'motion/react';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
@@ -19,6 +18,7 @@ import {
     useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
+import { getDetailListCellComponent } from '/@/renderer/components/item-list/item-detail-list/columns';
 import {
     pickTableColumns,
     SONG_TABLE_COLUMNS,
@@ -31,8 +31,6 @@ import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutatio
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useSettingsStore } from '/@/renderer/store';
-import { Icon } from '/@/shared/components/icon/icon';
-import { ReadOnlyRating } from '/@/shared/components/read-only-rating/read-only-rating';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
 import { ItemListKey, TableColumn } from '/@/shared/types/types';
@@ -66,6 +64,7 @@ interface TrackRowProps {
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
+    rowIndex: number;
     song: Song;
 }
 
@@ -73,7 +72,14 @@ const textAlignFromAlign = (align: ItemTableListColumnConfig['align']) =>
     align === 'start' ? 'left' : align === 'end' ? 'right' : 'center';
 
 const TrackRow = memo(
-    ({ columns, internalState, isMutatingFavorite, onFavoriteClick, song }: TrackRowProps) => {
+    ({
+        columns,
+        internalState,
+        isMutatingFavorite,
+        onFavoriteClick,
+        rowIndex,
+        song,
+    }: TrackRowProps) => {
         const playerContext = usePlayer();
         const { dragRef, isDragging } = useItemDragDropState<HTMLTableRowElement>({
             enableDrag: true,
@@ -83,8 +89,6 @@ const TrackRow = memo(
             itemType: LibraryItem.SONG,
             playerContext,
         });
-        const discAndCol =
-            `${song.discNumber ?? 1}` + ' - ' + song.trackNumber.toString().padStart(2, '0');
         const isSelected = useItemSelectionState(internalState, song.id);
 
         const handleRowClick = useCallback(
@@ -195,52 +199,16 @@ const TrackRow = memo(
                         textAlign: textAlignFromAlign(col.align),
                         ...widthStyle,
                     };
-
-                    let content: React.ReactNode;
-                    switch (col.id) {
-                        case TableColumn.DISC_NUMBER:
-                        case TableColumn.TRACK_NUMBER:
-                            content = discAndCol;
-                            break;
-                        case TableColumn.DURATION:
-                            content = formatDuration(song.duration);
-                            break;
-                        case TableColumn.TITLE:
-                            content = song.name;
-                            break;
-                        case TableColumn.USER_FAVORITE:
-                            content = (
-                                <div
-                                    aria-disabled={isMutatingFavorite}
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        event.preventDefault();
-                                        onFavoriteClick(song);
-                                    }}
-                                    onDoubleClick={(event) => {
-                                        event.stopPropagation();
-                                        event.preventDefault();
-                                    }}
-                                    role="button"
-                                >
-                                    <Icon icon="favorite" size="xs" />
-                                </div>
-                            );
-                            break;
-                        case TableColumn.USER_RATING:
-                            content = (
-                                <ReadOnlyRating size="md" value={song.userRating ?? undefined} />
-                            );
-                            break;
-                        default: {
-                            const raw = (song as Record<string, unknown>)[col.id];
-                            content =
-                                raw !== undefined && raw !== null && typeof raw !== 'object'
-                                    ? String(raw)
-                                    : '—';
-                            break;
-                        }
-                    }
+                    const CellComponent = getDetailListCellComponent(col.id);
+                    const content = (
+                        <CellComponent
+                            columnId={col.id}
+                            isMutatingFavorite={isMutatingFavorite}
+                            onFavoriteClick={onFavoriteClick}
+                            rowIndex={rowIndex}
+                            song={song}
+                        />
+                    );
 
                     return (
                         <td className={styles.trackCell} key={col.id} style={style}>
@@ -378,13 +346,14 @@ const RowContent = memo(
                 <div className={styles.right}>
                     <table className={styles.tracksTable}>
                         <tbody>
-                            {songs.map((song) => (
+                            {songs.map((song, rowIndex) => (
                                 <TrackRow
                                     columns={trackColumns}
                                     internalState={internalState}
                                     isMutatingFavorite={isMutatingFavorite}
                                     key={song.id}
                                     onFavoriteClick={onFavoriteClick}
+                                    rowIndex={rowIndex}
                                     song={song as Song}
                                 />
                             ))}
