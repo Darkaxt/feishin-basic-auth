@@ -55,6 +55,7 @@ interface RowData {
     columnWidthPercents: number[];
     controls?: ItemControls;
     data: unknown[];
+    enableAlternateRowColors: boolean;
     enableHorizontalBorders: boolean;
     enableRowHoverHighlight: boolean;
     enableVerticalBorders: boolean;
@@ -70,6 +71,7 @@ interface TrackRowProps {
     columns: ItemTableListColumnConfig[];
     columnWidthPercents: number[];
     controls?: ItemControls;
+    enableAlternateRowColors: boolean;
     enableHorizontalBorders: boolean;
     enableRowHoverHighlight: boolean;
     enableVerticalBorders: boolean;
@@ -89,6 +91,7 @@ const TrackRow = memo(
         columns,
         columnWidthPercents,
         controls,
+        enableAlternateRowColors,
         enableHorizontalBorders,
         enableRowHoverHighlight,
         enableVerticalBorders,
@@ -194,6 +197,8 @@ const TrackRow = memo(
         return (
             <div
                 className={clsx(styles.trackRow, {
+                    [styles.trackRowAlternateEven]: enableAlternateRowColors && rowIndex % 2 === 0,
+                    [styles.trackRowAlternateOdd]: enableAlternateRowColors && rowIndex % 2 === 1,
                     [styles.trackRowDragging]: isDragging,
                     [styles.trackRowHorizontalBorderVisible]:
                         enableHorizontalBorders && rowIndex > 0,
@@ -278,6 +283,7 @@ const RowContent = memo(
         columnWidthPercents,
         controls,
         data,
+        enableAlternateRowColors,
         enableHorizontalBorders,
         enableRowHoverHighlight,
         enableVerticalBorders,
@@ -407,6 +413,7 @@ const RowContent = memo(
                                 columns={trackColumns}
                                 columnWidthPercents={columnWidthPercents}
                                 controls={controls}
+                                enableAlternateRowColors={enableAlternateRowColors}
                                 enableHorizontalBorders={enableHorizontalBorders}
                                 enableRowHoverHighlight={enableRowHoverHighlight}
                                 enableVerticalBorders={enableVerticalBorders}
@@ -428,6 +435,7 @@ const RowContent = memo(
         prev.index === next.index &&
         prev.data === next.data &&
         prev.columnWidthPercents === next.columnWidthPercents &&
+        prev.enableAlternateRowColors === next.enableAlternateRowColors &&
         prev.enableHorizontalBorders === next.enableHorizontalBorders &&
         prev.enableRowHoverHighlight === next.enableRowHoverHighlight &&
         prev.enableVerticalBorders === next.enableVerticalBorders &&
@@ -527,6 +535,7 @@ export const ItemDetailList = ({
     }, [tableConfig?.columns]);
     const trackTableSize = tableConfig?.size ?? 'default';
     const enableRowHoverHighlight = tableConfig?.enableRowHoverHighlight ?? true;
+    const enableAlternateRowColors = tableConfig?.enableAlternateRowColors ?? false;
     const enableHorizontalBorders = tableConfig?.enableHorizontalBorders ?? false;
     const enableVerticalBorders = tableConfig?.enableVerticalBorders ?? false;
 
@@ -567,6 +576,7 @@ export const ItemDetailList = ({
             columnWidthPercents,
             controls,
             data: dataSource,
+            enableAlternateRowColors,
             enableHorizontalBorders,
             enableRowHoverHighlight,
             enableVerticalBorders,
@@ -582,6 +592,7 @@ export const ItemDetailList = ({
             columnWidthPercents,
             controls,
             dataSource,
+            enableAlternateRowColors,
             enableHorizontalBorders,
             enableRowHoverHighlight,
             enableVerticalBorders,

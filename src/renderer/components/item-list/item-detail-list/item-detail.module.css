@@ -172,6 +172,20 @@
     opacity: 0.5;
 }
 
+.track-row.track-row-alternate-even {
+    background-color: var(--theme-colors-background);
+}
+
+.track-row.track-row-alternate-odd {
+    @mixin dark {
+        background-color: darken(var(--theme-colors-background), 30%);
+    }
+
+    @mixin light {
+        background-color: darken(var(--theme-colors-background), 2%);
+    }
+}
+
 .track-row.track-row-with-horizontal-border {
     border-top: 1px solid transparent;
 }
