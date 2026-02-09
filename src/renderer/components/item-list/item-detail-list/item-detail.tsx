@@ -866,22 +866,30 @@ export const ItemDetailList = ({
     const headerLeftRef = useRef<HTMLSpanElement>(null);
     const dataSourceRef = useRef(dataSource);
     dataSourceRef.current = dataSource;
+    const lastHeaderNameRef = useRef('');
 
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
             const el = headerLeftRef.current;
             if (el) {
-                const album = dataSourceRef.current[range.startIndex] as Album | undefined;
+                const album = getItem?.(range.startIndex) as Album | undefined;
                 const name = album?.name ?? '';
-                el.textContent = name;
-                el.setAttribute('data-title', name);
-                el.title = name;
+                if (name) {
+                    lastHeaderNameRef.current = name;
+                    el.textContent = name;
+                    el.setAttribute('data-title', name);
+                    el.title = name;
+                } else {
+                    el.textContent = lastHeaderNameRef.current;
+                    el.setAttribute('data-title', lastHeaderNameRef.current);
+                    el.title = lastHeaderNameRef.current;
+                }
             }
             if (onRangeChanged) {
                 onRangeChanged(range);
             }
         },
-        [onRangeChanged],
+        [getItem, onRangeChanged],
     );
 
     const throttledHandleRowsRendered = useMemo(
