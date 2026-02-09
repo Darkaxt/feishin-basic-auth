@@ -73,9 +73,9 @@ export const ListConfigBooleanControl = ({
 };
 
 export interface ListConfigMenuDetailConfig {
-    listKey: ItemListKey;
     optionsConfig?: ListConfigMenuOptionsConfig['detail'];
     tableColumnsData: { label: string; value: string }[];
+    tableKey: 'detail';
 }
 
 export interface ListConfigMenuDisplayTypeConfig {
@@ -196,9 +196,10 @@ const Config = ({
                 return (
                     <TableConfig
                         enablePinColumnButtons={false}
-                        listKey={props.detailConfig.listKey}
+                        listKey={props.listKey}
                         optionsConfig={props.detailConfig.optionsConfig}
                         tableColumnsData={props.detailConfig.tableColumnsData}
+                        tableKey="detail"
                     />
                 );
             }

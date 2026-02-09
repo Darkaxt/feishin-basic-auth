@@ -74,13 +74,16 @@ export const AlbumListContent = () => {
 };
 
 const AlbumListSuspenseContainer = () => {
-    const { display, grid, itemsPerPage, pagination, table } = useListSettings(ItemListKey.ALBUM);
+    const { detail, display, grid, itemsPerPage, pagination, table } = useListSettings(
+        ItemListKey.ALBUM,
+    );
 
     const { customFilters } = useListContext();
 
     return (
         <Suspense fallback={<Spinner container />}>
             <AlbumListView
+                detail={detail}
                 display={display}
                 grid={grid}
                 itemsPerPage={itemsPerPage}
@@ -95,13 +98,17 @@ const AlbumListSuspenseContainer = () => {
 export type OverrideAlbumListQuery = Omit<Partial<AlbumListQuery>, 'limit' | 'startIndex'>;
 
 export const AlbumListView = ({
+    detail,
     display,
     grid,
     itemsPerPage,
     overrideQuery,
     pagination,
     table,
-}: ItemListSettings & { overrideQuery?: OverrideAlbumListQuery }) => {
+}: ItemListSettings & {
+    detail?: ItemListSettings['detail'];
+    overrideQuery?: OverrideAlbumListQuery;
+}) => {
     const server = useCurrentServer();
     const { pageKey } = useListContext();
 
@@ -196,6 +203,7 @@ export const AlbumListView = ({
                 case ListPaginationType.INFINITE: {
                     return (
                         <AlbumListInfiniteDetail
+                            enableHeader={detail?.enableHeader}
                             itemsPerPage={itemsPerPage}
                             query={mergedQuery}
                             serverId={server.id}
@@ -205,6 +213,7 @@ export const AlbumListView = ({
                 case ListPaginationType.PAGINATED: {
                     return (
                         <AlbumListPaginatedDetail
+                            enableHeader={detail?.enableHeader}
                             itemsPerPage={itemsPerPage}
                             query={mergedQuery}
                             serverId={server.id}

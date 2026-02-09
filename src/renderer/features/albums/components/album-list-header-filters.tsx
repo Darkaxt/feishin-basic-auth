@@ -98,11 +98,11 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
                 <ListDisplayTypeToggleButton listKey={ItemListKey.ALBUM} />
                 <ListConfigMenu
                     detailConfig={{
-                        listKey: ItemListKey.ALBUM_DETAIL,
                         optionsConfig: {
                             autoFitColumns: { hidden: true },
                         },
                         tableColumnsData: SONG_TABLE_COLUMNS,
+                        tableKey: 'detail',
                     }}
                     listKey={ItemListKey.ALBUM}
                     tableColumnsData={ALBUM_TABLE_COLUMNS}

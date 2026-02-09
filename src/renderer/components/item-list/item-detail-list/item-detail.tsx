@@ -724,7 +724,7 @@ export const ItemDetailList = ({
 
     const internalState = useItemListState(getDataFn, extractRowIdSong);
 
-    const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.ALBUM_DETAIL]?.table);
+    const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.ALBUM]?.detail);
     const trackColumns = useMemo((): ItemTableListColumnConfig[] => {
         const raw = tableConfig?.columns;
         if (raw && raw.length > 0) {

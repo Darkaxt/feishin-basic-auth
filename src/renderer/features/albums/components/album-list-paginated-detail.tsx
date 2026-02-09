@@ -16,9 +16,12 @@ import {
 } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
-interface AlbumListPaginatedDetailProps extends ItemListComponentProps<AlbumListQuery> {}
+interface AlbumListPaginatedDetailProps extends ItemListComponentProps<AlbumListQuery> {
+    enableHeader?: boolean;
+}
 
 export const AlbumListPaginatedDetail = ({
+    enableHeader = true,
     itemsPerPage = 100,
     query = {
         sortBy: AlbumListSort.NAME,
@@ -59,7 +62,11 @@ export const AlbumListPaginatedDetail = ({
             pageCount={pageCount}
             totalItemCount={totalItemCount}
         >
-            <ItemDetailList currentPage={currentPage} items={data || []} />
+            <ItemDetailList
+                currentPage={currentPage}
+                enableHeader={enableHeader}
+                items={data || []}
+            />
         </ItemListWithPagination>
     );
 };

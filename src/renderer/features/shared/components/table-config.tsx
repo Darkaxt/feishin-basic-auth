@@ -21,7 +21,12 @@ import {
     ListConfigBooleanControl,
     ListConfigTable,
 } from '/@/renderer/features/shared/components/list-config-menu';
-import { ItemListSettings, useSettingsStore, useSettingsStoreActions } from '/@/renderer/store';
+import {
+    type DataTableProps,
+    ItemListSettings,
+    useSettingsStore,
+    useSettingsStoreActions,
+} from '/@/renderer/store';
 import { ActionIcon, ActionIconGroup } from '/@/shared/components/action-icon/action-icon';
 import { Badge } from '/@/shared/components/badge/badge';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -53,6 +58,7 @@ interface TableConfigProps {
         };
     };
     tableColumnsData: { label: string; value: string }[];
+    tableKey?: 'detail' | 'main';
 }
 
 export const TableConfig = ({
@@ -61,11 +67,27 @@ export const TableConfig = ({
     listKey,
     optionsConfig,
     tableColumnsData,
+    tableKey = 'main',
 }: TableConfigProps) => {
     const { t } = useTranslation();
 
     const list = useSettingsStore((state) => state.lists[listKey]) as ItemListSettings;
     const { setList } = useSettingsStoreActions();
+
+    const table = tableKey === 'detail' ? (list?.detail ?? list?.table) : list?.table;
+
+    const setTableUpdate = useCallback(
+        (patch: Partial<DataTableProps>) => {
+            if (tableKey === 'detail') {
+                setList(listKey, { detail: patch } as Parameters<
+                    ReturnType<typeof useSettingsStoreActions>['setList']
+                >[1]);
+            } else {
+                setList(listKey, { table: patch });
+            }
+        },
+        [listKey, setList, tableKey],
+    );
 
     const advancedSettings = useMemo(() => {
         const allOptions = [
@@ -159,7 +181,7 @@ export const TableConfig = ({
                             })
                         }
                         size="sm"
-                        value={list.table.size}
+                        value={table.size}
                         w="100%"
                     />
                 ),
@@ -171,8 +193,8 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
-                        onChange={(e) => setList(listKey, { table: { enableHeader: e } })}
-                        value={list.table.enableHeader}
+                        onChange={(e) => setTableUpdate({ enableHeader: e })}
+                        value={table.enableHeader}
                     />
                 ),
                 id: 'enableHeader',
@@ -183,10 +205,8 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
-                        onChange={(e) =>
-                            setList(listKey, { table: { enableRowHoverHighlight: e } })
-                        }
-                        value={list.table.enableRowHoverHighlight}
+                        onChange={(e) => setTableUpdate({ enableRowHoverHighlight: e })}
+                        value={table.enableRowHoverHighlight}
                     />
                 ),
                 id: 'enableRowHoverHighlight',
@@ -197,10 +217,8 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
-                        onChange={(e) =>
-                            setList(listKey, { table: { enableAlternateRowColors: e } })
-                        }
-                        value={list.table.enableAlternateRowColors}
+                        onChange={(e) => setTableUpdate({ enableAlternateRowColors: e })}
+                        value={table.enableAlternateRowColors}
                     />
                 ),
                 id: 'enableAlternateRowColors',
@@ -211,10 +229,8 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
-                        onChange={(e) =>
-                            setList(listKey, { table: { enableHorizontalBorders: e } })
-                        }
-                        value={list.table.enableHorizontalBorders}
+                        onChange={(e) => setTableUpdate({ enableHorizontalBorders: e })}
+                        value={table.enableHorizontalBorders}
                     />
                 ),
                 id: 'enableHorizontalBorders',
@@ -225,8 +241,8 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
-                        onChange={(e) => setList(listKey, { table: { enableVerticalBorders: e } })}
-                        value={list.table.enableVerticalBorders}
+                        onChange={(e) => setTableUpdate({ enableVerticalBorders: e })}
+                        value={table.enableVerticalBorders}
                     />
                 ),
                 id: 'enableVerticalBorders',
@@ -237,8 +253,10 @@ export const TableConfig = ({
             {
                 component: (
                     <ListConfigBooleanControl
-                        onChange={(e) => setList(listKey, { table: { autoFitColumns: e } })}
-                        value={list.table.autoFitColumns}
+                        onChange={(e) => setTableUpdate({ autoFitColumns: e })}
+                        value={
+                            tableKey === 'main' ? (table as DataTableProps).autoFitColumns : false
+                        }
                     />
                 ),
                 id: 'autoFitColumns',
@@ -258,7 +276,18 @@ export const TableConfig = ({
                 return option;
             })
             .filter((option): option is NonNullable<typeof option> => option !== null);
-    }, [extraOptions, listKey, optionsConfig, setList, t, list]);
+    }, [
+        t,
+        list.pagination,
+        list.itemsPerPage,
+        table,
+        tableKey,
+        extraOptions,
+        setList,
+        listKey,
+        setTableUpdate,
+        optionsConfig,
+    ]);
 
     return (
         <>
@@ -267,8 +296,8 @@ export const TableConfig = ({
             <TableColumnConfig
                 data={tableColumnsData}
                 enablePinColumnButtons={enablePinColumnButtons}
-                onChange={(columns) => setList(listKey, { table: { columns } })}
-                value={list.table.columns}
+                onChange={(columns) => setTableUpdate({ columns })}
+                value={table.columns}
             />
         </>
     );

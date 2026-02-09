@@ -14,9 +14,12 @@ import {
 } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
-interface AlbumListInfiniteDetailProps extends ItemListComponentProps<AlbumListQuery> {}
+interface AlbumListInfiniteDetailProps extends ItemListComponentProps<AlbumListQuery> {
+    enableHeader?: boolean;
+}
 
 export const AlbumListInfiniteDetail = ({
+    enableHeader = true,
     itemsPerPage = 100,
     query = {
         sortBy: AlbumListSort.NAME,
@@ -49,6 +52,7 @@ export const AlbumListInfiniteDetail = ({
     return (
         <ItemDetailList
             data={loadedItems}
+            enableHeader={enableHeader}
             getItem={getItem}
             itemCount={itemCount}
             onRangeChanged={onRangeChanged}
