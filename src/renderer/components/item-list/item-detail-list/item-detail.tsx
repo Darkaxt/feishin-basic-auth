@@ -3,7 +3,17 @@ import clsx from 'clsx';
 import throttle from 'lodash/throttle';
 import { AnimatePresence } from 'motion/react';
 import { useOverlayScrollbars } from 'overlayscrollbars-react';
-import { memo, type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    Fragment,
+    memo,
+    type ReactElement,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 import { List, RowComponentProps, useDynamicRowHeight } from 'react-window-v2';
 
@@ -31,12 +41,18 @@ import {
 import { useItemDragDropState } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-drag-drop-state';
 import { ItemControls, ItemTableListColumnConfig } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
+import {
+    JOINED_ARTISTS_MUTED_PROPS,
+    JoinedArtists,
+} from '/@/renderer/features/albums/components/joined-artists';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useSettingsStore } from '/@/renderer/store';
+import { useSettingsStore, useShowRatings } from '/@/renderer/store';
+import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
+import { Text } from '/@/shared/components/text/text';
 import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
 import { ItemListKey, TableColumn } from '/@/shared/types/types';
 
@@ -277,6 +293,151 @@ const TrackRow = memo(
 
 TrackRow.displayName = 'TrackRow';
 
+interface MetadataSectionProps {
+    controls?: ItemControls;
+    internalState: ItemListStateActions;
+    item: Album;
+}
+
+const MetadataSection = memo(
+    ({ controls, internalState, item }: MetadataSectionProps) => {
+        const { t } = useTranslation();
+        const showRatings = useShowRatings();
+        const [isImageHovered, setIsImageHovered] = useState(false);
+        const [isMetadataHovered, setIsMetadataHovered] = useState(false);
+
+        const isFavorite = item.userFavorite ?? false;
+        const userRating = item.userRating ?? null;
+        const hasRating = showRatings && userRating !== null && userRating > 0;
+
+        const metadataExtra = useMemo(() => {
+            const parts: Array<{ content: React.ReactNode; key: string }> = [];
+            const releaseStr =
+                (item.releaseDate && formatDateAbsoluteUTC(item.releaseDate)) ||
+                (item.releaseYear != null ? String(item.releaseYear) : '');
+            if (releaseStr) parts.push({ content: releaseStr, key: 'release' });
+            const genres = item.genres?.filter((g) => g.name) ?? [];
+            if (genres.length > 0) {
+                parts.push({
+                    content: genres.map((genre, i) => (
+                        <Fragment key={genre.id}>
+                            {i > 0 && ', '}
+                            <Link
+                                className={styles.metadataLink}
+                                to={generatePath(AppRoute.LIBRARY_GENRES_DETAIL, {
+                                    genreId: genre.id,
+                                })}
+                            >
+                                {genre.name}
+                            </Link>
+                        </Fragment>
+                    )),
+                    key: 'genres',
+                });
+            }
+            const songCount = item.songCount ?? 0;
+            const duration = item.duration ?? 0;
+            const tracksAndDurationParts: string[] = [];
+            if (songCount > 0) {
+                tracksAndDurationParts.push(t('entity.trackWithCount', { count: songCount }));
+            }
+            if (duration > 0) {
+                tracksAndDurationParts.push(formatDurationString(duration));
+            }
+            const tracksAndDuration = tracksAndDurationParts.join(' · ');
+            if (tracksAndDuration) {
+                parts.push({ content: tracksAndDuration, key: 'tracks' });
+            }
+            return parts.length > 0 ? parts : null;
+        }, [item, t]);
+
+        const hasArtist =
+            (item.albumArtistName?.trim()?.length ?? 0) > 0 || (item.albumArtists?.length ?? 0) > 0;
+
+        return (
+            <div
+                className={styles.metadata}
+                onMouseEnter={() => setIsMetadataHovered(true)}
+                onMouseLeave={() => setIsMetadataHovered(false)}
+            >
+                <Link
+                    className={styles.imageWrapper}
+                    onMouseEnter={() => setIsImageHovered(true)}
+                    onMouseLeave={() => setIsImageHovered(false)}
+                    state={{ item }}
+                    to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
+                        albumId: item.id,
+                    })}
+                >
+                    <ItemImage
+                        className={styles.image}
+                        id={item.imageId}
+                        itemType={item._itemType}
+                        type="itemCard"
+                    />
+                    {isFavorite && <div className={styles.favoriteBadge} />}
+                    {hasRating && <div className={styles.ratingBadge}>{userRating}</div>}
+                    <AnimatePresence>
+                        {controls && isImageHovered && (
+                            <ItemCardControls
+                                controls={controls}
+                                enableExpansion={false}
+                                internalState={internalState}
+                                item={item}
+                                itemType={item._itemType}
+                                showRating={true}
+                                type="compact"
+                            />
+                        )}
+                    </AnimatePresence>
+                </Link>
+                <Link
+                    className={styles.title}
+                    state={{ item }}
+                    to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
+                        albumId: item.id,
+                    })}
+                >
+                    {item.name}
+                </Link>
+                <div className={styles.artist}>
+                    {!hasArtist ? (
+                        <>&nbsp;</>
+                    ) : !isMetadataHovered ? (
+                        <Text className={styles.artistPlainText} component="span" isMuted size="sm">
+                            {item.albumArtistName ?? ''}
+                        </Text>
+                    ) : (
+                        <JoinedArtists
+                            artistName={item.albumArtistName ?? ''}
+                            artists={item.albumArtists ?? []}
+                            linkProps={JOINED_ARTISTS_MUTED_PROPS.linkProps}
+                            rootTextProps={JOINED_ARTISTS_MUTED_PROPS.rootTextProps}
+                        />
+                    )}
+                </div>
+                {metadataExtra && metadataExtra.length > 0 && (
+                    <div className={styles.metadataExtra}>
+                        {metadataExtra.map((part) => (
+                            <div
+                                className={clsx(styles.metadataLine, {
+                                    [styles.metadataLineClamp2]: part.key === 'genres',
+                                })}
+                                key={part.key}
+                            >
+                                {part.content}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    },
+    (prev, next) => prev.item === next.item,
+);
+
+MetadataSection.displayName = 'MetadataSection';
+
 type RowContentProps = Omit<RowComponentProps<RowData>, 'style'>;
 
 const RowContent = memo(
@@ -296,7 +457,6 @@ const RowContent = memo(
         trackColumns,
         trackTableSize,
     }: RowContentProps) => {
-        const [showControls, setShowControls] = useState(false);
         const item = useMemo(() => {
             if (getItem) {
                 return getItem(index) as Album | undefined;
@@ -372,39 +532,11 @@ const RowContent = memo(
         return (
             <>
                 <div className={styles.left}>
-                    <div className={styles.metadata}>
-                        <Link
-                            className={styles.imageWrapper}
-                            onMouseEnter={() => setShowControls(true)}
-                            onMouseLeave={() => setShowControls(false)}
-                            state={{ item }}
-                            to={generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
-                                albumId: item.id,
-                            })}
-                        >
-                            <ItemImage
-                                className={styles.image}
-                                id={item.imageId}
-                                itemType={item._itemType}
-                                type="itemCard"
-                            />
-                            <AnimatePresence>
-                                {controls && showControls && (
-                                    <ItemCardControls
-                                        controls={controls}
-                                        enableExpansion={false}
-                                        internalState={internalState}
-                                        item={item}
-                                        itemType={item._itemType}
-                                        showRating={true}
-                                        type="compact"
-                                    />
-                                )}
-                            </AnimatePresence>
-                        </Link>
-                        <div className={styles.title}>{item.name}</div>
-                        <div className={styles.artist}>{item.albumArtistName}</div>
-                    </div>
+                    <MetadataSection
+                        controls={controls}
+                        internalState={internalState}
+                        item={item}
+                    />
                 </div>
 
                 <div className={styles.right}>

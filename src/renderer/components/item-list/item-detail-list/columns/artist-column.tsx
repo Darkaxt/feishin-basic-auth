@@ -1,6 +1,9 @@
 import { ItemDetailListCellProps } from './types';
 
-import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
+import {
+    JOINED_ARTISTS_MUTED_PROPS,
+    JoinedArtists,
+} from '/@/renderer/features/albums/components/joined-artists';
 import { Text } from '/@/shared/components/text/text';
 
 export const ArtistColumn = ({ isRowHovered, song }: ItemDetailListCellProps) => {
@@ -21,8 +24,8 @@ export const ArtistColumn = ({ isRowHovered, song }: ItemDetailListCellProps) =>
         <JoinedArtists
             artistName={song.artistName ?? ''}
             artists={song.artists ?? []}
-            linkProps={{ fw: 400, isMuted: true }}
-            rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
+            linkProps={JOINED_ARTISTS_MUTED_PROPS.linkProps}
+            rootTextProps={JOINED_ARTISTS_MUTED_PROPS.rootTextProps}
         />
     );
 };

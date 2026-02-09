@@ -1,9 +1,14 @@
-import { Fragment } from 'react';
+import { Fragment, memo } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import { AppRoute } from '/@/renderer/router/routes';
 import { Text, TextProps } from '/@/shared/components/text/text';
 import { AlbumArtist, RelatedAlbumArtist, RelatedArtist } from '/@/shared/types/domain-types';
+
+export const JOINED_ARTISTS_MUTED_PROPS = {
+    linkProps: { fw: 400, isMuted: true },
+    rootTextProps: { fw: 400, isMuted: true, size: 'sm' as const },
+} as const;
 
 interface JoinedArtistsProps {
     artistName: string;
@@ -12,7 +17,7 @@ interface JoinedArtistsProps {
     rootTextProps?: Partial<Omit<TextProps, 'children' | 'component'>>;
 }
 
-export const JoinedArtists = ({
+const JoinedArtistsComponent = ({
     artistName,
     artists,
     linkProps,
@@ -204,6 +209,8 @@ export const JoinedArtists = ({
         </Text>
     );
 };
+
+export const JoinedArtists = memo(JoinedArtistsComponent);
 
 function escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
