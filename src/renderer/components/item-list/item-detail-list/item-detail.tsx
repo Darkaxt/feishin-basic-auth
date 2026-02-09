@@ -56,8 +56,9 @@ import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Text } from '/@/shared/components/text/text';
+import { useDoubleClick } from '/@/shared/hooks/use-double-click';
 import { Album, LibraryItem, Song, SongListSort, SortOrder } from '/@/shared/types/domain-types';
-import { ItemListKey, TableColumn } from '/@/shared/types/types';
+import { ItemListKey, Play, TableColumn } from '/@/shared/types/types';
 
 const DEFAULT_ROW_HEIGHT = 300;
 
@@ -93,6 +94,7 @@ interface RowData {
 }
 
 interface TrackRowProps {
+    albumSongs: Song[];
     columns: ItemTableListColumnConfig[];
     columnWidthPercents: number[];
     controls?: ItemControls;
@@ -113,6 +115,7 @@ const textAlignFromAlign = (align: ItemTableListColumnConfig['align']) =>
 
 const TrackRow = memo(
     ({
+        albumSongs,
         columns,
         columnWidthPercents,
         controls,
@@ -138,6 +141,17 @@ const TrackRow = memo(
         });
         const [isRowHovered, setIsRowHovered] = useState(false);
         const isSelected = useItemSelectionState(internalState, song.id);
+
+        const handleDoubleClick = useCallback(
+            (e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isSongsLoading || albumSongs.length === 0) return;
+                internalState.setSelected([song]);
+                playerContext.addToQueueByData(albumSongs, Play.NOW, song.id);
+            },
+            [albumSongs, internalState, isSongsLoading, playerContext, song],
+        );
 
         const handleRowClick = useCallback(
             (e: React.MouseEvent) => {
@@ -223,6 +237,11 @@ const TrackRow = memo(
             [internalState, song],
         );
 
+        const handleClick = useDoubleClick({
+            onDoubleClick: handleDoubleClick,
+            onSingleClick: handleRowClick,
+        });
+
         const handleContextMenu = useCallback(
             (event: React.MouseEvent<HTMLDivElement>) => {
                 if (isSongsLoading || !controls?.onMore) return;
@@ -254,7 +273,7 @@ const TrackRow = memo(
                     [styles.trackRowSizeLarge]: size === 'large',
                     [styles.trackRowWithHorizontalBorder]: rowIndex > 0,
                 })}
-                onClick={handleRowClick}
+                onClick={handleClick}
                 onContextMenu={handleContextMenu}
                 onMouseEnter={() => setIsRowHovered(true)}
                 onMouseLeave={() => setIsRowHovered(false)}
@@ -653,6 +672,7 @@ const RowContent = memo(
                     <div className={styles.tracksTable} role="table">
                         {songs.map((song, rowIndex) => (
                             <TrackRow
+                                albumSongs={songItems ? (songItems as Song[]) : []}
                                 columns={trackColumns}
                                 columnWidthPercents={columnWidthPercents}
                                 controls={controls}
