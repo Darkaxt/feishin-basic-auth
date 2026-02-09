@@ -42,7 +42,6 @@ import {
 import { useItemDragDropState } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-drag-drop-state';
 import { columnLabelMap } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls, ItemTableListColumnConfig } from '/@/renderer/components/item-list/types';
-import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {
     JOINED_ARTISTS_MUTED_PROPS,
     JoinedArtists,
@@ -50,13 +49,14 @@ import {
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
+import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useSettingsStore, useShowRatings } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Text } from '/@/shared/components/text/text';
-import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
+import { Album, LibraryItem, Song, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey, TableColumn } from '/@/shared/types/types';
 
 const DEFAULT_ROW_HEIGHT = 300;
@@ -582,21 +582,36 @@ const RowContent = memo(
             return (data?.[index] as Album | undefined) || undefined;
         }, [data, getItem, index]);
 
-        const { data: songData, isLoading: isSongsQueryLoading } = useQuery({
-            enabled: !!item && !!item.id,
-            ...albumQueries.detail({
+        const songListQuery = useMemo(() => {
+            if (!item?.id || !item?._serverId) return null;
+            return {
                 query: {
-                    id: item?.id || '',
+                    albumIds: [item.id],
+                    limit: -1,
+                    sortBy: SongListSort.ALBUM,
+                    sortOrder: SortOrder.ASC,
+                    startIndex: 0,
                 },
                 serverId: item?._serverId || '',
-            }),
+            };
+        }, [item]);
+
+        const { data: songListData, isLoading: isSongsQueryLoading } = useQuery({
+            enabled: !!songListQuery,
+            ...(songListQuery
+                ? songsQueries.list(songListQuery)
+                : {
+                      queryFn: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
+                      queryKey: ['item-detail', 'list', 'disabled'],
+                  }),
         });
 
-        const isSongsLoading = !!item && isSongsQueryLoading && !songData;
+        const songItems = songListData?.items;
+        const isSongsLoading = !!item && isSongsQueryLoading && !songItems?.length;
 
         const songs = useMemo(() => {
             return (
-                songData?.songs ||
+                songItems ||
                 Array.from({ length: item?.songCount || 0 }, (_, i) => ({
                     duration: 0,
                     id: `${item?.id}-${i}`,
@@ -604,13 +619,13 @@ const RowContent = memo(
                     trackNumber: i + 1,
                 }))
             );
-        }, [songData, item?.id, item?.songCount]);
+        }, [songItems, item?.id, item?.songCount]);
 
         useEffect(() => {
-            if (item?.id && songData?.songs?.length) {
-                registerSongs(item.id, songData.songs as Song[]);
+            if (item?.id && songItems?.length) {
+                registerSongs(item.id, songItems as Song[]);
             }
-        }, [item?.id, registerSongs, songData?.songs]);
+        }, [item?.id, registerSongs, songItems]);
 
         if (!item) {
             return (
