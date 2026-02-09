@@ -2,9 +2,19 @@ import { TableColumn } from '/@/shared/types/types';
 
 const FIXED_TRACK_COLUMN_WIDTHS: Partial<Record<TableColumn, number>> = {
     [TableColumn.ACTIONS]: 32,
+    [TableColumn.BIT_DEPTH]: 80,
+    [TableColumn.BIT_RATE]: 80,
+    [TableColumn.BPM]: 56,
+    [TableColumn.CHANNELS]: 80,
+    [TableColumn.CODEC]: 80,
+    [TableColumn.DATE_ADDED]: 128,
+    [TableColumn.DISC_NUMBER]: 36,
+    [TableColumn.RELEASE_DATE]: 128,
+    [TableColumn.SAMPLE_RATE]: 90,
     [TableColumn.TRACK_NUMBER]: 56,
     [TableColumn.USER_FAVORITE]: 32,
     [TableColumn.USER_RATING]: 64,
+    [TableColumn.YEAR]: 56,
 };
 
 const HOVER_ONLY_COLUMNS: TableColumn[] = [
