@@ -204,7 +204,11 @@ const TrackRow = memo(
                         internalState.setSelected([song]);
                     }
                 } else {
-                    internalState.setSelected([song]);
+                    const selected = internalState.getSelected();
+                    const onlyThisSelected =
+                        selected.length === 1 &&
+                        internalState.extractRowId(selected[0]) === song.id;
+                    internalState.setSelected(onlyThisSelected ? [] : [song]);
                 }
             },
             [internalState, song],
