@@ -55,7 +55,9 @@ interface RowData {
     columnWidthPercents: number[];
     controls?: ItemControls;
     data: unknown[];
+    enableHorizontalBorders: boolean;
     enableRowHoverHighlight: boolean;
+    enableVerticalBorders: boolean;
     getItem?: (index: number) => unknown;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
@@ -68,7 +70,9 @@ interface TrackRowProps {
     columns: ItemTableListColumnConfig[];
     columnWidthPercents: number[];
     controls?: ItemControls;
+    enableHorizontalBorders: boolean;
     enableRowHoverHighlight: boolean;
+    enableVerticalBorders: boolean;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
@@ -85,7 +89,9 @@ const TrackRow = memo(
         columns,
         columnWidthPercents,
         controls,
+        enableHorizontalBorders,
         enableRowHoverHighlight,
+        enableVerticalBorders,
         internalState,
         isMutatingFavorite,
         onFavoriteClick,
@@ -189,11 +195,14 @@ const TrackRow = memo(
             <div
                 className={clsx(styles.trackRow, {
                     [styles.trackRowDragging]: isDragging,
+                    [styles.trackRowHorizontalBorderVisible]:
+                        enableHorizontalBorders && rowIndex > 0,
                     [styles.trackRowHoverHighlightEnabled]: enableRowHoverHighlight,
                     [styles.trackRowSelected]: isSelected,
                     [styles.trackRowSizeCompact]: size === 'compact',
                     [styles.trackRowSizeDefault]: size === 'default',
                     [styles.trackRowSizeLarge]: size === 'large',
+                    [styles.trackRowWithHorizontalBorder]: rowIndex > 0,
                 })}
                 onClick={handleRowClick}
                 onMouseEnter={() => setIsRowHovered(true)}
@@ -237,11 +246,15 @@ const TrackRow = memo(
                         '\u00A0'
                     );
 
+                    const isLastColumn = colIndex === columns.length - 1;
                     return (
                         <div
                             className={clsx(styles.trackCell, {
                                 [styles.trackCellImage]: isImageColumn,
                                 [styles.trackCellMuted]: !isTitleColumn,
+                                [styles.trackCellVerticalBorderVisible]:
+                                    enableVerticalBorders && !isLastColumn,
+                                [styles.trackCellWithVerticalBorder]: !isLastColumn,
                             })}
                             key={col.id}
                             role="cell"
@@ -265,7 +278,9 @@ const RowContent = memo(
         columnWidthPercents,
         controls,
         data,
+        enableHorizontalBorders,
         enableRowHoverHighlight,
+        enableVerticalBorders,
         getItem,
         index,
         internalState,
@@ -392,7 +407,9 @@ const RowContent = memo(
                                 columns={trackColumns}
                                 columnWidthPercents={columnWidthPercents}
                                 controls={controls}
+                                enableHorizontalBorders={enableHorizontalBorders}
                                 enableRowHoverHighlight={enableRowHoverHighlight}
+                                enableVerticalBorders={enableVerticalBorders}
                                 internalState={internalState}
                                 isMutatingFavorite={isMutatingFavorite}
                                 key={song.id}
@@ -411,7 +428,9 @@ const RowContent = memo(
         prev.index === next.index &&
         prev.data === next.data &&
         prev.columnWidthPercents === next.columnWidthPercents &&
+        prev.enableHorizontalBorders === next.enableHorizontalBorders &&
         prev.enableRowHoverHighlight === next.enableRowHoverHighlight &&
+        prev.enableVerticalBorders === next.enableVerticalBorders &&
         prev.getItem === next.getItem &&
         prev.internalState === next.internalState &&
         prev.isMutatingFavorite === next.isMutatingFavorite &&
@@ -508,6 +527,8 @@ export const ItemDetailList = ({
     }, [tableConfig?.columns]);
     const trackTableSize = tableConfig?.size ?? 'default';
     const enableRowHoverHighlight = tableConfig?.enableRowHoverHighlight ?? true;
+    const enableHorizontalBorders = tableConfig?.enableHorizontalBorders ?? false;
+    const enableVerticalBorders = tableConfig?.enableVerticalBorders ?? false;
 
     const columnWidthPercents = useMemo(() => {
         const total = trackColumns.reduce((sum, c) => sum + c.width, 0);
@@ -546,7 +567,9 @@ export const ItemDetailList = ({
             columnWidthPercents,
             controls,
             data: dataSource,
+            enableHorizontalBorders,
             enableRowHoverHighlight,
+            enableVerticalBorders,
             getItem,
             internalState,
             isMutatingFavorite,
@@ -559,7 +582,9 @@ export const ItemDetailList = ({
             columnWidthPercents,
             controls,
             dataSource,
+            enableHorizontalBorders,
             enableRowHoverHighlight,
+            enableVerticalBorders,
             getItem,
             internalState,
             isMutatingFavorite,

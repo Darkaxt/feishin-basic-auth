@@ -140,6 +140,14 @@
     color: var(--theme-colors-foreground-muted);
 }
 
+.row .track-cell-with-vertical-border {
+    border-right: 1px solid transparent;
+}
+
+.row .track-cell-vertical-border-visible {
+    border-right-color: var(--theme-colors-border);
+}
+
 .row .track-cell-image {
     display: flex;
     align-self: stretch;
@@ -162,6 +170,14 @@
 
 .track-row-dragging {
     opacity: 0.5;
+}
+
+.track-row.track-row-with-horizontal-border {
+    border-top: 1px solid transparent;
+}
+
+.track-row.track-row-horizontal-border-visible {
+    border-top-color: var(--theme-colors-border);
 }
 
 .track-row.track-row-hover-highlight-enabled {
