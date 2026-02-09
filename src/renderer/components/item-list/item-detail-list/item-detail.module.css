@@ -101,10 +101,10 @@
     display: grid;
     grid-template-columns: 240px 1fr;
     gap: var(--theme-spacing-md);
-    padding: 0 var(--theme-spacing-md) var(--theme-spacing-xl) var(--theme-spacing-md);
+    padding: var(--theme-spacing-md);
+    border-bottom: 1px solid var(--theme-colors-border);
 }
 
-/* Height constraint for skeleton columns; row grid gets two direct children (left, right) */
 .skeleton-column-wrapper {
     box-sizing: border-box;
     min-width: 0;
