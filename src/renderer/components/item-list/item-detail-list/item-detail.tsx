@@ -242,6 +242,7 @@ const TrackRow = memo(
                             controls={controls}
                             internalState={internalState}
                             isMutatingFavorite={isMutatingFavorite}
+                            isRowHovered={isRowHovered}
                             onFavoriteClick={onFavoriteClick}
                             rowIndex={rowIndex}
                             size={size}

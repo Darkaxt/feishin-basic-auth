@@ -6,6 +6,7 @@ export interface ItemDetailListCellProps {
     controls?: ItemControls;
     internalState?: ItemListStateActions;
     isMutatingFavorite?: boolean;
+    isRowHovered?: boolean;
     onFavoriteClick?: (song: Song) => void;
     rowIndex?: number;
     size?: 'compact' | 'default' | 'large';
