@@ -195,6 +195,7 @@ const Config = ({
             if (props.detailConfig) {
                 return (
                     <TableConfig
+                        enablePinColumnButtons={false}
                         listKey={props.detailConfig.listKey}
                         optionsConfig={props.detailConfig.optionsConfig}
                         tableColumnsData={props.detailConfig.tableColumnsData}

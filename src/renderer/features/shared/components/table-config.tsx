@@ -39,6 +39,7 @@ import { dndUtils, DragData, DragOperation, DragTarget } from '/@/shared/types/d
 import { ItemListKey, ListPaginationType } from '/@/shared/types/types';
 
 interface TableConfigProps {
+    enablePinColumnButtons?: boolean;
     extraOptions?: {
         component: React.ReactNode;
         id: string;
@@ -55,6 +56,7 @@ interface TableConfigProps {
 }
 
 export const TableConfig = ({
+    enablePinColumnButtons = true,
     extraOptions,
     listKey,
     optionsConfig,
@@ -264,6 +266,7 @@ export const TableConfig = ({
             <Divider />
             <TableColumnConfig
                 data={tableColumnsData}
+                enablePinColumnButtons={enablePinColumnButtons}
                 onChange={(columns) => setList(listKey, { table: { columns } })}
                 value={list.table.columns}
             />
@@ -273,10 +276,12 @@ export const TableConfig = ({
 
 const TableColumnConfig = ({
     data,
+    enablePinColumnButtons,
     onChange,
     value,
 }: {
     data: { label: string; value: string }[];
+    enablePinColumnButtons: boolean;
     onChange: (value: ItemTableListColumnConfig[]) => void;
     value: ItemTableListColumnConfig[];
 }) => {
@@ -473,6 +478,7 @@ const TableColumnConfig = ({
             <div style={{ userSelect: 'none' }}>
                 {filteredColumns.map(({ item, matches }) => (
                     <TableColumnItem
+                        enablePinColumnButtons={enablePinColumnButtons}
                         handleAlignCenter={handleAlignCenter}
                         handleAlignLeft={handleAlignLeft}
                         handleAlignRight={handleAlignRight}
@@ -516,6 +522,7 @@ const DragHandle = ({
 
 const TableColumnItem = memo(
     ({
+        enablePinColumnButtons,
         handleAlignCenter,
         handleAlignLeft,
         handleAlignRight,
@@ -531,6 +538,7 @@ const TableColumnItem = memo(
         label,
         matches,
     }: {
+        enablePinColumnButtons: boolean;
         handleAlignCenter: (item: ItemTableListColumnConfig) => void;
         handleAlignLeft: (item: ItemTableListColumnConfig) => void;
         handleAlignRight: (item: ItemTableListColumnConfig) => void;
@@ -667,32 +675,34 @@ const TableColumnItem = memo(
                             variant="subtle"
                         />
                     </ActionIconGroup>
-                    <ActionIconGroup className={styles.group}>
-                        <ActionIcon
-                            icon="arrowLeftToLine"
-                            iconProps={{ size: 'md' }}
-                            onClick={() => handlePinToLeft(item)}
-                            size="xs"
-                            tooltip={{
-                                label: t('table.config.general.pinToLeft', {
-                                    postProcess: 'sentenceCase',
-                                }),
-                            }}
-                            variant={item.pinned === 'left' ? 'filled' : 'subtle'}
-                        />
-                        <ActionIcon
-                            icon="arrowRightToLine"
-                            iconProps={{ size: 'md' }}
-                            onClick={() => handlePinToRight(item)}
-                            size="xs"
-                            tooltip={{
-                                label: t('table.config.general.pinToRight', {
-                                    postProcess: 'sentenceCase',
-                                }),
-                            }}
-                            variant={item.pinned === 'right' ? 'filled' : 'subtle'}
-                        />
-                    </ActionIconGroup>
+                    {enablePinColumnButtons && (
+                        <ActionIconGroup className={styles.group}>
+                            <ActionIcon
+                                icon="arrowLeftToLine"
+                                iconProps={{ size: 'md' }}
+                                onClick={() => handlePinToLeft(item)}
+                                size="xs"
+                                tooltip={{
+                                    label: t('table.config.general.pinToLeft', {
+                                        postProcess: 'sentenceCase',
+                                    }),
+                                }}
+                                variant={item.pinned === 'left' ? 'filled' : 'subtle'}
+                            />
+                            <ActionIcon
+                                icon="arrowRightToLine"
+                                iconProps={{ size: 'md' }}
+                                onClick={() => handlePinToRight(item)}
+                                size="xs"
+                                tooltip={{
+                                    label: t('table.config.general.pinToRight', {
+                                        postProcess: 'sentenceCase',
+                                    }),
+                                }}
+                                variant={item.pinned === 'right' ? 'filled' : 'subtle'}
+                            />
+                        </ActionIconGroup>
+                    )}
                     <ActionIconGroup className={styles.group}>
                         <ActionIcon
                             icon="alignLeft"
@@ -772,6 +782,7 @@ const TableColumnItem = memo(
     (prevProps, nextProps) => {
         // Custom comparison function for better memoization
         return (
+            prevProps.enablePinColumnButtons === nextProps.enablePinColumnButtons &&
             prevProps.item.id === nextProps.item.id &&
             prevProps.item.isEnabled === nextProps.item.isEnabled &&
             prevProps.item.autoSize === nextProps.item.autoSize &&
