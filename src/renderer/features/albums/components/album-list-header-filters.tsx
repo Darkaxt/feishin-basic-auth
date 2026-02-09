@@ -95,7 +95,7 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
                 <ListRefreshButton listKey={pageKey as ItemListKey} />
             </Group>
             <Group gap="sm" wrap="nowrap">
-                <ListDisplayTypeToggleButton listKey={ItemListKey.ALBUM} />
+                <ListDisplayTypeToggleButton enableDetail listKey={ItemListKey.ALBUM} />
                 <ListConfigMenu
                     detailConfig={{
                         optionsConfig: {

@@ -40,7 +40,7 @@ const DISPLAY_TYPES = [
     {
         label: (
             <Group align="center" justify="center" p="sm">
-                <Icon icon="layoutList" size="lg" />
+                <Icon icon="layoutDetail" size="lg" />
                 {i18n.t('table.config.view.detail', { postProcess: 'sentenceCase' }) as string}
             </Group>
         ),
