@@ -21,6 +21,10 @@ import {
 import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
 import { getDetailListCellComponent } from '/@/renderer/components/item-list/item-detail-list/columns';
 import {
+    getTrackColumnFixed,
+    shouldShowHoverOnlyColumnContent,
+} from '/@/renderer/components/item-list/item-detail-list/utils';
+import {
     pickTableColumns,
     SONG_TABLE_COLUMNS,
 } from '/@/renderer/components/item-list/item-table-list/default-columns';
@@ -62,6 +66,7 @@ interface RowData {
 interface TrackRowProps {
     columns: ItemTableListColumnConfig[];
     columnWidthPercents: number[];
+    controls?: ItemControls;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
@@ -77,6 +82,7 @@ const TrackRow = memo(
     ({
         columns,
         columnWidthPercents,
+        controls,
         internalState,
         isMutatingFavorite,
         onFavoriteClick,
@@ -85,7 +91,7 @@ const TrackRow = memo(
         song,
     }: TrackRowProps) => {
         const playerContext = usePlayer();
-        const { dragRef, isDragging } = useItemDragDropState<HTMLTableRowElement>({
+        const { dragRef, isDragging } = useItemDragDropState<HTMLDivElement>({
             enableDrag: true,
             internalState,
             isDataRow: true,
@@ -93,6 +99,7 @@ const TrackRow = memo(
             itemType: LibraryItem.SONG,
             playerContext,
         });
+        const [isRowHovered, setIsRowHovered] = useState(false);
         const isSelected = useItemSelectionState(internalState, song.id);
 
         const handleRowClick = useCallback(
@@ -176,8 +183,8 @@ const TrackRow = memo(
         );
 
         return (
-            <tr
-                className={clsx({
+            <div
+                className={clsx(styles.trackRow, {
                     [styles.trackRowDragging]: isDragging,
                     [styles.trackRowSelected]: isSelected,
                     [styles.trackRowSizeCompact]: size === 'compact',
@@ -185,45 +192,62 @@ const TrackRow = memo(
                     [styles.trackRowSizeLarge]: size === 'large',
                 })}
                 onClick={handleRowClick}
+                onMouseEnter={() => setIsRowHovered(true)}
+                onMouseLeave={() => setIsRowHovered(false)}
                 ref={dragRef ?? undefined}
+                role="row"
             >
                 {columns.map((col, colIndex) => {
                     const percent = columnWidthPercents[colIndex] ?? 0;
+                    const { fixedWidth, isFixedColumn } = getTrackColumnFixed(col.id);
                     const style: React.CSSProperties = {
+                        flex: isFixedColumn ? `0 0 ${fixedWidth}px` : `${percent} 1 0`,
                         fontFamily:
                             col.id === TableColumn.DURATION || col.id === TableColumn.TRACK_NUMBER
                                 ? 'monospace'
                                 : undefined,
-                        minWidth: 0,
+                        minWidth: isFixedColumn ? fixedWidth : 0,
                         textAlign: textAlignFromAlign(col.align),
-                        width: `${percent}%`,
                     };
                     const CellComponent = getDetailListCellComponent(col.id);
-                    const content = (
+                    const isTitleColumn = col.id === TableColumn.TITLE;
+                    const isImageColumn = col.id === TableColumn.IMAGE;
+                    const showHoverContent = shouldShowHoverOnlyColumnContent(
+                        col.id,
+                        isRowHovered,
+                        song,
+                    );
+
+                    const content = showHoverContent ? (
                         <CellComponent
                             columnId={col.id}
+                            controls={controls}
+                            internalState={internalState}
                             isMutatingFavorite={isMutatingFavorite}
                             onFavoriteClick={onFavoriteClick}
                             rowIndex={rowIndex}
+                            size={size}
                             song={song}
                         />
+                    ) : (
+                        '\u00A0'
                     );
 
-                    const isTitleColumn = col.id === TableColumn.TITLE;
                     return (
-                        <td
-                            className={clsx(
-                                styles.trackCell,
-                                !isTitleColumn && styles.trackCellMuted,
-                            )}
+                        <div
+                            className={clsx(styles.trackCell, {
+                                [styles.trackCellImage]: isImageColumn,
+                                [styles.trackCellMuted]: !isTitleColumn,
+                            })}
                             key={col.id}
+                            role="cell"
                             style={style}
                         >
                             {content}
-                        </td>
+                        </div>
                     );
                 })}
-            </tr>
+            </div>
         );
     },
 );
@@ -357,23 +381,22 @@ const RowContent = memo(
                 </div>
 
                 <div className={styles.right}>
-                    <table className={styles.tracksTable}>
-                        <tbody>
-                            {songs.map((song, rowIndex) => (
-                                <TrackRow
-                                    columns={trackColumns}
-                                    columnWidthPercents={columnWidthPercents}
-                                    internalState={internalState}
-                                    isMutatingFavorite={isMutatingFavorite}
-                                    key={song.id}
-                                    onFavoriteClick={onFavoriteClick}
-                                    rowIndex={rowIndex}
-                                    size={trackTableSize}
-                                    song={song as Song}
-                                />
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className={styles.tracksTable} role="table">
+                        {songs.map((song, rowIndex) => (
+                            <TrackRow
+                                columns={trackColumns}
+                                columnWidthPercents={columnWidthPercents}
+                                controls={controls}
+                                internalState={internalState}
+                                isMutatingFavorite={isMutatingFavorite}
+                                key={song.id}
+                                onFavoriteClick={onFavoriteClick}
+                                rowIndex={rowIndex}
+                                size={trackTableSize}
+                                song={song as Song}
+                            />
+                        ))}
+                    </div>
                 </div>
             </>
         );

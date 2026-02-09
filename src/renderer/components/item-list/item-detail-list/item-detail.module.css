@@ -67,6 +67,7 @@
     flex-direction: column;
     gap: var(--theme-spacing-xs);
     align-items: center;
+    padding: var(--theme-spacing-sm);
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: var(--theme-font-size-md);
@@ -88,9 +89,18 @@
 }
 
 .row .tracks-table {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     font-size: var(--theme-font-size-sm);
-    table-layout: fixed;
+}
+
+.row .track-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .row .track-header-cell {
@@ -100,6 +110,7 @@
 }
 
 .row .track-cell {
+    min-width: 0;
     padding-right: var(--theme-spacing-sm);
     padding-left: var(--theme-spacing-sm);
     overflow: hidden;
@@ -107,23 +118,36 @@
     white-space: nowrap;
 }
 
-.row .track-row-size-compact .track-cell {
-    padding-top: var(--theme-spacing-xs);
-    padding-bottom: var(--theme-spacing-xs);
+.row .track-row-size-compact {
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
 }
 
-.row .track-row-size-default .track-cell {
-    padding-top: var(--theme-spacing-sm);
-    padding-bottom: var(--theme-spacing-sm);
+.row .track-row-size-default {
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
 }
 
-.row .track-row-size-large .track-cell {
-    padding-top: var(--theme-spacing-md);
-    padding-bottom: var(--theme-spacing-md);
+.row .track-row-size-large {
+    height: 48px;
+    min-height: 48px;
+    max-height: 48px;
 }
 
 .row .track-cell-muted {
     color: var(--theme-colors-foreground-muted);
+}
+
+.row .track-cell-image {
+    display: flex;
+    align-self: stretch;
+    min-height: 0;
+    max-height: 100%;
+    padding-right: var(--theme-spacing-sm);
+    padding-left: var(--theme-spacing-sm);
+    overflow: hidden;
 }
 
 .track-row-selected {
@@ -172,18 +196,21 @@
 }
 
 .skeleton-tracks-size-compact .skeleton-track-row {
-    padding-top: var(--theme-spacing-xs);
-    padding-bottom: var(--theme-spacing-xs);
+    height: 32px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .skeleton-tracks-size-default .skeleton-track-row {
-    padding-top: var(--theme-spacing-sm);
-    padding-bottom: var(--theme-spacing-sm);
+    height: 40px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .skeleton-tracks-size-large .skeleton-track-row {
-    padding-top: var(--theme-spacing-md);
-    padding-bottom: var(--theme-spacing-md);
+    height: 48px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .skeleton-track-cell {
