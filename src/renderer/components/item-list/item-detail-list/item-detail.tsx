@@ -222,6 +222,22 @@ const TrackRow = memo(
             [internalState, song],
         );
 
+        const handleContextMenu = useCallback(
+            (event: React.MouseEvent<HTMLDivElement>) => {
+                if (isSongsLoading || !controls?.onMore) return;
+                event.preventDefault();
+                const index = internalState.findItemIndex(song.id);
+                controls.onMore({
+                    event,
+                    index,
+                    internalState,
+                    item: song,
+                    itemType: LibraryItem.SONG,
+                });
+            },
+            [controls, internalState, isSongsLoading, song],
+        );
+
         return (
             <div
                 className={clsx(styles.trackRow, {
@@ -238,6 +254,7 @@ const TrackRow = memo(
                     [styles.trackRowWithHorizontalBorder]: rowIndex > 0,
                 })}
                 onClick={handleRowClick}
+                onContextMenu={handleContextMenu}
                 onMouseEnter={() => setIsRowHovered(true)}
                 onMouseLeave={() => setIsRowHovered(false)}
                 ref={dragRef ?? undefined}
