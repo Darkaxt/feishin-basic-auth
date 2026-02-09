@@ -88,53 +88,15 @@
     table-layout: fixed;
 }
 
-.row .track-col-number {
-    width: 3.5rem;
-    min-width: 3.5rem;
-    max-width: 3.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--theme-colors-foreground-muted);
-    text-align: center;
-    white-space: nowrap;
-}
-
-.row .track-col-title {
-    width: auto;
-    min-width: 0;
+.row .track-header-cell {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.row .track-col-duration {
-    width: 4rem;
-    min-width: 4rem;
-    max-width: 4rem;
+.row .track-cell {
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--theme-colors-foreground-muted);
-    text-align: center;
-    white-space: nowrap;
-}
-
-.row .track-col-favorite {
-    width: 2.5rem;
-    min-width: 2.5rem;
-    max-width: 2.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.row .track-col-rating {
-    width: 5.5rem;
-    min-width: 5.5rem;
-    max-width: 5.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
     white-space: nowrap;
 }
 

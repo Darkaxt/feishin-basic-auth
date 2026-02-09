@@ -72,6 +72,12 @@ export const ListConfigBooleanControl = ({
     );
 };
 
+export interface ListConfigMenuDetailConfig {
+    listKey: ItemListKey;
+    optionsConfig?: ListConfigMenuOptionsConfig['detail'];
+    tableColumnsData: { label: string; value: string }[];
+}
+
 export interface ListConfigMenuDisplayTypeConfig {
     disabled?: boolean;
     hidden?: boolean;
@@ -84,6 +90,9 @@ export interface ListConfigMenuOptionConfig {
 }
 
 export interface ListConfigMenuOptionsConfig {
+    detail?: {
+        [key: string]: ListConfigMenuOptionConfig;
+    };
     grid?: {
         [key: string]: ListConfigMenuOptionConfig;
     };
@@ -94,6 +103,7 @@ export interface ListConfigMenuOptionsConfig {
 
 interface ListConfigMenuProps {
     buttonProps?: ActionIconProps;
+    detailConfig?: ListConfigMenuDetailConfig;
     displayTypes?: ListConfigMenuDisplayTypeConfig[];
     listKey: ItemListKey;
     optionsConfig?: ListConfigMenuOptionsConfig;
@@ -181,6 +191,18 @@ const Config = ({
     ...props
 }: ListConfigMenuProps & { displayType: ListDisplayType }) => {
     switch (displayType) {
+        case ListDisplayType.DETAIL:
+            if (props.detailConfig) {
+                return (
+                    <TableConfig
+                        listKey={props.detailConfig.listKey}
+                        optionsConfig={props.detailConfig.optionsConfig}
+                        tableColumnsData={props.detailConfig.tableColumnsData}
+                    />
+                );
+            }
+            return null;
+
         case ListDisplayType.GRID:
             return (
                 <GridConfig
@@ -198,10 +220,6 @@ const Config = ({
                     tableColumnsData={tableColumnsData}
                 />
             );
-
-        case ListDisplayType.DETAIL:
-            // Detail view doesn't have specific configuration options
-            return null;
 
         default:
             return null;

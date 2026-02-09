@@ -1,7 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ALBUM_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import {
+    ALBUM_TABLE_COLUMNS,
+    SONG_TABLE_COLUMNS,
+} from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
@@ -94,6 +97,17 @@ export const AlbumListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarge
             <Group gap="sm" wrap="nowrap">
                 <ListDisplayTypeToggleButton listKey={ItemListKey.ALBUM} />
                 <ListConfigMenu
+                    detailConfig={{
+                        listKey: ItemListKey.ALBUM_DETAIL,
+                        optionsConfig: {
+                            autoFitColumns: { hidden: true },
+                            enableHeader: { hidden: true },
+                            itemsPerPage: { hidden: true },
+                            pagination: { hidden: true },
+                            size: { hidden: true },
+                        },
+                        tableColumnsData: SONG_TABLE_COLUMNS,
+                    }}
                     listKey={ItemListKey.ALBUM}
                     tableColumnsData={ALBUM_TABLE_COLUMNS}
                 />

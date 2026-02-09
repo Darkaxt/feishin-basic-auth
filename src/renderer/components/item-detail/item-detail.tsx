@@ -18,17 +18,24 @@ import {
     useItemListState,
     useItemSelectionState,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
+import { parseTableColumns } from '/@/renderer/components/item-list/helpers/parse-table-columns';
+import {
+    pickTableColumns,
+    SONG_TABLE_COLUMNS,
+} from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useItemDragDropState } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-drag-drop-state';
-import { ItemControls } from '/@/renderer/components/item-list/types';
+import { ItemControls, ItemTableListColumnConfig } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { useIsMutatingCreateFavorite } from '/@/renderer/features/shared/mutations/create-favorite-mutation';
 import { useIsMutatingDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { AppRoute } from '/@/renderer/router/routes';
+import { useSettingsStore } from '/@/renderer/store';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ReadOnlyRating } from '/@/shared/components/read-only-rating/read-only-rating';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { Album, LibraryItem, Song } from '/@/shared/types/domain-types';
+import { ItemListKey, TableColumn } from '/@/shared/types/types';
 
 interface ItemDetailListProps {
     currentPage?: number;
@@ -45,22 +52,28 @@ interface ItemDetailListProps {
 interface RowData {
     controls?: ItemControls;
     data: unknown[];
+    enableTrackTableHeader: boolean;
     getItem?: (index: number) => unknown;
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     queryClient: ReturnType<typeof useQueryClient>;
     registerSongs: (albumId: string, songs: Song[]) => void;
+    trackColumns: ItemTableListColumnConfig[];
 }
 
 interface TrackRowProps {
+    columns: ItemTableListColumnConfig[];
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
     song: Song;
 }
 
+const textAlignFromAlign = (align: ItemTableListColumnConfig['align']) =>
+    align === 'start' ? 'left' : align === 'end' ? 'right' : 'center';
+
 const TrackRow = memo(
-    ({ internalState, isMutatingFavorite, onFavoriteClick, song }: TrackRowProps) => {
+    ({ columns, internalState, isMutatingFavorite, onFavoriteClick, song }: TrackRowProps) => {
         const playerContext = usePlayer();
         const { dragRef, isDragging } = useItemDragDropState<HTMLTableRowElement>({
             enableDrag: true,
@@ -166,33 +179,75 @@ const TrackRow = memo(
                 onClick={handleRowClick}
                 ref={dragRef ?? undefined}
             >
-                <td className={styles.trackColNumber} style={{ fontFamily: 'monospace' }}>
-                    {discAndCol}
-                </td>
-                <td className={styles.trackColTitle}>{song.name}</td>
-                <td className={styles.trackColDuration} style={{ fontFamily: 'monospace' }}>
-                    {formatDuration(song.duration)}
-                </td>
-                <td className={styles.trackColFavorite}>
-                    <div
-                        aria-disabled={isMutatingFavorite}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            event.preventDefault();
-                            onFavoriteClick(song);
-                        }}
-                        onDoubleClick={(event) => {
-                            event.stopPropagation();
-                            event.preventDefault();
-                        }}
-                        role="button"
-                    >
-                        <Icon icon="favorite" size="xs" />
-                    </div>
-                </td>
-                <td className={styles.trackColRating}>
-                    <ReadOnlyRating size="md" value={song.userRating} />
-                </td>
+                {columns.map((col) => {
+                    const widthStyle = col.autoSize
+                        ? { minWidth: col.width }
+                        : {
+                              maxWidth: col.width,
+                              minWidth: col.width,
+                              width: col.width,
+                          };
+                    const style: React.CSSProperties = {
+                        fontFamily:
+                            col.id === TableColumn.DURATION || col.id === TableColumn.TRACK_NUMBER
+                                ? 'monospace'
+                                : undefined,
+                        textAlign: textAlignFromAlign(col.align),
+                        ...widthStyle,
+                    };
+
+                    let content: React.ReactNode;
+                    switch (col.id) {
+                        case TableColumn.DISC_NUMBER:
+                        case TableColumn.TRACK_NUMBER:
+                            content = discAndCol;
+                            break;
+                        case TableColumn.DURATION:
+                            content = formatDuration(song.duration);
+                            break;
+                        case TableColumn.TITLE:
+                            content = song.name;
+                            break;
+                        case TableColumn.USER_FAVORITE:
+                            content = (
+                                <div
+                                    aria-disabled={isMutatingFavorite}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        event.preventDefault();
+                                        onFavoriteClick(song);
+                                    }}
+                                    onDoubleClick={(event) => {
+                                        event.stopPropagation();
+                                        event.preventDefault();
+                                    }}
+                                    role="button"
+                                >
+                                    <Icon icon="favorite" size="xs" />
+                                </div>
+                            );
+                            break;
+                        case TableColumn.USER_RATING:
+                            content = (
+                                <ReadOnlyRating size="md" value={song.userRating ?? undefined} />
+                            );
+                            break;
+                        default: {
+                            const raw = (song as Record<string, unknown>)[col.id];
+                            content =
+                                raw !== undefined && raw !== null && typeof raw !== 'object'
+                                    ? String(raw)
+                                    : '—';
+                            break;
+                        }
+                    }
+
+                    return (
+                        <td className={styles.trackCell} key={col.id} style={style}>
+                            {content}
+                        </td>
+                    );
+                })}
             </tr>
         );
     },
@@ -206,12 +261,14 @@ const RowContent = memo(
     ({
         controls,
         data,
+        enableTrackTableHeader,
         getItem,
         index,
         internalState,
         isMutatingFavorite,
         queryClient,
         registerSongs,
+        trackColumns,
     }: RowContentProps) => {
         const [showControls, setShowControls] = useState(false);
         const item = useMemo(() => {
@@ -323,6 +380,7 @@ const RowContent = memo(
                         <tbody>
                             {songs.map((song) => (
                                 <TrackRow
+                                    columns={trackColumns}
                                     internalState={internalState}
                                     isMutatingFavorite={isMutatingFavorite}
                                     key={song.id}
@@ -339,12 +397,14 @@ const RowContent = memo(
     (prev, next) =>
         prev.index === next.index &&
         prev.data === next.data &&
+        prev.enableTrackTableHeader === next.enableTrackTableHeader &&
         prev.getItem === next.getItem &&
         prev.internalState === next.internalState &&
         prev.queryClient === next.queryClient &&
         prev.isMutatingFavorite === next.isMutatingFavorite &&
         prev.controls === next.controls &&
-        prev.registerSongs === next.registerSongs,
+        prev.registerSongs === next.registerSongs &&
+        prev.trackColumns === next.trackColumns,
 );
 
 RowContent.displayName = 'RowContent';
@@ -416,6 +476,25 @@ export const ItemDetailList = ({
 
     const internalState = useItemListState(getDataFn, extractRowIdSong);
 
+    const tableConfig = useSettingsStore((state) => state.lists[ItemListKey.ALBUM_DETAIL]?.table);
+    const trackColumns = useMemo((): ItemTableListColumnConfig[] => {
+        const raw = tableConfig?.columns;
+        if (raw && raw.length > 0) {
+            return parseTableColumns(raw);
+        }
+        return pickTableColumns({
+            columns: SONG_TABLE_COLUMNS,
+            enabledColumns: [
+                TableColumn.TRACK_NUMBER,
+                TableColumn.TITLE,
+                TableColumn.DURATION,
+                TableColumn.USER_FAVORITE,
+                TableColumn.USER_RATING,
+            ],
+        });
+    }, [tableConfig?.columns]);
+    const enableTrackTableHeader = tableConfig?.enableHeader ?? false;
+
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
             if (onRangeChanged) {
@@ -444,20 +523,24 @@ export const ItemDetailList = ({
         () => ({
             controls,
             data: dataSource,
+            enableTrackTableHeader,
             getItem,
             internalState,
             isMutatingFavorite,
             queryClient,
             registerSongs,
+            trackColumns,
         }),
         [
             controls,
             dataSource,
+            enableTrackTableHeader,
             getItem,
             internalState,
             isMutatingFavorite,
             queryClient,
             registerSongs,
+            trackColumns,
         ],
     );
 
