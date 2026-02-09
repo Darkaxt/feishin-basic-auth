@@ -82,6 +82,11 @@
     color: var(--theme-colors-foreground-muted);
 }
 
+.row .right {
+    min-width: 0;
+    overflow: hidden;
+}
+
 .row .tracks-table {
     width: 100%;
     font-size: var(--theme-font-size-sm);

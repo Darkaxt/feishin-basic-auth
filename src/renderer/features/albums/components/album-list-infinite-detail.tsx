@@ -32,16 +32,15 @@ export const AlbumListInfiniteDetail = ({
 
     const listQueryFn = api.controller.getAlbumList;
 
-    const { dataVersion, getItem, itemCount, loadedItems, onRangeChanged } =
-        useItemListInfiniteLoader({
-            eventKey: ItemListKey.ALBUM,
-            itemsPerPage,
-            itemType: LibraryItem.ALBUM,
-            listCountQuery,
-            listQueryFn,
-            query,
-            serverId,
-        });
+    const { getItem, itemCount, loadedItems, onRangeChanged } = useItemListInfiniteLoader({
+        eventKey: ItemListKey.ALBUM,
+        itemsPerPage,
+        itemType: LibraryItem.ALBUM,
+        listCountQuery,
+        listQueryFn,
+        query,
+        serverId,
+    });
 
     const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
         enabled: saveScrollOffset,
@@ -50,7 +49,6 @@ export const AlbumListInfiniteDetail = ({
     return (
         <ItemDetailList
             data={loadedItems}
-            dataVersion={dataVersion}
             getItem={getItem}
             itemCount={itemCount}
             onRangeChanged={onRangeChanged}

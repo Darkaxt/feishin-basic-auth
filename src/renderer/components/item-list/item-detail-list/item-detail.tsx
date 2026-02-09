@@ -48,6 +48,7 @@ interface ItemDetailListProps {
 }
 
 interface RowData {
+    columnWidthPercents: number[];
     controls?: ItemControls;
     data: unknown[];
     getItem?: (index: number) => unknown;
@@ -60,6 +61,7 @@ interface RowData {
 
 interface TrackRowProps {
     columns: ItemTableListColumnConfig[];
+    columnWidthPercents: number[];
     internalState: ItemListStateActions;
     isMutatingFavorite: boolean;
     onFavoriteClick: (song: Song) => void;
@@ -74,6 +76,7 @@ const textAlignFromAlign = (align: ItemTableListColumnConfig['align']) =>
 const TrackRow = memo(
     ({
         columns,
+        columnWidthPercents,
         internalState,
         isMutatingFavorite,
         onFavoriteClick,
@@ -184,21 +187,16 @@ const TrackRow = memo(
                 onClick={handleRowClick}
                 ref={dragRef ?? undefined}
             >
-                {columns.map((col) => {
-                    const widthStyle = col.autoSize
-                        ? { minWidth: col.width }
-                        : {
-                              maxWidth: col.width,
-                              minWidth: col.width,
-                              width: col.width,
-                          };
+                {columns.map((col, colIndex) => {
+                    const percent = columnWidthPercents[colIndex] ?? 0;
                     const style: React.CSSProperties = {
                         fontFamily:
                             col.id === TableColumn.DURATION || col.id === TableColumn.TRACK_NUMBER
                                 ? 'monospace'
                                 : undefined,
+                        minWidth: 0,
                         textAlign: textAlignFromAlign(col.align),
-                        ...widthStyle,
+                        width: `${percent}%`,
                     };
                     const CellComponent = getDetailListCellComponent(col.id);
                     const content = (
@@ -236,6 +234,7 @@ type RowContentProps = Omit<RowComponentProps<RowData>, 'style'>;
 
 const RowContent = memo(
     ({
+        columnWidthPercents,
         controls,
         data,
         getItem,
@@ -363,6 +362,7 @@ const RowContent = memo(
                             {songs.map((song, rowIndex) => (
                                 <TrackRow
                                     columns={trackColumns}
+                                    columnWidthPercents={columnWidthPercents}
                                     internalState={internalState}
                                     isMutatingFavorite={isMutatingFavorite}
                                     key={song.id}
@@ -381,6 +381,7 @@ const RowContent = memo(
     (prev, next) =>
         prev.index === next.index &&
         prev.data === next.data &&
+        prev.columnWidthPercents === next.columnWidthPercents &&
         prev.getItem === next.getItem &&
         prev.internalState === next.internalState &&
         prev.isMutatingFavorite === next.isMutatingFavorite &&
@@ -477,6 +478,14 @@ export const ItemDetailList = ({
     }, [tableConfig?.columns]);
     const trackTableSize = tableConfig?.size ?? 'default';
 
+    const columnWidthPercents = useMemo(() => {
+        const total = trackColumns.reduce((sum, c) => sum + c.width, 0);
+        if (total <= 0) {
+            return trackColumns.map(() => 100 / Math.max(1, trackColumns.length));
+        }
+        return trackColumns.map((c) => (c.width / total) * 100);
+    }, [trackColumns]);
+
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
             if (onRangeChanged) {
@@ -503,6 +512,7 @@ export const ItemDetailList = ({
 
     const rowProps = useMemo<RowData>(
         () => ({
+            columnWidthPercents,
             controls,
             data: dataSource,
             getItem,
@@ -514,6 +524,7 @@ export const ItemDetailList = ({
             trackTableSize,
         }),
         [
+            columnWidthPercents,
             controls,
             dataSource,
             getItem,
