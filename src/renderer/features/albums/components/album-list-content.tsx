@@ -36,6 +36,18 @@ const AlbumListPaginatedTable = lazy(() =>
     })),
 );
 
+const AlbumListInfiniteDetail = lazy(() =>
+    import('/@/renderer/features/albums/components/album-list-infinite-detail').then((module) => ({
+        default: module.AlbumListInfiniteDetail,
+    })),
+);
+
+const AlbumListPaginatedDetail = lazy(() =>
+    import('/@/renderer/features/albums/components/album-list-paginated-detail').then((module) => ({
+        default: module.AlbumListPaginatedDetail,
+    })),
+);
+
 const AlbumListFilters = () => {
     return (
         <ListWithSidebarContainer.SidebarPortal>
@@ -172,6 +184,30 @@ export const AlbumListView = ({
                             query={mergedQuery}
                             serverId={server.id}
                             size={table.size}
+                        />
+                    );
+                }
+                default:
+                    return null;
+            }
+        }
+        case ListDisplayType.DETAIL: {
+            switch (pagination) {
+                case ListPaginationType.INFINITE: {
+                    return (
+                        <AlbumListInfiniteDetail
+                            itemsPerPage={itemsPerPage}
+                            query={mergedQuery}
+                            serverId={server.id}
+                        />
+                    );
+                }
+                case ListPaginationType.PAGINATED: {
+                    return (
+                        <AlbumListPaginatedDetail
+                            itemsPerPage={itemsPerPage}
+                            query={mergedQuery}
+                            serverId={server.id}
                         />
                     );
                 }

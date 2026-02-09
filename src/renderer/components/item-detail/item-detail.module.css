@@ -1,84 +1,178 @@
 .container {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--theme-spacing-sm);
+    position: relative;
     width: 100%;
     height: 100%;
-    padding: var(--theme-spacing-sm);
-    container-type: inline-size;
-    background: var(--theme-colors-surface);
-    border-radius: var(--theme-radius-md);
-
-    @container (min-width: 500px) {
-        grid-template-columns: minmax(0, 1fr);
-    }
 }
 
-.image-container {
+.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--theme-spacing-md);
+    padding: 0 var(--theme-spacing-md) var(--theme-spacing-xl) var(--theme-spacing-md);
+}
+
+.image-wrapper {
     position: relative;
-    display: none;
-    height: 100%;
-    min-height: 0;
-    aspect-ratio: 1/1;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--theme-radius-md);
 
     &::before {
         position: absolute;
         top: 0;
         left: 0;
+        z-index: 5;
         width: 100%;
         height: 100%;
+        pointer-events: none;
         content: '';
         background-color: rgb(0 0 0);
         opacity: 0;
-        transition: all 0.2s ease-in-out;
+        transition: opacity 0.2s ease-in-out;
     }
 
     &:hover {
-        &::before {
-            opacity: 0.6;
+        @mixin dark {
+            &::before {
+                opacity: 0.7;
+            }
+        }
+
+        @mixin light {
+            &::before {
+                opacity: 0.5;
+            }
         }
     }
-
-    @container (min-width: 500px) {
-        display: block;
-    }
 }
 
-.image {
-    aspect-ratio: 1/1;
+.row .image {
+    object-fit: var(--theme-image-fit);
+    border-radius: var(--theme-radius-md);
 }
 
-.metadata-container {
+.row .metadata {
     display: flex;
     flex-direction: column;
-    gap: var(--theme-spacing-sm);
-    width: 100%;
-    height: 100%;
-    padding: var(--theme-spacing-xs) 0;
-    overflow: hidden;
-}
-
-.metadata-container .header {
-    display: flex;
+    gap: var(--theme-spacing-xs);
     align-items: center;
-    justify-content: space-between;
-    font-weight: 600;
-    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--theme-font-size-md);
+    text-align: center;
 }
 
-.metadata-container .header .title {
-    max-width: 70%;
+.row .title {
+    font-weight: 500;
+}
+
+.row .artist {
+    font-size: var(--theme-font-size-sm);
+    color: var(--theme-colors-foreground-muted);
+}
+
+.row .tracks-table {
+    width: 100%;
+    font-size: var(--theme-font-size-sm);
+    table-layout: fixed;
+}
+
+.row .track-col-number {
+    width: 3.5rem;
+    min-width: 3.5rem;
+    max-width: 3.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--theme-colors-foreground-muted);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.row .track-col-title {
+    width: auto;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.metadata-container .content {
+.row .track-col-duration {
+    width: 8rem;
+    min-width: 8rem;
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--theme-colors-foreground-muted);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.row .track-col-favorite {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    max-width: 2.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.row .track-col-rating {
+    width: 5.5rem;
+    min-width: 5.5rem;
+    max-width: 5.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--theme-radius-md);
+}
+
+.skeleton-title {
+    width: 75%;
+    height: 1.25rem;
+}
+
+.skeleton-artist {
+    width: 50%;
+    height: 1rem;
+}
+
+.skeleton-tracks {
     display: flex;
     flex-direction: column;
     gap: var(--theme-spacing-xs);
 }
 
-.metadata-container .content .tags {
+.skeleton-track-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 8rem;
+    gap: var(--theme-spacing-sm);
+    align-items: center;
+}
+
+.skeleton-track-cell {
+    width: 100%;
+    height: 1rem;
+}
+
+.skeleton-track-cell-title {
+    width: 100%;
+    min-width: 0;
+    height: 1rem;
 }

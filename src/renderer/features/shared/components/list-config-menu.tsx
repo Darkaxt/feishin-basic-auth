@@ -37,6 +37,15 @@ const DISPLAY_TYPES = [
         ),
         value: ListDisplayType.GRID,
     },
+    {
+        label: (
+            <Group align="center" justify="center" p="sm">
+                <Icon icon="layoutList" size="lg" />
+                {i18n.t('table.config.view.detail', { postProcess: 'sentenceCase' }) as string}
+            </Group>
+        ),
+        value: ListDisplayType.DETAIL,
+    },
     // {
     //     disabled: true,
     //     label: (
@@ -189,6 +198,10 @@ const Config = ({
                     tableColumnsData={tableColumnsData}
                 />
             );
+
+        case ListDisplayType.DETAIL:
+            // Detail view doesn't have specific configuration options
+            return null;
 
         default:
             return null;

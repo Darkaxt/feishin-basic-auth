@@ -1,0 +1,65 @@
+import { UseSuspenseQueryOptions } from '@tanstack/react-query';
+
+import { api } from '/@/renderer/api';
+import { ItemDetailList } from '/@/renderer/components/item-detail/item-detail';
+import { useItemListPaginatedLoader } from '/@/renderer/components/item-list/helpers/item-list-paginated-loader';
+import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpers/use-item-list-scroll-persist';
+import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
+import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
+import { ItemListComponentProps } from '/@/renderer/components/item-list/types';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
+import {
+    AlbumListQuery,
+    AlbumListSort,
+    LibraryItem,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import { ItemListKey } from '/@/shared/types/types';
+
+interface AlbumListPaginatedDetailProps extends ItemListComponentProps<AlbumListQuery> {}
+
+export const AlbumListPaginatedDetail = ({
+    itemsPerPage = 100,
+    query = {
+        sortBy: AlbumListSort.NAME,
+        sortOrder: SortOrder.ASC,
+    },
+    saveScrollOffset = true,
+    serverId,
+}: AlbumListPaginatedDetailProps) => {
+    const listCountQuery = albumQueries.listCount({
+        query: { ...query },
+        serverId: serverId,
+    }) as UseSuspenseQueryOptions<number, Error, number, readonly unknown[]>;
+
+    const listQueryFn = api.controller.getAlbumList;
+
+    const { currentPage, onChange } = useItemListPagination();
+
+    const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
+        currentPage,
+        eventKey: ItemListKey.ALBUM,
+        itemsPerPage,
+        itemType: LibraryItem.ALBUM,
+        listCountQuery,
+        listQueryFn,
+        query,
+        serverId,
+    });
+
+    const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
+        enabled: saveScrollOffset,
+    });
+
+    return (
+        <ItemListWithPagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            onChange={onChange}
+            pageCount={pageCount}
+            totalItemCount={totalItemCount}
+        >
+            <ItemDetailList currentPage={currentPage} items={data || []} />
+        </ItemListWithPagination>
+    );
+};
