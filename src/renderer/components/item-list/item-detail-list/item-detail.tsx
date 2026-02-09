@@ -610,6 +610,18 @@ interface DetailListHeaderProps {
     trackTableSize: 'compact' | 'default' | 'large';
 }
 
+const colTypeToAlignMap = {
+    center: 'center',
+    end: 'right',
+    start: 'left',
+};
+
+const colTypeToJustifyContentMap = {
+    center: 'center',
+    end: 'flex-end',
+    start: 'flex-start',
+};
+
 const DetailListHeader = memo(
     ({
         columnWidthPercents,
@@ -633,16 +645,17 @@ const DetailListHeader = memo(
                             const percent = columnWidthPercents[colIndex] ?? 0;
                             const { fixedWidth, isFixedColumn } = getTrackColumnFixed(col.id);
                             const isLastColumn = colIndex === trackColumns.length - 1;
+
                             const style: React.CSSProperties = {
                                 flex: isFixedColumn ? `0 0 ${fixedWidth}px` : `${percent} 1 0`,
+                                justifyContent: colTypeToJustifyContentMap[col.align],
                                 minWidth: isFixedColumn ? fixedWidth : 0,
-                                textAlign:
-                                    col.align === 'start'
-                                        ? 'left'
-                                        : col.align === 'end'
-                                          ? 'right'
-                                          : 'center',
+                                textAlign: colTypeToAlignMap[col.align] as
+                                    | 'center'
+                                    | 'left'
+                                    | 'right',
                             };
+
                             return (
                                 <div
                                     className={clsx(styles.trackHeaderCell, {

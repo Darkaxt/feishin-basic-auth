@@ -28,7 +28,7 @@
     gap: var(--theme-spacing-md);
     padding: 0 var(--theme-spacing-md);
     font-size: var(--theme-font-size-sm);
-    color: var(--theme-colors-foreground-muted);
+    user-select: none;
     background-color: var(--theme-colors-background);
     border-bottom: 1px solid var(--theme-colors-border);
 }
