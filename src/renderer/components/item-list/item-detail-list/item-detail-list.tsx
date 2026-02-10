@@ -1213,7 +1213,9 @@ export const ItemDetailList = ({
             lastVisibleStartIndexRef.current = range.startIndex;
             const el = headerLeftRef.current;
             if (el) {
-                const album = getItem?.(range.startIndex) as Album | undefined;
+                const album = (
+                    getItem ? getItem(range.startIndex) : dataSourceRef.current[range.startIndex]
+                ) as Album | undefined;
                 const name = album?.name ?? '';
                 if (name) {
                     lastHeaderNameRef.current = name;
