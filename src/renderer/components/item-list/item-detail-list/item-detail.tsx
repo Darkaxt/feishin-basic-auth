@@ -53,6 +53,7 @@ import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useSettingsStore, useShowRatings } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
+import { SEPARATOR_STRING } from '/@/shared/api/utils';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { useDoubleClick } from '/@/shared/hooks/use-double-click';
@@ -361,10 +362,30 @@ const MetadataSection = memo(
 
         const metadataExtra = useMemo(() => {
             const parts: Array<{ content: React.ReactNode; key: string }> = [];
-            const releaseStr =
-                (item.releaseDate && formatDateAbsoluteUTC(item.releaseDate)) ||
-                (item.releaseYear != null ? String(item.releaseYear) : '');
+            let releaseStr = '';
+            if (item.releaseDate) {
+                if (item.originalDate && item.originalDate !== item.releaseDate) {
+                    releaseStr = `${formatDateAbsoluteUTC(item.originalDate)}${SEPARATOR_STRING}${formatDateAbsoluteUTC(item.releaseDate)}`;
+                } else {
+                    releaseStr = formatDateAbsoluteUTC(item.releaseDate);
+                }
+            } else if (item.releaseYear != null) {
+                releaseStr = String(item.releaseYear);
+            }
             if (releaseStr) parts.push({ content: releaseStr, key: 'release' });
+            const songCount = item.songCount ?? 0;
+            const duration = item.duration ?? 0;
+            const tracksAndDurationParts: string[] = [];
+            if (songCount > 0) {
+                tracksAndDurationParts.push(t('entity.trackWithCount', { count: songCount }));
+            }
+            if (duration > 0) {
+                tracksAndDurationParts.push(formatDurationString(duration));
+            }
+            const tracksAndDuration = tracksAndDurationParts.join(SEPARATOR_STRING);
+            if (tracksAndDuration) {
+                parts.push({ content: tracksAndDuration, key: 'tracks' });
+            }
             const genres = item.genres?.filter((g) => g.name) ?? [];
             if (genres.length > 0) {
                 parts.push({
@@ -383,19 +404,6 @@ const MetadataSection = memo(
                     )),
                     key: 'genres',
                 });
-            }
-            const songCount = item.songCount ?? 0;
-            const duration = item.duration ?? 0;
-            const tracksAndDurationParts: string[] = [];
-            if (songCount > 0) {
-                tracksAndDurationParts.push(t('entity.trackWithCount', { count: songCount }));
-            }
-            if (duration > 0) {
-                tracksAndDurationParts.push(formatDurationString(duration));
-            }
-            const tracksAndDuration = tracksAndDurationParts.join(' · ');
-            if (tracksAndDuration) {
-                parts.push({ content: tracksAndDuration, key: 'tracks' });
             }
             return parts.length > 0 ? parts : null;
         }, [item, t]);

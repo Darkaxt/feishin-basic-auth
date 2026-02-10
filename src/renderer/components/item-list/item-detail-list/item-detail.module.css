@@ -232,6 +232,7 @@
 }
 
 .row .metadata-link:hover {
+    color: var(--theme-colors-foreground);
     text-decoration: underline;
 }
 
