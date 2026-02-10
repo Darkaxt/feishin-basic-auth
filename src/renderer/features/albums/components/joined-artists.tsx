@@ -14,6 +14,7 @@ interface JoinedArtistsProps {
     artistName: string;
     artists: AlbumArtist[] | RelatedAlbumArtist[] | RelatedArtist[];
     linkProps?: Partial<Omit<TextProps, 'children' | 'component' | 'to'>>;
+    readOnly?: boolean;
     rootTextProps?: Partial<Omit<TextProps, 'children' | 'component'>>;
 }
 
@@ -21,6 +22,7 @@ const JoinedArtistsComponent = ({
     artistName,
     artists,
     linkProps,
+    readOnly = false,
     rootTextProps,
 }: JoinedArtistsProps) => {
     const parts: (
@@ -116,7 +118,7 @@ const JoinedArtistsComponent = ({
                 {artists.map((artist, index) => (
                     <Fragment key={artist.id || `artist-${index}`}>
                         {index > 0 && ', '}
-                        {artist.id ? (
+                        {artist.id && !readOnly ? (
                             <Text
                                 component={Link}
                                 fw={500}
@@ -129,7 +131,7 @@ const JoinedArtistsComponent = ({
                                 {artist.name}
                             </Text>
                         ) : (
-                            <Text fw={500} {...linkProps}>
+                            <Text component="span" fw={500} {...linkProps}>
                                 {artist.name}
                             </Text>
                         )}
@@ -157,7 +159,7 @@ const JoinedArtistsComponent = ({
 
                 const { artist, text } = part;
 
-                if (artist.id) {
+                if (artist.id && !readOnly) {
                     return (
                         <Text
                             component={Link}
@@ -174,7 +176,7 @@ const JoinedArtistsComponent = ({
                     );
                 }
                 return (
-                    <Text fw={500} key={`${artist.name}-${index}`} {...linkProps}>
+                    <Text component="span" fw={500} key={`${artist.name}-${index}`} {...linkProps}>
                         {text}
                     </Text>
                 );
@@ -185,7 +187,7 @@ const JoinedArtistsComponent = ({
                     {unmatchedArtists.map((artist, index) => (
                         <Fragment key={artist.id}>
                             {index > 0 && ', '}
-                            {artist.id ? (
+                            {artist.id && !readOnly ? (
                                 <Text
                                     component={Link}
                                     fw={500}
@@ -195,6 +197,10 @@ const JoinedArtistsComponent = ({
                                     })}
                                     {...linkProps}
                                 >
+                                    {artist.name}
+                                </Text>
+                            ) : artist.id ? (
+                                <Text component="span" fw={500} {...linkProps}>
                                     {artist.name}
                                 </Text>
                             ) : (

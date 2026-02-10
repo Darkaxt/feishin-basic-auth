@@ -55,7 +55,6 @@ import { useSettingsStore, useShowRatings } from '/@/renderer/store';
 import { formatDateAbsoluteUTC, formatDurationString } from '/@/renderer/utils';
 import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/explicit-indicator';
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
-import { Text } from '/@/shared/components/text/text';
 import { useDoubleClick } from '/@/shared/hooks/use-double-click';
 import { Album, LibraryItem, Song, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey, Play, TableColumn } from '/@/shared/types/types';
@@ -456,15 +455,12 @@ const MetadataSection = memo(
                 <div className={styles.artist}>
                     {!hasArtist ? (
                         <>&nbsp;</>
-                    ) : !isMetadataHovered ? (
-                        <Text className={styles.artistPlainText} component="span" isMuted size="sm">
-                            {item.albumArtistName ?? ''}
-                        </Text>
                     ) : (
                         <JoinedArtists
                             artistName={item.albumArtistName ?? ''}
                             artists={item.albumArtists ?? []}
                             linkProps={JOINED_ARTISTS_MUTED_PROPS.linkProps}
+                            readOnly={!isMetadataHovered}
                             rootTextProps={JOINED_ARTISTS_MUTED_PROPS.rootTextProps}
                         />
                     )}
