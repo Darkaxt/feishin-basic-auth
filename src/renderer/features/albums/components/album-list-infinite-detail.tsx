@@ -4,7 +4,7 @@ import { api } from '/@/renderer/api';
 import { useItemListInfiniteLoader } from '/@/renderer/components/item-list/helpers/item-list-infinite-loader';
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
-import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail';
+import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail-list';
 import { ItemListComponentProps } from '/@/renderer/components/item-list/types';
 import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import {

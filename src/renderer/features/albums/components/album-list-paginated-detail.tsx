@@ -4,7 +4,7 @@ import { api } from '/@/renderer/api';
 import { useItemListPaginatedLoader } from '/@/renderer/components/item-list/helpers/item-list-paginated-loader';
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
-import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail';
+import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail-list';
 import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
 import { ItemListComponentProps } from '/@/renderer/components/item-list/types';

@@ -28,7 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 import { List, RowComponentProps, useDynamicRowHeight, useListRef } from 'react-window-v2';
 
-import styles from './item-detail.module.css';
+import styles from './item-detail-list.module.css';
 
 import { ItemCardControls } from '/@/renderer/components/item-card/item-card-controls';
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
