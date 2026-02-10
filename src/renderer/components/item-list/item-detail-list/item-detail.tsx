@@ -771,8 +771,6 @@ const DetailListHeaderCell = memo(
         columnId,
         columnWidthPercents,
         enableColumnResize,
-        enableVerticalBorders,
-        isLastColumn,
         onColumnReordered,
         onColumnResized,
         tableId,
@@ -892,8 +890,6 @@ const DetailListHeaderCell = memo(
                     [styles.trackHeaderCellDraggedOverRight]: isDraggedOver === 'right',
                     [styles.trackHeaderCellDragging]: isDragging,
                     [styles.trackHeaderCellNoHPadding]: isNoHorizontalPaddingColumn(columnId),
-                    [styles.trackHeaderCellWithVerticalBorder]:
-                        enableVerticalBorders && !isLastColumn,
                 })}
                 ref={containerRef}
                 role="columnheader"
@@ -1090,8 +1086,6 @@ const DetailListHeader = memo(
                                     className={clsx(styles.trackHeaderCell, {
                                         [styles.trackHeaderCellNoHPadding]:
                                             isNoHorizontalPaddingColumn(col.id),
-                                        [styles.trackHeaderCellWithVerticalBorder]:
-                                            enableVerticalBorders && !isLastColumn,
                                     })}
                                     key={col.id}
                                     role="columnheader"

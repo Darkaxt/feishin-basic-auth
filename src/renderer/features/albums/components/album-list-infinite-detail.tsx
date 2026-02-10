@@ -45,8 +45,6 @@ export const AlbumListInfiniteDetail = ({
         tableKey: 'detail',
     });
 
-    console.log('handleColumnResized', handleColumnResized);
-
     const { getItem, itemCount, loadedItems, onRangeChanged } = useItemListInfiniteLoader({
         eventKey: ItemListKey.ALBUM,
         itemsPerPage,

@@ -82,6 +82,7 @@
     display: flex;
     align-items: center;
     min-width: 0;
+    min-height: 60%;
     padding-right: var(--theme-spacing-sm);
     padding-left: var(--theme-spacing-sm);
     overflow: visible;
