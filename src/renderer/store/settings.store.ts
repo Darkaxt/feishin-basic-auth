@@ -1181,6 +1181,7 @@ const initialState: SettingsState = {
                     autoSizeColumns: [],
                     columns: SONG_TABLE_COLUMNS,
                     columnWidths: {
+                        [TableColumn.ACTIONS]: 60,
                         [TableColumn.DURATION]: 100,
                         [TableColumn.TITLE]: 400,
                         [TableColumn.TRACK_NUMBER]: 50,
@@ -1191,6 +1192,7 @@ const initialState: SettingsState = {
                         TableColumn.TITLE,
                         TableColumn.DURATION,
                         TableColumn.USER_FAVORITE,
+                        TableColumn.ACTIONS,
                     ],
                 }),
                 enableAlternateRowColors: false,
