@@ -2,6 +2,8 @@ import { UseSuspenseQueryOptions } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { useItemListPaginatedLoader } from '/@/renderer/components/item-list/helpers/item-list-paginated-loader';
+import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
+import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
 import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail';
 import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
@@ -35,6 +37,16 @@ export const AlbumListPaginatedDetail = ({
 
     const listQueryFn = api.controller.getAlbumList;
 
+    const { handleColumnReordered } = useItemListColumnReorder({
+        itemListKey: ItemListKey.ALBUM,
+        tableKey: 'detail',
+    });
+
+    const { handleColumnResized } = useItemListColumnResize({
+        itemListKey: ItemListKey.ALBUM,
+        tableKey: 'detail',
+    });
+
     const { currentPage, onChange } = useItemListPagination();
 
     const { data, pageCount, totalItemCount } = useItemListPaginatedLoader({
@@ -60,6 +72,8 @@ export const AlbumListPaginatedDetail = ({
                 currentPage={currentPage}
                 enableHeader={enableHeader}
                 items={data || []}
+                onColumnReordered={handleColumnReordered}
+                onColumnResized={handleColumnResized}
             />
         </ItemListWithPagination>
     );

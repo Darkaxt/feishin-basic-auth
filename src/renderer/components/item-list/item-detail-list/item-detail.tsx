@@ -1,3 +1,14 @@
+import {
+    attachClosestEdge,
+    type Edge,
+    extractClosestEdge,
+} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
+import {
+    draggable,
+    dropTargetForElements,
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import throttle from 'lodash/throttle';
@@ -58,6 +69,7 @@ import { ExplicitIndicator } from '/@/shared/components/explicit-indicator/expli
 import { Skeleton } from '/@/shared/components/skeleton/skeleton';
 import { useDoubleClick } from '/@/shared/hooks/use-double-click';
 import { Album, LibraryItem, Song, SongListSort, SortOrder } from '/@/shared/types/domain-types';
+import { dndUtils, DragData, DragOperation, DragTarget } from '/@/shared/types/drag-and-drop';
 import { ItemListKey, Play, TableColumn } from '/@/shared/types/types';
 
 const DEFAULT_ROW_HEIGHT = 300;
@@ -72,10 +84,17 @@ interface ItemDetailListProps {
     internalState?: ItemListStateActions;
     itemCount?: number;
     items?: unknown[];
+    onColumnReordered?: (
+        columnIdFrom: TableColumn,
+        columnIdTo: TableColumn,
+        edge: 'bottom' | 'left' | 'right' | 'top' | null,
+    ) => void;
+    onColumnResized?: (columnId: TableColumn, width: number) => void;
     onRangeChanged?: (range: { startIndex: number; stopIndex: number }) => Promise<void> | void;
     onScrollEnd?: (rowIndex: number) => void;
     rowHeight?: number;
     scrollOffset?: number;
+    tableId?: string;
 }
 
 interface RowData {
@@ -731,10 +750,259 @@ const RowComponent = memo((props: RowComponentProps<RowData>): ReactElement => {
 
 RowComponent.displayName = 'ItemDetailRow';
 
+interface DetailListHeaderCellProps {
+    columnId: TableColumn;
+    columnWidthPercents: number[];
+    enableColumnResize?: boolean;
+    enableVerticalBorders: boolean;
+    isLastColumn: boolean;
+    onColumnReordered?: (args: {
+        columnIdFrom: TableColumn;
+        columnIdTo: TableColumn;
+        edge: Edge | null;
+    }) => void;
+    onColumnResized?: (columnId: TableColumn, width: number) => void;
+    tableId: string;
+    trackColumns: ItemTableListColumnConfig[];
+}
+
+const DetailListHeaderCell = memo(
+    ({
+        columnId,
+        columnWidthPercents,
+        enableColumnResize,
+        enableVerticalBorders,
+        isLastColumn,
+        onColumnReordered,
+        onColumnResized,
+        tableId,
+        trackColumns,
+    }: DetailListHeaderCellProps) => {
+        const containerRef = useRef<HTMLDivElement>(null);
+        const [isDragging, setIsDragging] = useState(false);
+        const [isDraggedOver, setIsDraggedOver] = useState<Edge | null>(null);
+        const colIndex = trackColumns.findIndex((c) => c.id === columnId);
+        const col = colIndex >= 0 ? trackColumns[colIndex] : null;
+        const percent = col ? (columnWidthPercents[colIndex] ?? 0) : 0;
+        const { fixedWidth, isFixedColumn } = getTrackColumnFixed(columnId);
+        const currentWidth = col?.width ?? (fixedWidth || 100);
+        const showResizeHandle =
+            enableColumnResize && !isFixedColumn && !col?.autoSize && onColumnResized;
+
+        useEffect(() => {
+            if (!containerRef.current || !onColumnReordered) {
+                return;
+            }
+
+            const handleReorder = (
+                columnIdFrom: TableColumn,
+                columnIdTo: TableColumn,
+                edge: Edge | null,
+            ) => {
+                onColumnReordered({ columnIdFrom, columnIdTo, edge });
+            };
+
+            return combine(
+                draggable({
+                    element: containerRef.current,
+                    getInitialData: () => {
+                        const data = dndUtils.generateDragData(
+                            {
+                                id: [columnId],
+                                operation: [DragOperation.REORDER],
+                                type: DragTarget.TABLE_COLUMN,
+                            },
+                            { tableId },
+                        );
+                        return data;
+                    },
+                    onDragStart: () => setIsDragging(true),
+                    onDrop: () => setIsDragging(false),
+                    onGenerateDragPreview: (data) => {
+                        disableNativeDragPreview({ nativeSetDragImage: data.nativeSetDragImage });
+                    },
+                }),
+                dropTargetForElements({
+                    canDrop: (args) => {
+                        const data = args.source.data as unknown as DragData;
+                        const sourceTableId = (data.metadata as { tableId?: string })?.tableId;
+                        const isSelf = (args.source.data.id as string[])[0] === columnId;
+                        const isSameTable = sourceTableId === tableId;
+                        return (
+                            dndUtils.isDropTarget(data.type, [DragTarget.TABLE_COLUMN]) &&
+                            !isSelf &&
+                            isSameTable
+                        );
+                    },
+                    element: containerRef.current,
+                    getData: ({ element, input }) => {
+                        const data = dndUtils.generateDragData(
+                            {
+                                id: [columnId],
+                                operation: [DragOperation.REORDER],
+                                type: DragTarget.TABLE_COLUMN,
+                            },
+                            { tableId },
+                        );
+                        return attachClosestEdge(data, {
+                            allowedEdges: ['left', 'right'],
+                            element,
+                            input,
+                        });
+                    },
+                    onDrag: (args) => {
+                        const closestEdgeOfTarget = extractClosestEdge(args.self.data);
+                        setIsDraggedOver(closestEdgeOfTarget);
+                    },
+                    onDragLeave: () => setIsDraggedOver(null),
+                    onDrop: (args) => {
+                        const closestEdgeOfTarget = extractClosestEdge(args.self.data);
+                        const from = args.source.data.id as string[];
+                        const to = args.self.data.id as string[];
+
+                        handleReorder(
+                            from[0] as TableColumn,
+                            to[0] as TableColumn,
+                            closestEdgeOfTarget,
+                        );
+                        setIsDraggedOver(null);
+                    },
+                }),
+            );
+        }, [columnId, onColumnReordered, tableId]);
+
+        const style: React.CSSProperties = {
+            flex: isFixedColumn ? `0 0 ${fixedWidth}px` : `${percent} 1 0`,
+            justifyContent: colTypeToJustifyContentMap[col?.align ?? 'start'],
+            minWidth: isFixedColumn ? fixedWidth : 0,
+            textAlign: colTypeToAlignMap[col?.align ?? 'start'] as 'center' | 'left' | 'right',
+        };
+
+        const handleResize = useCallback(
+            (id: TableColumn, width: number) => {
+                onColumnResized?.(id, width);
+            },
+            [onColumnResized],
+        );
+
+        return (
+            <div
+                className={clsx(styles.trackHeaderCell, {
+                    [styles.trackHeaderCellDraggedOverLeft]: isDraggedOver === 'left',
+                    [styles.trackHeaderCellDraggedOverRight]: isDraggedOver === 'right',
+                    [styles.trackHeaderCellDragging]: isDragging,
+                    [styles.trackHeaderCellNoHPadding]: isNoHorizontalPaddingColumn(columnId),
+                    [styles.trackHeaderCellWithVerticalBorder]:
+                        enableVerticalBorders && !isLastColumn,
+                })}
+                ref={containerRef}
+                role="columnheader"
+                style={style}
+            >
+                {columnLabelMap[columnId] ?? ''}
+                {showResizeHandle && (
+                    <DetailListColumnResizeHandle
+                        columnId={columnId}
+                        initialWidth={currentWidth}
+                        onResize={handleResize}
+                        side="right"
+                    />
+                )}
+            </div>
+        );
+    },
+);
+
+DetailListHeaderCell.displayName = 'DetailListHeaderCell';
+
+interface DetailListColumnResizeHandleProps {
+    columnId: TableColumn;
+    initialWidth: number;
+    onResize: (columnId: TableColumn, width: number) => void;
+    side: 'left' | 'right';
+}
+
+const DetailListColumnResizeHandle = ({
+    columnId,
+    initialWidth,
+    onResize,
+    side,
+}: DetailListColumnResizeHandleProps) => {
+    const [isDragging, setIsDragging] = useState(false);
+    const handleRef = useRef<HTMLDivElement>(null);
+    const startWidthRef = useRef<number>(initialWidth);
+    const startXRef = useRef<number>(0);
+    const finalWidthRef = useRef<number>(initialWidth);
+
+    useEffect(() => {
+        if (!isDragging) {
+            startWidthRef.current = initialWidth;
+        }
+    }, [initialWidth, isDragging]);
+
+    useEffect(() => {
+        if (!isDragging) return;
+
+        const handleMouseMove = (event: MouseEvent) => {
+            const deltaX = event.clientX - startXRef.current;
+            const newWidth = Math.min(Math.max(10, startWidthRef.current + deltaX), 1000);
+            finalWidthRef.current = newWidth;
+        };
+
+        const handleMouseUp = () => {
+            setIsDragging(false);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            onResize(columnId, finalWidthRef.current);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, columnId, onResize]);
+
+    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsDragging(true);
+        startWidthRef.current = initialWidth;
+        startXRef.current = event.clientX;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    };
+
+    return (
+        <div
+            className={clsx(styles.resizeHandle, {
+                [styles.resizeHandleDragging]: isDragging,
+                [styles.resizeHandleLeft]: side === 'left',
+                [styles.resizeHandleRight]: side === 'right',
+            })}
+            onMouseDown={handleMouseDown}
+            ref={handleRef}
+        />
+    );
+};
+
 interface DetailListHeaderProps {
     columnWidthPercents: number[];
+    enableColumnReorder?: boolean;
+    enableColumnResize?: boolean;
     enableVerticalBorders: boolean;
     headerLeftRef: React.RefObject<HTMLSpanElement | null>;
+    onColumnReordered?: (args: {
+        columnIdFrom: TableColumn;
+        columnIdTo: TableColumn;
+        edge: Edge | null;
+    }) => void;
+    onColumnResized?: (columnId: TableColumn, width: number) => void;
+    tableId: string;
     trackColumns: ItemTableListColumnConfig[];
     trackTableSize: 'compact' | 'default' | 'large';
 }
@@ -754,8 +1022,13 @@ const colTypeToJustifyContentMap = {
 const DetailListHeader = memo(
     ({
         columnWidthPercents,
+        enableColumnReorder,
+        enableColumnResize,
         enableVerticalBorders,
         headerLeftRef,
+        onColumnReordered,
+        onColumnResized,
+        tableId,
         trackColumns,
         trackTableSize,
     }: DetailListHeaderProps) => {
@@ -778,10 +1051,30 @@ const DetailListHeader = memo(
                         role="row"
                     >
                         {trackColumns.map((col, colIndex) => {
-                            const percent = columnWidthPercents[colIndex] ?? 0;
-                            const { fixedWidth, isFixedColumn } = getTrackColumnFixed(col.id);
                             const isLastColumn = colIndex === trackColumns.length - 1;
 
+                            if (
+                                (enableColumnResize && onColumnResized) ||
+                                (enableColumnReorder && onColumnReordered)
+                            ) {
+                                return (
+                                    <DetailListHeaderCell
+                                        columnId={col.id}
+                                        columnWidthPercents={columnWidthPercents}
+                                        enableColumnResize={enableColumnResize}
+                                        enableVerticalBorders={enableVerticalBorders}
+                                        isLastColumn={isLastColumn}
+                                        key={col.id}
+                                        onColumnReordered={onColumnReordered}
+                                        onColumnResized={onColumnResized}
+                                        tableId={tableId}
+                                        trackColumns={trackColumns}
+                                    />
+                                );
+                            }
+
+                            const percent = columnWidthPercents[colIndex] ?? 0;
+                            const { fixedWidth, isFixedColumn } = getTrackColumnFixed(col.id);
                             const style: React.CSSProperties = {
                                 flex: isFixedColumn ? `0 0 ${fixedWidth}px` : `${percent} 1 0`,
                                 justifyContent: colTypeToJustifyContentMap[col.align],
@@ -804,7 +1097,9 @@ const DetailListHeader = memo(
                                     role="columnheader"
                                     style={style}
                                 >
-                                    {columnLabelMap[col.id] ?? ''}
+                                    <span className={styles.trackHeaderCellContent}>
+                                        {columnLabelMap[col.id] ?? ''}
+                                    </span>
                                 </div>
                             );
                         })}
@@ -819,6 +1114,8 @@ DetailListHeader.displayName = 'DetailListHeader';
 
 const SCROLL_END_DEBOUNCE_MS = 150;
 
+const DEFAULT_DETAIL_TABLE_ID = 'album-detail';
+
 export const ItemDetailList = ({
     currentPage,
     data,
@@ -826,15 +1123,21 @@ export const ItemDetailList = ({
     getItem,
     itemCount: externalItemCount,
     items,
+    onColumnReordered,
+    onColumnResized,
     onRangeChanged,
     onScrollEnd,
+    tableId = DEFAULT_DETAIL_TABLE_ID,
 }: ItemDetailListProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useListRef(null);
     const lastVisibleStartIndexRef = useRef(0);
     const queryClient = useQueryClient();
 
-    const controls = useDefaultItemListControls();
+    const controls = useDefaultItemListControls({
+        onColumnReordered,
+        onColumnResized,
+    });
     const isMutatingCreateFavorite = useIsMutatingCreateFavorite();
     const isMutatingDeleteFavorite = useIsMutatingDeleteFavorite();
     const isMutatingFavorite = isMutatingCreateFavorite || isMutatingDeleteFavorite;
@@ -1053,8 +1356,17 @@ export const ItemDetailList = ({
             {enableHeader && (
                 <DetailListHeader
                     columnWidthPercents={columnWidthPercents}
+                    enableColumnReorder={!!onColumnReordered}
+                    enableColumnResize={!!controls.onColumnResized}
                     enableVerticalBorders={enableVerticalBorders}
                     headerLeftRef={headerLeftRef}
+                    onColumnReordered={controls.onColumnReordered}
+                    onColumnResized={
+                        controls.onColumnResized
+                            ? (columnId, width) => controls.onColumnResized?.({ columnId, width })
+                            : undefined
+                    }
+                    tableId={tableId}
                     trackColumns={trackColumns}
                     trackTableSize={trackTableSize}
                 />

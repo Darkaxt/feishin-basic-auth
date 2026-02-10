@@ -192,9 +192,10 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                 onColumnReordered?.(columnIdFrom, columnIdTo, edge);
             },
 
-            onColumnResized: ({ columnId, width }: { columnId: TableColumn; width: number }) => {
-                onColumnResized?.(columnId, width);
-            },
+            onColumnResized: onColumnResized
+                ? ({ columnId, width }: { columnId: TableColumn; width: number }) =>
+                      onColumnResized(columnId, width)
+                : undefined,
 
             onDoubleClick: ({ internalState, item, itemType, meta }: DefaultItemControlProps) => {
                 if (!item || !internalState) {
