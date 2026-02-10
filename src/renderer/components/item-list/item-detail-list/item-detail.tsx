@@ -15,7 +15,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
-import { List, RowComponentProps, useDynamicRowHeight } from 'react-window-v2';
+import { List, RowComponentProps, useDynamicRowHeight, useListRef } from 'react-window-v2';
 
 import styles from './item-detail.module.css';
 
@@ -73,7 +73,9 @@ interface ItemDetailListProps {
     itemCount?: number;
     items?: unknown[];
     onRangeChanged?: (range: { startIndex: number; stopIndex: number }) => Promise<void> | void;
+    onScrollEnd?: (rowIndex: number) => void;
     rowHeight?: number;
+    scrollOffset?: number;
 }
 
 interface RowData {
@@ -815,6 +817,8 @@ const DetailListHeader = memo(
 
 DetailListHeader.displayName = 'DetailListHeader';
 
+const SCROLL_END_DEBOUNCE_MS = 150;
+
 export const ItemDetailList = ({
     currentPage,
     data,
@@ -823,9 +827,13 @@ export const ItemDetailList = ({
     itemCount: externalItemCount,
     items,
     onRangeChanged,
+    onScrollEnd,
 }: ItemDetailListProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const listRef = useListRef(null);
+    const lastVisibleStartIndexRef = useRef(0);
     const queryClient = useQueryClient();
+
     const controls = useDefaultItemListControls();
     const isMutatingCreateFavorite = useIsMutatingCreateFavorite();
     const isMutatingDeleteFavorite = useIsMutatingDeleteFavorite();
@@ -909,6 +917,7 @@ export const ItemDetailList = ({
 
     const handleRowsRendered = useCallback(
         (range: { startIndex: number; stopIndex: number }) => {
+            lastVisibleStartIndexRef.current = range.startIndex;
             const el = headerLeftRef.current;
             if (el) {
                 const album = getItem?.(range.startIndex) as Album | undefined;
@@ -1017,8 +1026,27 @@ export const ItemDetailList = ({
             target: container,
         });
 
-        return () => osInstance()?.destroy();
-    }, [initialize, osInstance]);
+        let scrollEndTimeoutId: null | ReturnType<typeof setTimeout> = null;
+        const handleScroll = () => {
+            if (scrollEndTimeoutId) clearTimeout(scrollEndTimeoutId);
+            scrollEndTimeoutId = setTimeout(() => {
+                scrollEndTimeoutId = null;
+                onScrollEnd?.(lastVisibleStartIndexRef.current);
+            }, SCROLL_END_DEBOUNCE_MS);
+        };
+
+        if (onScrollEnd) {
+            viewport.addEventListener('scroll', handleScroll, { passive: true });
+        }
+
+        return () => {
+            if (onScrollEnd) {
+                viewport.removeEventListener('scroll', handleScroll);
+                if (scrollEndTimeoutId) clearTimeout(scrollEndTimeoutId);
+            }
+            osInstance()?.destroy();
+        };
+    }, [initialize, onScrollEnd, osInstance]);
 
     return (
         <div className={styles.wrapper}>
@@ -1033,6 +1061,7 @@ export const ItemDetailList = ({
             )}
             <div className={styles.container} ref={containerRef}>
                 <List
+                    listRef={listRef}
                     onRowsRendered={throttledHandleRowsRendered}
                     rowComponent={
                         RowComponent as (props: RowComponentProps<RowData>) => ReactElement

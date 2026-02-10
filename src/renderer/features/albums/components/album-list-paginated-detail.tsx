@@ -2,7 +2,6 @@ import { UseSuspenseQueryOptions } from '@tanstack/react-query';
 
 import { api } from '/@/renderer/api';
 import { useItemListPaginatedLoader } from '/@/renderer/components/item-list/helpers/item-list-paginated-loader';
-import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpers/use-item-list-scroll-persist';
 import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail';
 import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
@@ -27,7 +26,6 @@ export const AlbumListPaginatedDetail = ({
         sortBy: AlbumListSort.NAME,
         sortOrder: SortOrder.ASC,
     },
-    saveScrollOffset = true,
     serverId,
 }: AlbumListPaginatedDetailProps) => {
     const listCountQuery = albumQueries.listCount({
@@ -48,10 +46,6 @@ export const AlbumListPaginatedDetail = ({
         listQueryFn,
         query,
         serverId,
-    });
-
-    const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
-        enabled: saveScrollOffset,
     });
 
     return (

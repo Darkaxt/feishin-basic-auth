@@ -531,7 +531,7 @@ export const applyFavoriteOptimisticUpdates = (
                     pendingUpdates.push({
                         previousData: data,
                         queryKey,
-                        updater: (prev: { items: Song[] } | undefined) => {
+                        updater: (prev: undefined | { items: Song[] }) => {
                             if (!prev) return prev;
                             const updatedItems = updateItemInArray(prev.items, itemIdSet, (item) =>
                                 createFavoriteUpdater<Song>(item),
@@ -701,10 +701,7 @@ export const applyFavoriteOptimisticUpdatesDeferred = (
                 queryKeys.playlists.songList(variables.apiClientProps.serverId),
                 'playlist-song-list',
             );
-            collectQueries(
-                queryKeys.songs.list(variables.apiClientProps.serverId),
-                'song-list',
-            );
+            collectQueries(queryKeys.songs.list(variables.apiClientProps.serverId), 'song-list');
             collectQueries(
                 queryKeys.albumArtists.topSongs(variables.apiClientProps.serverId),
                 'top-songs',
