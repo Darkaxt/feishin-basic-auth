@@ -1,3 +1,12 @@
+.image-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
 .compact-container {
     flex: 1 1 0;
     width: 100%;
@@ -10,6 +19,25 @@
     padding-bottom: var(--theme-spacing-xs);
     overflow: hidden;
     border-radius: var(--theme-radius-md);
+}
+
+.play-button-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 10;
+    opacity: 0.6;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease-in-out;
+}
+
+.play-button-overlay:hover {
+    opacity: 1;
+}
+
+.play-button-overlay button {
+    width: 24px;
+    height: 24px;
 }
 
 .compact-image {
