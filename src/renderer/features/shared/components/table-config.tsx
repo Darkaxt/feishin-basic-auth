@@ -176,12 +176,12 @@ export const TableConfig = ({
                             },
                         ]}
                         onChange={(value) =>
-                            setList(listKey, {
-                                table: { size: value as 'compact' | 'default' },
+                            setTableUpdate({
+                                size: value as 'compact' | 'default' | 'large',
                             })
                         }
                         size="sm"
-                        value={table.size}
+                        value={table?.size ?? 'default'}
                         w="100%"
                     />
                 ),
