@@ -306,10 +306,6 @@ const TrackRow = memo(
                     const { fixedWidth, isFixedColumn } = getTrackColumnFixed(col.id);
                     const style: React.CSSProperties = {
                         flex: isFixedColumn ? `0 0 ${fixedWidth}px` : `${percent} 1 0`,
-                        fontFamily:
-                            col.id === TableColumn.DURATION || col.id === TableColumn.TRACK_NUMBER
-                                ? 'monospace'
-                                : undefined,
                         minWidth: isFixedColumn ? fixedWidth : 0,
                         textAlign: textAlignFromAlign(col.align),
                     };
