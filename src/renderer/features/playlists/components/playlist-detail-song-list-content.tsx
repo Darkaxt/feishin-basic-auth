@@ -2,14 +2,46 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { ItemListHandle } from '/@/renderer/components/item-list/types';
+import { useGridRows } from '/@/renderer/components/item-list/helpers/use-grid-rows';
+import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
+import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
+import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpers/use-item-list-scroll-persist';
+import { ItemDetailList } from '/@/renderer/components/item-list/item-detail-list/item-detail-list';
+import { ItemGridList } from '/@/renderer/components/item-list/item-grid-list/item-grid-list';
+import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
+import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
+import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
+import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
+import {
+    DefaultItemControlProps,
+    ItemControls,
+    ItemListHandle,
+} from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
+import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
-import { useCurrentServer, useListSettings } from '/@/renderer/store';
+import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
+import { useSortOrderFilter } from '/@/renderer/features/shared/hooks/use-sort-order-filter';
+import { useCurrentServer, useGeneralSettings, useListSettings } from '/@/renderer/store';
+import { sortAlbumList } from '/@/shared/api/utils';
 import { Spinner } from '/@/shared/components/spinner/spinner';
-import { PlaylistSongListQuery, PlaylistSongListResponse } from '/@/shared/types/domain-types';
-import { ItemListKey, ListDisplayType, TableColumn } from '/@/shared/types/types';
+import {
+    Album,
+    AlbumListSort,
+    LibraryItem,
+    PlaylistSongListQuery,
+    PlaylistSongListResponse,
+    Song,
+    SortOrder,
+} from '/@/shared/types/domain-types';
+import {
+    ItemListKey,
+    ListDisplayType,
+    ListPaginationType,
+    Play,
+    TableColumn,
+} from '/@/shared/types/types';
 
 const PlaylistDetailSongListTable = lazy(() =>
     import('/@/renderer/features/playlists/components/playlist-detail-song-list-table').then(
@@ -38,7 +70,7 @@ const PlaylistDetailSongListGrid = lazy(() =>
 export const PlaylistDetailSongListContent = () => {
     const { playlistId } = useParams() as { playlistId: string };
     const server = useCurrentServer();
-    const { setItemCount } = useListContext();
+    const { displayMode, setItemCount } = useListContext();
     const queryClient = useQueryClient();
 
     const playlistSongsQuery = useSuspenseQuery(
@@ -52,12 +84,12 @@ export const PlaylistDetailSongListContent = () => {
 
     useEffect(() => {
         if (
-            playlistSongsQuery.data?.totalRecordCount !== undefined &&
-            playlistSongsQuery.data.totalRecordCount !== null
+            displayMode !== LibraryItem.ALBUM &&
+            playlistSongsQuery.data?.totalRecordCount != null
         ) {
             setItemCount?.(playlistSongsQuery.data.totalRecordCount);
         }
-    }, [playlistSongsQuery.data?.totalRecordCount, setItemCount]);
+    }, [displayMode, playlistSongsQuery.data?.totalRecordCount, setItemCount]);
 
     useEffect(() => {
         const handleRefresh = async (payload: { key: string }) => {
@@ -94,11 +126,23 @@ export type OverridePlaylistSongListQuery = Omit<Partial<PlaylistSongListQuery>,
 
 export const PlaylistDetailSongListView = ({ data }: { data: PlaylistSongListResponse }) => {
     const server = useCurrentServer();
-    const { display, table } = useListSettings(ItemListKey.PLAYLIST_SONG);
+    const { display, itemsPerPage, pagination, table } = useListSettings(ItemListKey.PLAYLIST_SONG);
+    const { currentPage, onChange: onPageChange } = useItemListPagination();
+    const isPaginated = pagination === ListPaginationType.PAGINATED;
+
+    const paginationProps = isPaginated
+        ? {
+              currentPage,
+              itemsPerPage,
+              onPageChange,
+          }
+        : undefined;
 
     switch (display) {
         case ListDisplayType.GRID: {
-            return <PlaylistDetailSongListGrid data={data} serverId={server.id} />;
+            return (
+                <PlaylistDetailSongListGrid data={data} serverId={server.id} {...paginationProps} />
+            );
         }
         case ListDisplayType.TABLE: {
             return (
@@ -113,6 +157,7 @@ export const PlaylistDetailSongListView = ({ data }: { data: PlaylistSongListRes
                     enableVerticalBorders={table.enableVerticalBorders}
                     serverId={server.id}
                     size={table.size}
+                    {...paginationProps}
                 />
             );
         }
@@ -252,8 +297,243 @@ export const PlaylistDetailSongListEdit = ({ data }: { data: PlaylistSongListRes
     }
 };
 
+export type PlaylistAlbumRow = Album & { _playlistSongs?: Song[] };
+
+export function playlistSongsToAlbums(songs: Song[]): PlaylistAlbumRow[] {
+    if (songs.length === 0) return [];
+
+    const rows: PlaylistAlbumRow[] = [];
+    let group: Song[] = [songs[0]];
+    let prevAlbumId = songs[0].albumId;
+
+    const pushRow = (song: Song, groupSongs: Song[]) => {
+        rows.push({
+            _itemType: LibraryItem.ALBUM,
+            _playlistSongs: groupSongs,
+            _serverId: song._serverId,
+            _serverType: song._serverType,
+            albumArtistName: song.albumArtistName,
+            albumArtists: song.albumArtists,
+            artists: song.artists,
+            comment: song.comment,
+            createdAt: song.createdAt,
+            duration: null,
+            explicitStatus: song.explicitStatus,
+            genres: song.genres,
+            id: song.albumId,
+            imageId: song.imageId,
+            imageUrl: song.imageUrl,
+            isCompilation: song.compilation,
+            lastPlayedAt: song.lastPlayedAt,
+            mbzId: null,
+            mbzReleaseGroupId: null,
+            name: song.album ?? '',
+            originalDate: null,
+            originalYear: null,
+            participants: song.participants,
+            playCount: null,
+            recordLabels: [],
+            releaseDate: song.releaseDate,
+            releaseType: null,
+            releaseTypes: [],
+            releaseYear: song.releaseYear,
+            size: null,
+            songCount: null,
+            sortName: song.album ?? '',
+            tags: song.tags,
+            updatedAt: song.updatedAt,
+            userFavorite: false,
+            userRating: null,
+            version: null,
+        });
+    };
+
+    for (let i = 1; i < songs.length; i++) {
+        const song = songs[i];
+        if (song.albumId === prevAlbumId) {
+            group.push(song);
+        } else {
+            pushRow(group[0], group);
+            group = [song];
+            prevAlbumId = song.albumId;
+        }
+    }
+    pushRow(group[0], group);
+
+    return rows;
+}
+
+const PlaylistDetailAlbumList = ({ data }: { data: PlaylistSongListResponse }) => {
+    const player = usePlayer();
+    const { setItemCount, setListData } = useListContext();
+    const { detail, display, grid, itemsPerPage, pagination, table } = useListSettings(
+        ItemListKey.PLAYLIST_ALBUM,
+    );
+    const { enableGridMultiSelect } = useGeneralSettings();
+    const { currentPage, onChange: onPageChange } = useItemListPagination();
+    const { sortBy } = useSortByFilter<AlbumListSort>(AlbumListSort.ID, ItemListKey.PLAYLIST_ALBUM);
+    const { sortOrder } = useSortOrderFilter(SortOrder.ASC, ItemListKey.PLAYLIST_ALBUM);
+
+    const albums = useMemo(() => playlistSongsToAlbums(data?.items ?? []), [data?.items]);
+    const sortedAlbums = useMemo(
+        () =>
+            sortAlbumList(
+                albums,
+                (sortBy as AlbumListSort) ?? AlbumListSort.ID,
+                sortOrder ?? SortOrder.ASC,
+            ),
+        [albums, sortBy, sortOrder],
+    );
+
+    const isPaginated = pagination === ListPaginationType.PAGINATED;
+    const totalAlbumCount = sortedAlbums.length;
+    const albumPageCount = Math.max(1, Math.ceil(totalAlbumCount / itemsPerPage));
+    const paginatedAlbums = useMemo(() => {
+        if (!isPaginated) return sortedAlbums;
+        const start = currentPage * itemsPerPage;
+        return sortedAlbums.slice(start, start + itemsPerPage);
+    }, [isPaginated, currentPage, itemsPerPage, sortedAlbums]);
+    const albumsToRender = isPaginated ? paginatedAlbums : sortedAlbums;
+
+    const playlistSongs = useMemo(() => data?.items ?? [], [data?.items]);
+
+    const albumControlOverrides = useMemo<Partial<ItemControls>>(() => {
+        return {
+            onPlay: ({
+                item,
+                itemType,
+                playType,
+            }: DefaultItemControlProps & { playType: Play }) => {
+                if (!item) return;
+                const rowSongs = (item as PlaylistAlbumRow)._playlistSongs;
+                if (itemType === LibraryItem.ALBUM && rowSongs?.length) {
+                    player.addToQueueByData(rowSongs, playType);
+                    return;
+                }
+                player.addToQueueByFetch(item._serverId, [item.id], itemType, playType);
+            },
+        };
+    }, [player]);
+
+    useEffect(() => {
+        setItemCount?.(totalAlbumCount);
+    }, [setItemCount, totalAlbumCount]);
+
+    useEffect(() => {
+        setListData?.(data?.items ?? []);
+    }, [data?.items, setListData]);
+
+    const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({ enabled: true });
+    const { handleColumnReordered } = useItemListColumnReorder({
+        itemListKey: ItemListKey.PLAYLIST_ALBUM,
+    });
+    const { handleColumnResized } = useItemListColumnResize({
+        itemListKey: ItemListKey.PLAYLIST_ALBUM,
+    });
+    const { handleColumnReordered: handleDetailColumnReordered } = useItemListColumnReorder({
+        itemListKey: ItemListKey.PLAYLIST_ALBUM,
+        tableKey: 'detail',
+    });
+    const { handleColumnResized: handleDetailColumnResized } = useItemListColumnResize({
+        itemListKey: ItemListKey.PLAYLIST_ALBUM,
+        tableKey: 'detail',
+    });
+    const rows = useGridRows(LibraryItem.ALBUM, ItemListKey.PLAYLIST_ALBUM, grid.size);
+
+    const renderAlbumList = () => {
+        switch (display) {
+            case ListDisplayType.DETAIL:
+                return (
+                    <ItemDetailList
+                        enableHeader={detail?.enableHeader}
+                        items={albumsToRender}
+                        listKey={ItemListKey.PLAYLIST_ALBUM}
+                        onColumnReordered={handleDetailColumnReordered}
+                        onColumnResized={handleDetailColumnResized}
+                        onScrollEnd={handleOnScrollEnd}
+                        onSongRowDoubleClick={({ internalState, item }) => {
+                            if (playlistSongs.length === 0) return;
+                            internalState?.setSelected([item]);
+                            player.addToQueueByData(playlistSongs, Play.NOW, item.id);
+                        }}
+                        overrideControls={albumControlOverrides}
+                        scrollOffset={scrollOffset ?? 0}
+                        songsByAlbumId={{}}
+                        tableId="album-detail"
+                    />
+                );
+            case ListDisplayType.GRID:
+                return (
+                    <ItemGridList
+                        data={albumsToRender}
+                        enableExpansion
+                        enableMultiSelect={enableGridMultiSelect}
+                        gap={grid.itemGap}
+                        initialTop={{
+                            to: scrollOffset ?? 0,
+                            type: 'offset',
+                        }}
+                        itemsPerRow={grid.itemsPerRowEnabled ? grid.itemsPerRow : undefined}
+                        itemType={LibraryItem.ALBUM}
+                        onScrollEnd={handleOnScrollEnd}
+                        overrideControls={albumControlOverrides}
+                        rows={rows}
+                        size={grid.size}
+                    />
+                );
+            case ListDisplayType.TABLE:
+                return (
+                    <ItemTableList
+                        autoFitColumns={table.autoFitColumns}
+                        CellComponent={ItemTableListColumn}
+                        columns={table.columns}
+                        data={albumsToRender}
+                        enableAlternateRowColors={table.enableAlternateRowColors}
+                        enableHeader={table.enableHeader}
+                        enableHorizontalBorders={table.enableHorizontalBorders}
+                        enableRowHoverHighlight={table.enableRowHoverHighlight}
+                        enableSelection
+                        enableVerticalBorders={table.enableVerticalBorders}
+                        initialTop={{
+                            to: scrollOffset ?? 0,
+                            type: 'offset',
+                        }}
+                        itemType={LibraryItem.ALBUM}
+                        onColumnReordered={handleColumnReordered}
+                        onColumnResized={handleColumnResized}
+                        onScrollEnd={handleOnScrollEnd}
+                        overrideControls={albumControlOverrides}
+                        size={table.size}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
+    if (isPaginated) {
+        return (
+            <ItemListWithPagination
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onChange={onPageChange}
+                pageCount={albumPageCount}
+                totalItemCount={totalAlbumCount}
+            >
+                {renderAlbumList()}
+            </ItemListWithPagination>
+        );
+    }
+
+    return renderAlbumList();
+};
+
 const PlaylistDetailSongList = ({ data }: { data: PlaylistSongListResponse }) => {
-    const { isSmartPlaylist, mode } = useListContext();
+    const { displayMode, isSmartPlaylist, mode } = useListContext();
+
+    if (displayMode === LibraryItem.ALBUM) {
+        return <PlaylistDetailAlbumList data={data} />;
+    }
 
     if (isSmartPlaylist) {
         return <PlaylistDetailSongListView data={data} />;

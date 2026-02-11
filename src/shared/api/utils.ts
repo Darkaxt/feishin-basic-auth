@@ -404,6 +404,9 @@ export const sortAlbumList = (albums: Album[], sortBy: AlbumListSort, sortOrder:
         case AlbumListSort.FAVORITED:
             results = orderBy(results, ['starred'], [order]);
             break;
+        case AlbumListSort.ID:
+            results = sortOrder === SortOrder.DESC ? [...results].reverse() : results;
+            break;
         case AlbumListSort.NAME:
             results = orderBy(results, [(v) => v.name.toLowerCase()], [order]);
             break;

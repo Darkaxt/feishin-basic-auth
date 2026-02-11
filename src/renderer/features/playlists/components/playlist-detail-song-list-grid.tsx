@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useGridRows } from '/@/renderer/components/item-list/helpers/use-grid-rows';
 import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpers/use-item-list-scroll-persist';
 import { ItemGridList } from '/@/renderer/components/item-list/item-grid-list/item-grid-list';
+import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
 import { ItemListGridComponentProps } from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
 import { usePlaylistSongListFilters } from '/@/renderer/features/playlists/hooks/use-playlist-song-list-filters';
@@ -20,11 +21,14 @@ import { ItemListKey } from '/@/shared/types/types';
 
 interface PlaylistDetailSongListGridProps
     extends Omit<ItemListGridComponentProps<PlaylistSongListQuery>, 'query'> {
+    currentPage?: number;
     data: PlaylistSongListResponse;
+    itemsPerPage?: number;
+    onPageChange?: (page: number) => void;
 }
 
 export const PlaylistDetailSongListGrid = forwardRef<any, PlaylistDetailSongListGridProps>(
-    ({ data, saveScrollOffset = true }) => {
+    ({ currentPage, data, itemsPerPage, onPageChange, saveScrollOffset = true }) => {
         const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
             enabled: saveScrollOffset,
         });
@@ -59,9 +63,22 @@ export const PlaylistDetailSongListGrid = forwardRef<any, PlaylistDetailSongList
         );
         const { enableGridMultiSelect } = useGeneralSettings();
 
-        return (
+        const isPaginated =
+            typeof currentPage === 'number' &&
+            typeof itemsPerPage === 'number' &&
+            typeof onPageChange === 'function';
+        const totalCount = songData.length;
+        const pageCount = Math.max(1, Math.ceil(totalCount / (itemsPerPage ?? 1)));
+        const paginatedData = useMemo(() => {
+            if (!isPaginated || currentPage == null || itemsPerPage == null) return songData;
+            const start = currentPage * itemsPerPage;
+            return songData.slice(start, start + itemsPerPage);
+        }, [currentPage, isPaginated, itemsPerPage, songData]);
+        const dataToRender = isPaginated ? paginatedData : songData;
+
+        const grid = (
             <ItemGridList
-                data={songData}
+                data={dataToRender}
                 enableMultiSelect={enableGridMultiSelect}
                 gap={gridProps.itemGap}
                 initialTop={{
@@ -75,5 +92,21 @@ export const PlaylistDetailSongListGrid = forwardRef<any, PlaylistDetailSongList
                 size={gridProps.size}
             />
         );
+
+        if (isPaginated && itemsPerPage != null) {
+            return (
+                <ItemListWithPagination
+                    currentPage={currentPage!}
+                    itemsPerPage={itemsPerPage}
+                    onChange={onPageChange!}
+                    pageCount={pageCount}
+                    totalItemCount={totalCount}
+                >
+                    {grid}
+                </ItemListWithPagination>
+            );
+        }
+
+        return grid;
     },
 );

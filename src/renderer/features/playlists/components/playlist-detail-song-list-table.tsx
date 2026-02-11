@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useItemListColumnReorder } from '/@/renderer/components/item-list/helpers/use-item-list-column-reorder';
 import { useItemListColumnResize } from '/@/renderer/components/item-list/helpers/use-item-list-column-resize';
 import { useItemListScrollPersist } from '/@/renderer/components/item-list/helpers/use-item-list-scroll-persist';
+import { ItemListWithPagination } from '/@/renderer/components/item-list/item-list-pagination/item-list-pagination';
 import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls, ItemListTableComponentProps } from '/@/renderer/components/item-list/types';
@@ -24,7 +25,10 @@ import { ItemListKey, Play } from '/@/shared/types/types';
 
 interface PlaylistDetailSongListTableProps
     extends Omit<ItemListTableComponentProps<PlaylistSongListQuery>, 'query'> {
+    currentPage?: number;
     data: PlaylistSongListResponse;
+    itemsPerPage?: number;
+    onPageChange?: (page: number) => void;
 }
 
 export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongListTableProps>(
@@ -32,6 +36,7 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
         {
             autoFitColumns = false,
             columns,
+            currentPage,
             data,
             enableAlternateRowColors = false,
             enableHeader = true,
@@ -39,6 +44,8 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
             enableRowHoverHighlight = true,
             enableSelection = true,
             enableVerticalBorders = false,
+            itemsPerPage,
+            onPageChange,
             saveScrollOffset = true,
             size = 'default',
         },
@@ -108,13 +115,26 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
             };
         }, []);
 
-        return (
+        const isPaginated =
+            typeof currentPage === 'number' &&
+            typeof itemsPerPage === 'number' &&
+            typeof onPageChange === 'function';
+        const totalCount = songData.length;
+        const pageCount = Math.max(1, Math.ceil(totalCount / (itemsPerPage ?? 1)));
+        const paginatedData = useMemo(() => {
+            if (!isPaginated || currentPage == null || itemsPerPage == null) return songData;
+            const start = currentPage * itemsPerPage;
+            return songData.slice(start, start + itemsPerPage);
+        }, [isPaginated, currentPage, itemsPerPage, songData]);
+        const dataToRender = isPaginated ? paginatedData : songData;
+
+        const table = (
             <ItemTableList
                 activeRowId={currentSong?.id}
                 autoFitColumns={autoFitColumns}
                 CellComponent={ItemTableListColumn}
                 columns={columns}
-                data={songData}
+                data={dataToRender}
                 enableAlternateRowColors={enableAlternateRowColors}
                 enableExpansion={false}
                 enableHeader={enableHeader}
@@ -136,6 +156,22 @@ export const PlaylistDetailSongListTable = forwardRef<any, PlaylistDetailSongLis
                 size={size}
             />
         );
+
+        if (isPaginated && itemsPerPage != null) {
+            return (
+                <ItemListWithPagination
+                    currentPage={currentPage!}
+                    itemsPerPage={itemsPerPage}
+                    onChange={onPageChange!}
+                    pageCount={pageCount}
+                    totalItemCount={totalCount}
+                >
+                    {table}
+                </ItemListWithPagination>
+            );
+        }
+
+        return table;
     },
 );
 
