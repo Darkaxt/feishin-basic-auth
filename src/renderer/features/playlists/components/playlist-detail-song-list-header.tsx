@@ -93,6 +93,7 @@ export const PlaylistDetailSongListHeader = ({
                 </PageHeader>
             ) : (
                 <LibraryHeader
+                    compact
                     imageUrl={imageUrl}
                     item={{
                         imageId: detailQuery?.data?.imageId,
