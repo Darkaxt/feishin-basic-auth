@@ -35,7 +35,7 @@ import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { Tooltip } from '/@/shared/components/tooltip/tooltip';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
-import { AlbumListSort, LibraryItem, SongListSort, SortOrder } from '/@/shared/types/domain-types';
+import { LibraryItem, SongListSort, SortOrder } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
 interface PlaylistDetailSongListHeaderFiltersProps {
@@ -103,37 +103,18 @@ export const PlaylistDetailSongListHeaderFilters = ({
                     {toggleChoice}
                 </Button>
                 <Divider orientation="vertical" />
-                {isAlbumMode ? (
-                    <>
-                        <ListSortByDropdown
-                            defaultSortByValue={AlbumListSort.ID}
-                            disabled={isEditMode}
-                            itemType={LibraryItem.ALBUM}
-                            listKey={listKey}
-                        />
-                        <Divider orientation="vertical" />
-                        <ListSortOrderToggleButton
-                            defaultSortOrder={SortOrder.ASC}
-                            disabled={isEditMode}
-                            listKey={listKey}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <ListSortByDropdown
-                            defaultSortByValue={SongListSort.ID}
-                            disabled={isEditMode}
-                            itemType={LibraryItem.PLAYLIST_SONG}
-                            listKey={listKey}
-                        />
-                        <Divider orientation="vertical" />
-                        <ListSortOrderToggleButton
-                            defaultSortOrder={SortOrder.ASC}
-                            disabled={isEditMode}
-                            listKey={listKey}
-                        />
-                    </>
-                )}
+                <ListSortByDropdown
+                    defaultSortByValue={SongListSort.ID}
+                    disabled={isEditMode}
+                    itemType={LibraryItem.PLAYLIST_SONG}
+                    listKey={ItemListKey.PLAYLIST_SONG}
+                />
+                <Divider orientation="vertical" />
+                <ListSortOrderToggleButton
+                    defaultSortOrder={SortOrder.ASC}
+                    disabled={isEditMode}
+                    listKey={ItemListKey.PLAYLIST_SONG}
+                />
                 {!collapsed && <ListSearchInput />}
                 <ListRefreshButton disabled={isEditMode} listKey={listKey} />
                 <MoreButton onClick={handleMore} />
