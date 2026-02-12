@@ -46,11 +46,20 @@ interface LibraryHeaderProps {
     };
     loading?: boolean;
     title: string;
+    topRight?: ReactNode;
 }
 
 export const LibraryHeader = forwardRef(
     (
-        { children, compact, containerClassName, imageUrl, item, title }: LibraryHeaderProps,
+        {
+            children,
+            compact,
+            containerClassName,
+            imageUrl,
+            item,
+            title,
+            topRight,
+        }: LibraryHeaderProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const { t } = useTranslation();
@@ -134,6 +143,7 @@ export const LibraryHeader = forwardRef(
                 )}
                 ref={ref}
             >
+                {topRight && <div className={styles.topRight}>{topRight}</div>}
                 <div
                     className={styles.imageSection}
                     onClick={() => {

@@ -16,7 +16,6 @@ import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-a
 import { ListConfigMenu } from '/@/renderer/features/shared/components/list-config-menu';
 import { ListDisplayTypeToggleButton } from '/@/renderer/features/shared/components/list-display-type-toggle-button';
 import { ListRefreshButton } from '/@/renderer/features/shared/components/list-refresh-button';
-import { ListSearchInput } from '/@/renderer/features/shared/components/list-search-input';
 import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-sort-by-dropdown';
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { MoreButton } from '/@/renderer/features/shared/components/more-button';
@@ -115,7 +114,6 @@ export const PlaylistDetailSongListHeaderFilters = ({
                     disabled={isEditMode}
                     listKey={ItemListKey.PLAYLIST_SONG}
                 />
-                {!collapsed && <ListSearchInput />}
                 <ListRefreshButton disabled={isEditMode} listKey={listKey} />
                 <MoreButton onClick={handleMore} />
             </Group>

@@ -102,6 +102,7 @@ export const PlaylistDetailSongListHeader = ({
                         type: LibraryItem.PLAYLIST,
                     }}
                     title={detailQuery?.data?.name || ''}
+                    topRight={<ListSearchInput />}
                 >
                     <LibraryHeaderMenu
                         onPlay={(type) => handlePlay(type)}
