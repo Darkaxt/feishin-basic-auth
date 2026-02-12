@@ -21,6 +21,7 @@ import { useListContext } from '/@/renderer/context/list-context';
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-api';
+import { usePlaylistTrackList } from '/@/renderer/features/playlists/hooks/use-playlist-track-list';
 import { useSortByFilter } from '/@/renderer/features/shared/hooks/use-sort-by-filter';
 import { useSortOrderFilter } from '/@/renderer/features/shared/hooks/use-sort-order-filter';
 import { useCurrentServer, useGeneralSettings, useListSettings } from '/@/renderer/store';
@@ -70,7 +71,6 @@ const PlaylistDetailSongListGrid = lazy(() =>
 export const PlaylistDetailSongListContent = () => {
     const { playlistId } = useParams() as { playlistId: string };
     const server = useCurrentServer();
-    const { displayMode, setItemCount } = useListContext();
     const queryClient = useQueryClient();
 
     const playlistSongsQuery = useSuspenseQuery(
@@ -83,17 +83,11 @@ export const PlaylistDetailSongListContent = () => {
     );
 
     useEffect(() => {
-        if (
-            displayMode !== LibraryItem.ALBUM &&
-            playlistSongsQuery.data?.totalRecordCount != null
-        ) {
-            setItemCount?.(playlistSongsQuery.data.totalRecordCount);
-        }
-    }, [displayMode, playlistSongsQuery.data?.totalRecordCount, setItemCount]);
-
-    useEffect(() => {
         const handleRefresh = async (payload: { key: string }) => {
-            if (payload.key !== ItemListKey.PLAYLIST_SONG) {
+            if (
+                payload.key !== ItemListKey.PLAYLIST_SONG &&
+                payload.key !== ItemListKey.PLAYLIST_ALBUM
+            ) {
                 return;
             }
 
@@ -113,7 +107,7 @@ export const PlaylistDetailSongListContent = () => {
         return () => {
             eventEmitter.off('ITEM_LIST_REFRESH', handleRefresh);
         };
-    }, [playlistId, queryClient, server.id]);
+    }, [playlistId, queryClient, server?.id]);
 
     return (
         <Suspense fallback={<Spinner container />}>
@@ -124,7 +118,13 @@ export const PlaylistDetailSongListContent = () => {
 
 export type OverridePlaylistSongListQuery = Omit<Partial<PlaylistSongListQuery>, 'id'>;
 
-export const PlaylistDetailSongListView = ({ data }: { data: PlaylistSongListResponse }) => {
+interface PlaylistDetailSongListViewProps {
+    data: PlaylistSongListResponse;
+    /** When provided, table/grid use this instead of computing from data (avoids duplicate filter/sort). */
+    items?: Song[];
+}
+
+export const PlaylistDetailSongListView = ({ data, items }: PlaylistDetailSongListViewProps) => {
     const server = useCurrentServer();
     const { display, itemsPerPage, pagination, table } = useListSettings(ItemListKey.PLAYLIST_SONG);
     const { currentPage, onChange: onPageChange } = useItemListPagination();
@@ -141,7 +141,12 @@ export const PlaylistDetailSongListView = ({ data }: { data: PlaylistSongListRes
     switch (display) {
         case ListDisplayType.GRID: {
             return (
-                <PlaylistDetailSongListGrid data={data} serverId={server.id} {...paginationProps} />
+                <PlaylistDetailSongListGrid
+                    data={data}
+                    items={items}
+                    serverId={server.id}
+                    {...paginationProps}
+                />
             );
         }
         case ListDisplayType.TABLE: {
@@ -155,6 +160,7 @@ export const PlaylistDetailSongListView = ({ data }: { data: PlaylistSongListRes
                     enableHorizontalBorders={table.enableHorizontalBorders}
                     enableRowHoverHighlight={table.enableRowHoverHighlight}
                     enableVerticalBorders={table.enableVerticalBorders}
+                    items={items}
                     serverId={server.id}
                     size={table.size}
                     {...paginationProps}
@@ -363,7 +369,7 @@ export function playlistSongsToAlbums(songs: Song[]): PlaylistAlbumRow[] {
     return rows;
 }
 
-const PlaylistDetailAlbumList = ({ data }: { data: PlaylistSongListResponse }) => {
+export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListResponse }) => {
     const player = usePlayer();
     const { setItemCount, setListData } = useListContext();
     const { detail, display, grid, itemsPerPage, pagination, table } = useListSettings(
@@ -528,23 +534,33 @@ const PlaylistDetailAlbumList = ({ data }: { data: PlaylistSongListResponse }) =
     return renderAlbumList();
 };
 
-const PlaylistDetailSongList = ({ data }: { data: PlaylistSongListResponse }) => {
-    const { displayMode, isSmartPlaylist, mode } = useListContext();
-
-    if (displayMode === LibraryItem.ALBUM) {
-        return <PlaylistDetailAlbumList data={data} />;
-    }
+/** Track view: view mode uses centralized list derivation; edit mode uses local reorder state. */
+const PlaylistDetailTrackView = ({ data }: { data: PlaylistSongListResponse }) => {
+    const { isSmartPlaylist, mode } = useListContext();
 
     if (isSmartPlaylist) {
-        return <PlaylistDetailSongListView data={data} />;
+        return <PlaylistDetailTrackViewContent data={data} />;
     }
 
-    switch (mode) {
-        case 'edit':
-            return <PlaylistDetailSongListEdit data={data} />;
-        case 'view':
-            return <PlaylistDetailSongListView data={data} />;
-        default:
-            return null;
+    if (mode === 'edit') {
+        return <PlaylistDetailSongListEdit data={data} />;
     }
+
+    return <PlaylistDetailTrackViewContent data={data} />;
+};
+
+/** Uses usePlaylistTrackList once and passes derived items to the list view. */
+const PlaylistDetailTrackViewContent = ({ data }: { data: PlaylistSongListResponse }) => {
+    const { sortedAndFilteredSongs } = usePlaylistTrackList(data);
+    return <PlaylistDetailSongListView data={data} items={sortedAndFilteredSongs} />;
+};
+
+const PlaylistDetailSongList = ({ data }: { data: PlaylistSongListResponse }) => {
+    const { displayMode } = useListContext();
+
+    if (displayMode === LibraryItem.ALBUM) {
+        return <PlaylistDetailAlbumView data={data} />;
+    }
+
+    return <PlaylistDetailTrackView data={data} />;
 };

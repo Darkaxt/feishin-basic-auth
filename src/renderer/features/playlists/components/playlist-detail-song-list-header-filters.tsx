@@ -46,7 +46,7 @@ export const PlaylistDetailSongListHeaderFilters = ({
     isSmartPlaylist,
 }: PlaylistDetailSongListHeaderFiltersProps) => {
     const { t } = useTranslation();
-    const { mode, setMode } = useListContext();
+    const { listKey: listKeyFromContext, mode, setMode } = useListContext();
     const { playlistId } = useParams() as { playlistId: string };
     const playlistTarget = usePlaylistTarget();
     const { setPlaylistBehavior } = useSettingsStoreActions();
@@ -66,8 +66,12 @@ export const PlaylistDetailSongListHeaderFilters = ({
         });
     };
 
-    const isAlbumMode = playlistTarget === PlaylistTarget.ALBUM;
-    const listKey = isAlbumMode ? ItemListKey.PLAYLIST_ALBUM : ItemListKey.PLAYLIST_SONG;
+    const listKey =
+        listKeyFromContext ??
+        (playlistTarget === PlaylistTarget.ALBUM
+            ? ItemListKey.PLAYLIST_ALBUM
+            : ItemListKey.PLAYLIST_SONG);
+    const isAlbumMode = listKey === ItemListKey.PLAYLIST_ALBUM;
     const toggleChoice = isAlbumMode
         ? t('entity.album', { count: 2, postProcess: 'titleCase' })
         : t('entity.track', { count: 2, postProcess: 'titleCase' });

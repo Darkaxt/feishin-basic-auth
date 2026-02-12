@@ -16,6 +16,7 @@ import {
     LibraryItem,
     PlaylistSongListQuery,
     PlaylistSongListResponse,
+    Song,
 } from '/@/shared/types/domain-types';
 import { ItemListKey } from '/@/shared/types/types';
 
@@ -23,36 +24,44 @@ interface PlaylistDetailSongListGridProps
     extends Omit<ItemListGridComponentProps<PlaylistSongListQuery>, 'query'> {
     currentPage?: number;
     data: PlaylistSongListResponse;
+    items?: Song[];
     itemsPerPage?: number;
     onPageChange?: (page: number) => void;
 }
 
 export const PlaylistDetailSongListGrid = forwardRef<any, PlaylistDetailSongListGridProps>(
-    ({ currentPage, data, itemsPerPage, onPageChange, saveScrollOffset = true }) => {
+    ({
+        currentPage,
+        data,
+        items: itemsProp,
+        itemsPerPage,
+        onPageChange,
+        saveScrollOffset = true,
+    }) => {
         const { handleOnScrollEnd, scrollOffset } = useItemListScrollPersist({
             enabled: saveScrollOffset,
         });
 
         const { searchTerm } = useSearchTermFilter();
         const { query } = usePlaylistSongListFilters();
-        const { setListData } = useListContext();
 
-        const songData = useMemo(() => {
-            let items = data?.items || [];
-
+        const songDataFromData = useMemo(() => {
+            let list = data?.items || [];
             if (searchTerm) {
-                items = searchLibraryItems(items, searchTerm, LibraryItem.SONG);
-                return items;
+                list = searchLibraryItems(list, searchTerm, LibraryItem.SONG);
+                return list;
             }
-
-            return sortSongList(items, query.sortBy, query.sortOrder);
+            return sortSongList(list, query.sortBy, query.sortOrder);
         }, [data?.items, searchTerm, query.sortBy, query.sortOrder]);
 
+        const { setListData } = useListContext();
+        const songData = itemsProp ?? songDataFromData;
+
         useEffect(() => {
-            if (setListData) {
-                setListData(songData);
+            if (itemsProp == null && setListData) {
+                setListData(songDataFromData);
             }
-        }, [songData, setListData]);
+        }, [itemsProp, songDataFromData, setListData]);
 
         const gridProps = useListSettings(ItemListKey.PLAYLIST_SONG).grid;
 

@@ -402,6 +402,8 @@ const PlaylistDetailSongListRoute = () => {
     const playlistTarget = usePlaylistTarget();
     const displayMode: LibraryItem.ALBUM | LibraryItem.SONG =
         playlistTarget === PlaylistTarget.ALBUM ? LibraryItem.ALBUM : LibraryItem.SONG;
+    const listKey =
+        displayMode === LibraryItem.ALBUM ? ItemListKey.PLAYLIST_ALBUM : ItemListKey.PLAYLIST_SONG;
 
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
     const [listData, setListData] = useState<unknown[]>([]);
@@ -415,13 +417,14 @@ const PlaylistDetailSongListRoute = () => {
             isSmartPlaylist,
             itemCount,
             listData,
+            listKey,
             mode,
-            pageKey: ItemListKey.PLAYLIST_SONG,
+            pageKey: listKey,
             setItemCount,
             setListData,
             setMode,
         };
-    }, [playlistId, isSmartPlaylist, displayMode, itemCount, listData, mode]);
+    }, [playlistId, isSmartPlaylist, displayMode, listKey, itemCount, listData, mode]);
 
     return (
         <AnimatedPage key={`playlist-detail-songList-${playlistId}`}>

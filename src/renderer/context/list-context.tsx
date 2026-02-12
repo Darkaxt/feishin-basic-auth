@@ -13,6 +13,7 @@ interface ListContextProps {
     isSmartPlaylist?: boolean;
     itemCount?: number;
     listData?: unknown[];
+    listKey?: ItemListKey;
     mode?: 'edit' | 'view';
     pageKey: ItemListKey | string;
     setDisplayMode?: (displayMode: ListDisplayMode) => void;
