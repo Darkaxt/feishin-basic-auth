@@ -8,6 +8,7 @@ import qs from 'qs';
 import i18n from '/@/i18n/i18n';
 import { authenticationFailure } from '/@/renderer/api/utils';
 import { useAuthStore } from '/@/renderer/store';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { getServerUrl } from '/@/renderer/utils/normalize-server-url';
 import { ndType } from '/@/shared/api/navidrome/navidrome-types';
 import { resultWithHeaders } from '/@/shared/api/utils';
@@ -367,11 +368,21 @@ axiosClient.interceptors.response.use(
                     })
                     .catch((newError: any) => {
                         if (newError !== TIMEOUT_ERROR) {
-                            console.error('Error when trying to reauthenticate: ', newError);
+                            logFn.error('Reauthentication failed', {
+                                category: LogCategory.API,
+                                meta: {
+                                    message: (newError as Error)?.message,
+                                    serverId: currentServer.id,
+                                },
+                            });
 
                             if (isAxiosError(newError) && newError.code === 'ERR_NETWORK') {
-                                console.log(
+                                logFn.info(
                                     'Network error during reauthentication - preserving credentials',
+                                    {
+                                        category: LogCategory.API,
+                                        meta: { serverId: currentServer.id },
+                                    },
                                 );
                             } else {
                                 limitedFail(currentServer);
@@ -387,7 +398,10 @@ axiosClient.interceptors.response.use(
             }
 
             if (isAxiosError(error) && error.code === 'ERR_NETWORK') {
-                console.log('Network error during authentication - preserving credentials');
+                logFn.info('Network error during authentication - preserving credentials', {
+                    category: LogCategory.API,
+                    meta: { serverId: useAuthStore.getState().currentServer?.id },
+                });
             } else {
                 limitedFail(currentServer);
             }

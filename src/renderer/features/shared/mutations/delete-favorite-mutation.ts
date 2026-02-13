@@ -12,6 +12,7 @@ import {
     restoreFavoriteQueryData,
 } from '/@/renderer/features/shared/mutations/favorite-optimistic-updates';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import { FavoriteArgs, FavoriteResponse, LibraryItem } from '/@/shared/types/domain-types';
 
@@ -33,6 +34,15 @@ export const useDeleteFavorite = (args: MutationHookArgs) => {
         },
         mutationKey: deleteFavoriteMutationKey,
         onError: (_error, _variables, context) => {
+            logFn.error('Delete favorite failed', {
+                category: LogCategory.API,
+                meta: {
+                    id: _variables.query.id,
+                    message: _error?.message,
+                    serverId: _variables.apiClientProps.serverId,
+                    type: _variables.query.type,
+                },
+            });
             if (context) {
                 restoreFavoriteQueryData(queryClient, context);
             }

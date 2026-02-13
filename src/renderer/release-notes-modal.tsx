@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import packageJson from '../../package.json';
 
 import { formatHrDateTime } from '/@/renderer/utils/format';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Group } from '/@/shared/components/group/group';
@@ -70,10 +71,22 @@ const ReleaseNotesContent = ({ onDismiss, version }: ReleaseNotesContentProps) =
     // Fetch list of recent releases for the selector
     const { data: releasesList = [] } = useQuery({
         queryFn: async () => {
-            const response = await axios.get<GitHubRelease[]>(GITHUB_RELEASES_URL, {
-                params: { per_page: RELEASES_TO_FETCH },
-            });
-            return response.data;
+            try {
+                const response = await axios.get<GitHubRelease[]>(GITHUB_RELEASES_URL, {
+                    params: { per_page: RELEASES_TO_FETCH },
+                });
+                logFn.info('Release notes fetched', {
+                    category: LogCategory.GENERAL,
+                    meta: { count: response.data?.length ?? 0 },
+                });
+                return response.data;
+            } catch (error) {
+                logFn.error('Release notes fetch failed', {
+                    category: LogCategory.GENERAL,
+                    meta: { message: (error as Error)?.message },
+                });
+                throw error;
+            }
         },
         queryKey: ['github-releases-list'],
         retry: 2,

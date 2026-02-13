@@ -48,9 +48,9 @@ export const EditRadioStationForm = ({ onCancel, station }: EditRadioStationForm
             {
                 onError: (error) => {
                     logFn.error('An error occurred', {
-                    category: LogCategory.OTHER,
-                    meta: { error: error as Error },
-                });
+                        category: LogCategory.OTHER,
+                        meta: { error: error as Error },
+                    });
 
                     toast.error({
                         message: (error as Error).message,

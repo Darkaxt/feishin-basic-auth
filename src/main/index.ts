@@ -29,6 +29,7 @@ import packageJson from '../../package.json';
 import { disableMediaKeys, enableMediaKeys } from './features/core/player/media-keys';
 import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
+import { mainLogger } from './logger';
 import MenuBuilder from './menu';
 import {
     autoUpdaterLogInterface,
@@ -66,7 +67,7 @@ type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoU
 class AppUpdater {
     constructor() {
         const effectiveChannel = store.get('release_channel') as string;
-        console.log('Effective update channel:', effectiveChannel);
+        mainLogger.info('Effective update channel:', effectiveChannel);
         if (effectiveChannel === 'alpha') {
             checkAllChannelsAndGetBest().then(({ updater: updaterInstance }) => {
                 updaterInstance.autoInstallOnAppQuit = true;
@@ -103,7 +104,7 @@ async function checkAllChannelsAndGetBest(): Promise<{
     alphaUpdater.allowDowngrade = true;
 
     try {
-        console.log('Checking for updates on alpha channel');
+        mainLogger.info('Checking for updates on alpha channel');
         const alphaResult = await alphaUpdater.checkForUpdates();
         if (
             alphaResult?.updateInfo?.version &&
@@ -120,7 +121,7 @@ async function checkAllChannelsAndGetBest(): Promise<{
     try {
         autoUpdater.setFeedURL(GITHUB_UPDATER_CONFIG);
         configureAutoUpdaterForChannel('latest');
-        console.log('Checking for updates on latest channel (GitHub)');
+        mainLogger.info('Checking for updates on latest channel (GitHub)');
         const latestResult = await autoUpdater.checkForUpdates();
         if (
             latestResult?.updateInfo?.version &&
@@ -155,13 +156,13 @@ function configureAndGetUpdater(): UpdaterInstance {
     let releaseChannel = store.get('release_channel');
     const isNotConfigured = !releaseChannel;
 
-    console.log('Release channel:', releaseChannel);
-    console.log('Is beta version:', isBetaVersion);
-    console.log('Is alpha version:', isAlphaVersion);
-    console.log('Is not configured:', isNotConfigured);
+    mainLogger.info('Release channel:', releaseChannel);
+    mainLogger.info('Is beta version:', isBetaVersion);
+    mainLogger.info('Is alpha version:', isAlphaVersion);
+    mainLogger.info('Is not configured:', isNotConfigured);
 
     if (isNotConfigured) {
-        console.log('Release channel not configured, setting default channel');
+        mainLogger.info('Release channel not configured, setting default channel');
         const defaultChannel = isAlphaVersion ? 'alpha' : isBetaVersion ? 'beta' : 'latest';
         store.set('release_channel', defaultChannel);
         releaseChannel = defaultChannel;
@@ -235,7 +236,7 @@ function createAlphaUpdaterInstance(): AppImageUpdater | MacUpdater | NsisUpdate
 protocol.registerSchemesAsPrivileged([{ privileges: { bypassCSP: true }, scheme: 'feishin' }]);
 
 process.on('uncaughtException', (error: any) => {
-    console.error('Error in main process', error);
+    mainLogger.error('Uncaught exception in main process', error);
 });
 
 if (store.get('ignore_ssl')) {
@@ -521,12 +522,12 @@ async function createWindow(first = true): Promise<void> {
         'app-check-for-updates',
         async (): Promise<{ updateAvailable: boolean; version?: string }> => {
             if (disableAutoUpdates()) {
-                console.log('Auto updates are disabled');
+                mainLogger.info('Auto updates are disabled');
                 return { updateAvailable: false };
             }
 
             try {
-                console.log('Checking for updates');
+                mainLogger.info('Checking for updates');
                 const effectiveChannel = store.get('release_channel') as string;
                 let result: null | UpdateCheckResult;
                 let updater: UpdaterInstance;
@@ -541,9 +542,9 @@ async function createWindow(first = true): Promise<void> {
                 }
 
                 const updateAvailable = result?.isUpdateAvailable ?? false;
-                console.log('Update available:', updateAvailable);
+                mainLogger.info('Update available:', updateAvailable);
                 if (updateAvailable && store.get('disable_auto_updates') !== true) {
-                    console.log('Downloading update');
+                    mainLogger.info('Downloading update');
                     updater.downloadUpdate();
                 }
 
@@ -552,7 +553,7 @@ async function createWindow(first = true): Promise<void> {
                     version: result?.updateInfo?.version,
                 };
             } catch {
-                console.log('Error checking for updates');
+                mainLogger.error('Error checking for updates');
                 return { updateAvailable: false };
             }
         },

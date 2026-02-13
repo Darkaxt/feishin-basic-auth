@@ -7,6 +7,7 @@ import {
     LyricSearchQuery,
     LyricSource,
 } from '.';
+import { mainLogger } from '../../../logger';
 import { orderSearchResults } from './shared';
 
 const SEARCH_URL = 'https://genius.com/api/search/song';
@@ -100,7 +101,7 @@ export async function getLyricsBySongId(url: string): Promise<null | string> {
     try {
         result = await axios.get<string>(url, { responseType: 'text' });
     } catch (e) {
-        console.error('Genius lyrics request got an error!', (e as Error)?.message);
+        mainLogger.error('Genius lyrics request failed', (e as Error)?.message);
         return null;
     }
 
@@ -138,7 +139,7 @@ export async function getSearchResults(
             },
         });
     } catch (e) {
-        console.error('Genius search request got an error!', (e as Error)?.message);
+        mainLogger.error('Genius search request failed', (e as Error)?.message);
         return null;
     }
 
@@ -193,7 +194,7 @@ async function getSongId(
             },
         });
     } catch (e) {
-        console.error('Genius search request got an error!', (e as Error)?.message);
+        mainLogger.error('Genius search request failed', (e as Error)?.message);
         return null;
     }
 

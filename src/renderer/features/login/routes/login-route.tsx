@@ -18,6 +18,7 @@ import { AnimatedPage } from '/@/renderer/features/shared/components/animated-pa
 import { PageErrorBoundary } from '/@/renderer/features/shared/components/page-error-boundary';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
 import { Code } from '/@/shared/components/code/code';
@@ -136,6 +137,10 @@ const LoginRoute = () => {
             );
 
             if (!data) {
+                logFn.error('Login failed (no data returned)', {
+                    category: LogCategory.SYSTEM,
+                    meta: { serverName, serverType, serverUrl },
+                });
                 return toast.error({
                     message: t('error.authenticationFailed', { postProcess: 'sentenceCase' }),
                 });
@@ -159,6 +164,10 @@ const LoginRoute = () => {
             addServer(serverItem);
             setCurrentServer(serverItem);
 
+            logFn.info('Login successful', {
+                category: LogCategory.SYSTEM,
+                meta: { serverName, serverType, serverUrl, userId: data.userId },
+            });
             toast.success({
                 message: t('form.addServer.success', { postProcess: 'sentenceCase' }),
             });
@@ -175,6 +184,10 @@ const LoginRoute = () => {
                 }
             }
         } catch (err: any) {
+            logFn.error('Login failed', {
+                category: LogCategory.SYSTEM,
+                meta: { message: err?.message, serverName, serverType, serverUrl },
+            });
             setIsLoading(false);
             return toast.error({ message: err?.message });
         }

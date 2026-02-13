@@ -14,6 +14,7 @@ import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { IgnoreCorsSslSwitches } from '/@/renderer/features/servers/components/ignore-cors-ssl-switches';
 import { useAuthStoreActions } from '/@/renderer/store';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
@@ -149,6 +150,10 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
             );
 
             if (!data) {
+                logFn.error('Add server failed (no data returned)', {
+                    category: LogCategory.SYSTEM,
+                    meta: { name: values.name, serverType: values.type, url: values.url },
+                });
                 return toast.error({
                     message: t('error.authenticationFailed', { postProcess: 'sentenceCase' }),
                 });
@@ -189,6 +194,10 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
             setCurrentServer(serverItem);
             closeAllModals();
 
+            logFn.info('Add server successful', {
+                category: LogCategory.SYSTEM,
+                meta: { name: values.name, serverId: serverItem.id, serverType: values.type, url: values.url },
+            });
             toast.success({
                 message: t('form.addServer.success', { postProcess: 'sentenceCase' }),
             });
@@ -205,6 +214,10 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 }
             }
         } catch (err: any) {
+            logFn.error('Add server failed', {
+                category: LogCategory.SYSTEM,
+                meta: { message: err?.message, name: values.name, serverType: values.type, url: values.url },
+            });
             setIsLoading(false);
             return toast.error({ message: err?.message });
         }

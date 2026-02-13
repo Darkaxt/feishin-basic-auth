@@ -7,6 +7,7 @@ import {
     LyricSearchQuery,
     LyricSource,
 } from '.';
+import { mainLogger } from '../../../logger';
 import { orderSearchResults } from './shared';
 
 const FETCH_URL = 'https://lrclib.net/api/get';
@@ -46,7 +47,7 @@ export async function getLyricsBySongId(songId: string): Promise<null | string> 
     try {
         result = await axios.get<LrcLibTrackResponse>(`${FETCH_URL}/${songId}`);
     } catch (e) {
-        console.error('LrcLib lyrics request got an error!', (e as Error)?.message);
+        mainLogger.error('LrcLib lyrics request failed', (e as Error)?.message);
         return null;
     }
 
@@ -69,7 +70,7 @@ export async function getSearchResults(
             },
         });
     } catch (e) {
-        console.error('LrcLib search request got an error!', (e as Error)?.message);
+        mainLogger.error('LrcLib search request failed', (e as Error)?.message);
         return null;
     }
 
@@ -107,7 +108,7 @@ export async function query(
             timeout: TIMEOUT_MS,
         });
     } catch (e) {
-        console.error('LrcLib search request got an error!', (e as Error).message);
+        mainLogger.error('LrcLib search request failed', (e as Error).message);
         return null;
     }
 

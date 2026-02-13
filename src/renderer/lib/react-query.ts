@@ -8,12 +8,19 @@ import type {
 
 import { QueryCache, QueryClient } from '@tanstack/react-query';
 
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 
 const queryCache = new QueryCache({
     onError: (error: any, query) => {
+        logFn.error('Query failed', {
+            category: LogCategory.API,
+            meta: {
+                message: error?.message,
+                queryKey: query.queryKey,
+            },
+        });
         if (query.state.data !== undefined) {
-            console.error(error);
             toast.show({ message: `${error.message}`, type: 'error' });
         }
     },

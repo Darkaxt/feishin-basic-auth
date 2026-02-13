@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import isElectron from 'is-electron';
 import { useEffect, useState } from 'react';
 
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
+
 const CHECK_FOR_UPDATES_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
 const utils = isElectron() ? window.api?.utils : null;
@@ -21,7 +23,17 @@ export const useCheckForUpdates = () => {
 
     return useQuery({
         enabled: isEnabled,
-        queryFn: () => utils?.checkForUpdates?.(),
+        queryFn: async () => {
+            const result = await utils?.checkForUpdates?.();
+            logFn.info('Check for updates completed', {
+                category: LogCategory.SYSTEM,
+                meta: {
+                    updateAvailable: result?.updateAvailable ?? false,
+                    version: result?.version,
+                },
+            });
+            return result;
+        },
         queryKey: ['app-check-for-updates'],
         refetchInterval: CHECK_FOR_UPDATES_INTERVAL_MS,
         refetchIntervalInBackground: true,

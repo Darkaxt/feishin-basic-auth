@@ -5,6 +5,7 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createWithEqualityFn } from 'zustand/traditional';
 
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { ServerListItem, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 
 export interface AuthSlice extends AuthState {
@@ -30,6 +31,16 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
             immer((set, get) => ({
                 actions: {
                     addServer: (args) => {
+                        if (process.env.NODE_ENV === 'development') {
+                            logFn.debug('Auth store: add server', {
+                                category: LogCategory.SYSTEM,
+                                meta: {
+                                    serverId: args.id,
+                                    serverName: args.name,
+                                    serverType: args.type,
+                                },
+                            });
+                        }
                         set((state) => {
                             state.serverList[args.id] = args;
                         });
@@ -49,6 +60,15 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
                         return null;
                     },
                     setCurrentServer: (server) => {
+                        if (process.env.NODE_ENV === 'development') {
+                            logFn.debug('Auth store: set current server', {
+                                category: LogCategory.SYSTEM,
+                                meta: {
+                                    serverId: server?.id ?? null,
+                                    serverName: server?.name ?? null,
+                                },
+                            });
+                        }
                         set((state) => {
                             state.currentServer = server;
                         });
@@ -65,6 +85,12 @@ export const useAuthStore = createWithEqualityFn<AuthSlice>()(
                         });
                     },
                     updateServer: (id: string, args: Partial<ServerListItemWithCredential>) => {
+                        if (process.env.NODE_ENV === 'development') {
+                            logFn.debug('Auth store: update server', {
+                                category: LogCategory.SYSTEM,
+                                meta: { keys: Object.keys(args || {}), serverId: id },
+                            });
+                        }
                         set((state) => {
                             const updatedServer = {
                                 ...state.serverList[id],

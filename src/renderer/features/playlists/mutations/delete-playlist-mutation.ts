@@ -9,6 +9,7 @@ import {
     restorePlaylistQueryData,
 } from '/@/renderer/features/playlists/mutations/playlist-optimistic-updates';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { DeletePlaylistArgs, DeletePlaylistResponse } from '/@/shared/types/domain-types';
 
 export const useDeletePlaylist = (args: MutationHookArgs) => {
@@ -24,6 +25,14 @@ export const useDeletePlaylist = (args: MutationHookArgs) => {
                 });
             },
             onError: (_error, _variables, context) => {
+                logFn.error('Delete playlist failed', {
+                    category: LogCategory.API,
+                    meta: {
+                        message: _error?.message,
+                        playlistId: _variables.query.id,
+                        serverId: _variables.apiClientProps.serverId,
+                    },
+                });
                 if (context) {
                     restorePlaylistQueryData(queryClient, context);
                 }

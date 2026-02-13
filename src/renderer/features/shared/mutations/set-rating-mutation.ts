@@ -11,6 +11,7 @@ import {
     restoreRatingQueryData,
 } from '/@/renderer/features/shared/mutations/rating-optimistic-updates';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import { LibraryItem, RatingResponse, SetRatingArgs } from '/@/shared/types/domain-types';
 
@@ -30,6 +31,16 @@ export const useSetRatingMutation = (args: MutationHookArgs) => {
         },
         mutationKey: setRatingMutationKey,
         onError: (_error, _variables, context) => {
+            logFn.error('Set rating failed', {
+                category: LogCategory.API,
+                meta: {
+                    id: _variables.query.id,
+                    message: _error?.message,
+                    rating: _variables.query.rating,
+                    serverId: _variables.apiClientProps.serverId,
+                    type: _variables.query.type,
+                },
+            });
             if (context) {
                 restoreRatingQueryData(queryClient, context);
             }

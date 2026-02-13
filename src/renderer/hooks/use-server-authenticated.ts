@@ -345,7 +345,16 @@ export const useServerAuthenticated = () => {
 
     const debouncedAuth = debounce(
         (serverWithAuth: NonNullable<ReturnType<typeof getServerById>>) => {
-            authenticateServer(serverWithAuth).catch(console.error);
+            authenticateServer(serverWithAuth).catch((err) => {
+                logFn.error('Server authentication failed (debounced)', {
+                    category: LogCategory.SYSTEM,
+                    meta: {
+                        message: (err as Error)?.message,
+                        serverId: serverWithAuth.id,
+                        serverName: serverWithAuth.name,
+                    },
+                });
+            });
         },
         300,
     );

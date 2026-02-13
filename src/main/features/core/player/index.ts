@@ -1,4 +1,3 @@
-import console from 'console';
 import { app, ipcMain } from 'electron';
 import { rm } from 'fs/promises';
 import uniq from 'lodash/uniq';
@@ -7,6 +6,7 @@ import { pid } from 'node:process';
 import process from 'process';
 
 import { getMainWindow, sendToastToRenderer } from '../../../index';
+import { mainLogger } from '../../../logger';
 import { createLog, isWindows } from '../../../utils';
 import { store } from '../settings';
 
@@ -109,7 +109,7 @@ const createMpv = async (data: {
     try {
         await mpv.start();
     } catch (error: any) {
-        console.error('mpv failed to start', error);
+        mainLogger.error('mpv failed to start', error);
     } finally {
         await mpv.setMultipleProperties(properties || {});
     }
@@ -672,7 +672,7 @@ process.on('SIGTERM', async () => {
 
 // Handle uncaught exceptions - cleanup mpv before crashing
 process.on('uncaughtException', async (error) => {
-    console.error('Uncaught exception:', error);
+    mainLogger.error('Uncaught exception', error);
     await cleanupMpv(true).catch(() => {
         // Ignore cleanup errors during crash
     });
@@ -680,7 +680,7 @@ process.on('uncaughtException', async (error) => {
 
 // Handle unhandled rejections - cleanup mpv
 process.on('unhandledRejection', async (reason) => {
-    console.error('Unhandled rejection:', reason);
+    mainLogger.error('Unhandled rejection', reason);
     await cleanupMpv(true).catch(() => {
         // Ignore cleanup errors
     });

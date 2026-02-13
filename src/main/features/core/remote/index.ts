@@ -10,6 +10,7 @@ import { deflate, gzip } from 'zlib';
 import manifest from './manifest.json';
 
 import { getMainWindow } from '/@/main/index';
+import { mainLogger } from '/@/main/logger';
 import { isLinux } from '/@/main/utils';
 import { QueueSong } from '/@/shared/types/domain-types';
 import { ClientEvent, ServerEvent } from '/@/shared/types/remote-types';
@@ -349,7 +350,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                     }, 10000) as unknown as number;
                 }
 
-                ws.on('error', console.error);
+                ws.on('error', (err) => mainLogger.error('Remote WebSocket error', err));
 
                 ws.on('message', (data) => {
                     try {
@@ -488,7 +489,7 @@ const enableServer = (config: RemoteConfig): Promise<void> => {
                             }
                         }
                     } catch (error) {
-                        console.error(error);
+                        mainLogger.error('Remote message handler error', error);
                     }
                 });
 

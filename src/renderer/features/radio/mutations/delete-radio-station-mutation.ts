@@ -4,6 +4,7 @@ import { AxiosError } from 'axios';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import {
     DeleteInternetRadioStationArgs,
     DeleteInternetRadioStationResponse,
@@ -24,6 +25,17 @@ export const useDeleteRadioStation = (args: MutationHookArgs) => {
                 ...args,
                 apiClientProps: { serverId: args.apiClientProps.serverId },
             });
+        },
+        onError: (error, variables) => {
+            logFn.error('Delete radio station failed', {
+                category: LogCategory.API,
+                meta: {
+                    message: error?.message,
+                    serverId: variables.apiClientProps.serverId,
+                    stationId: variables.query?.id,
+                },
+            });
+            options?.onError?.(error);
         },
         onSuccess: (_args, variables) => {
             queryClient.invalidateQueries({

@@ -1,6 +1,7 @@
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { Box } from '/@/shared/components/box/box';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
@@ -43,5 +44,22 @@ interface ComponentErrorBoundaryProps {
 }
 
 export const ComponentErrorBoundary = ({ children }: ComponentErrorBoundaryProps) => {
-    return <ErrorBoundary FallbackComponent={ComponentErrorFallback}>{children}</ErrorBoundary>;
+    return (
+        <ErrorBoundary
+            FallbackComponent={ComponentErrorFallback}
+            onError={(error, errorInfo) => {
+                logFn.error('Component error boundary caught an error', {
+                    category: LogCategory.OTHER,
+                    meta: {
+                        componentStack: errorInfo?.componentStack,
+                        message: error?.message,
+                        name: error?.name,
+                        stack: error?.stack,
+                    },
+                });
+            }}
+        >
+            {children}
+        </ErrorBoundary>
+    );
 };

@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 
+import { mainLogger } from '../../../logger';
 import { store } from '../settings';
 import { getLyricsBySongId as getGenius, getSearchResults as searchGenius } from './genius';
 import { getLyricsBySongId as getLrcLib, getSearchResults as searchLrcLib } from './lrclib';
@@ -96,7 +97,7 @@ const searchAllSources = async (
             allSearchResults.push(...result.value.searchResults);
         } else if (result.status === 'rejected') {
             const index = settled.indexOf(result);
-            console.error(`Error searching ${sources[index]} for lyrics:`, result.reason);
+            mainLogger.error(`Error searching ${sources[index]} for lyrics`, result.reason);
         }
     }
     return allSearchResults;
@@ -160,7 +161,7 @@ const getRemoteLyrics = async (song: Song) => {
             };
         }
     } catch (error) {
-        console.error(`Error fetching lyrics from ${bestMatch.source}:`, error);
+        mainLogger.error(`Error fetching lyrics from ${bestMatch.source}`, error);
     }
 
     if (lyricsFromSource) {

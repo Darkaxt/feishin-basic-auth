@@ -2,6 +2,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { ServerSelector } from '/@/renderer/features/sidebar/components/server-selector';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { Box } from '/@/shared/components/box/box';
 import { Button } from '/@/shared/components/button/button';
 import { Center } from '/@/shared/components/center/center';
@@ -85,9 +86,15 @@ export const PageErrorBoundary = ({ children }: PageErrorBoundaryProps) => {
         <ErrorBoundary
             FallbackComponent={PageErrorFallback}
             onError={(error, errorInfo) => {
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Page error boundary caught an error:', error, errorInfo);
-                }
+                logFn.error('Page error boundary caught an error', {
+                    category: LogCategory.OTHER,
+                    meta: {
+                        componentStack: errorInfo?.componentStack,
+                        message: error?.message,
+                        name: error?.name,
+                        stack: error?.stack,
+                    },
+                });
             }}
             onReset={() => {}}
         >

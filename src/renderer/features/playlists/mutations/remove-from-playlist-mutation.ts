@@ -4,6 +4,7 @@ import { AxiosError } from 'axios';
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
 import { MutationOptions } from '/@/renderer/lib/react-query';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { RemoveFromPlaylistArgs, RemoveFromPlaylistResponse } from '/@/shared/types/domain-types';
 
 export const useRemoveFromPlaylist = (options?: MutationOptions) => {
@@ -15,6 +16,17 @@ export const useRemoveFromPlaylist = (options?: MutationOptions) => {
                 ...args,
                 apiClientProps: { serverId: args.apiClientProps.serverId },
             });
+        },
+        onError: (error, variables) => {
+            logFn.error('Remove from playlist failed', {
+                category: LogCategory.API,
+                meta: {
+                    message: error?.message,
+                    playlistId: variables.query.id,
+                    serverId: variables.apiClientProps.serverId,
+                },
+            });
+            options?.onError?.(error);
         },
         onSuccess: (_data, variables) => {
             const { apiClientProps } = variables;

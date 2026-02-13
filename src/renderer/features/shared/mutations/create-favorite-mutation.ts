@@ -12,6 +12,7 @@ import {
     restoreFavoriteQueryData,
 } from '/@/renderer/features/shared/mutations/favorite-optimistic-updates';
 import { MutationHookArgs } from '/@/renderer/lib/react-query';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import { FavoriteArgs, FavoriteResponse, LibraryItem } from '/@/shared/types/domain-types';
 
@@ -33,6 +34,15 @@ export const useCreateFavorite = (args: MutationHookArgs) => {
         },
         mutationKey: createFavoriteMutationKey,
         onError: (_error, variables, context) => {
+            logFn.error('Create favorite failed', {
+                category: LogCategory.API,
+                meta: {
+                    id: variables.query.id,
+                    message: _error?.message,
+                    serverId: variables.apiClientProps.serverId,
+                    type: variables.query.type,
+                },
+            });
             if (context) {
                 restoreFavoriteQueryData(queryClient, context);
             }

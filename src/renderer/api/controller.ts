@@ -4,6 +4,7 @@ import { NavidromeController } from '/@/renderer/api/navidrome/navidrome-control
 import { SubsonicController } from '/@/renderer/api/subsonic/subsonic-controller';
 import { mergeMusicFolderId } from '/@/renderer/api/utils-music-folder';
 import { getServerById, useAuthStore, useSettingsStore } from '/@/renderer/store';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import {
     AuthenticationResponse,
@@ -31,6 +32,7 @@ const apiController = <K extends keyof ControllerEndpoint>(
     const serverType = type || useAuthStore.getState().currentServer?.type;
 
     if (!serverType) {
+        logFn.warn('No server selected', { category: LogCategory.API });
         toast.error({
             message: i18n.t('error.serverNotSelectedError', {
                 postProcess: 'sentenceCase',
@@ -43,6 +45,10 @@ const apiController = <K extends keyof ControllerEndpoint>(
     const controllerFn = endpoints?.[serverType]?.[endpoint];
 
     if (typeof controllerFn !== 'function') {
+        logFn.warn('Endpoint not implemented', {
+            category: LogCategory.API,
+            meta: { endpoint, serverType },
+        });
         toast.error({
             message: `Endpoint ${endpoint} is not implemented for ${serverType}`,
             title: i18n.t('error.apiRouteError', { postProcess: 'sentenceCase' }) as string,
@@ -57,6 +63,10 @@ const apiController = <K extends keyof ControllerEndpoint>(
         );
     }
 
+    logFn.debug('API controller call', {
+        category: LogCategory.API,
+        meta: { endpoint, serverType },
+    });
     return controllerFn;
 };
 
