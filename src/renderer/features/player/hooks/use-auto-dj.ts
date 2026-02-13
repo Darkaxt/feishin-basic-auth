@@ -16,7 +16,6 @@ import {
     useSettingsStore,
 } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { shuffleInPlace } from '/@/renderer/utils/shuffle';
 import { hasFeature } from '/@/shared/api/utils';
 import { Played, Song, SongListSort, SortOrder } from '/@/shared/types/domain-types';
@@ -63,7 +62,7 @@ export const useAutoDJ = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.PLAYER].autoPlayTriggered, {
+                logFn.debug('Auto play triggered', {
                     category: LogCategory.PLAYER,
                     meta: { remaining: properties.remaining, songId: properties.song?.id },
                 });
@@ -207,7 +206,7 @@ export const useAutoDJ = () => {
                         songCount: songsToAdd.length,
                     });
                 } catch (error) {
-                    logFn.error(logMsg[LogCategory.PLAYER].autoPlayFailed, {
+                    logFn.error('Auto play failed', {
                         category: LogCategory.PLAYER,
                         meta: { error: (error as Error).message, songId: properties.song?.id },
                     });

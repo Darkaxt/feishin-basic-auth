@@ -12,7 +12,6 @@ import {
     useTimestampStoreBase,
 } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { LibraryItem, QueueSong, ServerType } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
 
@@ -131,7 +130,7 @@ export const useScrobble = () => {
                         },
                         {
                             onSuccess: () => {
-                                logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledTimeupdate, {
+                                logFn.debug('Scrobbled a timeupdate event', {
                                     category: LogCategory.SCROBBLE,
                                     meta: {
                                         id: currentSong.id,
@@ -173,7 +172,7 @@ export const useScrobble = () => {
                         },
                         {
                             onSuccess: () => {
-                                logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledSubmission, {
+                                logFn.debug('Scrobbled a submission event', {
                                     category: LogCategory.SCROBBLE,
                                     meta: {
                                         id: currentSong.id,
@@ -257,7 +256,7 @@ export const useScrobble = () => {
                         },
                         {
                             onSuccess: () => {
-                                logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledStart, {
+                                logFn.debug('Scrobbled a start event', {
                                     category: LogCategory.SCROBBLE,
                                     meta: {
                                         id: currentSong.id,
@@ -319,7 +318,7 @@ export const useScrobble = () => {
                 },
                 {
                     onSuccess: () => {
-                        logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledTimeupdate, {
+                        logFn.debug('Scrobbled a timeupdate event', {
                             category: LogCategory.SCROBBLE,
                             meta: {
                                 id: currentSong.id,
@@ -367,7 +366,7 @@ export const useScrobble = () => {
                     },
                     {
                         onSuccess: () => {
-                            logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledPause, {
+                            logFn.debug('Scrobbled a pause event', {
                                 category: LogCategory.SCROBBLE,
                                 meta: {
                                     id: currentSong.id,
@@ -393,7 +392,7 @@ export const useScrobble = () => {
                     },
                     {
                         onSuccess: () => {
-                            logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledUnpause, {
+                            logFn.debug('Scrobbled an unpause event', {
                                 category: LogCategory.SCROBBLE,
                                 meta: {
                                     id: currentSong.id,
@@ -436,7 +435,7 @@ export const useScrobble = () => {
             },
             {
                 onSuccess: () => {
-                    logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledStart, {
+                    logFn.debug('Scrobbled a start event', {
                         category: LogCategory.SCROBBLE,
                         meta: {
                             id: currentSong.id,

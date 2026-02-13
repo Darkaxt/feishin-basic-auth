@@ -10,7 +10,6 @@ import { controller } from '/@/renderer/api/controller';
 import { AppRoute } from '/@/renderer/router/routes';
 import { getServerById, useAuthStoreActions, useCurrentServer } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { toast } from '/@/shared/components/toast/toast';
 import { AuthState } from '/@/shared/types/types';
 
@@ -62,7 +61,7 @@ export const useServerAuthenticated = () => {
                 }
 
                 // First, try getUserInfo to check if current credentials are still valid
-                logFn.info(logMsg[LogCategory.SYSTEM].authenticatingServer, {
+                logFn.info('Authenticating server', {
                     category: LogCategory.SYSTEM,
                     meta: {
                         method: 'getUserInfo',
@@ -117,7 +116,7 @@ export const useServerAuthenticated = () => {
                         }
                     } catch (serverInfoError) {
                         // Log but don't fail authentication if server info fetch fails
-                        logFn.warn(logMsg[LogCategory.SYSTEM].serverAuthenticationSuccess, {
+                        logFn.warn('Server authentication successful', {
                             category: LogCategory.SYSTEM,
                             meta: {
                                 action: 'server_info_fetch_failed',
@@ -128,7 +127,7 @@ export const useServerAuthenticated = () => {
                         });
                     }
 
-                    logFn.info(logMsg[LogCategory.SYSTEM].serverAuthenticationSuccess, {
+                    logFn.info('Server authentication successful', {
                         category: LogCategory.SYSTEM,
                         meta: {
                             isAdmin: userInfo.isAdmin,
@@ -162,7 +161,7 @@ export const useServerAuthenticated = () => {
                         const password = await localSettings.passwordGet(serverWithAuth.id);
 
                         if (password) {
-                            logFn.info(logMsg[LogCategory.SYSTEM].authenticatingServer, {
+                            logFn.info('Authenticating server', {
                                 category: LogCategory.SYSTEM,
                                 meta: {
                                     method: 'authenticate',
@@ -227,7 +226,7 @@ export const useServerAuthenticated = () => {
                                 }
                             } catch (serverInfoError) {
                                 // Log but don't fail authentication if server info fetch fails
-                                logFn.warn(logMsg[LogCategory.SYSTEM].serverAuthenticationSuccess, {
+                                logFn.warn('Server authentication successful', {
                                     category: LogCategory.SYSTEM,
                                     meta: {
                                         action: 'server_info_fetch_failed',
@@ -238,7 +237,7 @@ export const useServerAuthenticated = () => {
                                 });
                             }
 
-                            logFn.info(logMsg[LogCategory.SYSTEM].serverAuthenticationSuccess, {
+                            logFn.info('Server authentication successful', {
                                 category: LogCategory.SYSTEM,
                                 meta: {
                                     isAdmin: authData.isAdmin,
@@ -275,7 +274,7 @@ export const useServerAuthenticated = () => {
                 if (isNetwork && retryAttempt < MAX_NETWORK_RETRIES) {
                     const nextRetry = retryAttempt + 1;
 
-                    logFn.warn(logMsg[LogCategory.SYSTEM].serverAuthenticationFailed, {
+                    logFn.warn('Server authentication failed', {
                         category: LogCategory.SYSTEM,
                         meta: {
                             action: 'network_error_retry',
@@ -298,7 +297,7 @@ export const useServerAuthenticated = () => {
 
                 // If network error and retries exhausted, redirect to no-network page
                 if (isNetwork && retryAttempt >= MAX_NETWORK_RETRIES) {
-                    logFn.error(logMsg[LogCategory.SYSTEM].serverAuthenticationFailed, {
+                    logFn.error('Server authentication failed', {
                         category: LogCategory.SYSTEM,
                         meta: {
                             action: 'network_error_max_retries_exceeded',
@@ -317,7 +316,7 @@ export const useServerAuthenticated = () => {
                 }
 
                 // For non-network errors, handle normally
-                logFn.error(logMsg[LogCategory.SYSTEM].serverAuthenticationFailed, {
+                logFn.error('Server authentication failed', {
                     category: LogCategory.SYSTEM,
                     meta: {
                         error: errorMessage,
@@ -353,7 +352,7 @@ export const useServerAuthenticated = () => {
 
     useEffect(() => {
         if (!server) {
-            logFn.debug(logMsg[LogCategory.SYSTEM].serverAuthenticationInvalid, {
+            logFn.debug('Server authentication invalid', {
                 category: LogCategory.SYSTEM,
                 meta: {
                     reason: 'No server selected',
@@ -369,7 +368,7 @@ export const useServerAuthenticated = () => {
             retryCountRef.current = 0; // Reset retry count when server changes
 
             if (!serverWithAuth) {
-                logFn.error(logMsg[LogCategory.SYSTEM].serverAuthenticationError, {
+                logFn.error('Server authentication error', {
                     category: LogCategory.SYSTEM,
                     meta: {
                         reason: 'Server not found in store',

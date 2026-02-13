@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useUpdateRadioStation } from '/@/renderer/features/radio/mutations/update-radio-station-mutation';
 import { useCurrentServer } from '/@/renderer/store';
-import { logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 import { Group } from '/@/shared/components/group/group';
 import { closeAllModals, openModal } from '/@/shared/components/modal/modal';
 import { ModalButton } from '/@/shared/components/modal/model-shared';
@@ -48,9 +47,10 @@ export const EditRadioStationForm = ({ onCancel, station }: EditRadioStationForm
             },
             {
                 onError: (error) => {
-                    logFn.error(logMsg.other.error, {
-                        meta: { error: error as Error },
-                    });
+                    logFn.error('An error occurred', {
+                    category: LogCategory.OTHER,
+                    meta: { error: error as Error },
+                });
 
                     toast.error({
                         message: (error as Error).message,

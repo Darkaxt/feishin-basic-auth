@@ -6,7 +6,6 @@ import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'r
 import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
 import { convertToLogVolume } from '/@/renderer/features/player/audio-player/utils/player-utils';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface WebPlayerEngineHandle extends AudioPlayer {
@@ -160,7 +159,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
 
             const { error } = target;
 
-            logFn.error(logMsg[LogCategory.PLAYER].playbackError, {
+            logFn.error('An error occurred during playback', {
                 category: LogCategory.PLAYER,
                 meta: { error },
             });

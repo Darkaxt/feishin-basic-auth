@@ -8,7 +8,6 @@ import { useCreateFavorite } from '/@/renderer/features/shared/mutations/create-
 import { useDeleteFavorite } from '/@/renderer/features/shared/mutations/delete-favorite-mutation';
 import { usePlayerActions, usePlayerStore, useRemoteSettings } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { toast } from '/@/shared/components/toast/toast';
 import { LibraryItem } from '/@/shared/types/domain-types';
 import { PlayerShuffle } from '/@/shared/types/types';
@@ -33,7 +32,7 @@ export const useRemote = () => {
             return;
         }
 
-        logFn.debug(logMsg[LogCategory.REMOTE].initializingRemoteSettings, {
+        logFn.debug('Initializing remote settings', {
             category: LogCategory.REMOTE,
             meta: {
                 enabled: remoteSettings.enabled,
@@ -50,7 +49,7 @@ export const useRemote = () => {
                 remoteSettings.password,
             )
             .catch((error) => {
-                logFn.error(logMsg[LogCategory.REMOTE].failedToEnableRemote, {
+                logFn.error('Failed to enable remote', {
                     category: LogCategory.REMOTE,
                     meta: { error },
                 });
@@ -66,7 +65,7 @@ export const useRemote = () => {
         }
 
         remote.requestPosition((_e: unknown, data: { position: number }) => {
-            logFn.debug(logMsg[LogCategory.REMOTE].requestPositionReceived, {
+            logFn.debug('Request position received', {
                 category: LogCategory.REMOTE,
                 meta: { position: data.position },
             });
@@ -75,7 +74,7 @@ export const useRemote = () => {
         });
 
         remote.requestSeek((_e: unknown, data: { offset: number }) => {
-            logFn.debug(logMsg[LogCategory.REMOTE].requestSeekReceived, {
+            logFn.debug('Request seek received', {
                 category: LogCategory.REMOTE,
                 meta: { offset: data.offset },
             });
@@ -84,7 +83,7 @@ export const useRemote = () => {
 
         remote.requestRating(
             (_e: unknown, data: { id: string; rating: number; serverId: string }) => {
-                logFn.debug(logMsg[LogCategory.REMOTE].requestRatingReceived, {
+                logFn.debug('Request rating received', {
                     category: LogCategory.REMOTE,
                     meta: { id: data.id, rating: data.rating, serverId: data.serverId },
                 });
@@ -93,7 +92,7 @@ export const useRemote = () => {
         );
 
         remote.requestVolume((_e: unknown, data: { volume: number }) => {
-            logFn.debug(logMsg[LogCategory.REMOTE].requestVolumeReceived, {
+            logFn.debug('Request volume received', {
                 category: LogCategory.REMOTE,
                 meta: { volume: data.volume },
             });
@@ -102,7 +101,7 @@ export const useRemote = () => {
 
         remote.requestFavorite(
             (_e: unknown, data: { favorite: boolean; id: string; serverId: string }) => {
-                logFn.debug(logMsg[LogCategory.REMOTE].requestFavoriteReceived, {
+                logFn.debug('Request favorite received', {
                     category: LogCategory.REMOTE,
                     meta: { favorite: data.favorite, id: data.id, serverId: data.serverId },
                 });
@@ -148,7 +147,7 @@ export const useRemote = () => {
         const currentSong = player.getCurrentSong();
 
         if (currentSong) {
-            logFn.debug(logMsg[LogCategory.REMOTE].sendingInitialSong, {
+            logFn.debug('Sending initial song', {
                 category: LogCategory.REMOTE,
                 meta: {
                     artistName: currentSong.artistName,
@@ -178,7 +177,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updateSongSent, {
+                logFn.debug('Update song sent', {
                     category: LogCategory.REMOTE,
                     meta: {
                         artistName: properties.song?.artistName,
@@ -209,7 +208,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updatePositionSent, {
+                logFn.debug('Update position sent', {
                     category: LogCategory.REMOTE,
                     meta: { timestamp: properties.timestamp },
                 });
@@ -220,7 +219,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updateRepeatSent, {
+                logFn.debug('Update repeat sent', {
                     category: LogCategory.REMOTE,
                     meta: { repeat: properties.repeat },
                 });
@@ -232,7 +231,7 @@ export const useRemote = () => {
                 }
 
                 const isShuffleEnabled = properties.shuffle !== PlayerShuffle.NONE;
-                logFn.debug(logMsg[LogCategory.REMOTE].updateShuffleSent, {
+                logFn.debug('Update shuffle sent', {
                     category: LogCategory.REMOTE,
                     meta: { isShuffleEnabled, shuffle: properties.shuffle },
                 });
@@ -243,7 +242,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updatePlaybackSent, {
+                logFn.debug('Update playback sent', {
                     category: LogCategory.REMOTE,
                     meta: { status: properties.status },
                 });
@@ -254,7 +253,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updateVolumeSent, {
+                logFn.debug('Update volume sent', {
                     category: LogCategory.REMOTE,
                     meta: { volume: properties.volume },
                 });
@@ -265,7 +264,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updateFavoriteSent, {
+                logFn.debug('Update favorite sent', {
                     category: LogCategory.REMOTE,
                     meta: {
                         favorite: properties.favorite,
@@ -280,7 +279,7 @@ export const useRemote = () => {
                     return;
                 }
 
-                logFn.debug(logMsg[LogCategory.REMOTE].updateRatingSent, {
+                logFn.debug('Update rating sent', {
                     category: LogCategory.REMOTE,
                     meta: {
                         id: properties.id,

@@ -19,7 +19,6 @@ import { playlistsQueries } from '/@/renderer/features/playlists/api/playlists-a
 import { songsQueries } from '/@/renderer/features/songs/api/songs-api';
 import { AddToQueueType, usePlayerActions, useSettingsStore } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { shuffle as shuffleArray } from '/@/renderer/utils/shuffle';
 import { sortSongsByFetchedOrder } from '/@/shared/api/utils';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -202,7 +201,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
                 const edge = type.edge === 'top' ? 'top' : 'bottom';
 
-                logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByData, {
+                logFn.debug('Added to queue by data', {
                     category: LogCategory.PLAYER,
                     meta: {
                         data: data.length,
@@ -215,7 +214,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
                 storeActions.addToQueueByUniqueId(filteredData, type.uniqueId, edge, playSongId);
             } else {
-                logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByType, {
+                logFn.debug('Added to queue by type', {
                     category: LogCategory.PLAYER,
                     meta: { data: data.length, filtered: filteredData.length, type },
                 });
@@ -258,7 +257,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             };
 
             try {
-                logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByFetch, {
+                logFn.debug('Added to queue by fetch', {
                     category: LogCategory.PLAYER,
                     meta: { ids: id, itemType, serverId, type },
                 });
@@ -324,7 +323,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
             let toastId: null | string = null;
             let fetchId: null | string = null;
 
-            logFn.debug(logMsg[LogCategory.PLAYER].addToQueueByListQuery, {
+            logFn.debug('Added to queue by list query', {
                 category: LogCategory.PLAYER,
                 meta: { itemType, query, serverId, type },
             });
@@ -405,7 +404,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                                 postProcess: 'sentenceCase',
                             }),
                             onClose: () => {
-                                logFn.debug(logMsg[LogCategory.PLAYER].cancelledFetch, {
+                                logFn.debug('Cancelled fetch', {
                                     category: LogCategory.PLAYER,
                                     meta: { itemType, serverId },
                                 });
@@ -505,7 +504,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const clearQueue = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].clearQueue, {
+        logFn.debug('Cleared queue', {
             category: LogCategory.PLAYER,
         });
 
@@ -514,7 +513,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const clearSelected = useCallback(
         (items: QueueSong[]) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].clearSelected, {
+            logFn.debug('Cleared selected', {
                 category: LogCategory.PLAYER,
                 meta: { items: items.length },
             });
@@ -526,7 +525,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const decreaseVolume = useCallback(
         (amount: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].decreaseVolume, {
+            logFn.debug('Decreased volume', {
                 category: LogCategory.PLAYER,
                 meta: { amount },
             });
@@ -538,7 +537,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const increaseVolume = useCallback(
         (amount: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].increaseVolume, {
+            logFn.debug('Increased volume', {
                 category: LogCategory.PLAYER,
                 meta: { amount },
             });
@@ -549,7 +548,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const mediaNext = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaNext, {
+        logFn.debug('Media next', {
             category: LogCategory.PLAYER,
         });
 
@@ -557,7 +556,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [storeActions]);
 
     const mediaPause = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaPause, {
+        logFn.debug('Media pause', {
             category: LogCategory.PLAYER,
         });
 
@@ -566,7 +565,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const mediaPlay = useCallback(
         (id?: string) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].mediaPlay, {
+            logFn.debug('Media play', {
                 category: LogCategory.PLAYER,
                 meta: { id },
             });
@@ -578,7 +577,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const mediaPlayByIndex = useCallback(
         (index: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].mediaPlayByIndex, {
+            logFn.debug('Media play by index', {
                 category: LogCategory.PLAYER,
                 meta: { index },
             });
@@ -589,7 +588,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const mediaPrevious = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaPrevious, {
+        logFn.debug('Media previous', {
             category: LogCategory.PLAYER,
         });
 
@@ -597,7 +596,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [storeActions]);
 
     const mediaStop = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaStop, {
+        logFn.debug('Media stop', {
             category: LogCategory.PLAYER,
         });
 
@@ -606,7 +605,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const mediaSeekToTimestamp = useCallback(
         (timestamp: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].mediaSeekToTimestamp, {
+            logFn.debug('Media seek to timestamp', {
                 category: LogCategory.PLAYER,
                 meta: { timestamp },
             });
@@ -617,7 +616,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const mediaSkipBackward = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaSkipBackward, {
+        logFn.debug('Media skip backward', {
             category: LogCategory.PLAYER,
         });
 
@@ -625,7 +624,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [storeActions]);
 
     const mediaSkipForward = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaSkipForward, {
+        logFn.debug('Media skip forward', {
             category: LogCategory.PLAYER,
         });
 
@@ -634,7 +633,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setQueue = useCallback(
         (data: Song[], index?: number, position?: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].setQueue, {
+            logFn.debug('Set queue', {
                 category: LogCategory.PLAYER,
                 meta: {
                     data: data.length,
@@ -650,7 +649,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setSpeed = useCallback(
         (speed: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].setSpeed, {
+            logFn.debug('Set speed', {
                 category: LogCategory.PLAYER,
                 meta: { speed },
             });
@@ -661,7 +660,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const mediaToggleMute = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaToggleMute, {
+        logFn.debug('Media toggle mute', {
             category: LogCategory.PLAYER,
         });
 
@@ -669,7 +668,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [storeActions]);
 
     const mediaTogglePlayPause = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].mediaTogglePlayPause, {
+        logFn.debug('Media toggle play pause', {
             category: LogCategory.PLAYER,
         });
 
@@ -678,7 +677,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedTo = useCallback(
         (items: QueueSong[], edge: 'bottom' | 'top', uniqueId: string) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedTo, {
+            logFn.debug('Moved selected to', {
                 category: LogCategory.PLAYER,
                 meta: { edge, items, uniqueId },
             });
@@ -690,7 +689,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedToBottom = useCallback(
         (items: QueueSong[]) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedToBottom, {
+            logFn.debug('Moved selected to bottom', {
                 category: LogCategory.PLAYER,
                 meta: { items },
             });
@@ -702,7 +701,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedToNext = useCallback(
         (items: QueueSong[]) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedToNext, {
+            logFn.debug('Moved selected to next', {
                 category: LogCategory.PLAYER,
                 meta: { items },
             });
@@ -714,7 +713,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const moveSelectedToTop = useCallback(
         (items: QueueSong[]) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].moveSelectedToTop, {
+            logFn.debug('Moved selected to top', {
                 category: LogCategory.PLAYER,
                 meta: { items },
             });
@@ -726,7 +725,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setVolume = useCallback(
         (volume: number) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].setVolume, {
+            logFn.debug('Set volume', {
                 category: LogCategory.PLAYER,
                 meta: { volume },
             });
@@ -738,7 +737,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setRepeat = useCallback(
         (repeat: PlayerRepeat) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].setRepeat, {
+            logFn.debug('Set repeat', {
                 category: LogCategory.PLAYER,
                 meta: { repeat },
             });
@@ -750,7 +749,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const setShuffle = useCallback(
         (shuffle: PlayerShuffle) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].setShuffle, {
+            logFn.debug('Set shuffle', {
                 category: LogCategory.PLAYER,
                 meta: { shuffle },
             });
@@ -761,7 +760,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const shuffle = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].shuffle, {
+        logFn.debug('Shuffle', {
             category: LogCategory.PLAYER,
         });
 
@@ -769,7 +768,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [storeActions]);
 
     const shuffleAll = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].shuffleAll, {
+        logFn.debug('Shuffle all', {
             category: LogCategory.PLAYER,
         });
 
@@ -778,7 +777,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
     const shuffleSelected = useCallback(
         (items: QueueSong[]) => {
-            logFn.debug(logMsg[LogCategory.PLAYER].shuffleSelected, {
+            logFn.debug('Shuffle selected', {
                 category: LogCategory.PLAYER,
                 meta: { items },
             });
@@ -789,7 +788,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     const toggleRepeat = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].toggleRepeat, {
+        logFn.debug('Toggle repeat', {
             category: LogCategory.PLAYER,
         });
 
@@ -797,7 +796,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [storeActions]);
 
     const toggleShuffle = useCallback(() => {
-        logFn.debug(logMsg[LogCategory.PLAYER].toggleShuffle, {
+        logFn.debug('Toggle shuffle', {
             category: LogCategory.PLAYER,
         });
 

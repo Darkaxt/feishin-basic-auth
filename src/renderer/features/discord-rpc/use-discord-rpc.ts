@@ -21,7 +21,6 @@ import {
 } from '/@/renderer/store';
 import { sentenceCase } from '/@/renderer/utils';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { useDebouncedCallback } from '/@/shared/hooks/use-debounced-callback';
 import { LibraryItem, QueueSong, ServerType } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
@@ -90,7 +89,7 @@ export const useDiscordRpc = () => {
                     reason = 'paused_with_show_paused_disabled';
                 }
 
-                logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcActivityCleared, {
+                logFn.debug('Activity was cleared for Discord RPC', {
                     category: LogCategory.EXTERNAL,
                     meta: {
                         reason,
@@ -128,7 +127,7 @@ export const useDiscordRpc = () => {
 
                 const isConnected = await discordRpc?.isConnected();
                 if (!isConnected) {
-                    logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcInitialized, {
+                    logFn.debug('Discord RPC was initialized', {
                         category: LogCategory.EXTERNAL,
                         meta: { clientId: discordSettings.clientId },
                     });
@@ -136,7 +135,7 @@ export const useDiscordRpc = () => {
                     await discordRpc?.initialize(discordSettings.clientId);
                 }
 
-                logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcSetActivity, {
+                logFn.debug('Activity was set for Discord RPC', {
                     category: LogCategory.EXTERNAL,
                     meta: {
                         currentStatus: current[2],
@@ -168,7 +167,7 @@ export const useDiscordRpc = () => {
                 current[2] !== previous[2]
             ) {
                 if (trackChangedByState || trackChanged) {
-                    logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcTrackChanged, {
+                    logFn.debug('Track was changed for Discord RPC', {
                         category: LogCategory.EXTERNAL,
                         meta: {
                             artistName: song.artists?.[0]?.name,
@@ -315,7 +314,7 @@ export const useDiscordRpc = () => {
                 // Initialize if needed
                 const isConnected = await discordRpc?.isConnected();
                 if (!isConnected) {
-                    logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcInitialized, {
+                    logFn.debug('Discord RPC was initialized', {
                         category: LogCategory.EXTERNAL,
                         meta: {
                             clientId: discordSettings.clientId,
@@ -327,7 +326,7 @@ export const useDiscordRpc = () => {
                     await discordRpc?.initialize(discordSettings.clientId);
                 }
 
-                logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcSetActivity, {
+                logFn.debug('Activity was set for Discord RPC', {
                     category: LogCategory.EXTERNAL,
                     meta: {
                         albumName: song.album,
@@ -347,7 +346,7 @@ export const useDiscordRpc = () => {
                 });
                 discordRpc?.setActivity(activity);
             } else {
-                logFn.debug(logMsg[LogCategory.EXTERNAL].discordRpcUpdateSkipped, {
+                logFn.debug('Activity was not updated for Discord RPC', {
                     category: LogCategory.EXTERNAL,
                     meta: {
                         currentStatus: current[2],
@@ -384,7 +383,7 @@ export const useDiscordRpc = () => {
     // Quit Discord RPC if it was enabled and is now disabled
     useEffect(() => {
         if ((!discordSettings.enabled || privateMode) && Boolean(previousEnabledRef.current)) {
-            logFn.info(logMsg[LogCategory.EXTERNAL].discordRpcQuit, {
+            logFn.info('Discord RPC was quit', {
                 category: LogCategory.EXTERNAL,
                 meta: {
                     enabled: discordSettings.enabled,

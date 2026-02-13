@@ -5,7 +5,6 @@ import { queryKeys } from '/@/renderer/api/query-keys';
 import { folderQueries } from '/@/renderer/features/folders/api/folder-api';
 import { PlayerFilter, useSettingsStore } from '/@/renderer/store';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 import { sortSongList } from '/@/shared/api/utils';
 import {
     PlaylistSongListQuery,
@@ -434,7 +433,7 @@ export const filterSongsByPlayerFilters = (songs: Song[], filters: PlayerFilter[
     });
 
     if (filteredSongs.length > 0) {
-        logFn.debug(logMsg[LogCategory.PLAYER].playerFiltersApplied, {
+        logFn.debug('Player filters applied', {
             category: LogCategory.PLAYER,
             meta: {
                 filteredCount: filteredSongs.length,

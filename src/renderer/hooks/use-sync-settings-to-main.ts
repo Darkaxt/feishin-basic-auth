@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react';
 import i18n from '/@/i18n/i18n';
 import { openRestartRequiredToast } from '/@/renderer/features/settings/restart-toast';
 import { useSettingsStore } from '/@/renderer/store/settings.store';
-import { logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
+import { LogCategory, logFn } from '/@/renderer/utils/logger';
 
 // Synchronizes settings from the renderer store to the main process electron store
 // on app initialization. If there are differences, it updates the main store and shows
@@ -120,7 +119,8 @@ export const useSyncSettingsToMain = () => {
                         JSON.stringify(rendererValueNormalized)
                     ) {
                         hasDifferences = true;
-                        logFn.warn(logMsg.system.settingsSynchronized, {
+                        logFn.warn('Differences found between renderer and main process settings', {
+                            category: LogCategory.SYSTEM,
                             meta: {
                                 mainStoreKey: mapping.mainStoreKey,
                                 mainValue: mainValueNormalized,

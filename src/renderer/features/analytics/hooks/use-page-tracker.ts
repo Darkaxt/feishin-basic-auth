@@ -5,7 +5,6 @@ import { useLocation } from 'react-router';
 import { isAnalyticsDisabled } from '/@/renderer/features/analytics/hooks/use-analytics-disabled';
 import { getRoutePattern } from '/@/renderer/features/analytics/utils/get-route-pattern';
 import { LogCategory, logFn } from '/@/renderer/utils/logger';
-import { logMsg } from '/@/renderer/utils/logger-message';
 
 const trackPageView = (routePattern: string) => {
     window.umami?.track((props) => ({
@@ -28,7 +27,7 @@ export const usePageTracker = () => {
 
         trackPageViewMutation(routePattern, {
             onSettled: () => {
-                logFn.debug(logMsg[LogCategory.ANALYTICS].pageViewTracked, {
+                logFn.debug('Page view tracked', {
                     category: LogCategory.ANALYTICS,
                     meta: { route: routePattern },
                 });
