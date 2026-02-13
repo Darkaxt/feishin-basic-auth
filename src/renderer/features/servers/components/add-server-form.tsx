@@ -196,7 +196,12 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
 
             logFn.info('Add server successful', {
                 category: LogCategory.SYSTEM,
-                meta: { name: values.name, serverId: serverItem.id, serverType: values.type, url: values.url },
+                meta: {
+                    name: values.name,
+                    serverId: serverItem.id,
+                    serverType: values.type,
+                    url: values.url,
+                },
             });
             toast.success({
                 message: t('form.addServer.success', { postProcess: 'sentenceCase' }),
@@ -216,7 +221,12 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
         } catch (err: any) {
             logFn.error('Add server failed', {
                 category: LogCategory.SYSTEM,
-                meta: { message: err?.message, name: values.name, serverType: values.type, url: values.url },
+                meta: {
+                    message: err?.message,
+                    name: values.name,
+                    serverType: values.type,
+                    url: values.url,
+                },
             });
             setIsLoading(false);
             return toast.error({ message: err?.message });
