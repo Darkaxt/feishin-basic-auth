@@ -717,28 +717,32 @@ const AlbumArtistMetadataFavoriteSongs = ({ routeId }: AlbumArtistMetadataFavori
                                 tableColumnsData={SONG_TABLE_COLUMNS}
                             />
                         </Group>
-                        <ItemTableList
-                            activeRowId={currentSongId}
-                            autoFitColumns={tableConfig.autoFitColumns}
-                            CellComponent={ItemTableListColumn}
-                            columns={columns}
-                            data={filteredSongs}
-                            enableAlternateRowColors={tableConfig.enableAlternateRowColors}
-                            enableDrag
-                            enableDragScroll={false}
-                            enableExpansion={false}
-                            enableHeader={tableConfig.enableHeader}
-                            enableHorizontalBorders={tableConfig.enableHorizontalBorders}
-                            enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
-                            enableSelection
-                            enableSelectionDialog={false}
-                            enableVerticalBorders={tableConfig.enableVerticalBorders}
-                            itemType={LibraryItem.SONG}
-                            onColumnReordered={handleColumnReordered}
-                            onColumnResized={handleColumnResized}
-                            overrideControls={overrideControls}
-                            size={tableConfig.size}
-                        />
+                        {/* Restrict the height. Rendering all items in the DOM makes for a long delay */}
+                        <div style={{ height: 50 + 64 * Math.min(songs.length, 5) }}>
+                            <ItemTableList
+                                activeRowId={currentSongId}
+                                autoFitColumns={tableConfig.autoFitColumns}
+                                CellComponent={ItemTableListColumn}
+                                columns={columns}
+                                data={filteredSongs}
+                                enableAlternateRowColors={tableConfig.enableAlternateRowColors}
+                                enableDrag
+                                enableDragScroll={false}
+                                enableExpansion={false}
+                                enableHeader={tableConfig.enableHeader}
+                                enableHorizontalBorders={tableConfig.enableHorizontalBorders}
+                                enableRowHoverHighlight={tableConfig.enableRowHoverHighlight}
+                                enableSelection
+                                enableSelectionDialog={false}
+                                enableVerticalBorders={tableConfig.enableVerticalBorders}
+                                itemType={LibraryItem.SONG}
+                                onColumnReordered={handleColumnReordered}
+                                onColumnResized={handleColumnResized}
+                                overrideControls={overrideControls}
+                                size={tableConfig.size}
+                            />
+                        </div>
+
                         {!searchTerm.trim() && songs.length > 5 && !showAll && (
                             <Group justify="center" w="100%">
                                 <Button onClick={() => setShowAll(true)} variant="subtle">
