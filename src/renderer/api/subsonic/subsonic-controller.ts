@@ -1951,10 +1951,9 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return totalRecordCount;
     },
-    getStreamUrl: async ({ apiClientProps, context, query }) => {
+    getStreamUrl: async ({ apiClientProps, query }) => {
         const { server } = apiClientProps;
         const { bitrate, format, id, mediaType = 'song', transcode } = query;
-        const { serverFeatures, transcode: transcodeSettings } = context || {};
 
         const streamUrl = `${server?.url}/rest/stream.view?id=${id}&v=1.13.0&c=Feishin&${server?.credential}`;
 
@@ -1964,13 +1963,15 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         // If the server supports transcoding decision, always use it to determine if we need to transcode
-        if (serverFeatures?.[ServerFeature.OS_TRANSCODE_DECISION]) {
-            const maxTranscodingAudioBitrate = transcodeSettings?.bitrate || 0;
+        if (hasFeature(server, ServerFeature.OS_TRANSCODE_DECISION)) {
+            const maxTranscodingAudioBitrate = 0;
 
-            const transcodingProfiles = (transcodeSettings?.format || []).map((format) => {
+            const transcodingProfiles = format?.split(',').map((f) => {
+                const trimmedFormat = f.trim();
+
                 return {
-                    audioCodec: format,
-                    container: format,
+                    audioCodec: trimmedFormat,
+                    container: trimmedFormat,
                     maxAudioChannels: 2,
                     protocol: 'http',
                 };
@@ -1980,7 +1981,7 @@ export const SubsonicController: InternalControllerEndpoint = {
                 body: {
                     codecProfiles: [],
                     directPlayProfiles: TRANSCODE_DIRECT_PLAY_PROFILES,
-                    maxAudioBitrate: 512000,
+                    maxAudioBitrate: 0,
                     maxTranscodingAudioBitrate,
                     name: 'Feishin',
                     platform: 'Web',

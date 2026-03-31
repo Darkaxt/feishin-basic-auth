@@ -413,12 +413,6 @@ export type Song = {
 type ApiContext = {
     pathReplace?: string;
     pathReplaceWith?: string;
-    serverFeatures?: ServerFeatures;
-    transcode?: {
-        bitrate?: number;
-        enabled?: boolean;
-        format?: string[];
-    };
 };
 
 type BaseEndpointArgs = {
