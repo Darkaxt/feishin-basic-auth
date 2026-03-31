@@ -1670,6 +1670,7 @@ export type StreamQuery = {
     id: string;
     mediaType?: 'podcast' | 'song';
     offset?: number;
+    skipAutoTranscode?: boolean;
     transcode: boolean;
 };
 

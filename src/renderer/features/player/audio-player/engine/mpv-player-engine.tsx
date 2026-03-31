@@ -124,10 +124,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             if (!radioState.currentStreamUrl) {
                 const playerData = usePlayerStore.getState().getPlayerData();
                 const currentSongUrl = playerData.currentSong
-                    ? await getSongUrl(playerData.currentSong, transcode)
+                    ? await getSongUrl(playerData.currentSong, transcode, true)
                     : undefined;
                 const nextSongUrl = playerData.nextSong
-                    ? await getSongUrl(playerData.nextSong, transcode)
+                    ? await getSongUrl(playerData.nextSong, transcode, true)
                     : undefined;
 
                 if (currentSongUrl && nextSongUrl && !hasPopulatedQueueRef.current && mpvPlayer) {
@@ -281,7 +281,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                     return;
                 }
 
-                const nextSongUrl = song ? await getSongUrl(song, transcode) : undefined;
+                const nextSongUrl = song ? await getSongUrl(song, transcode, true) : undefined;
                 mpvPlayer?.setQueueNext(nextSongUrl);
             },
             onPlayerPlay: () => {
@@ -346,7 +346,7 @@ async function handleMpvAutoNext(transcode: {
 }) {
     const playerData = usePlayerStore.getState().getPlayerData();
     const nextSongUrl = playerData.nextSong
-        ? await getSongUrl(playerData.nextSong, transcode)
+        ? await getSongUrl(playerData.nextSong, transcode, true)
         : undefined;
     mpvPlayer?.autoNext(nextSongUrl);
 }
@@ -365,10 +365,10 @@ async function replaceMpvQueue(transcode: {
 
     const playerData = usePlayerStore.getState().getPlayerData();
     const currentSongUrl = playerData.currentSong
-        ? await getSongUrl(playerData.currentSong, transcode)
+        ? await getSongUrl(playerData.currentSong, transcode, true)
         : undefined;
     const nextSongUrl = playerData.nextSong
-        ? await getSongUrl(playerData.nextSong, transcode)
+        ? await getSongUrl(playerData.nextSong, transcode, true)
         : undefined;
     mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
 }

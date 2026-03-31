@@ -61,13 +61,18 @@ export function useSongUrl(
     return shouldReusePrior ? prior.current[1] : queryStreamUrl;
 }
 
-export const getSongUrl = async (song: QueueSong, transcode: TranscodingConfig) => {
+export const getSongUrl = async (
+    song: QueueSong,
+    transcode: TranscodingConfig,
+    skipAutoTranscode?: boolean,
+) => {
     const url = await api.controller.getStreamUrl({
         apiClientProps: { serverId: song._serverId },
         query: {
             bitrate: transcode.bitrate,
             format: transcode.format,
             id: song.id,
+            skipAutoTranscode,
             transcode: transcode.enabled,
         },
     });

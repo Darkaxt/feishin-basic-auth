@@ -1953,13 +1953,18 @@ export const SubsonicController: InternalControllerEndpoint = {
     },
     getStreamUrl: async ({ apiClientProps, query }) => {
         const { server } = apiClientProps;
-        const { bitrate, format, id, mediaType = 'song', transcode } = query;
+        const { bitrate, format, id, mediaType = 'song', skipAutoTranscode, transcode } = query;
 
         const streamUrl = `${server?.url}/rest/stream.view?id=${id}&v=1.13.0&c=Feishin&${server?.credential}`;
 
         // If transcoding is explicitly enabled, just return the direct transcoded stream URL
         if (transcode) {
             return appendTranscodeParams(streamUrl, format, bitrate);
+        }
+
+        // Used in cases where MPV is the default player, since mpv handles basically every audio format
+        if (skipAutoTranscode) {
+            return streamUrl;
         }
 
         // If the server supports transcoding decision, always use it to determine if we need to transcode
