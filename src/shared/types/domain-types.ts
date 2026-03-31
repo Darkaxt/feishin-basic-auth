@@ -1424,11 +1424,10 @@ export type ControllerEndpoint = {
     getSongDetail: (args: SongDetailArgs) => Promise<SongDetailResponse>;
     getSongList: (args: SongListArgs) => Promise<SongListResponse>;
     getSongListCount: (args: SongListCountArgs) => Promise<number>;
-    getStreamUrl: (args: StreamArgs) => string;
+    getStreamUrl: (args: StreamArgs) => Promise<string>;
     getStructuredLyrics?: (args: StructuredLyricsArgs) => Promise<StructuredLyric[]>;
     getTagList?: (args: TagListArgs) => Promise<TagListResponse>;
     getTopSongs: (args: TopSongListArgs) => Promise<TopSongListResponse>;
-    getTranscodeDecision: (args: TranscodeDecisionArgs) => Promise<TranscodeDecisionResponse>;
     getUserInfo: (args: UserInfoArgs) => Promise<UserInfoResponse>;
     getUserList?: (args: UserListArgs) => Promise<UserListResponse>;
     movePlaylistItem?: (args: MoveItemArgs) => Promise<void>;
@@ -1577,9 +1576,6 @@ export type InternalControllerEndpoint = {
     ) => Promise<StructuredLyric[]>;
     getTagList?: (args: ReplaceApiClientProps<TagListArgs>) => Promise<TagListResponse>;
     getTopSongs: (args: ReplaceApiClientProps<TopSongListArgs>) => Promise<TopSongListResponse>;
-    getTranscodeDecision: (
-        args: ReplaceApiClientProps<TranscodeDecisionArgs>,
-    ) => Promise<TranscodeDecisionResponse>;
     getUserInfo: (args: ReplaceApiClientProps<UserInfoArgs>) => Promise<UserInfoResponse>;
     getUserList?: (args: ReplaceApiClientProps<UserListArgs>) => Promise<UserListResponse>;
     movePlaylistItem?: (args: ReplaceApiClientProps<MoveItemArgs>) => Promise<void>;

@@ -1283,35 +1283,40 @@ export const JellyfinController: InternalControllerEndpoint = {
             apiClientProps,
             query: { ...query, limit: 1, startIndex: 0 },
         }).then((result) => result!.totalRecordCount!),
-    getStreamUrl: ({ apiClientProps: { server }, query }) => {
-        const { bitrate, format, id, offset = 0, transcode, transcodeParams } = query;
+    getStreamUrl: async ({ apiClientProps: { server }, query }) => {
+        const { bitrate, format, id, transcode } = query;
         const deviceId = '';
 
-        if (transcodeParams != null || transcode) {
+        let url = `${server?.url}/Items/${id}/Download?apiKey=${server?.credential}&playSessionId=${deviceId}`;
+
+        if (transcode) {
+            // Some format appears to be required. Fall back to trusty MP3 if not specified
+            // Otherwise, ffmpeg appears to crash
             const realFormat = format || 'mp3';
-            let url =
+
+            url =
                 `${server?.url}/audio` +
                 `/${id}/universal` +
                 `?userId=${server?.userId}` +
                 `&deviceId=${deviceId}` +
+                '&audioCodec=aac' +
                 `&apiKey=${server?.credential}` +
                 `&playSessionId=${deviceId}` +
                 '&container=opus,mp3,aac,m4a,m4b,flac,wav,ogg';
+
             url += `&transcodingProtocol=http&transcodingContainer=${realFormat}`;
+            url = url.replace('audioCodec=aac', `audioCodec=${realFormat}`);
             url = url.replace(
                 '&container=opus,mp3,aac,m4a,m4b,flac,wav,ogg',
                 `&container=${realFormat}`,
             );
+
             if (bitrate !== undefined) {
                 url += `&maxStreamingBitrate=${bitrate * 1000}`;
             }
-            if (offset > 0) {
-                url += `&startTimeTicks=${Math.floor(offset * 10_000_000)}`;
-            }
-            return url;
         }
 
-        return `${server?.url}/Items/${id}/Download?apiKey=${server?.credential}&playSessionId=${deviceId}`;
+        return url;
     },
     getTagList: async (args) => {
         const { apiClientProps, query } = args;
