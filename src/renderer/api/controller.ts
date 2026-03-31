@@ -67,13 +67,28 @@ const getPathReplaceSettings = () => {
     return { pathReplace, pathReplaceWith };
 };
 
+const getTranscodeSettings = () => {
+    const transcode = useSettingsStore.getState().playback.transcode;
+    return transcode;
+};
+
+const getServerFeatures = () => {
+    const serverFeatures = useAuthStore.getState().currentServer?.features;
+    return serverFeatures;
+};
+
 const addContext = <T extends { apiClientProps: any; context?: any }>(args: T): T => {
     const pathSettings = getPathReplaceSettings();
+    const transcodeSettings = getTranscodeSettings();
+    const serverFeatures = getServerFeatures();
+
     return {
         ...args,
         context: {
             ...(args.context || {}),
             ...pathSettings,
+            serverFeatures: serverFeatures,
+            transcode: transcodeSettings,
         },
     };
 };

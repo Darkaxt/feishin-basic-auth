@@ -410,16 +410,24 @@ export type Song = {
     userRating: null | number;
 };
 
+type ApiContext = {
+    pathReplace?: string;
+    pathReplaceWith?: string;
+    serverFeatures?: ServerFeatures;
+    transcode?: {
+        bitrate?: number;
+        enabled?: boolean;
+        format?: string[];
+    };
+};
+
 type BaseEndpointArgs = {
     apiClientProps: {
         server?: null | ServerListItemWithCredential;
         serverId: string;
         signal?: AbortSignal;
     };
-    context?: {
-        pathReplace?: string;
-        pathReplaceWith?: string;
-    };
+    context?: ApiContext;
 };
 
 type GenreListSortMap = {
@@ -1563,7 +1571,7 @@ export type InternalControllerEndpoint = {
     getSongDetail: (args: ReplaceApiClientProps<SongDetailArgs>) => Promise<SongDetailResponse>;
     getSongList: (args: ReplaceApiClientProps<SongListArgs>) => Promise<SongListResponse>;
     getSongListCount: (args: ReplaceApiClientProps<SongListCountArgs>) => Promise<number>;
-    getStreamUrl: (args: ReplaceApiClientProps<StreamArgs>) => string;
+    getStreamUrl: (args: ReplaceApiClientProps<StreamArgs>) => Promise<string>;
     getStructuredLyrics?: (
         args: ReplaceApiClientProps<StructuredLyricsArgs>,
     ) => Promise<StructuredLyric[]>;
@@ -1673,7 +1681,6 @@ export type StreamQuery = {
     mediaType?: 'podcast' | 'song';
     offset?: number;
     transcode: boolean;
-    transcodeParams?: string;
 };
 
 export type StructuredLyric = (StructuredSyncedLyric | StructuredUnsyncedLyric) & {
@@ -1780,8 +1787,5 @@ type BaseEndpointArgsWithServer = {
         serverId: string;
         signal?: AbortSignal;
     };
-    context?: {
-        pathReplace?: string;
-        pathReplaceWith?: string;
-    };
+    context?: ApiContext;
 };
