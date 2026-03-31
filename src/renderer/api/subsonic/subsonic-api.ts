@@ -259,6 +259,14 @@ export const contract = c.router({
             200: ssType._response.getTranscodeDecision,
         },
     },
+    getTranscodeStream: {
+        method: 'GET',
+        path: 'getTranscodeStream.view',
+        query: ssType._parameters.getTranscodeStream,
+        responses: {
+            200: z.string(),
+        },
+    },
     getUser: {
         method: 'GET',
         path: 'getUser.view',
