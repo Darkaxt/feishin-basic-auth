@@ -1273,6 +1273,10 @@ export const SubsonicController: InternalControllerEndpoint = {
             }
         }
 
+        if (subsonicFeatures[SubsonicExtensions.TRANSCODING]) {
+            features.osTranscodeDecision = [1];
+        }
+
         if (subsonicFeatures[SubsonicExtensions.SONG_LYRICS]) {
             features.lyricsMultipleStructured = [1];
         }

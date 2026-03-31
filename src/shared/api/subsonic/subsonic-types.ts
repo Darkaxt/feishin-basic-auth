@@ -456,6 +456,7 @@ export enum SubsonicExtensions {
     INDEX_BASED_QUEUE = 'indexBasedQueue',
     SONG_LYRICS = 'songLyrics',
     TRANSCODE_OFFSET = 'transcodeOffset',
+    TRANSCODING = 'transcoding',
 }
 
 const updatePlaylistParameters = z.object({
