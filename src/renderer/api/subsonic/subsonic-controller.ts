@@ -8,6 +8,10 @@ import md5 from 'md5';
 import { z } from 'zod';
 
 import { contract, ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
+import {
+    getDefaultTranscodingProfiles,
+    getDirectPlayProfiles,
+} from '/@/renderer/features/player/components/audio-players';
 import { randomString } from '/@/renderer/utils';
 import { logFn } from '/@/renderer/utils/logger';
 import { getServerUrl } from '/@/renderer/utils/normalize-server-url';
@@ -88,44 +92,44 @@ const ALBUM_LIST_SORT_MAPPING: Record<AlbumListSort, AlbumListSortType | undefin
 const MAX_SUBSONIC_ITEMS = 500;
 const SUBSONIC_FAST_BATCH_SIZE = MAX_SUBSONIC_ITEMS * 10;
 
-const TRANSCODE_DIRECT_PLAY_PROFILES = [
-    {
-        audioCodecs: ['mp3'],
-        containers: ['mp3'],
-        maxAudioChannels: 2,
-        protocols: ['http'],
-    },
-    {
-        audioCodecs: ['aac'],
-        containers: ['m4a', 'mp4'],
-        maxAudioChannels: 2,
-        protocols: ['http'],
-    },
-    {
-        audioCodecs: ['vorbis'],
-        containers: ['ogg'],
-        maxAudioChannels: 2,
-        protocols: ['http'],
-    },
-    {
-        audioCodecs: ['opus'],
-        containers: ['ogg', 'webm'],
-        maxAudioChannels: 2,
-        protocols: ['http'],
-    },
-    {
-        audioCodecs: ['pcm'],
-        containers: ['wav'],
-        maxAudioChannels: 2,
-        protocols: ['http'],
-    },
-    {
-        audioCodecs: ['flac'],
-        containers: ['flac'],
-        maxAudioChannels: 2,
-        protocols: ['http'],
-    },
-];
+// const TRANSCODE_DIRECT_PLAY_PROFILES = [
+//     {
+//         audioCodecs: ['mp3'],
+//         containers: ['mp3'],
+//         maxAudioChannels: 2,
+//         protocols: ['http'],
+//     },
+//     {
+//         audioCodecs: ['aac'],
+//         containers: ['m4a', 'mp4'],
+//         maxAudioChannels: 2,
+//         protocols: ['http'],
+//     },
+//     {
+//         audioCodecs: ['vorbis'],
+//         containers: ['ogg'],
+//         maxAudioChannels: 2,
+//         protocols: ['http'],
+//     },
+//     {
+//         audioCodecs: ['opus'],
+//         containers: ['ogg', 'webm'],
+//         maxAudioChannels: 2,
+//         protocols: ['http'],
+//     },
+//     {
+//         audioCodecs: ['pcm'],
+//         containers: ['wav'],
+//         maxAudioChannels: 2,
+//         protocols: ['http'],
+//     },
+//     {
+//         audioCodecs: ['flac'],
+//         containers: ['flac'],
+//         maxAudioChannels: 2,
+//         protocols: ['http'],
+//     },
+// ];
 
 // const TRANSCODE_UNSUPPORTED_DIRECT_PLAY_PROFILES = [
 //     {
@@ -1971,25 +1975,17 @@ export const SubsonicController: InternalControllerEndpoint = {
         if (hasFeature(server, ServerFeature.OS_TRANSCODE_DECISION)) {
             const maxTranscodingAudioBitrate = 0;
 
-            const transcodingProfiles = format?.split(',').map((f) => {
-                const trimmedFormat = f.trim();
-
-                return {
-                    audioCodec: trimmedFormat,
-                    container: trimmedFormat,
-                    maxAudioChannels: 2,
-                    protocol: 'http',
-                };
-            });
+            const directPlayProfiles = getDirectPlayProfiles();
+            const transcodingProfiles = getDefaultTranscodingProfiles();
 
             const transcodeDecision = await ssApiClient(apiClientProps).getTranscodeDecision({
                 body: {
                     codecProfiles: [],
-                    directPlayProfiles: TRANSCODE_DIRECT_PLAY_PROFILES,
+                    directPlayProfiles,
                     maxAudioBitrate: 0,
                     maxTranscodingAudioBitrate,
                     name: 'Feishin',
-                    platform: 'Web',
+                    platform: navigator.userAgent,
                     transcodingProfiles,
                 },
                 query: {
