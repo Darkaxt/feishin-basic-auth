@@ -16,14 +16,22 @@
 
 .windows {
     grid-template-rows:
-        30px calc(100vh - 120px - var(--theme-spacing-md)) calc(90px + var(--theme-spacing-md));
+        calc(30px + var(--theme-spacing-md))
+        calc(100vh - 120px - 2 * var(--theme-spacing-md))
+        calc(90px + var(--theme-spacing-md));
     grid-template-rows:
-        30px calc(100dvh - 120px - var(--theme-spacing-md)) calc(90px + var(--theme-spacing-md));
+        calc(30px + var(--theme-spacing-md))
+        calc(100dvh - 120px - 2 * var(--theme-spacing-md))
+        calc(90px + var(--theme-spacing-md));
 }
 
 .macos {
     grid-template-rows:
-        30px calc(100vh - 120px - var(--theme-spacing-md)) calc(90px + var(--theme-spacing-md));
+        calc(30px + var(--theme-spacing-md))
+        calc(100vh - 120px - 2 * var(--theme-spacing-md))
+        calc(90px + var(--theme-spacing-md));
     grid-template-rows:
-        30px calc(100dvh - 120px - var(--theme-spacing-md)) calc(90px + var(--theme-spacing-md));
+        calc(30px + var(--theme-spacing-md))
+        calc(100dvh - 120px - 2 * var(--theme-spacing-md))
+        calc(90px + var(--theme-spacing-md));
 }

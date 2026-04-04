@@ -1,5 +1,5 @@
 /* stylelint-disable selector-class-pattern */
-.fs-player-bar-module-container {
+.fs-player-bar-module-bar {
     background: rgb(0 0 0 / 40%) !important;
     backdrop-filter: blur(2rem);
 }
@@ -125,8 +125,8 @@ table {
     height: 100vh;
 }
 
-:has(.fs-window-bar-module-window-bar) .fs-main-content-module-main-content-container {
-    height: calc(100vh - 30px);
+:has(.fs-window-bar-module-wrapper) .fs-main-content-module-main-content-container {
+    height: calc(100vh - 30px - var(--theme-spacing-md));
 }
 
 .mantine-Tabs-root {

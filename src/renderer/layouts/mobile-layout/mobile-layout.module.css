@@ -21,15 +21,19 @@
 .windows,
 .macos {
     grid-template-rows:
-        30px calc(100vh - 120px - var(--theme-spacing-md)) calc(90px + var(--theme-spacing-md));
+        calc(30px + var(--theme-spacing-md))
+        calc(100vh - 120px - 2 * var(--theme-spacing-md))
+        calc(90px + var(--theme-spacing-md));
     grid-template-rows:
-        30px calc(100dvh - 120px - var(--theme-spacing-md)) calc(90px + var(--theme-spacing-md));
+        calc(30px + var(--theme-spacing-md))
+        calc(100dvh - 120px - 2 * var(--theme-spacing-md))
+        calc(90px + var(--theme-spacing-md));
 }
 
 .drawer-button {
     position: absolute;
     bottom: calc(90px + var(--theme-spacing-md) + 0.75rem);
-    left: 0.75rem;
+    left: var(--theme-spacing-md);
     z-index: 100;
     background: color-mix(in srgb, var(--theme-colors-background) 90%, transparent);
     border: 1px solid var(--theme-colors-border);

@@ -205,19 +205,21 @@ export const WindowBar = () => {
     }
 
     return (
-        <div className={styles.windowBar}>
-            {windowBarStyle === Platform.WINDOWS && (
-                <WindowsControls
-                    controls={{ handleClose, handleMaximize, handleMinimize }}
-                    title={title}
-                />
-            )}
-            {windowBarStyle === Platform.MACOS && (
-                <MacOsControls
-                    controls={{ handleClose, handleMaximize, handleMinimize }}
-                    title={title}
-                />
-            )}
+        <div className={styles.wrapper}>
+            <div className={styles.bar}>
+                {windowBarStyle === Platform.WINDOWS && (
+                    <WindowsControls
+                        controls={{ handleClose, handleMaximize, handleMinimize }}
+                        title={title}
+                    />
+                )}
+                {windowBarStyle === Platform.MACOS && (
+                    <MacOsControls
+                        controls={{ handleClose, handleMaximize, handleMinimize }}
+                        title={title}
+                    />
+                )}
+            </div>
         </div>
     );
 };
