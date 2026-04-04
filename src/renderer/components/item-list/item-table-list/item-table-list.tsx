@@ -31,6 +31,7 @@ import { parseTableColumns } from '/@/renderer/components/item-list/helpers/pars
 import { useListHotkeys } from '/@/renderer/components/item-list/helpers/use-list-hotkeys';
 import { useContainerWidthTracking } from '/@/renderer/components/item-list/item-table-list/hooks/use-container-width-tracking';
 import { useRowInteractionDelegate } from '/@/renderer/components/item-list/item-table-list/hooks/use-row-interaction-delegate';
+import { useItemTableStickyLayoutOffsets } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-table-sticky-layout-offsets';
 import { useStickyGroupRowPositioning } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-group-row-positioning';
 import { useStickyHeaderPositioning } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-header-positioning';
 import { useStickyTableGroupRows } from '/@/renderer/components/item-list/item-table-list/hooks/use-sticky-table-group-rows';
@@ -829,6 +830,8 @@ const ItemTableListStickyUI = memo(
         const stickyHeaderMainRef = useRef<HTMLDivElement | null>(null);
         const stickyHeaderRightRef = useRef<HTMLDivElement | null>(null);
 
+        const stickyLayout = useItemTableStickyLayoutOffsets();
+
         const { shouldShowStickyHeader, stickyTop } = useStickyTableHeader({
             containerRef,
             enabled: enableHeader && enableStickyHeader,
@@ -837,6 +840,7 @@ const ItemTableListStickyUI = memo(
             pinnedLeftColumnRef,
             pinnedRightColumnRef,
             stickyHeaderMainRef,
+            stickyLayout,
         });
 
         useStickyHeaderPositioning({
@@ -858,6 +862,7 @@ const ItemTableListStickyUI = memo(
             mainGridRef: rowRef,
             shouldShowStickyHeader,
             stickyHeaderTop: stickyTop,
+            stickyLayout,
         });
 
         const shouldRenderStickyGroupRow = shouldShowStickyGroupRow;

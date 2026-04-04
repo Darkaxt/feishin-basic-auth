@@ -52,7 +52,7 @@
 
 .item-table-pinned-rows-grid-container.header-fixed {
     position: fixed !important;
-    top: 65px;
+    top: var(--item-table-sticky-top-default);
     z-index: 15;
     background-color: var(--theme-bg-primary);
     box-shadow: 0 -1px 0 0 var(--theme-colors-border);
@@ -60,7 +60,7 @@
 }
 
 .item-table-pinned-rows-grid-container.header-window-bar {
-    top: 95px;
+    top: var(--item-table-sticky-top-win-mac);
 }
 
 .item-table-list-container.header-fixed-margin {

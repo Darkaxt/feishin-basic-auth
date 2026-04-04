@@ -1,8 +1,7 @@
+import type { ItemTableStickyLayoutOffsets } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-table-sticky-layout-offsets';
+
 import { useInView } from 'motion/react';
 import { RefObject, useEffect, useMemo, useRef } from 'react';
-
-import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/shared/types/types';
 
 export const useStickyTableHeader = ({
     containerRef,
@@ -12,6 +11,7 @@ export const useStickyTableHeader = ({
     pinnedLeftColumnRef,
     pinnedRightColumnRef,
     stickyHeaderMainRef,
+    stickyLayout,
 }: {
     containerRef: RefObject<HTMLDivElement | null>;
     enabled: boolean;
@@ -20,8 +20,9 @@ export const useStickyTableHeader = ({
     pinnedLeftColumnRef?: RefObject<HTMLDivElement | null>;
     pinnedRightColumnRef?: RefObject<HTMLDivElement | null>;
     stickyHeaderMainRef?: RefObject<HTMLDivElement | null>;
+    stickyLayout: ItemTableStickyLayoutOffsets;
 }) => {
-    const { windowBarStyle } = useWindowSettings();
+    const { inViewMarginTop, stickyTop } = stickyLayout;
     const isScrollingRef = useRef({
         main: false,
         pinnedLeft: false,
@@ -29,26 +30,19 @@ export const useStickyTableHeader = ({
         stickyHeader: false,
     });
 
-    const topMargin =
-        windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS
-            ? '-130px'
-            : '-100px';
+    const inViewRootMargin = `${inViewMarginTop}px 0px 0px 0px`;
 
-    const isTableHeaderInView = useInView(headerRef, {
-        margin: `${topMargin} 0px 0px 0px`,
-    });
+    const inViewOptions = { margin: inViewRootMargin } as {
+        margin: NonNullable<Parameters<typeof useInView>[1]>['margin'];
+    };
 
-    const isTableInView = useInView(containerRef, {
-        margin: `${topMargin} 0px 0px 0px`,
-    });
+    const isTableHeaderInView = useInView(headerRef, inViewOptions);
+
+    const isTableInView = useInView(containerRef, inViewOptions);
 
     const shouldShowStickyHeader = useMemo(() => {
         return enabled && !isTableHeaderInView && isTableInView;
     }, [enabled, isTableHeaderInView, isTableInView]);
-
-    const stickyTop = useMemo(() => {
-        return windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS ? 95 : 65;
-    }, [windowBarStyle]);
 
     // Sync scroll between sticky header and main grid/pinned columns
     useEffect(() => {

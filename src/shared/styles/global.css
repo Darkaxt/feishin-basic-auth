@@ -283,6 +283,10 @@ button {
     --theme-spacing-xs: var(--mantine-spacing-xs);
     --theme-spacing-sm: var(--mantine-spacing-sm);
     --theme-spacing-md: var(--mantine-spacing-md);
+    --item-table-sticky-top-win-mac: calc(95px + 2 * var(--theme-spacing-md));
+    --item-table-sticky-top-default: calc(65px + var(--theme-spacing-md));
+    --item-table-sticky-inview-margin-win-mac: calc(-130px - 2 * var(--theme-spacing-md));
+    --item-table-sticky-inview-margin-default: calc(-100px - var(--theme-spacing-md));
     --theme-spacing-lg: var(--mantine-spacing-lg);
     --theme-spacing-xl: var(--mantine-spacing-xl);
     --theme-spacing-2xl: var(--mantine-spacing-2xl);

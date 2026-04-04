@@ -1,8 +1,7 @@
+import type { ItemTableStickyLayoutOffsets } from '/@/renderer/components/item-list/item-table-list/hooks/use-item-table-sticky-layout-offsets';
+
 import { useInView } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
-
-import { useWindowSettings } from '/@/renderer/store/settings.store';
-import { Platform } from '/@/shared/types/types';
 
 export interface GroupRowInfo {
     groupIndex: number;
@@ -18,6 +17,7 @@ export const useStickyTableGroupRows = ({
     mainGridRef,
     shouldShowStickyHeader,
     stickyHeaderTop,
+    stickyLayout,
 }: {
     containerRef: React.RefObject<HTMLDivElement | null>;
     enabled: boolean;
@@ -27,17 +27,14 @@ export const useStickyTableGroupRows = ({
     mainGridRef: React.RefObject<HTMLDivElement | null>;
     shouldShowStickyHeader?: boolean;
     stickyHeaderTop?: number;
+    stickyLayout: ItemTableStickyLayoutOffsets;
 }) => {
-    const { windowBarStyle } = useWindowSettings();
+    const { inViewMarginTop, stickyTop: layoutStickyTop } = stickyLayout;
     const [stickyGroupIndex, setStickyGroupIndex] = useState<null | number>(null);
 
-    const topMargin =
-        windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS
-            ? '-130px'
-            : '-100px';
-
+    const groupRowsInViewMargin = `${inViewMarginTop}px 0px 0px 0px`;
     const isTableInView = useInView(containerRef, {
-        margin: `${topMargin} 0px 0px 0px`,
+        margin: groupRowsInViewMargin as NonNullable<Parameters<typeof useInView>[1]>['margin'],
     });
 
     const stickyTop = useMemo(() => {
@@ -46,8 +43,8 @@ export const useStickyTableGroupRows = ({
         if (shouldShowStickyHeader && stickyHeaderTop !== undefined) {
             return stickyHeaderTop + headerHeight + 1;
         }
-        return windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS ? 95 : 65;
-    }, [windowBarStyle, shouldShowStickyHeader, stickyHeaderTop, headerHeight]);
+        return layoutStickyTop;
+    }, [layoutStickyTop, shouldShowStickyHeader, stickyHeaderTop, headerHeight]);
 
     // Calculate group row indexes
     const groupRowIndexes = useMemo(() => {
