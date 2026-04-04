@@ -10,13 +10,14 @@ export const PlayerBar = () => {
 
     return (
         <div
-            className={clsx({
-                [styles.container]: true,
+            className={clsx(styles.wrapper, {
                 [styles.openDrawer]: playerbarOpenDrawer,
             })}
             id="player-bar"
         >
-            <Playerbar />
+            <div className={styles.bar}>
+                <Playerbar />
+            </div>
         </div>
     );
 };
