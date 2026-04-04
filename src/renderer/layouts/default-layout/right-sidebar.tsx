@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import { forwardRef, Ref } from 'react';
 
 import styles from './right-sidebar.module.css';
@@ -64,9 +63,7 @@ export const RightSidebar = forwardRef(
             <>
                 {rightExpanded && sideQueueType === 'sideQueue' && (
                     <aside
-                        className={clsx(styles.rightSidebarContainer, {
-                            [styles.verticalLayout]: isVerticalLayout,
-                        })}
+                        className={styles.rightSidebarContainer}
                         id="sidebar-queue"
                         key="queue-sidebar"
                     >

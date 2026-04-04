@@ -7,16 +7,11 @@
     min-height: 0;
     overflow: hidden;
     background: var(--theme-colors-background-alternate);
-    border-left: 1px solid alpha(var(--theme-colors-border), 0.5);
+    border-radius: var(--theme-radius-lg);
 
     .current-song-cell:not(.current-playlist-song-cell) svg {
         display: none;
     }
-}
-
-.right-sidebar-container.vertical-layout {
-    border-top: 1px solid alpha(var(--theme-colors-border), 0.5);
-    border-left: 0;
 }
 
 .queue-drawer {

@@ -1,10 +1,12 @@
 .main-content-container {
     position: relative;
+    box-sizing: border-box;
     display: grid;
     grid-area: main-content;
-    grid-template-areas: 'sidebar . right-sidebar';
+    grid-template-areas: 'sidebar main';
     grid-template-rows: 1fr;
-    gap: 0;
+    gap: var(--theme-spacing-sm);
+    padding: var(--theme-spacing-md);
     background: var(--theme-colors-background);
 }
 
@@ -21,6 +23,7 @@
 }
 
 .main-content-container.right-expanded {
+    grid-template-areas: 'sidebar main right-sidebar';
     grid-template-columns: var(--sidebar-width) 1fr var(--right-sidebar-width);
 }
 
@@ -30,7 +33,7 @@
 
 .main-content-container.vertical-layout {
     grid-template-areas:
-        'sidebar .'
+        'sidebar main'
         'sidebar right-sidebar';
     grid-template-rows: minmax(0, 1fr) var(--right-sidebar-height);
     grid-template-columns: var(--sidebar-width) 1fr;
@@ -40,17 +43,15 @@
     grid-template-columns: 80px 1fr;
 }
 
-.main-content-container.vertical-layout #sidebar-queue {
-    border-top: 1px solid alpha(var(--theme-colors-border), 0.5);
-    border-left: 0;
-}
-
 .main-content-body {
     display: flex;
     flex: 1;
     flex-direction: column;
+    grid-area: main;
     min-height: 0;
     overflow: hidden;
+    background: var(--theme-colors-background);
+    border-radius: var(--theme-radius-lg);
 }
 
 .main-content-body-scroll {
