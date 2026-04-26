@@ -1,25 +1,30 @@
-name: Feature request
-description: Request a feature to be added to Feishin
-title: '[Feature]: '
-labels: ['enhancement']
+name: BasicAuth/proxy-auth feature request
+description: Request a reverse-proxy BasicAuth or proxy-auth feature for this fork.
+title: '[BasicAuth Feature]: '
+labels: ['enhancement', 'basic-auth', 'proxy-auth']
 body:
     - type: checkboxes
-      id: check-duplicate
+      id: scope
       attributes:
-          label: I have already checked through the existing feature requests and found no duplicates
+          label: Scope check
           options:
-              - label: 'Yes'
+              - label: This request is about reverse-proxy BasicAuth/proxy-auth behavior in this fork.
+                required: true
+              - label: I have already checked existing requests and found no duplicate.
                 required: true
 
     - type: dropdown
-      id: server-specific
+      id: proxy-area
       attributes:
-          label: Is this a server-specific feature?
+          label: Proxy-auth area
           options:
-              - Not server-specific
-              - OpenSubsonic
-              - Jellyfin
-              - Navidrome
+              - Server configuration fields
+              - Header injection
+              - Images or album art
+              - Web player streaming
+              - MPV streaming
+              - Downloads or uploads
+              - Automation or releases
           default: 0
       validations:
           required: true
@@ -27,7 +32,7 @@ body:
     - type: textarea
       id: solution
       attributes:
-          label: What do you want to be added?
-          placeholder: I would like to see [...]
+          label: What BasicAuth/proxy-auth behavior do you want added?
+          placeholder: Describe the proxy-auth use case, expected behavior, and affected server/proxy.
       validations:
           required: true

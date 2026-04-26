@@ -2,9 +2,12 @@
 
 # Feishin BasicAuth
 
-This GPL-3.0 fork adds reverse-proxy BasicAuth support for Windows-first Navidrome
-setups behind Traefik. Upstream Feishin is maintained at
-[jeffvli/feishin](https://github.com/jeffvli/feishin).
+Unofficial GPL-3.0 Feishin fork with first-class reverse-proxy BasicAuth support.
+This fork is intended for people running Feishin against self-hosted music servers behind
+Traefik, Authelia, Authentik, nginx, Caddy, or similar BasicAuth-protected reverse proxies.
+
+Upstream Feishin is maintained at [jeffvli/feishin](https://github.com/jeffvli/feishin).
+This repository only tracks BasicAuth/proxy-auth changes carried by this fork.
 
   <p align="center">
     <a href="https://github.com/Darkaxt/feishin-basic-auth/blob/development/LICENSE">
@@ -20,20 +23,23 @@ setups behind Traefik. Upstream Feishin is maintained at
       alt="Downloads">
     </a>
   </p>
-  <p align="center">
-    <a href="https://discord.gg/FVKpcMDy5f">
-      <img src="https://img.shields.io/discord/922656312888811530?color=black&label=discord&logo=discord&logoColor=white"
-      alt="Discord">
-    </a>
-    <a href="https://matrix.to/#/#sonixd:matrix.org">
-      <img src="https://img.shields.io/matrix/sonixd:matrix.org?color=black&label=matrix&logo=matrix&logoColor=white"
-      alt="Matrix">
-    </a>
-  </p>
-
 ---
 
-Rewrite of [Sonixd](https://github.com/jeffvli/sonixd).
+Fork of Feishin, a rewrite of [Sonixd](https://github.com/jeffvli/sonixd).
+
+## Support Scope
+
+This fork accepts issues and feature requests only for reverse-proxy BasicAuth and proxy-auth
+behavior added here. General Feishin bugs, unrelated server bugs, UI feature requests, packaging
+requests for other platforms, and normal usage questions are out of scope for this repository.
+
+Current validation:
+
+- Windows desktop build.
+- Navidrome behind Traefik BasicAuth.
+- Login, album browsing/images, and music playback.
+- Basic release gates: typecheck, lint, secret scan, Traefik/Navidrome smoke harness, Windows
+  packaging, and release artifact validation.
 
 ## Features
 
@@ -43,7 +49,8 @@ Rewrite of [Sonixd](https://github.com/jeffvli/sonixd).
 - [x] Scrobble playback to your server
 - [x] Smart playlist editor (Navidrome)
 - [x] Synchronized and unsynchronized lyrics support
-- [ ] [Request a feature](https://github.com/jeffvli/feishin/issues) or [view taskboard](https://github.com/users/jeffvli/projects/5/views/1)
+- [x] Reverse-proxy BasicAuth for configured server origins
+- [ ] [Report a BasicAuth issue](https://github.com/Darkaxt/feishin-basic-auth/issues/new/choose)
 
 ## Screenshots
 
@@ -51,84 +58,27 @@ Rewrite of [Sonixd](https://github.com/jeffvli/sonixd).
 
 ## Getting Started
 
-### Desktop (recommended)
+### Windows desktop prerelease
 
-Download the [latest desktop client](https://github.com/jeffvli/feishin/releases). The desktop client is the recommended way to use Feishin. It supports both the MPV and web player backends, as well as includes built-in fetching for lyrics.
+Download the latest Windows desktop prerelease from
+[this fork's releases](https://github.com/Darkaxt/feishin-basic-auth/releases). For most Windows
+systems, use the `win-x64.exe` installer.
 
-#### macOS Notes
+This fork currently publishes Windows desktop prereleases only. macOS, Linux, Docker, web, Winget,
+and package-manager distributions are not published by this fork.
 
-If you're using a device running macOS 12 (Monterey) or higher, [check here](https://github.com/jeffvli/feishin/issues/104#issuecomment-1553914730) for instructions on how to remove the app from quarantine.
+### Proxy BasicAuth setup
 
-For media keys to work, you will be prompted to allow Feishin to be a Trusted Accessibility Client. After allowing, you will need to restart Feishin for the privacy settings to take effect.
+1. Add or edit a server.
+2. Enter the normal music-server URL without URL credentials, for example
+   `https://navidrome.example.com`.
+3. Enable the proxy BasicAuth section.
+4. Enter the reverse-proxy username and password.
+5. Save the server and log in with the normal Navidrome/Jellyfin/Subsonic credentials.
 
-#### Linux Notes
-
-Feishin is available in [Flathub](https://flathub.org/en/apps/org.jeffvli.feishin).
-
-Alternatively, you can install it as an Appimage.
-We provide a small install script to download the latest `.AppImage`, make it executable, and also download the icons required by Desktop Environments.
-Finally, it generates a `.desktop` file to add Feishin to your Application Launcher.
-
-Simply run the installer like this:
-
-```sh
-dir=/your/application/directory
-curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/install-feishin-appimage' | sh -s -- "$dir"
-```
-
-The script also has an option to add launch arguments to run Feishin in native Wayland mode. Note that this is experimental in Electron and therefore not officially supported. If you want to use it, run this instead:
-
-```sh
-dir=/your/application/directory
-curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/install-feishin-appimage' | sh -s -- "$dir" wayland-native
-```
-
-It also provides a simple uninstall routine, removing the downloaded files:
-
-```sh
-dir=/your/application/directory
-curl 'https://raw.githubusercontent.com/jeffvli/feishin/refs/heads/development/install-feishin-appimage' | sh -s -- "$dir" remove
-```
-
-The entry should show up in your Application Launcher immediately. If it does not, simply log out, wait 10 seconds, and log back in. Your Desktop Environment may alternatively provide a way to reload entries.
-
-### Web and Docker
-
-Visit [https://feishin.vercel.app](https://feishin.vercel.app) to use the hosted web version of Feishin. The web client only supports the web player backend.
-
-Feishin is also available as a Docker image. The images are hosted via `ghcr.io` and are available to view [here](https://github.com/jeffvli/feishin/pkgs/container/feishin). You can run the container using the following commands:
-
-```bash
-# Run the latest version
-docker run --name feishin -p 9180:9180 ghcr.io/jeffvli/feishin:latest
-
-# Build the image locally
-docker build -t feishin .
-docker run --name feishin -p 9180:9180 feishin
-```
-
-#### Docker Compose
-
-To install via Docker Compose, use the following snippet. This also works on Portainer.
-
-```yaml
-services:
-    feishin:
-        container_name: feishin
-        image: 'ghcr.io/jeffvli/feishin:latest'
-        restart: unless-stopped
-        environment:
-            - SERVER_NAME=jellyfin # pre-defined server name
-            - SERVER_LOCK=true # When true AND name/type/url are set, only username/password can be toggled
-            - SERVER_TYPE=jellyfin # the allowed types are: jellyfin, navidrome, subsonic. These values are case insensitive
-            - SERVER_URL= # http://address:port or https://address:port
-            - REMOTE_URL= # http://address or https://address
-            - LEGACY_AUTHENTICATION=false # When SERVER_LOCK is true, sets the legacy (plaintext) authentication flag for Subsonic/OpenSubsonic servers
-            - ANALYTICS_DISABLED=true # Set to true to disable Umami analytics tracking
-        ports:
-            - 9180:9180
-            # Alternatively, to restrict to only localhost, - 127.0.0.1:9180:8190
-```
+Proxy BasicAuth passwords are stored through Electron `safeStorage`. The server list stores only
+proxy-auth metadata, not the proxy password. The app injects `Authorization: Basic ...` only for
+configured server origins and does not overwrite existing app-level `Authorization` headers.
 
 ### Configuration
 
@@ -227,4 +177,4 @@ This project uses [Weblate](https://hosted.weblate.org/projects/feishin/) for tr
 
 ## License
 
-[GNU General Public License v3.0 ©](https://github.com/jeffvli/feishin/blob/dev/LICENSE)
+[GNU General Public License v3.0 ©](LICENSE)

@@ -1,22 +1,24 @@
-name: Bug report
-description: You're having technical issues.
-title: '[Bug]: '
-labels: ['bug']
+name: BasicAuth bug report
+description: Report a reverse-proxy BasicAuth or proxy-auth issue in this fork.
+title: '[BasicAuth Bug]: '
+labels: ['bug', 'basic-auth', 'proxy-auth']
 body:
     - type: checkboxes
-      id: check-duplicate
+      id: scope
       attributes:
-          label: I have already checked through the existing bug reports and found no duplicates
+          label: Scope check
           options:
-              - label: 'Yes'
+              - label: This issue is about reverse-proxy BasicAuth/proxy-auth behavior in this fork.
+                required: true
+              - label: I have already checked existing issues and found no duplicate.
                 required: true
 
     - type: input
       id: version
       attributes:
-          label: App Version
-          description: What version of the app are you running?
-          placeholder: ex. 1.0.0
+          label: Feishin BasicAuth version
+          description: What version of this fork are you running?
+          placeholder: ex. 1.11.0-ba.2
       validations:
           required: true
 
@@ -30,19 +32,55 @@ body:
           required: true
 
     - type: dropdown
-      id: environments
+      id: proxy
       attributes:
-          label: What local environments are you seeing the problem on?
+          label: Reverse proxy
+          options:
+              - Traefik
+              - nginx
+              - Caddy
+              - Apache
+              - Authelia
+              - Authentik
+              - Cloudflare Access
+              - Other
+      validations:
+          required: true
+
+    - type: dropdown
+      id: proxy-auth-mode
+      attributes:
+          label: Proxy auth setup
+          options:
+              - Dedicated proxy BasicAuth fields
+              - URL credentials workaround
+              - Other
+      validations:
+          required: true
+
+    - type: dropdown
+      id: playback-backend
+      attributes:
+          label: Playback backend
+          multiple: false
+          options:
+              - Web player
+              - MPV
+              - Both
+              - Not playback-related
+      validations:
+          required: true
+
+    - type: dropdown
+      id: environment
+      attributes:
+          label: Environment
           multiple: true
           options:
               - Desktop Windows
               - Desktop macOS
               - Desktop Linux
-              - Web Firefox
-              - Web Chrome
-              - Web Safari
-              - Web Microsoft Edge
-              - Other (please specify in the next field)
+              - Other
 
     - type: textarea
       id: what-happened
@@ -69,6 +107,6 @@ body:
     - type: textarea
       id: logs
       attributes:
-          label: Relevant log output
-          description: Please copy and paste any relevant log output. This will be automatically formatted into code.
+          label: Redacted log output
+          description: Paste relevant logs with passwords, tokens, cookies, and BasicAuth headers removed.
           render: shell
