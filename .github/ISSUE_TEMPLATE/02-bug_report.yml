@@ -1,6 +1,6 @@
 name: BasicAuth bug report
 description: Report a reverse-proxy BasicAuth or proxy-auth issue in this fork.
-title: '[BasicAuth Bug]: '
+title: '[BasicAuth Bug] '
 labels: ['bug', 'basic-auth', 'proxy-auth']
 body:
     - type: checkboxes
@@ -62,7 +62,6 @@ body:
       id: playback-backend
       attributes:
           label: Playback backend
-          multiple: false
           options:
               - Web player
               - MPV

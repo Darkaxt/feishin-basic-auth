@@ -1,6 +1,6 @@
-name: BasicAuth/proxy-auth feature request
+name: BasicAuth proxy-auth feature request
 description: Request a reverse-proxy BasicAuth or proxy-auth feature for this fork.
-title: '[BasicAuth Feature]: '
+title: '[BasicAuth Feature] '
 labels: ['enhancement', 'basic-auth', 'proxy-auth']
 body:
     - type: checkboxes
