@@ -1,6 +1,6 @@
 appId: eu.remaxku.feishin.basicauth
 productName: Feishin BasicAuth
-artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+artifactName: Feishin-BasicAuth-${version}-${os}-${arch}.${ext}
 electronVersion: 39.4.0
 directories:
     buildResources: assets
@@ -47,7 +47,7 @@ mac:
     gatekeeperAssess: false
     notarize: false
     extendInfo:
-        NSAudioCaptureUsageDescription: "System audio access is required for mpv visualizer capture in Feishin"
+        NSAudioCaptureUsageDescription: 'System audio access is required for mpv visualizer capture in Feishin'
         NSLocalNetworkUsageDescription: 'Local network is necessary for accessing servers hosted on the same system as Feishin'
 
 dmg:
@@ -60,7 +60,7 @@ linux:
         - tar.xz
     category: AudioVideo;Audio;Player
     icon: assets/icons/icon.png
-    artifactName: ${productName}-${os}-${arch}.${ext}
+    artifactName: Feishin-BasicAuth-${version}-${os}-${arch}.${ext}
 
 toolsets:
     appimage: '1.0.2'

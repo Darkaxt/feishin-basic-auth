@@ -55,6 +55,8 @@ Use `node scripts/run-basic-auth-release-gates.mjs --full` for release candidate
 - Secret-redaction scan.
 - Traefik BasicAuth smoke harness.
 - Windows package build.
+- Release artifact validation: `latest.yml` must point at files that exist in `dist`, and release
+  asset filenames must avoid whitespace so GitHub does not rewrite them during upload.
 
 The smoke harness lives in `scripts/basic-auth-smoke.mjs` and starts Navidrome behind Traefik
 BasicAuth. It verifies the protected proxy path before client packaging. If the client code or

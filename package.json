@@ -1,6 +1,6 @@
 {
     "name": "feishin-basic-auth",
-    "version": "1.11.0-ba.1",
+    "version": "1.11.0-ba.2",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -26,6 +26,7 @@
         "build:remote": "vite build --config remote.vite.config.ts",
         "build:web": "vite build --config web.vite.config.ts",
         "check:proxy-auth-secrets": "node scripts/check-basic-auth-secrets.mjs",
+        "check:release-artifacts": "node scripts/check-release-artifacts.mjs",
         "dev": "electron-vite dev",
         "dev:remote": "vite dev --config remote.vite.config.ts",
         "dev:watch": "electron-vite dev --watch",
@@ -65,10 +66,10 @@
         "release:basic-auth:gates": "node scripts/run-basic-auth-release-gates.mjs --full",
         "smoke:basic-auth": "node scripts/basic-auth-smoke.mjs",
         "start": "electron-vite preview",
+        "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs",
         "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
         "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
         "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-        "test:proxy-auth": "node --test scripts/tests/proxy-auth.test.mjs",
         "version": "pnpm version --no-git-tag-version",
         "postversion": "node ./scripts/update-app-stream.mjs"
     },

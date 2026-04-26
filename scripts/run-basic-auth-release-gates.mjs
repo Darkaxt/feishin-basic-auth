@@ -13,12 +13,14 @@ const commands = [
 
 if (full) {
     commands.push(['node', ['scripts/basic-auth-smoke.mjs']]);
+    commands.push(['node', ['scripts/clean-release-dist.mjs']]);
     commands.push(['corepack', ['pnpm', 'run', 'build:electron']]);
     commands.push(['corepack', ['pnpm', 'run', 'build:remote']]);
     commands.push([
         'corepack',
         ['pnpm', 'exec', 'electron-builder', '--win', '--publish', 'never'],
     ]);
+    commands.push(['node', ['scripts/check-release-artifacts.mjs']]);
 }
 
 for (const [command, args] of commands) {
