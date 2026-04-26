@@ -28,6 +28,7 @@ import semver from 'semver';
 
 import packageJson from '../../package.json';
 import { disableMediaKeys, enableMediaKeys } from './features/core/player/media-keys';
+import { installProxyAuthInterceptor } from './features/core/proxy-auth';
 import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
 import MenuBuilder, { MenuPlaybackState } from './menu';
@@ -57,9 +58,9 @@ const ALPHA_UPDATER_CONFIG: {
 };
 
 const GITHUB_UPDATER_CONFIG = {
-    owner: 'jeffvli',
+    owner: 'Darkaxt',
     provider: 'github' as const,
-    repo: 'feishin',
+    repo: 'feishin-basic-auth',
 };
 
 type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoUpdater;
@@ -219,7 +220,7 @@ function configureAndGetUpdater(): UpdaterInstance {
         autoUpdater.disableDifferentialDownload = true;
     } else {
         autoUpdater.channel = 'latest';
-        autoUpdater.allowPrerelease = false;
+        autoUpdater.allowPrerelease = true;
     }
 
     return autoUpdater;
@@ -241,7 +242,7 @@ function configureAutoUpdaterForChannel(channel: 'beta' | 'latest'): void {
         autoUpdater.disableDifferentialDownload = true;
     } else {
         autoUpdater.channel = 'latest';
-        autoUpdater.allowPrerelease = false;
+        autoUpdater.allowPrerelease = true;
     }
 }
 
@@ -472,7 +473,7 @@ const createTray = () => {
         });
     }
 
-    tray.setToolTip('Feishin');
+    tray.setToolTip('Feishin BasicAuth');
     tray.setContextMenu(contextMenu);
 };
 
@@ -525,6 +526,7 @@ async function createWindow(first = true): Promise<void> {
         ...(nativeFrame && isMacOS() && nativeFrameConfig.macOS),
         ...(nativeFrame && isWindows() && nativeFrameConfig.windows),
     });
+    installProxyAuthInterceptor(mainWindow.webContents.session);
 
     // From https://github.com/electron/electron/issues/526#issuecomment-1663959513
     const bounds = store.get('bounds') as Rectangle | undefined;
@@ -715,7 +717,7 @@ async function createWindow(first = true): Promise<void> {
     });
 
     if (isWindows()) {
-        app.setAppUserModelId('org.jeffvli.feishin');
+        app.setAppUserModelId('eu.remaxku.feishin.basicauth');
     }
 
     if (isMacOS()) {

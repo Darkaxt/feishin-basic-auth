@@ -14,6 +14,7 @@ import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { IgnoreCorsSslSwitches } from '/@/renderer/features/servers/components/ignore-cors-ssl-switches';
 import { useAuthStoreActions, useServerList } from '/@/renderer/store';
+import { syncProxyAuthToMain } from '/@/renderer/utils/proxy-auth';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
@@ -29,6 +30,11 @@ import { useFocusTrap } from '/@/shared/hooks/use-focus-trap';
 import { useForm } from '/@/shared/hooks/use-form';
 import { AuthenticationResponse, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { DiscoveredServerItem, ServerType, toServerType } from '/@/shared/types/types';
+import {
+    getProxyBasicAuthSecretKey,
+    ProxyBasicAuthConfig,
+    sanitizeServerUrl,
+} from '/@/shared/utils/proxy-auth';
 
 const autodiscover = isElectron() ? window.api.autodiscover : null;
 const localSettings = isElectron() ? window.api.localSettings : null;
@@ -111,6 +117,9 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
             password: '',
             preferInstantMix: undefined,
             preferRemoteUrl: false,
+            proxyAuthEnabled: false,
+            proxyAuthPassword: '',
+            proxyAuthUsername: '',
             remoteUrl: '',
             savePassword: undefined,
             type:
@@ -122,13 +131,24 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
         },
     });
 
-    const isSubmitDisabled = !form.values.name || !form.values.url || !form.values.username;
+    const formUrlProxyPassword =
+        sanitizeServerUrl(form.values.url).proxyPassword ||
+        sanitizeServerUrl(form.values.remoteUrl).proxyPassword;
+    const isSubmitDisabled =
+        !form.values.name ||
+        !form.values.url ||
+        !form.values.username ||
+        (form.values.proxyAuthEnabled &&
+            (!form.values.proxyAuthUsername.trim() ||
+                (!form.values.proxyAuthPassword && !formUrlProxyPassword)));
 
     const fillServerDetails = (server: DiscoveredServerItem) => {
         form.setValues({ ...server });
     };
 
     const handleSubmit = form.onSubmit(async (values) => {
+        let pendingProxySecretKey: string | undefined;
+
         if (serverLock && Object.keys(serverList).length >= 1) {
             toast.error({
                 message: t('error.serverLockSingleServer', { postProcess: 'sentenceCase' }),
@@ -146,8 +166,70 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
 
         try {
             setIsLoading(true);
+            const serverId = nanoid();
+            const sanitizedUrl = sanitizeServerUrl(values.url);
+            const sanitizedRemoteUrl = values.remoteUrl?.trim()
+                ? sanitizeServerUrl(values.remoteUrl)
+                : undefined;
+            const proxyAuthUsername =
+                values.proxyAuthUsername.trim() ||
+                sanitizedUrl.proxyUsername ||
+                sanitizedRemoteUrl?.proxyUsername ||
+                '';
+            const proxyAuthPassword =
+                values.proxyAuthPassword ||
+                sanitizedUrl.proxyPassword ||
+                sanitizedRemoteUrl?.proxyPassword ||
+                '';
+            const proxyAuth: ProxyBasicAuthConfig | undefined =
+                values.proxyAuthEnabled || (proxyAuthUsername && proxyAuthPassword)
+                    ? {
+                          enabled: true,
+                          type: 'basic',
+                          username: proxyAuthUsername,
+                      }
+                    : undefined;
+
+            if (proxyAuth && !proxyAuthPassword) {
+                setIsLoading(false);
+                return toast.error({
+                    message: t('form.addServer.error', {
+                        context: 'proxyPassword',
+                        postProcess: 'sentenceCase',
+                    }),
+                });
+            }
+
+            if (localSettings && proxyAuth) {
+                pendingProxySecretKey = getProxyBasicAuthSecretKey(serverId);
+                const saved = await localSettings.passwordSet(
+                    proxyAuthPassword,
+                    pendingProxySecretKey,
+                );
+
+                if (!saved) {
+                    setIsLoading(false);
+                    return toast.error({
+                        message: t('form.addServer.error', {
+                            context: 'proxyPasswordSave',
+                            postProcess: 'sentenceCase',
+                        }),
+                    });
+                }
+
+                syncProxyAuthToMain([
+                    ...Object.values(serverList),
+                    {
+                        id: serverId,
+                        proxyAuth,
+                        remoteUrl: sanitizedRemoteUrl?.url,
+                        url: sanitizedUrl.url,
+                    },
+                ]);
+            }
+
             const data: AuthenticationResponse | undefined = await authFunction(
-                values.url,
+                sanitizedUrl.url,
                 {
                     legacy: values.legacyAuth,
                     password: values.password,
@@ -164,11 +246,12 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
 
             const serverItem: ServerListItemWithCredential = {
                 credential: data.credential,
-                id: nanoid(),
+                id: serverId,
                 isAdmin: data.isAdmin,
                 name: values.name,
+                proxyAuth,
                 type: values.type as ServerType,
-                url: values.url.replace(/\/$/, ''),
+                url: sanitizedUrl.url,
                 userId: data.userId,
                 username: data.username,
             };
@@ -181,8 +264,8 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 serverItem.savePassword = values.savePassword;
             }
 
-            if (values.remoteUrl?.trim()) {
-                serverItem.remoteUrl = values.remoteUrl.trim().replace(/\/$/, '');
+            if (sanitizedRemoteUrl?.url) {
+                serverItem.remoteUrl = sanitizedRemoteUrl.url;
             }
 
             if (values.preferRemoteUrl !== undefined) {
@@ -213,6 +296,11 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                 }
             }
         } catch (err: any) {
+            if (localSettings && pendingProxySecretKey) {
+                localSettings.passwordRemove(pendingProxySecretKey);
+                syncProxyAuthToMain(Object.values(serverList));
+            }
+
             setIsLoading(false);
             return toast.error({ message: err?.message });
         }
@@ -292,6 +380,45 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                                 type: 'checkbox',
                             })}
                         />
+                    )}
+                    {localSettings && (
+                        <>
+                            <Divider />
+                            <Checkbox
+                                description={t('form.addServer.input', {
+                                    context: 'proxyBasicAuthDescription',
+                                    postProcess: 'sentenceCase',
+                                })}
+                                label={t('form.addServer.input', {
+                                    context: 'proxyBasicAuth',
+                                    postProcess: 'titleCase',
+                                })}
+                                {...form.getInputProps('proxyAuthEnabled', {
+                                    type: 'checkbox',
+                                })}
+                            />
+                            {form.values.proxyAuthEnabled && (
+                                <Group grow>
+                                    <TextInput
+                                        label={t('form.addServer.input', {
+                                            context: 'proxyUsername',
+                                            postProcess: 'titleCase',
+                                        })}
+                                        required
+                                        {...form.getInputProps('proxyAuthUsername')}
+                                    />
+                                    <PasswordInput
+                                        label={t('form.addServer.input', {
+                                            context: 'proxyPassword',
+                                            postProcess: 'titleCase',
+                                        })}
+                                        required
+                                        {...form.getInputProps('proxyAuthPassword')}
+                                    />
+                                </Group>
+                            )}
+                            <Divider />
+                        </>
                     )}
                     <TextInput
                         label={t('form.addServer.input', {

@@ -6,8 +6,10 @@ import { useTranslation } from 'react-i18next';
 import i18n from '/@/i18n/i18n';
 import { api } from '/@/renderer/api';
 import { queryClient } from '/@/renderer/lib/react-query';
-import { getServerById, useAuthStoreActions } from '/@/renderer/store';
+import { getServerById, useAuthStoreActions, useServerList } from '/@/renderer/store';
+import { syncProxyAuthToMain } from '/@/renderer/utils/proxy-auth';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
+import { Divider } from '/@/shared/components/divider/divider';
 import { Group } from '/@/shared/components/group/group';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ModalButton } from '/@/shared/components/modal/model-shared';
@@ -24,6 +26,11 @@ import {
     ServerListItemWithCredential,
     ServerType,
 } from '/@/shared/types/domain-types';
+import {
+    getProxyBasicAuthSecretKey,
+    ProxyBasicAuthConfig,
+    sanitizeServerUrl,
+} from '/@/shared/utils/proxy-auth';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -45,6 +52,7 @@ const ModifiedFieldIndicator = () => {
 export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditServerFormProps) => {
     const { t } = useTranslation();
     const { updateServer } = useAuthStoreActions();
+    const serverList = useServerList();
     const focusTrapRef = useFocusTrap();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -56,6 +64,9 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
             password: password || '',
             preferInstantMix: server.preferInstantMix,
             preferRemoteUrl: server?.preferRemoteUrl || false,
+            proxyAuthEnabled: Boolean(server.proxyAuth?.enabled),
+            proxyAuthPassword: '',
+            proxyAuthUsername: server.proxyAuth?.username || '',
             remoteUrl: server?.remoteUrl || '',
             savePassword: server.savePassword,
             type: server?.type,
@@ -66,15 +77,94 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
 
     const isSubsonic = form.values.type === ServerType.SUBSONIC;
     const isNavidrome = form.values.type === ServerType.NAVIDROME;
+    const formUrlProxyPassword =
+        sanitizeServerUrl(form.values.url).proxyPassword ||
+        sanitizeServerUrl(form.values.remoteUrl).proxyPassword;
+    const isProxyPasswordRequired =
+        form.values.proxyAuthEnabled &&
+        !server.proxyAuth?.enabled &&
+        !form.values.proxyAuthPassword &&
+        !formUrlProxyPassword;
+    const isSubmitDisabled =
+        form.values.proxyAuthEnabled &&
+        (!form.values.proxyAuthUsername.trim() || isProxyPasswordRequired);
 
     const handleSubmit = form.onSubmit(async (values) => {
+        let pendingProxySecretKey: string | undefined;
+        let previousProxyPassword: null | string | undefined;
+
         try {
             setIsLoading(true);
+
+            const sanitizedUrl = sanitizeServerUrl(values.url);
+            const sanitizedRemoteUrl = values.remoteUrl?.trim()
+                ? sanitizeServerUrl(values.remoteUrl)
+                : undefined;
+            const proxyAuthUsername =
+                values.proxyAuthUsername.trim() ||
+                sanitizedUrl.proxyUsername ||
+                sanitizedRemoteUrl?.proxyUsername ||
+                '';
+            const proxyAuthPassword =
+                values.proxyAuthPassword ||
+                sanitizedUrl.proxyPassword ||
+                sanitizedRemoteUrl?.proxyPassword ||
+                '';
+            const proxyAuth: ProxyBasicAuthConfig | undefined =
+                values.proxyAuthEnabled || (proxyAuthUsername && proxyAuthPassword)
+                    ? {
+                          enabled: true,
+                          type: 'basic',
+                          username: proxyAuthUsername,
+                      }
+                    : undefined;
+
+            if (values.proxyAuthEnabled && (!proxyAuthUsername || isProxyPasswordRequired)) {
+                setIsLoading(false);
+                return toast.error({
+                    message: t('form.addServer.error', {
+                        context: 'proxyPassword',
+                        postProcess: 'sentenceCase',
+                    }),
+                });
+            }
+
+            if (localSettings && proxyAuth) {
+                pendingProxySecretKey = getProxyBasicAuthSecretKey(server.id);
+                previousProxyPassword = await localSettings.passwordGet(pendingProxySecretKey);
+
+                if (proxyAuthPassword) {
+                    const saved = await localSettings.passwordSet(
+                        proxyAuthPassword,
+                        pendingProxySecretKey,
+                    );
+
+                    if (!saved) {
+                        setIsLoading(false);
+                        return toast.error({
+                            message: t('form.addServer.error', {
+                                context: 'proxyPasswordSave',
+                                postProcess: 'sentenceCase',
+                            }),
+                        });
+                    }
+                }
+
+                syncProxyAuthToMain([
+                    ...Object.values(serverList).filter((item) => item.id !== server.id),
+                    {
+                        id: server.id,
+                        proxyAuth,
+                        remoteUrl: sanitizedRemoteUrl?.url,
+                        url: sanitizedUrl.url,
+                    },
+                ]);
+            }
 
             // Check if we can skip authentication
             const usernameChanged = values.username !== server.username;
             const passwordProvided = values.password && values.password.trim() !== '';
-            const urlChanged = values.url !== server.url;
+            const urlChanged = sanitizedUrl.url !== server.url;
             const typeChanged = values.type !== server.type;
 
             // Skip authentication if username hasn't changed, password is empty, and URL/type haven't changed
@@ -97,8 +187,9 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                     ...existingServer,
                     id: server.id,
                     name: values.name,
+                    proxyAuth,
                     type: values.type,
-                    url: values.url,
+                    url: sanitizedUrl.url,
                 };
             } else {
                 // Need to authenticate
@@ -111,7 +202,7 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                 }
 
                 data = await authFunction(
-                    values.url,
+                    sanitizedUrl.url,
                     {
                         legacy: values.legacyAuth,
                         password: values.password,
@@ -131,8 +222,9 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                     id: server.id,
                     isAdmin: data.isAdmin,
                     name: values.name,
+                    proxyAuth,
                     type: values.type,
-                    url: values.url,
+                    url: sanitizedUrl.url,
                     userId: data.userId,
                     username: data.username,
                 };
@@ -151,8 +243,8 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                 serverItem.savePassword = values.savePassword;
             }
 
-            if (values.remoteUrl?.trim()) {
-                serverItem.remoteUrl = values.remoteUrl.trim().replace(/\/$/, '');
+            if (sanitizedRemoteUrl?.url) {
+                serverItem.remoteUrl = sanitizedRemoteUrl.url;
             } else {
                 serverItem.remoteUrl = undefined;
             }
@@ -168,6 +260,10 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
 
             // Handle password saving in local settings
             if (localSettings) {
+                if (!proxyAuth) {
+                    localSettings.passwordRemove(getProxyBasicAuthSecretKey(server.id));
+                }
+
                 if (canSkipAuth) {
                     // If we skipped auth, only update savePassword preference
                     // Don't change the actual saved password
@@ -194,6 +290,16 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
 
             queryClient.removeQueries();
         } catch (err: any) {
+            if (localSettings && pendingProxySecretKey) {
+                if (previousProxyPassword) {
+                    await localSettings.passwordSet(previousProxyPassword, pendingProxySecretKey);
+                } else {
+                    localSettings.passwordRemove(pendingProxySecretKey);
+                }
+
+                syncProxyAuthToMain(Object.values(serverList));
+            }
+
             setIsLoading(false);
             return toast.error({ message: err?.message });
         }
@@ -248,6 +354,61 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                         />
                         {form.isDirty('preferRemoteUrl') && <ModifiedFieldIndicator />}
                     </Group>
+                )}
+                {localSettings && (
+                    <>
+                        <Divider />
+                        <Group gap="xs">
+                            <Checkbox
+                                description={t('form.addServer.input', {
+                                    context: 'proxyBasicAuthDescription',
+                                    postProcess: 'sentenceCase',
+                                })}
+                                label={t('form.addServer.input', {
+                                    context: 'proxyBasicAuth',
+                                    postProcess: 'titleCase',
+                                })}
+                                {...form.getInputProps('proxyAuthEnabled', {
+                                    type: 'checkbox',
+                                })}
+                            />
+                            {form.isDirty('proxyAuthEnabled') && <ModifiedFieldIndicator />}
+                        </Group>
+                        {form.values.proxyAuthEnabled && (
+                            <Group grow>
+                                <TextInput
+                                    label={t('form.addServer.input', {
+                                        context: 'proxyUsername',
+                                        postProcess: 'titleCase',
+                                    })}
+                                    required
+                                    rightSection={
+                                        form.isDirty('proxyAuthUsername') && (
+                                            <ModifiedFieldIndicator />
+                                        )
+                                    }
+                                    {...form.getInputProps('proxyAuthUsername')}
+                                />
+                                <PasswordInput
+                                    label={t('form.addServer.input', {
+                                        context: 'proxyPassword',
+                                        postProcess: 'titleCase',
+                                    })}
+                                    placeholder={
+                                        server.proxyAuth?.enabled
+                                            ? (t('form.addServer.input', {
+                                                  context: 'proxyPasswordUnchanged',
+                                                  postProcess: 'sentenceCase',
+                                              }) as string)
+                                            : undefined
+                                    }
+                                    required={!server.proxyAuth?.enabled}
+                                    {...form.getInputProps('proxyAuthPassword')}
+                                />
+                            </Group>
+                        )}
+                        <Divider />
+                    </>
                 )}
                 <TextInput
                     label={t('form.addServer.input', {
@@ -305,7 +466,12 @@ export const EditServerForm = ({ isUpdate, onCancel, password, server }: EditSer
                 )}
                 <Group justify="flex-end">
                     <ModalButton onClick={onCancel}>{t('common.cancel')}</ModalButton>
-                    <ModalButton loading={isLoading} type="submit" variant="filled">
+                    <ModalButton
+                        disabled={isSubmitDisabled}
+                        loading={isLoading}
+                        type="submit"
+                        variant="filled"
+                    >
                         {t('common.save')}
                     </ModalButton>
                 </Group>

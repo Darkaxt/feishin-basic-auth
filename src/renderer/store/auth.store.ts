@@ -125,6 +125,7 @@ export const useCurrentServer = () =>
             name: state.currentServer?.name,
             preferInstantMix: state.currentServer?.preferInstantMix,
             preferRemoteUrl: state.currentServer?.preferRemoteUrl,
+            proxyAuth: state.currentServer?.proxyAuth,
             remoteUrl: state.currentServer?.remoteUrl,
             savePassword: state.currentServer?.savePassword,
             type: state.currentServer?.type,

@@ -13,6 +13,7 @@ import i18n from '/@/i18n/i18n';
 import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-context';
 import { useCheckForUpdates } from '/@/renderer/hooks/use-check-for-updates';
 import { useNativeMenuSync } from '/@/renderer/hooks/use-native-menu-sync';
+import { useSyncProxyAuthToMain } from '/@/renderer/hooks/use-sync-proxy-auth-to-main';
 import { useSyncSettingsToMain } from '/@/renderer/hooks/use-sync-settings-to-main';
 import { AppRouter } from '/@/renderer/router/app-router';
 import { useCssSettings, useHotkeySettings, useLanguage } from '/@/renderer/store';
@@ -88,6 +89,7 @@ const AppShell = memo(function AppShell() {
 const AppEffects = () => (
     <>
         <SyncSettingsEffect />
+        <SyncProxyAuthEffect />
         <UpdateCheckEffect />
         <CssSettingsEffect />
         <GlobalShortcutsEffect />
@@ -98,6 +100,12 @@ const AppEffects = () => (
 
 const SyncSettingsEffect = () => {
     useSyncSettingsToMain();
+
+    return null;
+};
+
+const SyncProxyAuthEffect = () => {
+    useSyncProxyAuthToMain();
 
     return null;
 };

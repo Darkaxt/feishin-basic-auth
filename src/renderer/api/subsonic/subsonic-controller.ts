@@ -2,6 +2,7 @@ import type { ServerInferResponses } from '@ts-rest/core';
 
 import dayjs from 'dayjs';
 import { set } from 'idb-keyval';
+import isElectron from 'is-electron';
 import filter from 'lodash/filter';
 import orderBy from 'lodash/orderBy';
 import md5 from 'md5';
@@ -31,12 +32,21 @@ import {
     LibraryItem,
     PlaylistListSort,
     ReplaceApiClientProps,
+    ServerListItemWithCredential,
     ServerType,
     Song,
     SongListSort,
     SortOrder,
 } from '/@/shared/types/domain-types';
 import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
+import {
+    getProxyBasicAuthSecretKey,
+    isProxyBasicAuthConfigured,
+    withUrlBasicAuth,
+} from '/@/shared/utils/proxy-auth';
+
+const localSettings =
+    typeof window !== 'undefined' && isElectron() ? window.api.localSettings : null;
 
 const getSubsonicImageRequest = ({
     apiClientProps: { server },
@@ -289,6 +299,24 @@ function sortAndPaginate<T>(
         startIndex: startIndex,
         totalRecordCount: totalCount,
     };
+}
+
+async function withExternalProxyAuthUrl(
+    url: string,
+    server: null | ServerListItemWithCredential | undefined,
+    enabled?: boolean,
+) {
+    if (!enabled || !localSettings || !isProxyBasicAuthConfigured(server)) {
+        return url;
+    }
+
+    const password = await localSettings.passwordGet(getProxyBasicAuthSecretKey(server.id));
+
+    if (!password) {
+        return url;
+    }
+
+    return withUrlBasicAuth(url, server.proxyAuth.username, password);
 }
 
 export const SubsonicController: InternalControllerEndpoint = {
@@ -1981,15 +2009,17 @@ export const SubsonicController: InternalControllerEndpoint = {
         const { bitrate, format, id, mediaType = 'song', skipAutoTranscode, transcode } = query;
 
         const streamUrl = `${server?.url}/rest/stream.view?id=${id}&v=1.13.0&c=Feishin&${server?.credential}`;
+        const prepareExternalStreamUrl = (url: string) =>
+            withExternalProxyAuthUrl(url, server, skipAutoTranscode);
 
         // If transcoding is explicitly enabled, just return the direct transcoded stream URL
         if (transcode) {
-            return appendTranscodeParams(streamUrl, format, bitrate);
+            return prepareExternalStreamUrl(appendTranscodeParams(streamUrl, format, bitrate));
         }
 
         // Used in cases where MPV is the default player, since mpv handles basically every audio format
         if (skipAutoTranscode) {
-            return streamUrl;
+            return prepareExternalStreamUrl(streamUrl);
         }
 
         // If the server supports transcoding decision, always use it to determine if we need to transcode
@@ -2020,7 +2050,7 @@ export const SubsonicController: InternalControllerEndpoint = {
                 logFn.error(
                     `Failed to get transcode decision for song ${id}, falling back to direct stream`,
                 );
-                return streamUrl;
+                return prepareExternalStreamUrl(streamUrl);
             }
 
             const td = transcodeDecision.body.transcodeDecision;
@@ -2028,14 +2058,14 @@ export const SubsonicController: InternalControllerEndpoint = {
 
             // If the server does not require transcoding, just return the direct stream URL
             if (!requiresTranscoding) {
-                return streamUrl;
+                return prepareExternalStreamUrl(streamUrl);
             }
 
             logFn.info(`Song ${id} requires transcoding: ${[td.transcodeReason].join(', ')}`);
 
             // If the server does not return transcode params, manually create the transcode params
             if (!td.transcodeParams) {
-                return appendTranscodeParams(streamUrl, format, bitrate);
+                return prepareExternalStreamUrl(appendTranscodeParams(streamUrl, format, bitrate));
             }
 
             const transcodeStreamUrl = buildGetTranscodeStreamUrl(server, {
@@ -2045,10 +2075,10 @@ export const SubsonicController: InternalControllerEndpoint = {
                 transcodeParams: td.transcodeParams,
             });
 
-            return transcodeStreamUrl;
+            return prepareExternalStreamUrl(transcodeStreamUrl);
         }
 
-        return streamUrl;
+        return prepareExternalStreamUrl(streamUrl);
     },
     getStructuredLyrics: async (args) => {
         const { apiClientProps, query } = args;

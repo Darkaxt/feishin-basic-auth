@@ -1,3 +1,5 @@
+import type { ProxyBasicAuthConfig } from '/@/shared/utils/proxy-auth';
+
 import { AppRoute } from '@ts-rest/core';
 import { TFunction } from 'i18next';
 import { ReactNode } from 'react';
@@ -261,6 +263,7 @@ export type ServerListItem = {
     name: string;
     ndCredential?: string;
     preferRemoteUrl?: boolean;
+    proxyAuth?: ProxyBasicAuthConfig;
     remoteUrl?: string;
     savePassword?: boolean;
     type: ServerType;

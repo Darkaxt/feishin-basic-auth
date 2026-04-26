@@ -1,3 +1,5 @@
+import type { ProxyBasicAuthConfig } from '/@/shared/utils/proxy-auth';
+
 import {
     JFAlbumArtistListSort,
     JFAlbumListSort,
@@ -91,6 +93,7 @@ export type ServerListItem = {
     name: string;
     preferInstantMix?: boolean;
     preferRemoteUrl?: boolean;
+    proxyAuth?: ProxyBasicAuthConfig;
     remoteUrl?: string;
     savePassword?: boolean;
     type: ServerType;

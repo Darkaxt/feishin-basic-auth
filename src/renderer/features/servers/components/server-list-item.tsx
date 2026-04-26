@@ -13,6 +13,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Table } from '/@/shared/components/table/table';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { ServerListItem as ServerItem } from '/@/shared/types/domain-types';
+import { getProxyBasicAuthSecretKey } from '/@/shared/utils/proxy-auth';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
 
@@ -28,7 +29,8 @@ export const ServerListItem = ({ server }: ServerListItemProps) => {
 
     const handleDeleteServer = () => {
         deleteServer(server.id);
-        localSettings?.passwordRemove(server.name);
+        localSettings?.passwordRemove(server.id);
+        localSettings?.passwordRemove(getProxyBasicAuthSecretKey(server.id));
     };
 
     const handleEdit = useCallback(() => {

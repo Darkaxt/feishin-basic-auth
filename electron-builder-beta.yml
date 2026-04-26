@@ -1,5 +1,5 @@
-appId: org.jeffvli.feishin
-productName: Feishin
+appId: eu.remaxku.feishin.basicauth
+productName: Feishin BasicAuth
 artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 electronVersion: 39.4.0
 directories:
@@ -68,7 +68,7 @@ toolsets:
 npmRebuild: false
 publish:
     provider: github
-    owner: jeffvli
-    repo: feishin
+    owner: Darkaxt
+    repo: feishin-basic-auth
     channel: beta
     releaseType: draft
