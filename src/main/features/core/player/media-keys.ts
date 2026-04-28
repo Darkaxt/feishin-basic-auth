@@ -3,6 +3,7 @@ import { BrowserWindow, globalShortcut, systemPreferences } from 'electron';
 import { isLinux, isMacOS } from '../../../utils';
 import { store } from '../settings';
 
+import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
 import { PlayerType } from '/@/shared/types/types';
 
 export const enableMediaKeys = (window: BrowserWindow | null) => {
@@ -26,7 +27,7 @@ export const enableMediaKeys = (window: BrowserWindow | null) => {
     }
 
     const enableMediaSession = store.get('mediaSession', false) as boolean;
-    const playbackType = store.get('playbackType', PlayerType.WEB) as PlayerType;
+    const playbackType = store.get('playbackType', DEFAULT_DESKTOP_PLAYER_TYPE) as PlayerType;
 
     if (!enableMediaSession || isLinux() || playbackType !== PlayerType.WEB) {
         globalShortcut.register('MediaStop', () => {

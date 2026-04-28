@@ -15,6 +15,8 @@ const PROXY_USER = 'proxy-user';
 const PROXY_PASSWORD = 'proxy-pass';
 const SMOKE_URL = 'http://127.0.0.1:38080';
 
+const wait = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const run = (command, args, options = {}) => {
     const result = spawnSync(command, args, {
         cwd: ROOT,
@@ -43,10 +45,36 @@ const waitForProxy = async () => {
             // Retry while Docker publishes the port.
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await wait(1000);
     }
 
     throw new Error('Traefik BasicAuth endpoint did not become ready');
+};
+
+const waitForAuthenticatedProxy = async () => {
+    const authorization = createBasicAuthorizationHeader(PROXY_USER, PROXY_PASSWORD);
+    let lastStatus = 'no response';
+
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+        try {
+            const response = await fetch(SMOKE_URL, {
+                headers: {
+                    Authorization: authorization,
+                },
+            });
+            lastStatus = response.status;
+
+            if (response.status !== 401 && response.status < 500) {
+                return;
+            }
+        } catch (error) {
+            lastStatus = error instanceof Error ? error.message : String(error);
+        }
+
+        await wait(1000);
+    }
+
+    throw new Error(`Expected authenticated request to reach Navidrome, got ${lastStatus}`);
 };
 
 mkdirSync(AUTH_DIR, { recursive: true });
@@ -76,17 +104,7 @@ try {
         );
     }
 
-    const authenticated = await fetch(SMOKE_URL, {
-        headers: {
-            Authorization: createBasicAuthorizationHeader(PROXY_USER, PROXY_PASSWORD),
-        },
-    });
-
-    if (authenticated.status === 401 || authenticated.status >= 500) {
-        throw new Error(
-            `Expected authenticated request to reach Navidrome, got ${authenticated.status}`,
-        );
-    }
+    await waitForAuthenticatedProxy();
 
     console.log('Traefik BasicAuth smoke passed.');
 } finally {

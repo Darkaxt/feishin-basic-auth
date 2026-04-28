@@ -4,6 +4,8 @@ import { app, dialog, ipcMain, nativeTheme, OpenDialogOptions, safeStorage } fro
 import Store from 'electron-store';
 import path from 'path';
 
+import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
+
 const getFrame = () => {
     const isWindows = process.platform === 'win32';
     const isMacOS = process.platform === 'darwin';
@@ -37,7 +39,7 @@ export const store = new Store<any>({
         global_media_hotkeys: true,
         lyrics: ['NetEase', 'lrclib.net'],
         mediaSession: false,
-        playbackType: 'web',
+        playbackType: DEFAULT_DESKTOP_PLAYER_TYPE,
         should_prompt_accessibility: true,
         shown_accessibility_warning: false,
         visualizer_system_audio_consent_granted: false,
@@ -48,6 +50,11 @@ export const store = new Store<any>({
         window_window_bar_style: getFrame(),
     },
     migrations: {
+        '1.11.0-ba.3': (store) => {
+            if (store.get('playbackType') === 'web') {
+                store.set('playbackType', DEFAULT_DESKTOP_PLAYER_TYPE);
+            }
+        },
         '>=0.21.2': (store) => {
             store.set('window_bar_style', 'linux');
         },

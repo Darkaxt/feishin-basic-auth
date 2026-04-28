@@ -28,6 +28,7 @@ import { mergeOverridingColumns } from '/@/renderer/store/utils';
 import { FontValueSchema } from '/@/renderer/types/fonts';
 import { randomString } from '/@/renderer/utils';
 import { sanitizeCss } from '/@/renderer/utils/sanitize';
+import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
 import { AppTheme } from '/@/shared/themes/app-theme-types';
 import { LibraryItem, LyricSource, SavedCollection } from '/@/shared/types/domain-types';
 import {
@@ -1827,7 +1828,7 @@ const initialState: SettingsState = {
         transcode: {
             enabled: false,
         },
-        type: PlayerType.WEB,
+        type: isElectron() ? DEFAULT_DESKTOP_PLAYER_TYPE : PlayerType.WEB,
         webAudio: true,
     },
     queryBuilder: {
@@ -2404,10 +2405,14 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
+                if (version <= 27 && isElectron() && state.playback?.type === PlayerType.WEB) {
+                    state.playback.type = DEFAULT_DESKTOP_PLAYER_TYPE;
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 27,
+            version: 28,
         },
     ),
 );

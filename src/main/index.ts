@@ -43,6 +43,7 @@ import {
 } from './utils';
 import './features';
 
+import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
 import { PlayerRepeat, PlayerStatus, PlayerType, TitleTheme } from '/@/shared/types/types';
 
 const ALPHA_UPDATER_CONFIG: {
@@ -784,7 +785,7 @@ async function createWindow(first = true): Promise<void> {
 // 2. The playback type is WEB (mpv not supported)
 // 3. The platform is not Linux (because we are using mpris instead)
 const enableMediaSession = store.get('mediaSession', false) as boolean;
-const playbackType = store.get('playbackType', PlayerType.WEB) as PlayerType;
+const playbackType = store.get('playbackType', DEFAULT_DESKTOP_PLAYER_TYPE) as PlayerType;
 const shouldDisableMediaFeatures =
     isLinux() || !enableMediaSession || playbackType !== PlayerType.WEB;
 
