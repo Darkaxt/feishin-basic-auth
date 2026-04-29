@@ -400,17 +400,38 @@ const serverInfo = z.object({
 });
 
 const structuredLyricsParameters = z.object({
+    enhanced: z.boolean().optional(),
     id: z.string(),
 });
 
+const lyricCue = z.object({
+    byteEnd: z.number().optional(),
+    byteStart: z.number().optional(),
+    end: z.number().optional(),
+    start: z.number().optional(),
+    value: z.string(),
+});
+
+const lyricCueLine = z.object({
+    cue: z.array(lyricCue).optional(),
+    end: z.number().optional(),
+    index: z.number().optional(),
+    start: z.number().optional(),
+    value: z.string(),
+});
+
 const lyricLine = z.object({
+    end: z.number().optional(),
     start: z.number().optional(),
     value: z.string(),
 });
 
 const structuredLyric = z.object({
+    agent: z.string().optional(),
+    cueLine: z.array(lyricCueLine).optional(),
     displayArtist: z.string().optional(),
     displayTitle: z.string().optional(),
+    kind: z.string().optional(),
     lang: z.string(),
     line: z.array(lyricLine),
     offset: z.number().optional(),

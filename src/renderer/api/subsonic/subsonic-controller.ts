@@ -22,7 +22,13 @@ import {
     ssType,
     SubsonicExtensions,
 } from '/@/shared/api/subsonic/subsonic-types';
-import { hasFeature, sortAlbumArtistList, sortAlbumList, sortSongList } from '/@/shared/api/utils';
+import {
+    hasFeature,
+    hasFeatureWithVersion,
+    sortAlbumArtistList,
+    sortAlbumList,
+    sortSongList,
+} from '/@/shared/api/utils';
 import {
     AlbumListSort,
     GenreListSort,
@@ -39,6 +45,10 @@ import {
     SortOrder,
 } from '/@/shared/types/domain-types';
 import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
+import {
+    mergeDuplicateSyncedLyricLines,
+    mergeSyncedLyricTranslations,
+} from '/@/shared/utils/lyrics';
 import {
     getProxyBasicAuthSecretKey,
     isProxyBasicAuthConfigured,
@@ -1477,7 +1487,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         }
 
         if (subsonicFeatures[SubsonicExtensions.SONG_LYRICS]) {
-            features.lyricsMultipleStructured = [1];
+            features.lyricsMultipleStructured = subsonicFeatures[SubsonicExtensions.SONG_LYRICS];
         }
 
         if (subsonicFeatures[SubsonicExtensions.FORM_POST]) {
@@ -2082,9 +2092,15 @@ export const SubsonicController: InternalControllerEndpoint = {
     },
     getStructuredLyrics: async (args) => {
         const { apiClientProps, query } = args;
+        const supportsEnhancedLyrics = hasFeatureWithVersion(
+            apiClientProps.server,
+            ServerFeature.LYRICS_MULTIPLE_STRUCTURED,
+            2,
+        );
 
         const res = await ssApiClient(apiClientProps).getStructuredLyrics({
             query: {
+                ...(supportsEnhancedLyrics ? { enhanced: true } : {}),
                 id: query.songId,
             },
         });
@@ -2099,27 +2115,57 @@ export const SubsonicController: InternalControllerEndpoint = {
             return [];
         }
 
-        return lyrics.map((lyric) => {
+        const hasMainLyrics = lyrics.some((lyric) => lyric.kind !== 'translation');
+        const translationTracks = lyrics
+            .filter((lyric) => lyric.kind === 'translation' && lyric.synced)
+            .map((lyric) =>
+                mergeDuplicateSyncedLyricLines(
+                    lyric.line.flatMap((line) =>
+                        line.start == null ? [] : [[line.start, line.value]],
+                    ),
+                ),
+            )
+            .filter((lyric) => lyric.length > 0);
+
+        return lyrics.flatMap((lyric) => {
+            if (hasMainLyrics && lyric.kind === 'translation') {
+                return [];
+            }
+
             const baseLyric = {
                 artist: lyric.displayArtist || '',
                 lang: lyric.lang,
                 name: lyric.displayTitle || '',
+                offsetMs: lyric.offset,
                 remote: false,
                 source: apiClientProps.server?.name || 'music server',
             };
 
             if (lyric.synced) {
-                return {
-                    ...baseLyric,
-                    lyrics: lyric.line.map((line) => [line.start!, line.value]),
-                    synced: true,
-                };
+                const syncedLyrics = mergeDuplicateSyncedLyricLines(
+                    lyric.line.flatMap((line) =>
+                        line.start == null ? [] : [[line.start, line.value]],
+                    ),
+                );
+
+                return [
+                    {
+                        ...baseLyric,
+                        lyrics:
+                            lyric.kind === 'translation'
+                                ? syncedLyrics
+                                : mergeSyncedLyricTranslations(syncedLyrics, translationTracks),
+                        synced: true,
+                    },
+                ];
             }
-            return {
-                ...baseLyric,
-                lyrics: lyric.line.map((line) => [line.value]).join('\n'),
-                synced: false,
-            };
+            return [
+                {
+                    ...baseLyric,
+                    lyrics: lyric.line.map((line) => [line.value]).join('\n'),
+                    synced: false,
+                },
+            ];
         });
     },
     getTopSongs: async (args) => {

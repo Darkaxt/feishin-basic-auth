@@ -17,11 +17,11 @@ import {
     QueueSong,
     Song,
     StructuredLyric,
-    SynchronizedLyricsArray,
 } from '/@/shared/types/domain-types';
 import { LyricSource } from '/@/shared/types/domain-types';
 import { LyricsResponse } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
+import { parseLyricsForDisplay } from '/@/shared/utils/lyrics';
 
 const lyricsIpc = isElectron() ? window.api.lyrics : null;
 
@@ -37,48 +37,7 @@ export type LyricsQueryResult = {
     suppressRemoteAuto: boolean;
 };
 
-// Match LRC lyrics format by https://github.com/ustbhuangyi/lyric-parser
-// [mm:ss.SSS] text
-const timeExp = /\[(\d{2,}):(\d{2})(?:\.(\d{2,3}))?]([^\n]+)(\n|$)/g;
-
-// Match karaoke lyrics format returned by NetEase
-// [SSS,???] text
-const alternateTimeExp = /\[(\d*),(\d*)]([^\n]+)(\n|$)/g;
-
-const formatLyrics = (lyrics: string) => {
-    const synchronizedLines = lyrics.matchAll(timeExp);
-    const formattedLyrics: SynchronizedLyricsArray = [];
-
-    for (const line of synchronizedLines) {
-        const [, minute, sec, ms, text] = line;
-        const minutes = parseInt(minute, 10);
-        const seconds = parseInt(sec, 10);
-        const milis = ms?.length === 3 ? parseInt(ms, 10) : parseInt(ms, 10) * 10;
-
-        const timeInMilis = (minutes * 60 + seconds) * 1000 + milis;
-
-        formattedLyrics.push([timeInMilis, text]);
-    }
-
-    if (formattedLyrics.length > 0) return formattedLyrics;
-
-    const alternateSynchronizedLines = lyrics.matchAll(alternateTimeExp);
-    for (const line of alternateSynchronizedLines) {
-        const [, timeInMilis, , text] = line;
-        const cleanText = text
-            .replaceAll(/\(\d+,\d+\)/g, '')
-            .replaceAll(/\s,/g, ',')
-            .replaceAll(/\s\./g, '.');
-        formattedLyrics.push([Number(timeInMilis), cleanText]);
-    }
-
-    if (formattedLyrics.length > 0) return formattedLyrics;
-
-    // If no synchronized lyrics were found, return the original lyrics
-    return lyrics;
-};
-
-export const formatLyricsForDisplay = formatLyrics;
+export const formatLyricsForDisplay = parseLyricsForDisplay;
 
 export function computeSelectedFromResult(
     result: Pick<
@@ -183,7 +142,7 @@ export async function fetchLocalLyrics(params: {
     } else if (song.lyrics) {
         return {
             artist: song.artists?.[0]?.name,
-            lyrics: formatLyrics(song.lyrics),
+            lyrics: parseLyricsForDisplay(song.lyrics),
             name: song.name,
             remote: false,
             source: server?.name ?? 'music server',
@@ -201,7 +160,7 @@ export async function fetchRemoteLyricsAuto(song: QueueSong): Promise<FullLyrics
     if (remoteLyricsResult) {
         return {
             ...remoteLyricsResult,
-            lyrics: formatLyrics(remoteLyricsResult.lyrics),
+            lyrics: parseLyricsForDisplay(remoteLyricsResult.lyrics),
             remote: true,
         };
     }
@@ -214,7 +173,7 @@ export async function fetchRemoteLyricsById(params: {
     song?: QueueSong | Song;
 }): Promise<LyricsResponse | null> {
     const result = await lyricsIpc?.getRemoteLyricsByRemoteId(params as LyricGetQuery);
-    if (result) return formatLyrics(result);
+    if (result) return parseLyricsForDisplay(result);
     return null;
 }
 

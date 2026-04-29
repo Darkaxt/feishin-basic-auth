@@ -13,6 +13,7 @@ import { NumberInput } from '/@/shared/components/number-input/number-input';
 import { Stack } from '/@/shared/components/stack/stack';
 import { useForm } from '/@/shared/hooks/use-form';
 import { FullLyricsMetadata } from '/@/shared/types/domain-types';
+import { formatLyricTextForExport } from '/@/shared/utils/lyrics';
 
 interface LyricsExportFormProps {
     lyrics: FullLyricsMetadata;
@@ -35,7 +36,7 @@ export const LyricsExportForm = ({ lyrics, offsetMs, synced }: LyricsExportFormP
             const contents = lyrics.lyrics
                 .map(
                     (lyric) =>
-                        `[${formatDuration(lyric[0], { leading: true, ms: true })}]${lyric[1]}`,
+                        `[${formatDuration(lyric[0], { leading: true, ms: true })}]${formatLyricTextForExport(lyric[1])}`,
                 )
                 .join('\n');
 
@@ -46,9 +47,12 @@ ${contents}
 `;
         } else {
             if (Array.isArray(lyrics.lyrics)) {
-                return lyrics.lyrics.map((lyric) => lyric[1]).join('\n') + '\n';
+                return (
+                    lyrics.lyrics.map((lyric) => formatLyricTextForExport(lyric[1])).join('\n') +
+                    '\n'
+                );
             }
-            return lyrics.lyrics;
+            return formatLyricTextForExport(lyrics.lyrics);
         }
     }, [
         form.values.offsetMs,
