@@ -43,6 +43,7 @@ import {
     Song,
     SongListSort,
     SortOrder,
+    StructuredLyric,
 } from '/@/shared/types/domain-types';
 import { ServerFeature, ServerFeatures } from '/@/shared/types/features-types';
 import {
@@ -2127,7 +2128,7 @@ export const SubsonicController: InternalControllerEndpoint = {
             )
             .filter((lyric) => lyric.length > 0);
 
-        return lyrics.flatMap((lyric) => {
+        return lyrics.flatMap<StructuredLyric>((lyric) => {
             if (hasMainLyrics && lyric.kind === 'translation') {
                 return [];
             }

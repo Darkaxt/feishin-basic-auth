@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const lyrics = await import('../../src/shared/utils/lyrics.ts');
