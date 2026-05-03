@@ -44,7 +44,7 @@ export const UnsynchronizedLyrics = ({
 
     return (
         <div className={styles.container} style={{ gap: `${settings.gapUnsync}px` }}>
-            {settings.showProvider && source && (
+            {settings.showProvider && remote && source && (
                 <LyricLine
                     alignment={settings.alignment}
                     className="lyric-credit"

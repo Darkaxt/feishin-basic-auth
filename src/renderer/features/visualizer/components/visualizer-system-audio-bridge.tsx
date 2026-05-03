@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useIsLocalVisualizerSurfaceVisible } from '/@/renderer/features/player/hooks/use-is-local-visualizer-surface-visible';
 import { useVisualizerSystemAudio } from '/@/renderer/features/player/hooks/use-visualizer-system-audio';
+import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { closeLocalVisualizerSurfaces } from '/@/renderer/features/player/utils/close-local-visualizer-surfaces';
 import { useMpvSettings, usePlaybackType } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
@@ -33,9 +34,9 @@ function VisualizerSystemAudioBridge() {
     const { t } = useTranslation();
     const playbackType = usePlaybackType();
     const { audioExclusiveMode } = useMpvSettings();
+    const { webAudio } = useWebAudio();
     const isVisualizerSurfaceVisible = useIsLocalVisualizerSurfaceVisible();
     const [promptState, setPromptState] = useState<PromptState>('loading');
-    const [sessionAllowCapture, setSessionAllowCapture] = useState(false);
     const wasBlockedByExclusiveModeRef = useRef(false);
     const [isPromptOpen, { close: closePrompt, open: openPrompt, toggle: togglePrompt }] =
         useDisclosure(false);
@@ -74,14 +75,34 @@ function VisualizerSystemAudioBridge() {
         };
     }, []);
 
-    const eligibleForPrompt =
+    const canCaptureSystemAudio =
         isElectron() &&
         playbackType === PlayerType.LOCAL &&
         !isExclusiveModeEnabled &&
-        isVisualizerSurfaceVisible &&
-        promptState !== 'loading' &&
-        !promptState.consent &&
-        !sessionAllowCapture;
+        isVisualizerSurfaceVisible;
+
+    const handleCaptureSuccess = useCallback(() => {
+        persistConsent(true);
+        setPromptState({ consent: true });
+        closePrompt();
+    }, [closePrompt, persistConsent]);
+
+    const handleCaptureDenied = useCallback(() => {
+        persistConsent(false);
+        setPromptState({ consent: false });
+        closeLocalVisualizerSurfaces();
+    }, [persistConsent]);
+
+    const { connect, isConnected, isConnecting } = useVisualizerSystemAudio({
+        onSystemAudioCaptureDenied: handleCaptureDenied,
+        onSystemAudioCaptureSuccess: handleCaptureSuccess,
+        shouldAttemptConnection: canCaptureSystemAudio,
+    });
+
+    const hasVisualizerInput = isConnected || Boolean(webAudio?.visualizerInputs?.length);
+
+    const eligibleForPrompt =
+        canCaptureSystemAudio && promptState !== 'loading' && !hasVisualizerInput && !isConnecting;
 
     useEffect(() => {
         if (eligibleForPrompt) {
@@ -98,7 +119,6 @@ function VisualizerSystemAudioBridge() {
                     postProcess: 'sentenceCase',
                 }),
             });
-            setSessionAllowCapture(false);
             closePrompt();
             closeLocalVisualizerSurfaces();
         }
@@ -106,41 +126,13 @@ function VisualizerSystemAudioBridge() {
         wasBlockedByExclusiveModeRef.current = isVisualizerBlockedByExclusiveMode;
     }, [closePrompt, isVisualizerBlockedByExclusiveMode, t]);
 
-    const shouldAttemptConnection =
-        isElectron() &&
-        playbackType === PlayerType.LOCAL &&
-        !isExclusiveModeEnabled &&
-        isVisualizerSurfaceVisible &&
-        promptState !== 'loading' &&
-        (promptState.consent || sessionAllowCapture);
-
-    const handleCaptureSuccess = useCallback(() => {
-        persistConsent(true);
-        setPromptState({ consent: true });
-        setSessionAllowCapture(false);
-    }, [persistConsent]);
-
-    const handleCaptureDenied = useCallback(() => {
-        persistConsent(false);
-        setPromptState({ consent: false });
-        setSessionAllowCapture(false);
-        closeLocalVisualizerSurfaces();
-    }, [persistConsent]);
-
-    useVisualizerSystemAudio({
-        onSystemAudioCaptureDenied: handleCaptureDenied,
-        onSystemAudioCaptureSuccess: handleCaptureSuccess,
-        shouldAttemptConnection,
-    });
-
     const handleAllow = useCallback(() => {
-        setSessionAllowCapture(true);
-    }, []);
+        void connect();
+    }, [connect]);
 
     const handleDecline = useCallback(() => {
         persistConsent(false);
         setPromptState({ consent: false });
-        setSessionAllowCapture(false);
         closeLocalVisualizerSurfaces();
         closePrompt();
     }, [closePrompt, persistConsent]);

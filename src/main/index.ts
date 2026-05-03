@@ -737,8 +737,8 @@ async function createWindow(first = true): Promise<void> {
     });
 
     mainWindow.webContents.session.setDisplayMediaRequestHandler((_request, callback) => {
-        if (!isMacOS()) {
-            callback({ audio: 'loopback' });
+        if (!isWindows()) {
+            callback({});
             return;
         }
 

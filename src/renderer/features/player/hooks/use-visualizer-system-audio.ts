@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import i18n from '/@/i18n/i18n';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
@@ -19,12 +19,12 @@ export function useVisualizerSystemAudio(options: {
     onDeniedRef.current = onSystemAudioCaptureDenied;
     onSuccessRef.current = onSystemAudioCaptureSuccess;
     const playbackType = usePlaybackType();
-    const isMacOS = Boolean(window.api?.utils?.isMacOS?.());
     const { setWebAudio, webAudio } = useWebAudio();
     const webAudioRef = useRef(webAudio);
     const streamRef = useRef<MediaStream | null>(null);
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const connectInFlightRef = useRef(false);
+    const [isConnecting, setIsConnecting] = useState(false);
 
     useEffect(() => {
         webAudioRef.current = webAudio;
@@ -77,16 +77,27 @@ export function useVisualizerSystemAudio(options: {
         }
 
         connectInFlightRef.current = true;
+        setIsConnecting(true);
 
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({
                 audio: true,
-                video: isMacOS, // On macOS, getDisplayMedia requires video to be requested in order to capture system audio
-            });
+                monitorTypeSurfaces: 'include',
+                systemAudio: 'include',
+                video: true,
+                windowAudio: 'system',
+            } as DisplayMediaStreamOptions);
+
+            stream.getVideoTracks().forEach((track) => track.stop());
 
             const audioTracks = stream.getAudioTracks();
             if (audioTracks.length === 0) {
                 stream.getTracks().forEach((t) => t.stop());
+                toast.error({
+                    message: i18n.t('visualizer.systemAudioNoAudioTrack', {
+                        postProcess: 'sentenceCase',
+                    }),
+                });
                 onDeniedRef.current?.();
                 return;
             }
@@ -124,33 +135,21 @@ export function useVisualizerSystemAudio(options: {
             });
         } finally {
             connectInFlightRef.current = false;
+            setIsConnecting(false);
         }
-    }, [disconnect, isMacOS, setWebAudio]);
+    }, [disconnect, setWebAudio]);
 
     const connectRef = useRef(connect);
     connectRef.current = connect;
 
-    useEffect(() => {
-        if (playbackType !== PlayerType.LOCAL || !isElectron() || !shouldAttemptConnection) {
-            return;
-        }
-
-        const w = webAudioRef.current;
-        if (!w?.context || w.context.state === 'closed') {
-            return;
-        }
-        if (w.visualizerInputs?.length) {
-            return;
-        }
-        if (connectInFlightRef.current) {
-            return;
-        }
-
-        void connectRef.current();
-    }, [
-        playbackType,
-        shouldAttemptConnection,
-        webAudio?.context,
-        webAudio?.visualizerInputs?.length,
-    ]);
+    return {
+        connect: async () => {
+            if (connectInFlightRef.current) {
+                return;
+            }
+            await connectRef.current();
+        },
+        isConnected: Boolean(webAudio?.visualizerInputs?.length),
+        isConnecting,
+    };
 }

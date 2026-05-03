@@ -326,7 +326,7 @@ export const SynchronizedLyrics = ({
                 } as React.CSSProperties
             }
         >
-            {settings.showProvider && source && (
+            {settings.showProvider && remote && source && (
                 <LyricLine
                     alignment={settings.alignment}
                     className="lyric-credit"
