@@ -11,9 +11,14 @@ export function useVisualizerSystemAudio(options: {
     onSystemAudioCaptureDenied?: () => void;
     onSystemAudioCaptureSuccess?: () => void;
     shouldAttemptConnection: boolean;
+    shouldKeepConnection?: boolean;
 }) {
-    const { onSystemAudioCaptureDenied, onSystemAudioCaptureSuccess, shouldAttemptConnection } =
-        options;
+    const {
+        onSystemAudioCaptureDenied,
+        onSystemAudioCaptureSuccess,
+        shouldAttemptConnection,
+        shouldKeepConnection = shouldAttemptConnection,
+    } = options;
     const onDeniedRef = useRef(onSystemAudioCaptureDenied);
     const onSuccessRef = useRef(onSystemAudioCaptureSuccess);
     onDeniedRef.current = onSystemAudioCaptureDenied;
@@ -52,10 +57,10 @@ export function useVisualizerSystemAudio(options: {
     }, [setWebAudio]);
 
     useEffect(() => {
-        if (playbackType === PlayerType.WEB || !shouldAttemptConnection) {
+        if (playbackType === PlayerType.WEB || !shouldKeepConnection) {
             disconnect();
         }
-    }, [playbackType, shouldAttemptConnection, disconnect]);
+    }, [playbackType, shouldKeepConnection, disconnect]);
 
     const connect = useCallback(async () => {
         if (!isElectron()) {

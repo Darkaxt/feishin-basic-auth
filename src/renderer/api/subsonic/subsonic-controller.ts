@@ -364,6 +364,7 @@ export const SubsonicController: InternalControllerEndpoint = {
             };
         } else {
             const salt = randomString(12);
+            // codeql[js/insufficient-password-hash] Subsonic token authentication requires MD5(password + salt); this is protocol compatibility, not password storage.
             const hash = md5(body.password + salt);
 
             credential = `u=${encodeURIComponent(body.username)}&s=${encodeURIComponent(salt)}&t=${encodeURIComponent(hash)}`;

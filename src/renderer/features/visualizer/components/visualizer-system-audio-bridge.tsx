@@ -15,10 +15,13 @@ import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { useDisclosure } from '/@/shared/hooks/use-disclosure';
 import { PlayerType } from '/@/shared/types/types';
+import {
+    shouldAutoConnectSystemAudio,
+    shouldOpenSystemAudioConsentPrompt,
+    SystemAudioPromptState,
+} from '/@/shared/utils/visualizer-system-audio';
 
 const CONSENT_GRANTED_KEY = 'visualizer_system_audio_consent_granted';
-
-type PromptState = 'loading' | { consent: boolean };
 
 export function VisualizerSystemAudioBridgeHook() {
     const playbackType = usePlaybackType();
@@ -36,7 +39,8 @@ function VisualizerSystemAudioBridge() {
     const { audioExclusiveMode } = useMpvSettings();
     const { webAudio } = useWebAudio();
     const isVisualizerSurfaceVisible = useIsLocalVisualizerSurfaceVisible();
-    const [promptState, setPromptState] = useState<PromptState>('loading');
+    const [promptState, setPromptState] = useState<SystemAudioPromptState>('loading');
+    const hasAttemptedConnectionThisSessionRef = useRef(false);
     const wasBlockedByExclusiveModeRef = useRef(false);
     const [isPromptOpen, { close: closePrompt, open: openPrompt, toggle: togglePrompt }] =
         useDisclosure(false);
@@ -57,7 +61,7 @@ function VisualizerSystemAudioBridge() {
 
     useEffect(() => {
         if (!isElectron() || !window.api.localSettings) {
-            setPromptState({ consent: false });
+            setPromptState({ consent: false, promptedThisSession: false });
             return;
         }
 
@@ -66,7 +70,7 @@ function VisualizerSystemAudioBridge() {
             const ls = window.api.localSettings!;
             const consent = Boolean(await ls.get(CONSENT_GRANTED_KEY));
             if (!cancelled) {
-                setPromptState({ consent });
+                setPromptState({ consent, promptedThisSession: consent });
             }
         })();
 
@@ -80,29 +84,37 @@ function VisualizerSystemAudioBridge() {
         playbackType === PlayerType.LOCAL &&
         !isExclusiveModeEnabled &&
         isVisualizerSurfaceVisible;
+    const shouldKeepSystemAudioConnection =
+        isElectron() && playbackType === PlayerType.LOCAL && !isExclusiveModeEnabled;
 
     const handleCaptureSuccess = useCallback(() => {
         persistConsent(true);
-        setPromptState({ consent: true });
+        setPromptState({ consent: true, promptedThisSession: true });
         closePrompt();
     }, [closePrompt, persistConsent]);
 
     const handleCaptureDenied = useCallback(() => {
         persistConsent(false);
-        setPromptState({ consent: false });
+        setPromptState({ consent: false, promptedThisSession: true });
+        closePrompt();
         closeLocalVisualizerSurfaces();
-    }, [persistConsent]);
+    }, [closePrompt, persistConsent]);
 
     const { connect, isConnected, isConnecting } = useVisualizerSystemAudio({
         onSystemAudioCaptureDenied: handleCaptureDenied,
         onSystemAudioCaptureSuccess: handleCaptureSuccess,
         shouldAttemptConnection: canCaptureSystemAudio,
+        shouldKeepConnection: shouldKeepSystemAudioConnection,
     });
 
     const hasVisualizerInput = isConnected || Boolean(webAudio?.visualizerInputs?.length);
 
-    const eligibleForPrompt =
-        canCaptureSystemAudio && promptState !== 'loading' && !hasVisualizerInput && !isConnecting;
+    const eligibleForPrompt = shouldOpenSystemAudioConsentPrompt({
+        canCaptureSystemAudio,
+        hasVisualizerInput,
+        isConnecting,
+        promptState,
+    });
 
     useEffect(() => {
         if (eligibleForPrompt) {
@@ -111,6 +123,23 @@ function VisualizerSystemAudioBridge() {
             closePrompt();
         }
     }, [eligibleForPrompt, closePrompt, openPrompt]);
+
+    useEffect(() => {
+        if (
+            !shouldAutoConnectSystemAudio({
+                canCaptureSystemAudio,
+                hasAttemptedConnectionThisSession: hasAttemptedConnectionThisSessionRef.current,
+                hasVisualizerInput,
+                isConnecting,
+                promptState,
+            })
+        ) {
+            return;
+        }
+
+        hasAttemptedConnectionThisSessionRef.current = true;
+        void connect();
+    }, [canCaptureSystemAudio, connect, hasVisualizerInput, isConnecting, promptState]);
 
     useEffect(() => {
         if (isVisualizerBlockedByExclusiveMode && !wasBlockedByExclusiveModeRef.current) {
@@ -127,12 +156,13 @@ function VisualizerSystemAudioBridge() {
     }, [closePrompt, isVisualizerBlockedByExclusiveMode, t]);
 
     const handleAllow = useCallback(() => {
+        hasAttemptedConnectionThisSessionRef.current = true;
         void connect();
     }, [connect]);
 
     const handleDecline = useCallback(() => {
         persistConsent(false);
-        setPromptState({ consent: false });
+        setPromptState({ consent: false, promptedThisSession: true });
         closeLocalVisualizerSurfaces();
         closePrompt();
     }, [closePrompt, persistConsent]);

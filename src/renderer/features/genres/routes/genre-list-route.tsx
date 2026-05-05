@@ -11,15 +11,18 @@ const GenreListRoute = () => {
     const pageKey = ItemListKey.GENRE;
 
     const [itemCount, setItemCount] = useState<number | undefined>(undefined);
+    const [selectedItems, setSelectedItems] = useState<unknown[]>([]);
 
     const providerValue = useMemo(() => {
         return {
             id: undefined,
             itemCount,
             pageKey,
+            selectedItems,
             setItemCount,
+            setSelectedItems,
         };
-    }, [itemCount, pageKey, setItemCount]);
+    }, [itemCount, pageKey, selectedItems, setItemCount, setSelectedItems]);
 
     return (
         <AnimatedPage>

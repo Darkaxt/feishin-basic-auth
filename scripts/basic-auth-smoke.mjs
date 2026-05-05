@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +12,8 @@ const AUTH_DIR = join(SMOKE_DIR, 'auth');
 const DATA_DIR = join(SMOKE_DIR, 'data');
 const PROXY_USER = 'proxy-user';
 const PROXY_PASSWORD = 'proxy-pass';
+const PROXY_HTPASSWD_ENTRY =
+    'proxy-user:$2b$12$cJyIGKcTon/khpKzJKPK6esPsmxNsvgBIyGfdVpxTdZ79kmBo9vtK';
 const SMOKE_URL = 'http://127.0.0.1:38080';
 
 const wait = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -27,10 +28,6 @@ const run = (command, args, options = {}) => {
     if (result.status !== 0) {
         throw new Error(`${command} ${args.join(' ')} failed`);
     }
-};
-
-const shaPassword = (password) => {
-    return `{SHA}${createHash('sha1').update(password).digest('base64')}`;
 };
 
 const waitForProxy = async () => {
@@ -79,7 +76,7 @@ const waitForAuthenticatedProxy = async () => {
 
 mkdirSync(AUTH_DIR, { recursive: true });
 mkdirSync(DATA_DIR, { recursive: true });
-writeFileSync(join(AUTH_DIR, 'htpasswd'), `${PROXY_USER}:${shaPassword(PROXY_PASSWORD)}\n`);
+writeFileSync(join(AUTH_DIR, 'htpasswd'), `${PROXY_HTPASSWD_ENTRY}\n`);
 
 let started = false;
 

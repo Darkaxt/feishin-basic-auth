@@ -107,36 +107,68 @@ export const getGenreSongsById = async (args: {
         startIndex: 0,
         totalRecordCount: 0,
     };
+    const seenSongIds = new Set<string>();
+
     for (const genreId of id) {
-        const queryFilter: SongListQuery = {
-            genreIds: [genreId],
-            sortBy: SongListSort.GENRE,
-            sortOrder: SortOrder.ASC,
-            startIndex: 0,
-            ...query,
-        };
+        const fetchAllPages = query?.limit == null;
+        const pageSize = query?.limit ?? 500;
+        let startIndex = query?.startIndex ?? 0;
 
-        const queryKey = queryKeys.songs.list(serverId, queryFilter);
+        while (true) {
+            const queryFilter: SongListQuery = {
+                genreIds: [genreId],
+                limit: pageSize,
+                sortBy: SongListSort.GENRE,
+                sortOrder: SortOrder.ASC,
+                startIndex,
+                ...query,
+            };
 
-        const res = await queryClient.fetchQuery({
-            gcTime: 1000 * 60,
-            queryFn: async ({ signal }) =>
-                api.controller.getSongList({
-                    apiClientProps: {
-                        serverId,
-                        signal,
-                    },
-                    query: queryFilter,
-                }),
-            queryKey,
-            staleTime: 1000 * 60,
-        });
+            const queryKey = queryKeys.songs.list(serverId, queryFilter);
 
-        data.items.push(...res!.items);
-        if (data.totalRecordCount) {
-            data.totalRecordCount += res!.totalRecordCount || 0;
+            const res = await queryClient.fetchQuery({
+                gcTime: 1000 * 60,
+                queryFn: async ({ signal }) =>
+                    api.controller.getSongList({
+                        apiClientProps: {
+                            serverId,
+                            signal,
+                        },
+                        query: queryFilter,
+                    }),
+                queryKey,
+                staleTime: 1000 * 60,
+            });
+
+            for (const song of res!.items) {
+                if (seenSongIds.has(song.id)) {
+                    continue;
+                }
+
+                seenSongIds.add(song.id);
+                data.items.push(song);
+            }
+
+            if (!fetchAllPages) {
+                break;
+            }
+
+            if (!res?.items.length || res.items.length < pageSize) {
+                break;
+            }
+
+            if (
+                res.totalRecordCount != null &&
+                startIndex + res.items.length >= res.totalRecordCount
+            ) {
+                break;
+            }
+
+            startIndex += pageSize;
         }
     }
+
+    data.totalRecordCount = data.items.length;
 
     return data;
 };

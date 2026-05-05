@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,7 +27,7 @@ export default async function afterAllArtifactBuild(buildResult) {
         console.log('Running app stream update for Linux build...');
 
         try {
-            execSync(`node ${updateScriptPath} --replace-if-version-missing`, {
+            execFileSync('node', [updateScriptPath, '--replace-if-version-missing'], {
                 cwd: projectRoot,
                 stdio: 'inherit',
             });

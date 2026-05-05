@@ -37,9 +37,11 @@ import {
     ItemListStateActions,
     ItemListStateItemWithRequiredProperties,
     useItemListState,
+    useSyncItemListSelection,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
 import { useListHotkeys } from '/@/renderer/components/item-list/helpers/use-list-hotkeys';
 import { ItemControls, ItemListHandle } from '/@/renderer/components/item-list/types';
+import { useListContext } from '/@/renderer/context/list-context';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { useElementSize } from '/@/shared/hooks/use-element-size';
 import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
@@ -408,6 +410,8 @@ const BaseItemGridList = ({
     const extractRowId = useMemo(() => createExtractRowId(getRowId), [getRowId]);
 
     const internalState = useItemListState(getDataFn, extractRowId);
+    const { setSelectedItems } = useListContext();
+    useSyncItemListSelection(internalState, setSelectedItems);
 
     const [initialize, osInstance] = useOverlayScrollbars({
         defer: false,

@@ -16,11 +16,13 @@ interface ListContextProps {
     listKey?: ItemListKey;
     mode?: 'edit' | 'view';
     pageKey: ItemListKey | string;
+    selectedItems?: unknown[];
     setDisplayMode?: (displayMode: ListDisplayMode) => void;
     setIsSidebarOpen?: (isSidebarOpen: boolean) => void;
     setItemCount?: (itemCount: number) => void;
     setListData?: (items: unknown[]) => void;
     setMode?: (mode: 'edit' | 'view') => void;
+    setSelectedItems?: (items: unknown[]) => void;
 }
 
 export const ListContext = createContext<ListContextProps>({

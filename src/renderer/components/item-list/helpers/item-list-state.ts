@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import { itemListSelectors } from '/@/renderer/components/item-list/helpers/item-list-reducer-utils';
 import { LibraryItem } from '/@/shared/types/domain-types';
@@ -385,6 +385,30 @@ export const useItemDraggingState = (
     return useItemListStateSubscription(internalState, (state) =>
         state && rowId ? state.dragging.has(rowId) : false,
     );
+};
+
+export const useSyncItemListSelection = (
+    internalState: ItemListStateActions,
+    onSelectedItemsChange?: (items: unknown[]) => void,
+): void => {
+    const selectedVersion = useItemListStateSubscription(
+        onSelectedItemsChange ? internalState : undefined,
+        (state) => state?.version ?? 0,
+    );
+
+    useEffect(() => {
+        if (!onSelectedItemsChange) {
+            return;
+        }
+
+        onSelectedItemsChange(internalState.getSelected());
+    }, [internalState, onSelectedItemsChange, selectedVersion]);
+
+    useEffect(() => {
+        return () => {
+            onSelectedItemsChange?.([]);
+        };
+    }, [onSelectedItemsChange]);
 };
 
 export const useItemListState = (

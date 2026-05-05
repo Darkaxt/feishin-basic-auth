@@ -32,6 +32,7 @@ const LibraryHeaderBarComponent = ({ children, ignoreMaxWidth }: LibraryHeaderBa
 
 interface HeaderPlayButtonProps {
     className?: string;
+    disabled?: boolean;
     ids?: string[];
     itemType: LibraryItem;
     listQuery?: Record<string, any>;

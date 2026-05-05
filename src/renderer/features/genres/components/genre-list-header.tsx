@@ -1,16 +1,16 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useIsFetchingItemListCount } from '/@/renderer/components/item-list/helpers/use-is-fetching-item-list';
 import { PageHeader } from '/@/renderer/components/page-header/page-header';
 import { useListContext } from '/@/renderer/context/list-context';
 import { GenreListHeaderFilters } from '/@/renderer/features/genres/components/genre-list-header-filters';
-import { useGenreListFilters } from '/@/renderer/features/genres/hooks/use-genre-list-filters';
 import { FilterBar } from '/@/renderer/features/shared/components/filter-bar';
 import { LibraryHeaderBar } from '/@/renderer/features/shared/components/library-header-bar';
 import { ListSearchInput } from '/@/renderer/features/shared/components/list-search-input';
 import { Group } from '/@/shared/components/group/group';
 import { Stack } from '/@/shared/components/stack/stack';
-import { LibraryItem } from '/@/shared/types/domain-types';
+import { Genre, LibraryItem } from '/@/shared/types/domain-types';
 
 interface GenreListHeaderProps {
     title?: string;
@@ -51,7 +51,27 @@ const GenreListHeaderBadge = () => {
 };
 
 const PlayButton = () => {
-    const { query } = useGenreListFilters();
+    const { selectedItems } = useListContext();
+    const genreIds = useMemo(() => {
+        return (selectedItems ?? [])
+            .filter((item): item is Genre => {
+                return (
+                    typeof item === 'object' &&
+                    item !== null &&
+                    'id' in item &&
+                    typeof (item as Genre).id === 'string' &&
+                    '_itemType' in item &&
+                    (item as Genre)._itemType === LibraryItem.GENRE
+                );
+            })
+            .map((genre) => genre.id);
+    }, [selectedItems]);
 
-    return <LibraryHeaderBar.PlayButton itemType={LibraryItem.GENRE} listQuery={query} />;
+    return (
+        <LibraryHeaderBar.PlayButton
+            disabled={genreIds.length === 0}
+            ids={genreIds}
+            itemType={LibraryItem.GENRE}
+        />
+    );
 };

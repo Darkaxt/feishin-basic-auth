@@ -5,6 +5,14 @@ const full = process.argv.includes('--full');
 const commands = [
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
     ['node', ['--test', 'scripts/tests/default-playback.test.mjs']],
+    [
+        'node',
+        [
+            '--test',
+            'scripts/tests/genre-context-menu.test.mjs',
+            'scripts/tests/visualizer-system-audio.test.mjs',
+        ],
+    ],
     ['corepack', ['pnpm', 'run', 'typecheck:node']],
     ['corepack', ['pnpm', 'run', 'typecheck:web']],
     ['corepack', ['pnpm', 'run', 'lint-code']],
