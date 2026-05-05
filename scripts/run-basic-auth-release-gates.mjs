@@ -21,6 +21,7 @@ if (full) {
         'corepack',
         ['pnpm', 'exec', 'electron-builder', '--win', '--publish', 'never'],
     ]);
+    commands.push(['node', ['scripts/normalize-windows-latest-yml.mjs']]);
     commands.push(['node', ['scripts/check-release-artifacts.mjs']]);
 }
 

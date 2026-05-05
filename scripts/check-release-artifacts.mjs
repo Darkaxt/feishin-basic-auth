@@ -26,6 +26,11 @@ const references = [
             .filter((value) => !/^[a-z][a-z0-9+.-]*:/i.test(value)),
     ),
 ];
+const primaryPath = latest
+    .split(/\r?\n/)
+    .map((line) => line.match(/^path:\s*(.+?)\s*$/)?.[1]?.trim())
+    .find(Boolean)
+    ?.replace(/^['"]|['"]$/g, '');
 
 const missing = [];
 const escaped = [];
@@ -70,6 +75,12 @@ if (whitespaceAssets.length > 0) {
     );
 }
 
+if (!primaryPath) {
+    fail('latest.yml is missing the top-level update path.');
+} else if (!/-win\.exe$/i.test(primaryPath)) {
+    fail(`latest.yml update path must use the architecture-neutral installer: ${primaryPath}`);
+}
+
 if (process.exitCode) {
     process.exit();
 }
@@ -77,4 +88,4 @@ if (process.exitCode) {
 console.log(
     `Validated ${references.length} latest.yml artifact references and ${readdirSync(distPath).length} dist entries.`,
 );
-console.log(`Primary update path: ${basename(references.at(-1) ?? '') || 'unknown'}`);
+console.log(`Primary update path: ${basename(primaryPath ?? '') || 'unknown'}`);
