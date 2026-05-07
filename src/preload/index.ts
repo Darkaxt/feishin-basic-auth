@@ -5,6 +5,7 @@ import { autodiscover } from './autodiscover';
 import { browser } from './browser';
 import { discordRpc } from './discord-rpc';
 import { ipc } from './ipc';
+import { lidaClips } from './lidaclips';
 import { localSettings } from './local-settings';
 import { lyrics } from './lyrics';
 import { mpris } from './mpris';
@@ -18,6 +19,7 @@ const api = {
     browser,
     discordRpc,
     ipc,
+    lidaClips,
     localSettings,
     lyrics,
     mpris,

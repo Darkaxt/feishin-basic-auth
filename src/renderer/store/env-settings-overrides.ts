@@ -45,7 +45,10 @@ const SIDE_QUEUE_TYPES = new Set(['sideDrawerQueue', 'sideQueue']);
 const SIDE_QUEUE_LAYOUTS = new Set(['horizontal', 'vertical']);
 
 export type EnvSettingsOverrides = DeepPartial<
-    Pick<SettingsState, 'autoDJ' | 'css' | 'discord' | 'font' | 'general' | 'lyrics' | 'playback'>
+    Pick<
+        SettingsState,
+        'autoDJ' | 'css' | 'discord' | 'font' | 'general' | 'lidaClips' | 'lyrics' | 'playback'
+    >
 >;
 
 type DeepPartial<T> = {
@@ -287,6 +290,8 @@ const ENV_SETTING_SPECS: EnvSettingSpec[] = [
         type: 'bool',
     },
     { key: 'FS_LYRICS_TRANSLATION_API_KEY', path: ['lyrics', 'translationApiKey'], type: 'string' },
+    { key: 'FS_LIDACLIPS_ENABLED', path: ['lidaClips', 'enabled'], type: 'bool' },
+    { key: 'FS_LIDACLIPS_BASE_URL', path: ['lidaClips', 'baseUrl'], type: 'string' },
     {
         key: 'FS_LYRICS_TRANSLATION_TARGET_LANGUAGE',
         path: ['lyrics', 'translationTargetLanguage'],

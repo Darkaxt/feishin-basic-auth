@@ -1,0 +1,266 @@
+export const LIDACLIPS_API_KEY_SECRET_KEY = 'lidaclips:api-key';
+
+export type LidaClipsClip = {
+    album?: null | string;
+    artist?: null | string;
+    created_at?: null | string;
+    duration?: null | number;
+    evidence?: unknown;
+    file_name?: null | string;
+    id: number | string;
+    localStreamUrl?: string;
+    mime_type?: null | string;
+    quality_tier?: null | string;
+    score?: null | number;
+    source_url?: null | string;
+    stream_url?: null | string;
+    title?: null | string;
+    track?: null | string;
+    updated_at?: null | string;
+};
+
+export type LidaClipsLookupQuery = {
+    album?: null | string;
+    artist: string;
+    track: string;
+};
+
+export type LidaClipsLookupResult =
+    | {
+          clip: SafeLidaClipsClip;
+          status: 'ok';
+      }
+    | {
+          message?: string;
+          status: 'disabled' | 'error' | 'no-match' | 'not-configured' | 'unauthorized';
+      };
+
+export type LidaClipsSecretState = {
+    apiKey: boolean;
+};
+
+export type LidaClipsServerProxyAuthSource = {
+    enabled: true;
+    secretKey: string;
+    username: string;
+};
+
+export type LidaClipsSettings = {
+    baseUrl: string;
+    enabled: boolean;
+};
+
+export type LidaClipsSongLike = {
+    album?: null | string;
+    artistName?: null | string;
+    name?: null | string;
+};
+
+export type SafeLidaClipsClip = Pick<
+    LidaClipsClip,
+    | 'album'
+    | 'artist'
+    | 'created_at'
+    | 'duration'
+    | 'file_name'
+    | 'id'
+    | 'mime_type'
+    | 'quality_tier'
+    | 'score'
+    | 'title'
+    | 'track'
+    | 'updated_at'
+> & {
+    localStreamUrl: string;
+};
+
+type ServerProxyAuthLike = {
+    id: string;
+    proxyAuth?: {
+        enabled: boolean;
+        username: string;
+    };
+};
+
+const HTTP_PROTOCOLS = new Set(['http:', 'https:']);
+const SERVER_PROXY_BASIC_AUTH_SECRET_PREFIX = 'proxy-basic-auth';
+const STREAM_FORWARD_HEADERS = new Set([
+    'if-match',
+    'if-modified-since',
+    'if-none-match',
+    'if-range',
+    'if-unmodified-since',
+    'range',
+]);
+
+const toTimestamp = (value?: null | string) => {
+    if (!value) return 0;
+    const timestamp = Date.parse(value);
+    return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
+const toScore = (value?: null | number) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return 0;
+    }
+
+    return value;
+};
+
+const stripTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+
+export const normalizeLidaClipsBaseUrl = (baseUrl: string): null | string => {
+    const trimmed = baseUrl.trim();
+
+    if (!trimmed) {
+        return null;
+    }
+
+    try {
+        const parsed = new URL(trimmed);
+
+        if (!HTTP_PROTOCOLS.has(parsed.protocol)) {
+            return null;
+        }
+
+        parsed.username = '';
+        parsed.password = '';
+        parsed.hash = '';
+        parsed.search = '';
+
+        return stripTrailingSlash(parsed.toString());
+    } catch {
+        return null;
+    }
+};
+
+export const buildLidaClipsLookupUrl = (baseUrl: string, query: LidaClipsLookupQuery): string => {
+    const normalizedBaseUrl = normalizeLidaClipsBaseUrl(baseUrl);
+
+    if (!normalizedBaseUrl) {
+        throw new Error('Invalid LidaClips base URL');
+    }
+
+    const url = new URL('api/v1/clips', `${normalizedBaseUrl}/`);
+    url.searchParams.set('artist', query.artist);
+    url.searchParams.set('album', query.album ?? '');
+    url.searchParams.set('track', query.track);
+
+    return url.toString();
+};
+
+export const resolveLidaClipsResourceUrl = (baseUrl: string, resourceUrl: string): string => {
+    const normalizedBaseUrl = normalizeLidaClipsBaseUrl(baseUrl);
+
+    if (!normalizedBaseUrl) {
+        throw new Error('Invalid LidaClips base URL');
+    }
+
+    const parsedBaseUrl = new URL(normalizedBaseUrl);
+
+    if (/^https?:\/\//i.test(resourceUrl)) {
+        const parsedResourceUrl = new URL(resourceUrl);
+
+        if (!HTTP_PROTOCOLS.has(parsedResourceUrl.protocol)) {
+            throw new Error('Invalid LidaClips resource URL');
+        }
+
+        if (parsedResourceUrl.origin !== parsedBaseUrl.origin) {
+            throw new Error('LidaClips resource URL must use the configured origin');
+        }
+
+        parsedResourceUrl.username = '';
+        parsedResourceUrl.password = '';
+
+        return parsedResourceUrl.toString();
+    }
+
+    const resourcePath = resourceUrl.replace(/^\/+/, '');
+    const normalizedBasePath = parsedBaseUrl.pathname.replace(/^\/+|\/+$/g, '');
+
+    if (normalizedBasePath && resourcePath.startsWith(`${normalizedBasePath}/`)) {
+        return new URL(resourcePath, `${parsedBaseUrl.origin}/`).toString();
+    }
+
+    return new URL(resourcePath, `${normalizedBaseUrl}/`).toString();
+};
+
+export const createLidaClipsLookupQueryFromSong = (
+    song?: LidaClipsSongLike | null,
+): LidaClipsLookupQuery | null => {
+    const artist = song?.artistName?.trim();
+    const track = song?.name?.trim();
+
+    if (!artist || !track) {
+        return null;
+    }
+
+    return {
+        album: song?.album ?? '',
+        artist,
+        track,
+    };
+};
+
+export const createLidaClipsProxyAuthSourceFromServer = (
+    server?: null | ServerProxyAuthLike,
+): LidaClipsServerProxyAuthSource | undefined => {
+    const username = server?.proxyAuth?.username.trim();
+
+    if (!server?.id || !server.proxyAuth?.enabled || !username) {
+        return undefined;
+    }
+
+    return {
+        enabled: true,
+        secretKey: `${SERVER_PROXY_BASIC_AUTH_SECRET_PREFIX}:${server.id}`,
+        username,
+    };
+};
+
+export const rankLidaClips = <T extends LidaClipsClip>(clips: T[]): null | T => {
+    if (clips.length === 0) {
+        return null;
+    }
+
+    return [...clips].sort((a, b) => {
+        const officialScore =
+            (b.quality_tier === 'official' ? 1 : 0) - (a.quality_tier === 'official' ? 1 : 0);
+        if (officialScore !== 0) return officialScore;
+
+        const score = toScore(b.score) - toScore(a.score);
+        if (score !== 0) return score;
+
+        return toTimestamp(b.updated_at) - toTimestamp(a.updated_at);
+    })[0];
+};
+
+export const redactLidaClipsSecretsFromText = (value: string): string => {
+    return value
+        .replace(/\bBasic\s+[A-Za-z0-9+/=]+/g, 'Basic <redacted>')
+        .replace(/(https?:\/\/)([^:@/\s]+):([^@/\s]+)@/gi, '$1<proxy-auth>@')
+        .replace(/\b(X-Api-Key\s*:\s*)[^\s&]+/gi, '$1<redacted>')
+        .replace(/([?&](?:apiKey|api_key)=)[^&\s]+/gi, '$1<redacted>');
+};
+
+export const selectLidaClipsStreamRequestHeaders = (
+    requestHeaders: Record<string, string | string[] | undefined>,
+): Record<string, string> => {
+    const forwardedHeaders: Record<string, string> = {};
+
+    for (const [name, value] of Object.entries(requestHeaders)) {
+        const normalizedName = name.toLowerCase();
+
+        if (!STREAM_FORWARD_HEADERS.has(normalizedName) || value === undefined) {
+            continue;
+        }
+
+        forwardedHeaders[normalizedName] = Array.isArray(value) ? value.join(', ') : value;
+    }
+
+    return forwardedHeaders;
+};
+
+export const shouldShowLidaClipsTab = (settings: Pick<LidaClipsSettings, 'enabled'>): boolean => {
+    return settings.enabled;
+};

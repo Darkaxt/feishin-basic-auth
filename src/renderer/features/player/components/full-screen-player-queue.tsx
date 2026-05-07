@@ -1,14 +1,15 @@
 import clsx from 'clsx';
 import { motion } from 'motion/react';
-import { CSSProperties, lazy, Suspense, useMemo } from 'react';
+import { CSSProperties, lazy, Suspense, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './full-screen-player-queue.module.css';
 
+import { LidaClipsPanel } from '/@/renderer/features/lidaclips/components/lidaclips-panel';
 import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { FullScreenSimilarSongs } from '/@/renderer/features/player/components/full-screen-similar-songs';
-import { usePlaybackSettings, useSettingsStore } from '/@/renderer/store';
+import { useLidaClipsSettings, usePlaybackSettings, useSettingsStore } from '/@/renderer/store';
 import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
@@ -16,6 +17,7 @@ import {
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { ItemListKey } from '/@/shared/types/types';
+import { shouldShowLidaClipsTab } from '/@/shared/utils/lidaclips';
 
 const AudioMotionAnalyzerVisualizer = lazy(() =>
     import('../../visualizer/components/audiomotionanalyzer/visualizer').then((module) => ({
@@ -34,7 +36,15 @@ export const FullScreenPlayerQueue = () => {
     const { activeTab, opacity } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { webAudio } = usePlaybackSettings();
+    const lidaClipsSettings = useLidaClipsSettings();
+    const showLidaClipsTab = shouldShowLidaClipsTab(lidaClipsSettings);
     const visualizerType = useSettingsStore((store) => store.visualizer.type);
+
+    useEffect(() => {
+        if (activeTab === 'clips' && !showLidaClipsTab) {
+            setStore({ activeTab: 'queue' });
+        }
+    }, [activeTab, setStore, showLidaClipsTab]);
 
     const headerItems = useMemo(() => {
         const items = [
@@ -48,6 +58,15 @@ export const FullScreenPlayerQueue = () => {
                 label: t('page.fullscreenPlayer.related'),
                 onClick: () => setStore({ activeTab: 'related' }),
             },
+            ...(showLidaClipsTab
+                ? [
+                      {
+                          active: activeTab === 'clips',
+                          label: t('page.fullscreenPlayer.clips'),
+                          onClick: () => setStore({ activeTab: 'clips' }),
+                      },
+                  ]
+                : []),
             {
                 active: activeTab === 'lyrics',
                 label: t('page.fullscreenPlayer.lyrics'),
@@ -64,7 +83,7 @@ export const FullScreenPlayerQueue = () => {
         }
 
         return items;
-    }, [activeTab, setStore, t, webAudio]);
+    }, [activeTab, setStore, showLidaClipsTab, t, webAudio]);
 
     return (
         <div
@@ -117,6 +136,8 @@ export const FullScreenPlayerQueue = () => {
                 <div className={styles.queueContainer}>
                     <FullScreenSimilarSongs />
                 </div>
+            ) : activeTab === 'clips' && showLidaClipsTab ? (
+                <LidaClipsPanel />
             ) : activeTab === 'lyrics' ? (
                 <Lyrics fadeOutNoLyricsMessage={false} />
             ) : activeTab === 'visualizer' && webAudio ? (

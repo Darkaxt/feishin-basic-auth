@@ -1,4 +1,5 @@
 import './autodiscover';
+import './lidaclips';
 import './lyrics';
 import './player';
 import './remote';

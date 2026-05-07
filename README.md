@@ -14,7 +14,7 @@ This repository only tracks BasicAuth/proxy-auth changes carried by this fork.
       <img src="https://img.shields.io/github/license/Darkaxt/feishin-basic-auth?style=flat-square&color=brightgreen"
       alt="License">
     </a>
-      <a href="https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.6">
+      <a href="https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.8">
       <img src="https://img.shields.io/github/v/release/Darkaxt/feishin-basic-auth?include_prereleases&style=flat-square&color=blue"
       alt="Release">
     </a>
@@ -39,6 +39,7 @@ Current validation:
 - Navidrome behind Traefik BasicAuth.
 - Login, album browsing/images, and music playback.
 - Genre play queues, translated synced lyrics display, and MPV visualizer system-audio capture.
+- LidaClips lookup/stream proxy using the active server proxy BasicAuth credentials.
 - Basic release gates: typecheck, lint, secret scan, Traefik/Navidrome smoke harness, Windows
   packaging, and release artifact validation.
 
@@ -51,6 +52,7 @@ Current validation:
 - [x] Smart playlist editor (Navidrome)
 - [x] Synchronized and unsynchronized lyrics support
 - [x] Reverse-proxy BasicAuth for configured server origins
+- [x] LidaClips fullscreen clip tab with safe API-key storage
 - [ ] [Report a BasicAuth issue](https://github.com/Darkaxt/feishin-basic-auth/issues/new/choose)
 
 ## Screenshots
@@ -61,14 +63,14 @@ Current validation:
 
 ### Windows desktop prerelease
 
-Current prerelease: [v1.11.0-ba.6](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.6).
+Current prerelease: [v1.11.0-ba.8](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.8).
 
 Download the latest Windows desktop prerelease from
 [this fork's releases](https://github.com/Darkaxt/feishin-basic-auth/releases). For most Windows
 systems, use
-[`Feishin-BasicAuth-1.11.0-ba.6-win-x64.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.6/Feishin-BasicAuth-1.11.0-ba.6-win-x64.exe).
+[`Feishin-BasicAuth-1.11.0-ba.8-win-x64.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.8/Feishin-BasicAuth-1.11.0-ba.8-win-x64.exe).
 The architecture-neutral Windows installer is
-[`Feishin-BasicAuth-1.11.0-ba.6-win.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.6/Feishin-BasicAuth-1.11.0-ba.6-win.exe).
+[`Feishin-BasicAuth-1.11.0-ba.8-win.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.8/Feishin-BasicAuth-1.11.0-ba.8-win.exe).
 
 This fork currently publishes Windows desktop prereleases only. macOS, Linux, Docker, web, Winget,
 and package-manager distributions are not published by this fork.
@@ -85,6 +87,16 @@ and package-manager distributions are not published by this fork.
 Proxy BasicAuth passwords are stored through Electron `safeStorage`. The server list stores only
 proxy-auth metadata, not the proxy password. The app injects `Authorization: Basic ...` only for
 configured server origins and does not overwrite existing app-level `Authorization` headers.
+
+### LidaClips setup
+
+1. Open Settings > General > LidaClips.
+2. Enable LidaClips and enter the LidaClips base URL.
+3. Save the LidaClips API key.
+
+The LidaClips API key is stored through Electron `safeStorage`. LidaClips lookup and clip streaming
+reuse the active song server's proxy BasicAuth configuration; no separate LidaClips proxy password is
+stored.
 
 ### Configuration
 

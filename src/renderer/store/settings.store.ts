@@ -558,6 +558,11 @@ const LyricsSettingsSchema = z.object({
     translationTargetLanguage: z.string().nullable(),
 });
 
+const LidaClipsSettingsSchema = z.object({
+    baseUrl: z.string(),
+    enabled: z.boolean(),
+});
+
 const ScrobbleSettingsSchema = z.object({
     enabled: z.boolean(),
     notify: z.boolean(),
@@ -681,6 +686,7 @@ export const ValidationSettingsStateSchema = z.object({
     font: FontSettingsSchema,
     general: GeneralSettingsSchema,
     hotkeys: HotkeysSettingsSchema,
+    lidaClips: LidaClipsSettingsSchema,
     lists: z.record(z.nativeEnum(ItemListKey), ItemListConfigSchema),
     lyrics: LyricsSettingsSchema,
     lyricsDisplay: z.record(z.string(), LyricsDisplaySettingsSchema),
@@ -1233,6 +1239,10 @@ const initialState: SettingsState = {
             zoomOut: { allowGlobal: true, hotkey: '', isGlobal: false },
         },
         globalMediaHotkeys: true,
+    },
+    lidaClips: {
+        baseUrl: '',
+        enabled: false,
     },
     lists: {
         ['albumDetail']: {
@@ -2413,10 +2423,31 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     state.playback.type = DEFAULT_DESKTOP_PLAYER_TYPE;
                 }
 
+                if (version <= 28) {
+                    state.lidaClips = initialState.lidaClips;
+                }
+
+                if (version <= 29) {
+                    const lidaClips = state.lidaClips as
+                        | undefined
+                        | { baseUrl?: unknown; enabled?: unknown };
+
+                    state.lidaClips = {
+                        baseUrl:
+                            typeof lidaClips?.baseUrl === 'string'
+                                ? lidaClips.baseUrl
+                                : initialState.lidaClips.baseUrl,
+                        enabled:
+                            typeof lidaClips?.enabled === 'boolean'
+                                ? lidaClips.enabled
+                                : initialState.lidaClips.enabled,
+                    };
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 28,
+            version: 30,
         },
     ),
 );
@@ -2461,6 +2492,8 @@ export const useMpvSettings = () =>
     useSettingsStore((state) => state.playback.mpvProperties, shallow);
 
 export const useLyricsSettings = () => useSettingsStore((state) => state.lyrics, shallow);
+
+export const useLidaClipsSettings = () => useSettingsStore((state) => state.lidaClips, shallow);
 
 export const useLyricsDisplaySettings = (key: string = 'default') =>
     useSettingsStore((state) => state.lyricsDisplay[key] || state.lyricsDisplay.default, shallow);

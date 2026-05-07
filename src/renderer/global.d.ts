@@ -54,6 +54,8 @@ declare global {
         FS_GENERAL_USE_THEME_ACCENT_COLOR?: string;
         FS_GENERAL_USE_THEME_PRIMARY_SHADE?: string;
         FS_GENERAL_ZOOM_FACTOR?: string;
+        FS_LIDACLIPS_BASE_URL?: string;
+        FS_LIDACLIPS_ENABLED?: string;
         FS_LYRICS_ALIGNMENT?: string;
         FS_LYRICS_DELAY_MS?: string;
         FS_LYRICS_ENABLE_AUTO_TRANSLATION?: string;
