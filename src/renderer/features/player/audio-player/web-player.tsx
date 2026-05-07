@@ -23,9 +23,11 @@ import {
     usePlayerStoreBase,
     usePlayerVolume,
 } from '/@/renderer/store';
+import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
 import { toast } from '/@/shared/components/toast/toast';
 import { QueueSong } from '/@/shared/types/domain-types';
 import { CrossfadeStyle, PlayerStatus, PlayerStyle } from '/@/shared/types/types';
+import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
 
 const PLAY_PAUSE_FADE_DURATION = 300;
 const PLAY_PAUSE_FADE_INTERVAL = 10;
@@ -174,8 +176,19 @@ export function WebPlayer() {
     );
 
     const handleOnEndedPlayer1 = useCallback(() => {
+        const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
+        const playerState = usePlayerStoreBase.getState();
+        const shouldStopClipMode =
+            clipModeActive &&
+            shouldStopLidaClipsModeAfterAutoNext({
+                hasNextSong: Boolean(playerState.getPlayerData().nextSong),
+                pauseOnNext: playerState.player.pauseOnNextSongEnd,
+            });
+
         const promise = new Promise((resolve) => {
-            mediaAutoNext();
+            mediaAutoNext({
+                keepPaused: clipModeActive,
+            });
             resolve(true);
         });
 
@@ -190,13 +203,27 @@ export function WebPlayer() {
             } else {
                 playerRef.current?.setVolume(volume);
             }
+            if (shouldStopClipMode) {
+                useFullScreenPlayerStore.getState().actions.setStore({ clipModeActive: false });
+            }
             setIsTransitioning(false);
         });
     }, [mediaAutoNext, volume]);
 
     const handleOnEndedPlayer2 = useCallback(() => {
+        const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
+        const playerState = usePlayerStoreBase.getState();
+        const shouldStopClipMode =
+            clipModeActive &&
+            shouldStopLidaClipsModeAfterAutoNext({
+                hasNextSong: Boolean(playerState.getPlayerData().nextSong),
+                pauseOnNext: playerState.player.pauseOnNextSongEnd,
+            });
+
         const promise = new Promise((resolve) => {
-            mediaAutoNext();
+            mediaAutoNext({
+                keepPaused: clipModeActive,
+            });
             resolve(true);
         });
 
@@ -208,6 +235,9 @@ export function WebPlayer() {
                 playerRef.current?.pause();
             } else {
                 playerRef.current?.setVolume(volume);
+            }
+            if (shouldStopClipMode) {
+                useFullScreenPlayerStore.getState().actions.setStore({ clipModeActive: false });
             }
             setIsTransitioning(false);
         });

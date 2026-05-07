@@ -12,6 +12,7 @@ export interface FullScreenPlayerSlice extends FullScreenPlayerState {
 
 interface FullScreenPlayerState {
     activeTab: 'lyrics' | 'queue' | 'related' | string;
+    clipModeActive: boolean;
     dynamicBackground?: boolean;
     dynamicImageBlur: number;
     dynamicIsImage?: boolean;
@@ -31,6 +32,7 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
                     },
                 },
                 activeTab: 'queue',
+                clipModeActive: false,
                 dynamicBackground: true,
                 dynamicImageBlur: 1.5,
                 dynamicIsImage: false,
@@ -50,10 +52,17 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
                     return {} as FullScreenPlayerState;
                 }
 
+                if (version <= 3) {
+                    return {
+                        ...(persistedState as FullScreenPlayerState),
+                        clipModeActive: false,
+                    };
+                }
+
                 return persistedState;
             },
             name: 'store_full_screen_player',
-            version: 3,
+            version: 4,
         },
     ),
 );

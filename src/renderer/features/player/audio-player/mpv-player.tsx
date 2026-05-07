@@ -14,7 +14,9 @@ import {
     usePlayerStore,
     usePlayerVolume,
 } from '/@/renderer/store';
+import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
 import { PlayerStatus } from '/@/shared/types/types';
+import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
 
 const PLAY_PAUSE_FADE_DURATION = 300;
 const PLAY_PAUSE_FADE_INTERVAL = 10;
@@ -89,11 +91,24 @@ export function MpvPlayer() {
         // When mpv auto-advances to the next song (position 1 becomes position 0),
         // we need to update the player store first, then update the mpv queue with the new next song
         // This follows the same pattern as the old useCenterControls implementation
-        const playerData = mediaAutoNext();
+        const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
+        const playerState = usePlayerStore.getState();
+        const shouldStopClipMode =
+            clipModeActive &&
+            shouldStopLidaClipsModeAfterAutoNext({
+                hasNextSong: Boolean(playerState.getPlayerData().nextSong),
+                pauseOnNext: playerState.player.pauseOnNextSongEnd,
+            });
+        const playerData = mediaAutoNext({
+            keepPaused: clipModeActive,
+        });
 
         // Update the mpv queue with the new next song
         // The engine will handle the queue update through the useEffect when nextSong changes
-        playerRef.current?.setVolume(volume);
+        playerRef.current?.setVolume(playerData.status === PlayerStatus.PAUSED ? 0 : volume);
+        if (shouldStopClipMode) {
+            useFullScreenPlayerStore.getState().actions.setStore({ clipModeActive: false });
+        }
         setIsTransitioning(false);
 
         return playerData;

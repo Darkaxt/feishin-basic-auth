@@ -35,6 +35,15 @@ export type LidaClipsLookupResult =
           status: 'disabled' | 'error' | 'no-match' | 'not-configured' | 'unauthorized';
       };
 
+export type LidaClipsPlaybackAction = 'none' | 'pauseAudio' | 'playAudio';
+
+export type LidaClipsPlaybackDecision = {
+    clipModeActive: boolean;
+    playerAction: LidaClipsPlaybackAction;
+    shouldAutoplayClip: boolean;
+    tab: 'clips' | 'queue' | 'visualizer';
+};
+
 export type LidaClipsSecretState = {
     apiKey: boolean;
 };
@@ -263,4 +272,73 @@ export const selectLidaClipsStreamRequestHeaders = (
 
 export const shouldShowLidaClipsTab = (settings: Pick<LidaClipsSettings, 'enabled'>): boolean => {
     return settings.enabled;
+};
+
+export const getLidaClipsFallbackTab = ({
+    webAudio,
+}: {
+    webAudio: boolean;
+}): 'queue' | 'visualizer' => {
+    return webAudio ? 'visualizer' : 'queue';
+};
+
+export const getLidaClipsPlaybackDecision = ({
+    clipModeActive,
+    lookupStatus,
+    webAudio,
+}: {
+    clipModeActive: boolean;
+    lookupStatus: LidaClipsLookupResult['status'];
+    webAudio: boolean;
+}): LidaClipsPlaybackDecision => {
+    if (!clipModeActive) {
+        return {
+            clipModeActive: false,
+            playerAction: 'none',
+            shouldAutoplayClip: false,
+            tab: 'clips',
+        };
+    }
+
+    if (lookupStatus === 'ok') {
+        return {
+            clipModeActive: true,
+            playerAction: 'pauseAudio',
+            shouldAutoplayClip: true,
+            tab: 'clips',
+        };
+    }
+
+    return {
+        clipModeActive: true,
+        playerAction: 'playAudio',
+        shouldAutoplayClip: false,
+        tab: getLidaClipsFallbackTab({ webAudio }),
+    };
+};
+
+export const shouldExitLidaClipsModeForTab = (tab: string): boolean => {
+    return tab !== 'clips' && tab !== 'visualizer';
+};
+
+export const shouldPauseAfterAutoNext = ({
+    keepPaused,
+    pauseOnNext,
+    shouldPause,
+}: {
+    keepPaused?: boolean;
+    pauseOnNext: boolean;
+    shouldPause: boolean;
+}): boolean => {
+    return Boolean(keepPaused || pauseOnNext || shouldPause);
+};
+
+export const shouldStopLidaClipsModeAfterAutoNext = ({
+    hasNextSong,
+    pauseOnNext,
+}: {
+    hasNextSong: boolean;
+    pauseOnNext: boolean;
+}): boolean => {
+    return pauseOnNext || !hasNextSong;
 };

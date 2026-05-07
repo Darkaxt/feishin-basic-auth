@@ -16,7 +16,9 @@ import {
     usePlayerStore,
     useSettingsStore,
 } from '/@/renderer/store';
+import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
 import { PlayerStatus } from '/@/shared/types/types';
+import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
 
 export interface MpvPlayerEngineHandle extends AudioPlayer {}
 
@@ -259,7 +261,20 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         }
 
         const handleOnAutoNext = () => {
-            mediaAutoNext();
+            const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
+            const playerState = usePlayerStore.getState();
+            const shouldStopClipMode =
+                clipModeActive &&
+                shouldStopLidaClipsModeAfterAutoNext({
+                    hasNextSong: Boolean(playerState.getPlayerData().nextSong),
+                    pauseOnNext: playerState.player.pauseOnNextSongEnd,
+                });
+            mediaAutoNext({
+                keepPaused: clipModeActive,
+            });
+            if (shouldStopClipMode) {
+                useFullScreenPlayerStore.getState().actions.setStore({ clipModeActive: false });
+            }
             handleMpvAutoNext(transcode);
         };
 

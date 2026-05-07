@@ -1,11 +1,14 @@
 import clsx from 'clsx';
 import { motion } from 'motion/react';
-import { CSSProperties, lazy, Suspense, useEffect, useMemo } from 'react';
+import { CSSProperties, lazy, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './full-screen-player-queue.module.css';
 
-import { LidaClipsPanel } from '/@/renderer/features/lidaclips/components/lidaclips-panel';
+import {
+    LidaClipsPanel,
+    LidaClipsPlaybackCoordinator,
+} from '/@/renderer/features/lidaclips/components/lidaclips-panel';
 import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { FullScreenSimilarSongs } from '/@/renderer/features/player/components/full-screen-similar-songs';
@@ -17,7 +20,7 @@ import {
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { ItemListKey } from '/@/shared/types/types';
-import { shouldShowLidaClipsTab } from '/@/shared/utils/lidaclips';
+import { shouldExitLidaClipsModeForTab, shouldShowLidaClipsTab } from '/@/shared/utils/lidaclips';
 
 const AudioMotionAnalyzerVisualizer = lazy(() =>
     import('../../visualizer/components/audiomotionanalyzer/visualizer').then((module) => ({
@@ -33,7 +36,7 @@ const ButterchurnVisualizer = lazy(() =>
 
 export const FullScreenPlayerQueue = () => {
     const { t } = useTranslation();
-    const { activeTab, opacity } = useFullScreenPlayerStore();
+    const { activeTab, expanded, opacity } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { webAudio } = usePlaybackSettings();
     const lidaClipsSettings = useLidaClipsSettings();
@@ -42,35 +45,57 @@ export const FullScreenPlayerQueue = () => {
 
     useEffect(() => {
         if (activeTab === 'clips' && !showLidaClipsTab) {
-            setStore({ activeTab: 'queue' });
+            setStore({ activeTab: 'queue', clipModeActive: false });
         }
     }, [activeTab, setStore, showLidaClipsTab]);
+
+    useEffect(() => {
+        if (!expanded) {
+            setStore({ clipModeActive: false });
+        }
+    }, [expanded, setStore]);
+
+    useEffect(() => {
+        return () => {
+            setStore({ clipModeActive: false });
+        };
+    }, [setStore]);
+
+    const setActiveTab = useCallback(
+        (tab: string) => {
+            setStore({
+                activeTab: tab,
+                ...(shouldExitLidaClipsModeForTab(tab) ? { clipModeActive: false } : {}),
+            });
+        },
+        [setStore],
+    );
 
     const headerItems = useMemo(() => {
         const items = [
             {
                 active: activeTab === 'queue',
                 label: t('page.fullscreenPlayer.upNext'),
-                onClick: () => setStore({ activeTab: 'queue' }),
+                onClick: () => setActiveTab('queue'),
             },
             {
                 active: activeTab === 'related',
                 label: t('page.fullscreenPlayer.related'),
-                onClick: () => setStore({ activeTab: 'related' }),
+                onClick: () => setActiveTab('related'),
             },
             ...(showLidaClipsTab
                 ? [
                       {
                           active: activeTab === 'clips',
                           label: t('page.fullscreenPlayer.clips'),
-                          onClick: () => setStore({ activeTab: 'clips' }),
+                          onClick: () => setActiveTab('clips'),
                       },
                   ]
                 : []),
             {
                 active: activeTab === 'lyrics',
                 label: t('page.fullscreenPlayer.lyrics'),
-                onClick: () => setStore({ activeTab: 'lyrics' }),
+                onClick: () => setActiveTab('lyrics'),
             },
         ];
 
@@ -78,12 +103,12 @@ export const FullScreenPlayerQueue = () => {
             items.push({
                 active: activeTab === 'visualizer',
                 label: t('page.fullscreenPlayer.visualizer', { postProcess: 'titleCase' }),
-                onClick: () => setStore({ activeTab: 'visualizer' }),
+                onClick: () => setActiveTab('visualizer'),
             });
         }
 
         return items;
-    }, [activeTab, setStore, showLidaClipsTab, t, webAudio]);
+    }, [activeTab, setActiveTab, showLidaClipsTab, t, webAudio]);
 
     return (
         <div
@@ -94,6 +119,7 @@ export const FullScreenPlayerQueue = () => {
                 } as CSSProperties
             }
         >
+            {showLidaClipsTab ? <LidaClipsPlaybackCoordinator /> : null}
             <Group
                 align="center"
                 className="full-screen-player-queue-header"

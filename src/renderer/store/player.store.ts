@@ -24,6 +24,7 @@ import {
     PlayerStatus,
     PlayerStyle,
 } from '/@/shared/types/types';
+import { shouldPauseAfterAutoNext } from '/@/shared/utils/lidaclips';
 
 export interface PlayerState extends Actions, State {}
 
@@ -50,7 +51,7 @@ interface Actions {
     increaseVolume: (value: number) => void;
     isFirstTrackInQueue: () => boolean;
     isLastTrackInQueue: () => boolean;
-    mediaAutoNext: () => PlayerData;
+    mediaAutoNext: (options?: { keepPaused?: boolean }) => PlayerData;
     mediaNext: () => void;
     mediaPause: () => void;
     mediaPlay: (id?: string) => void;
@@ -874,7 +875,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     const currentIndex = state.player.index;
                     return currentIndex === queue.items.length - 1;
                 },
-                mediaAutoNext: () => {
+                mediaAutoNext: (options?: { keepPaused?: boolean }) => {
                     const stateSnapshot = get();
                     const currentIndex = stateSnapshot.player.index;
                     const player = stateSnapshot.player;
@@ -893,8 +894,13 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         repeat,
                     );
                     const pauseOnNext = player.pauseOnNextSongEnd;
-                    const newStatus =
-                        shouldPause || pauseOnNext ? PlayerStatus.PAUSED : PlayerStatus.PLAYING;
+                    const newStatus = shouldPauseAfterAutoNext({
+                        keepPaused: options?.keepPaused,
+                        pauseOnNext,
+                        shouldPause,
+                    })
+                        ? PlayerStatus.PAUSED
+                        : PlayerStatus.PLAYING;
 
                     set((state) => {
                         state.player.index = nextPlaybackIndex;

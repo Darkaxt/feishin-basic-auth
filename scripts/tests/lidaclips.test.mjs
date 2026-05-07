@@ -133,6 +133,100 @@ test('shouldShowLidaClipsTab hides the tab when disabled', () => {
     assert.equal(lidaClips.shouldShowLidaClipsTab({ enabled: true }), true);
 });
 
+test('getLidaClipsFallbackTab prefers visualizer when web audio is available', () => {
+    assert.equal(lidaClips.getLidaClipsFallbackTab({ webAudio: true }), 'visualizer');
+    assert.equal(lidaClips.getLidaClipsFallbackTab({ webAudio: false }), 'queue');
+});
+
+test('getLidaClipsPlaybackDecision keeps clip mode sticky across clip and fallback states', () => {
+    assert.deepEqual(
+        lidaClips.getLidaClipsPlaybackDecision({
+            clipModeActive: true,
+            lookupStatus: 'ok',
+            webAudio: true,
+        }),
+        {
+            clipModeActive: true,
+            playerAction: 'pauseAudio',
+            shouldAutoplayClip: true,
+            tab: 'clips',
+        },
+    );
+
+    assert.deepEqual(
+        lidaClips.getLidaClipsPlaybackDecision({
+            clipModeActive: true,
+            lookupStatus: 'no-match',
+            webAudio: true,
+        }),
+        {
+            clipModeActive: true,
+            playerAction: 'playAudio',
+            shouldAutoplayClip: false,
+            tab: 'visualizer',
+        },
+    );
+});
+
+test('shouldExitLidaClipsModeForTab exits only when leaving clip playback surfaces', () => {
+    assert.equal(lidaClips.shouldExitLidaClipsModeForTab('clips'), false);
+    assert.equal(lidaClips.shouldExitLidaClipsModeForTab('visualizer'), false);
+    assert.equal(lidaClips.shouldExitLidaClipsModeForTab('queue'), true);
+    assert.equal(lidaClips.shouldExitLidaClipsModeForTab('related'), true);
+    assert.equal(lidaClips.shouldExitLidaClipsModeForTab('lyrics'), true);
+});
+
+test('shouldPauseAfterAutoNext keeps audio paused for clip-mode queue advancement', () => {
+    assert.equal(
+        lidaClips.shouldPauseAfterAutoNext({
+            keepPaused: true,
+            pauseOnNext: false,
+            shouldPause: false,
+        }),
+        true,
+    );
+    assert.equal(
+        lidaClips.shouldPauseAfterAutoNext({
+            keepPaused: false,
+            pauseOnNext: false,
+            shouldPause: false,
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldPauseAfterAutoNext({
+            keepPaused: false,
+            pauseOnNext: true,
+            shouldPause: false,
+        }),
+        true,
+    );
+});
+
+test('shouldStopLidaClipsModeAfterAutoNext stops only at queue boundaries or pause-on-next', () => {
+    assert.equal(
+        lidaClips.shouldStopLidaClipsModeAfterAutoNext({
+            hasNextSong: true,
+            pauseOnNext: false,
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldStopLidaClipsModeAfterAutoNext({
+            hasNextSong: false,
+            pauseOnNext: false,
+        }),
+        true,
+    );
+    assert.equal(
+        lidaClips.shouldStopLidaClipsModeAfterAutoNext({
+            hasNextSong: true,
+            pauseOnNext: true,
+        }),
+        true,
+    );
+});
+
 test('redactLidaClipsSecretsFromText removes API keys and proxy credentials', () => {
     const text =
         'X-Api-Key: secret-123 Authorization: ' +

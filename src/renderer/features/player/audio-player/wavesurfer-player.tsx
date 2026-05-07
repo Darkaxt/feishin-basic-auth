@@ -16,9 +16,12 @@ import {
     usePlayerData,
     usePlayerMuted,
     usePlayerProperties,
+    usePlayerStoreBase,
     usePlayerVolume,
 } from '/@/renderer/store';
+import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
 import { PlayerStatus, PlayerStyle } from '/@/shared/types/types';
+import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
 
 const PLAY_PAUSE_FADE_DURATION = 300;
 const PLAY_PAUSE_FADE_INTERVAL = 10;
@@ -146,27 +149,65 @@ export function WaveSurferPlayer() {
     );
 
     const handleOnEndedPlayer1 = useCallback(() => {
+        let nextStatus = PlayerStatus.PLAYING;
+        const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
+        const playerState = usePlayerStoreBase.getState();
+        const shouldStopClipMode =
+            clipModeActive &&
+            shouldStopLidaClipsModeAfterAutoNext({
+                hasNextSong: Boolean(playerState.getPlayerData().nextSong),
+                pauseOnNext: playerState.player.pauseOnNextSongEnd,
+            });
         const promise = new Promise((resolve) => {
-            mediaAutoNext();
+            const playerData = mediaAutoNext({
+                keepPaused: clipModeActive,
+            });
+            nextStatus = playerData.status;
             resolve(true);
         });
 
         promise.then(() => {
             playerRef.current?.player1()?.ref?.pause();
-            playerRef.current?.setVolume(volume);
+            if (nextStatus === PlayerStatus.PAUSED) {
+                playerRef.current?.setVolume(0);
+            } else {
+                playerRef.current?.setVolume(volume);
+            }
+            if (shouldStopClipMode) {
+                useFullScreenPlayerStore.getState().actions.setStore({ clipModeActive: false });
+            }
             setIsTransitioning(false);
         });
     }, [mediaAutoNext, volume]);
 
     const handleOnEndedPlayer2 = useCallback(() => {
+        let nextStatus = PlayerStatus.PLAYING;
+        const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
+        const playerState = usePlayerStoreBase.getState();
+        const shouldStopClipMode =
+            clipModeActive &&
+            shouldStopLidaClipsModeAfterAutoNext({
+                hasNextSong: Boolean(playerState.getPlayerData().nextSong),
+                pauseOnNext: playerState.player.pauseOnNextSongEnd,
+            });
         const promise = new Promise((resolve) => {
-            mediaAutoNext();
+            const playerData = mediaAutoNext({
+                keepPaused: clipModeActive,
+            });
+            nextStatus = playerData.status;
             resolve(true);
         });
 
         promise.then(() => {
             playerRef.current?.player2()?.ref?.pause();
-            playerRef.current?.setVolume(volume);
+            if (nextStatus === PlayerStatus.PAUSED) {
+                playerRef.current?.setVolume(0);
+            } else {
+                playerRef.current?.setVolume(volume);
+            }
+            if (shouldStopClipMode) {
+                useFullScreenPlayerStore.getState().actions.setStore({ clipModeActive: false });
+            }
             setIsTransitioning(false);
         });
     }, [mediaAutoNext, volume]);
