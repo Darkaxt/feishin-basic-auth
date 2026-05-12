@@ -6,6 +6,7 @@ const commands = [
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
     ['node', ['--test', 'scripts/tests/lidaclips.test.mjs']],
     ['node', ['--test', 'scripts/tests/default-playback.test.mjs']],
+    ['node', ['--test', 'scripts/tests/dependency-security.test.mjs']],
     [
         'node',
         [
