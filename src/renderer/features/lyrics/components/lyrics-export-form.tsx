@@ -89,7 +89,6 @@ ${contents}
                             data-autofocus
                             label={t('form.lyricsExport.input', {
                                 context: 'synced',
-                                postProcess: 'titleCase',
                             })}
                             {...form.getInputProps('synced', { type: 'checkbox' })}
                         />
@@ -97,7 +96,6 @@ ${contents}
                             data-autofocus
                             label={t('form.lyricsExport.input', {
                                 context: 'offset',
-                                postProcess: 'titleCase',
                             })}
                             {...form.getInputProps('offsetMs')}
                         />
@@ -108,10 +106,10 @@ ${contents}
             <Divider />
             <Group justify="flex-end">
                 <Button onClick={() => closeAllModals()} variant="default">
-                    {t('common.close', { postProcess: 'titleCase' })}
+                    {t('common.close')}
                 </Button>
                 <Button onClick={exportLyrics} variant="filled">
-                    {t('form.lyricsExport.export', { postProcess: 'titleCase' })}
+                    {t('form.lyricsExport.export')}
                 </Button>
             </Group>
         </Stack>
@@ -127,6 +125,6 @@ export const openLyricsExportModal = ({ lyrics, offsetMs, synced }: LyricsExport
                 height: '600px',
             },
         },
-        title: i18n.t('form.lyricSearch.title', { postProcess: 'titleCase' }) as string,
+        title: i18n.t('form.lyricSearch.title') as string,
     });
 };
