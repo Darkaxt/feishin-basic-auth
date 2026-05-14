@@ -68,6 +68,7 @@ import {
 } from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
 import { PlayerContext, usePlayer } from '/@/renderer/features/player/context/player-context';
+import { usePlayerStore } from '/@/renderer/store';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
@@ -1600,11 +1601,22 @@ const BaseItemTableList = ({
         ],
     );
 
+    const onShowPlayingSong = useCallback(() => {
+        const targetId = usePlayerStore.getState().getCurrentSong()?.id;
+        if (!targetId) return;
+        const index =
+            getItemIndex?.(targetId) ??
+            data.findIndex((item) => (item as null | { id?: string })?.id === targetId);
+        if (index === undefined || index < 0) return;
+        handleRef.current?.scrollToIndex(index, { align: 'center', behavior: 'auto' });
+    }, [data, getItemIndex]);
+
     useListHotkeys({
         controls,
         focused,
         internalState,
         itemType,
+        onShowPlayingSong,
     });
 
     const tableConfigValue = useMemo<ItemTableListConfig>(
