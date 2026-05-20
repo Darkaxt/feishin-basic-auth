@@ -1,6 +1,6 @@
 {
     "name": "feishin-basic-auth",
-    "version": "1.11.0-ba.12",
+    "version": "1.11.0-ba.13",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -151,7 +151,7 @@
         "semver": "^7.7.4",
         "string-to-color": "^2.2.2",
         "wavesurfer.js": "^7.12.5",
-        "ws": "^8.20.0",
+        "ws": "^8.20.1",
         "zod": "^3.25.76",
         "zustand": "^5.0.12"
     },

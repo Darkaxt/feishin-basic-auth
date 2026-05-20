@@ -14,7 +14,7 @@ This repository only tracks BasicAuth/proxy-auth changes carried by this fork.
       <img src="https://img.shields.io/github/license/Darkaxt/feishin-basic-auth?style=flat-square&color=brightgreen"
       alt="License">
     </a>
-      <a href="https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.12">
+      <a href="https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.13">
       <img src="https://img.shields.io/github/v/release/Darkaxt/feishin-basic-auth?include_prereleases&style=flat-square&color=blue"
       alt="Release">
     </a>
@@ -63,14 +63,14 @@ Current validation:
 
 ### Windows desktop prerelease
 
-Current prerelease: [v1.11.0-ba.12](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.12).
+Current prerelease: [v1.11.0-ba.13](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.11.0-ba.13).
 
 Download the latest Windows desktop prerelease from
 [this fork's releases](https://github.com/Darkaxt/feishin-basic-auth/releases). For most Windows
 systems, use
-[`Feishin-BasicAuth-1.11.0-ba.12-win-x64.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.12/Feishin-BasicAuth-1.11.0-ba.12-win-x64.exe).
+[`Feishin-BasicAuth-1.11.0-ba.13-win-x64.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.13/Feishin-BasicAuth-1.11.0-ba.13-win-x64.exe).
 The architecture-neutral Windows installer is
-[`Feishin-BasicAuth-1.11.0-ba.12-win.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.12/Feishin-BasicAuth-1.11.0-ba.12-win.exe).
+[`Feishin-BasicAuth-1.11.0-ba.13-win.exe`](https://github.com/Darkaxt/feishin-basic-auth/releases/download/v1.11.0-ba.13/Feishin-BasicAuth-1.11.0-ba.13-win.exe).
 
 This fork currently publishes Windows desktop prereleases only. macOS, Linux, Docker, web, Winget,
 and package-manager distributions are not published by this fork.
