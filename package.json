@@ -1,6 +1,6 @@
 {
     "name": "feishin-basic-auth",
-    "version": "1.11.0-ba.13",
+    "version": "1.11.0-ba.14",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -135,7 +135,7 @@
         "node-mpv": "github:jeffvli/Node-MPV#32b4d64395289ad710c41d481d2707a7acfc228f",
         "overlayscrollbars": "^2.14.0",
         "overlayscrollbars-react": "^0.5.6",
-        "qs": "^6.15.0",
+        "qs": "^6.15.2",
         "react": "^19.2.4",
         "react-call": "^1.8.2",
         "react-dom": "^19.2.4",
