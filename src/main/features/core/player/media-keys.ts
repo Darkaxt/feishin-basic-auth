@@ -1,8 +1,8 @@
 import { BrowserWindow, globalShortcut, systemPreferences } from 'electron';
 
-import { isLinux, isMacOS } from '../../../utils';
 import { store } from '../settings';
 
+import { isLinux, isMacOS } from '/@/main/env';
 import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
 import { PlayerType } from '/@/shared/types/types';
 

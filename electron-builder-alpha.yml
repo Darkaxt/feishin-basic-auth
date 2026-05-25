@@ -1,7 +1,7 @@
 appId: eu.remaxku.feishin.basicauth
 productName: Feishin BasicAuth
 artifactName: Feishin-BasicAuth-${version}-${os}-${arch}.${ext}
-electronVersion: 39.4.0
+electronVersion: 41.7.0
 directories:
     buildResources: assets
 files:

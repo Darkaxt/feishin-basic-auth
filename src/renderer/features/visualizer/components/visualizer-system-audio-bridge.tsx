@@ -25,6 +25,21 @@ const CONSENT_GRANTED_KEY = 'visualizer_system_audio_consent_granted';
 
 export function VisualizerSystemAudioBridgeHook() {
     const playbackType = usePlaybackType();
+    const isVisualizerSurfaceVisible = useIsLocalVisualizerSurfaceVisible();
+
+    useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
+
+        const shouldReportVisible = playbackType === PlayerType.LOCAL && isVisualizerSurfaceVisible;
+
+        window.api.visualizer.setLocalSurfaceVisible(shouldReportVisible);
+
+        return () => {
+            window.api.visualizer.setLocalSurfaceVisible(false);
+        };
+    }, [playbackType, isVisualizerSurfaceVisible]);
 
     if (!isElectron() || playbackType !== PlayerType.LOCAL) {
         return null;
