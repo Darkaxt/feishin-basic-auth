@@ -475,6 +475,7 @@ const similarSongs2 = z.object({
 export enum SubsonicExtensions {
     FORM_POST = 'formPost',
     INDEX_BASED_QUEUE = 'indexBasedQueue',
+    PLAYBACK_REPORT = 'playbackReport',
     SONG_LYRICS = 'songLyrics',
     TRANSCODE_OFFSET = 'transcodeOffset',
     TRANSCODING = 'transcoding',
@@ -814,6 +815,17 @@ const getInternetRadioStations = z.object({
         .optional(),
 });
 
+const reportPlaybackParameters = z.object({
+    ignoreScrobble: z.boolean().optional(),
+    mediaId: z.string(),
+    mediaType: z.enum(['song', 'podcast']),
+    playbackRate: z.number().optional(),
+    positionMs: z.number(),
+    state: z.enum(['starting', 'playing', 'paused', 'stopped']),
+});
+
+const reportPlayback = z.null();
+
 export const ssType = {
     _body: {
         getTranscodeDecision: transcodeDecisionRequestBody,
@@ -845,6 +857,7 @@ export const ssType = {
         getTranscodeStream: getTranscodeStreamParameters,
         randomSongList: randomSongListParameters,
         removeFavorite: removeFavoriteParameters,
+        reportPlayback: reportPlaybackParameters,
         savePlayQueueByIndex: savePlayQueueByIndexParameters,
         saveQueue: saveQueueParameters,
         scrobble: scrobbleParameters,
@@ -898,6 +911,7 @@ export const ssType = {
         playQueueByIndex,
         randomSongList,
         removeFavorite,
+        reportPlayback,
         saveQueue,
         scrobble,
         search3,
