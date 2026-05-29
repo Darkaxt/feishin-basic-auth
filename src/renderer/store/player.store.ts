@@ -224,7 +224,7 @@ function calculateNextIndex(
     } else {
         // Repeat none: move to next track, or pause if at the end
         if (isLastTrack) {
-            return { nextIndex: 0, shouldPause: true };
+            return { nextIndex: currentIndex, shouldPause: true };
         } else {
             return { nextIndex: currentIndex + 1, shouldPause: false };
         }
@@ -945,10 +945,12 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     })
                         ? PlayerStatus.PAUSED
                         : PlayerStatus.PLAYING;
+                    const shouldKeepCurrentPlayer = newStatus === PlayerStatus.PAUSED;
+                    const shouldSwapPlayer = !isRepeatOneSameTrack && !shouldKeepCurrentPlayer;
 
                     set((state) => {
                         state.player.index = nextPlaybackIndex;
-                        state.player.playerNum = newPlayerNum;
+                        state.player.playerNum = shouldSwapPlayer ? newPlayerNum : player.playerNum;
                         setTimestampStore(0);
                         state.player.status = newStatus;
 
@@ -1005,7 +1007,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     }
 
                     const { player1, player2 } = getDualPlayerSongs(
-                        newPlayerNum,
+                        shouldSwapPlayer ? newPlayerNum : player.playerNum,
                         currentSong,
                         nextSong,
                         repeat,
@@ -1015,7 +1017,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         currentSong,
                         index: currentQueueIndex,
                         nextSong,
-                        num: newPlayerNum,
+                        num: shouldSwapPlayer ? newPlayerNum : player.playerNum,
                         player1,
                         player2,
                         previousSong,

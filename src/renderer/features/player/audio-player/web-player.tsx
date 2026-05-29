@@ -155,6 +155,7 @@ export function WebPlayer() {
                     gaplessHandler({
                         currentTime: e.playedSeconds,
                         duration: getDuration(playerRef.current.player1().ref),
+                        hasNextSong: Boolean(player2),
                         isFlac: false,
                         isTransitioning,
                         nextPlayer: playerRef.current.player2(),
@@ -208,6 +209,7 @@ export function WebPlayer() {
                     gaplessHandler({
                         currentTime: e.playedSeconds,
                         duration: getDuration(playerRef.current.player2().ref),
+                        hasNextSong: Boolean(player1),
                         isFlac: false,
                         isTransitioning,
                         nextPlayer: playerRef.current.player1(),
@@ -710,6 +712,7 @@ function exponentialEaseOut(t: number): number {
 function gaplessHandler(args: {
     currentTime: number;
     duration: number;
+    hasNextSong: boolean;
     isFlac: boolean;
     isTransitioning: boolean | string;
     nextPlayer: {
@@ -718,7 +721,19 @@ function gaplessHandler(args: {
     };
     setIsTransitioning: Dispatch<boolean | string>;
 }) {
-    const { currentTime, duration, isFlac, isTransitioning, nextPlayer, setIsTransitioning } = args;
+    const {
+        currentTime,
+        duration,
+        hasNextSong,
+        isFlac,
+        isTransitioning,
+        nextPlayer,
+        setIsTransitioning,
+    } = args;
+
+    if (!hasNextSong) {
+        return null;
+    }
 
     if (!isTransitioning) {
         if (currentTime > duration - 2) {
