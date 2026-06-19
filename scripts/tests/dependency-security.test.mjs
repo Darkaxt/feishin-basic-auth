@@ -13,7 +13,7 @@ test('pnpm lockfile does not pin vulnerable fast-xml-builder versions', () => {
 });
 
 test('pnpm lockfile does not pin vulnerable tmp versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}tmp@0\.2\.[0-5]:$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}tmp@0\.2\.[0-6]:$/mu);
 });
 
 test('pnpm lockfile does not pin vulnerable brace-expansion 5.x versions', () => {
@@ -22,4 +22,18 @@ test('pnpm lockfile does not pin vulnerable brace-expansion 5.x versions', () =>
 
 test('pnpm lockfile does not pin vulnerable react-router versions', () => {
     assert.doesNotMatch(lockfile, /^\s{2}react-router@7\.(?:[0-9]|1[0-4])\./mu);
+    assert.doesNotMatch(lockfile, /^\s{2}react-router@7\.15\.0:/mu);
+});
+
+test('pnpm lockfile does not pin vulnerable dompurify versions', () => {
+    assert.doesNotMatch(lockfile, /^\s{2}dompurify@3\.4\.(?:[0-9]|10):$/mu);
+});
+
+test('pnpm lockfile does not pin vulnerable esbuild versions', () => {
+    assert.doesNotMatch(lockfile, /^\s{2}esbuild@0\.(?:1[7-9]|2[0-7])\./mu);
+    assert.doesNotMatch(lockfile, /^\s{2}esbuild@0\.28\.0:/mu);
+});
+
+test('pnpm lockfile does not pin vulnerable shell-quote versions', () => {
+    assert.doesNotMatch(lockfile, /^\s{2}shell-quote@1\.(?:[0-7]\.|8\.[0-3]:)/mu);
 });
