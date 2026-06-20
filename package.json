@@ -1,6 +1,6 @@
 {
     "name": "feishin-basic-auth",
-    "version": "1.13.0-ba.2",
+    "version": "1.13.0-ba.3",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -86,6 +86,7 @@
         "serialize-javascript": "7.0.5",
         "shell-quote": "1.8.4",
         "tmp": "0.2.7",
+        "undici": "6.27.0",
         "xml2js": "0.5.0",
         "yaml": "2.8.3"
     },

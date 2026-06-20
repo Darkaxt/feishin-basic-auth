@@ -37,3 +37,7 @@ test('pnpm lockfile does not pin vulnerable esbuild versions', () => {
 test('pnpm lockfile does not pin vulnerable shell-quote versions', () => {
     assert.doesNotMatch(lockfile, /^\s{2}shell-quote@1\.(?:[0-7]\.|8\.[0-3]:)/mu);
 });
+
+test('pnpm lockfile does not pin vulnerable undici versions', () => {
+    assert.doesNotMatch(lockfile, /^\s{2}undici@6\.(?:[0-9]|1[0-9]|2[0-6])\./mu);
+});
