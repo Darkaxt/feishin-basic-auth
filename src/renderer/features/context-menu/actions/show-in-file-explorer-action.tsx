@@ -2,9 +2,9 @@ import isElectron from 'is-electron';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { resolveSongPath } from '/@/renderer/utils/resolve-song-path';
 import { ContextMenu } from '/@/shared/components/context-menu/context-menu';
 import { toast } from '/@/shared/components/toast/toast';
-import { resolveSongPath } from '/@/renderer/utils/resolve-song-path';
 import { QueueSong, Song } from '/@/shared/types/domain-types';
 
 interface ShowInFileExplorerActionProps {
