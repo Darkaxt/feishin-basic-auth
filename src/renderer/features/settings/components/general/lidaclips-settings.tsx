@@ -10,11 +10,16 @@ import { useLidaClipsSettings, useSettingsStoreActions } from '/@/renderer/store
 import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
 import { PasswordInput } from '/@/shared/components/password-input/password-input';
+import { SegmentedControl } from '/@/shared/components/segmented-control/segmented-control';
 import { Stack } from '/@/shared/components/stack/stack';
 import { Switch } from '/@/shared/components/switch/switch';
 import { TextInput } from '/@/shared/components/text-input/text-input';
 import { toast } from '/@/shared/components/toast/toast';
-import { LidaClipsSecretState } from '/@/shared/utils/lidaclips';
+import {
+    LIDA_CLIPS_AMBIENT_SYNC_MODE,
+    LIDA_CLIPS_DISPLAY_MODE,
+    LidaClipsSecretState,
+} from '/@/shared/utils/lidaclips';
 
 const lidaClips = isElectron() ? window.api.lidaClips : null;
 
@@ -28,6 +33,26 @@ export const LidaClipsSettings = memo(() => {
     const { setSettings } = useSettingsStoreActions();
     const [secretState, setSecretState] = useState<LidaClipsSecretState>(emptySecretState);
     const [apiKey, setApiKey] = useState('');
+    const displayModeOptions = [
+        {
+            label: t('setting.lidaClipsDisplayModePlayer'),
+            value: LIDA_CLIPS_DISPLAY_MODE.PLAYER,
+        },
+        {
+            label: t('setting.lidaClipsDisplayModeAmbientBackground'),
+            value: LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+        },
+    ];
+    const ambientSyncModeOptions = [
+        {
+            label: t('setting.lidaClipsAmbientSyncModeNatural'),
+            value: LIDA_CLIPS_AMBIENT_SYNC_MODE.NATURAL,
+        },
+        {
+            label: t('setting.lidaClipsAmbientSyncModeFitSong'),
+            value: LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG,
+        },
+    ];
 
     const refreshSecretState = useCallback(async () => {
         const state = await lidaClips?.getSecretState();
@@ -97,6 +122,47 @@ export const LidaClipsSettings = memo(() => {
             }),
             isHidden: !isElectron(),
             title: t('setting.lidaClipsBaseUrl', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <SegmentedControl
+                    aria-label={t('setting.lidaClipsDisplayMode')}
+                    data={displayModeOptions}
+                    onChange={(value) =>
+                        updateSetting({
+                            displayMode: value as (typeof settings)['displayMode'],
+                        })
+                    }
+                    value={settings.displayMode}
+                />
+            ),
+            description: t('setting.lidaClipsDisplayMode', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden: !isElectron(),
+            title: t('setting.lidaClipsDisplayMode', { postProcess: 'sentenceCase' }),
+        },
+        {
+            control: (
+                <SegmentedControl
+                    aria-label={t('setting.lidaClipsAmbientSyncMode')}
+                    data={ambientSyncModeOptions}
+                    onChange={(value) =>
+                        updateSetting({
+                            ambientSyncMode: value as (typeof settings)['ambientSyncMode'],
+                        })
+                    }
+                    value={settings.ambientSyncMode}
+                />
+            ),
+            description: t('setting.lidaClipsAmbientSyncMode', {
+                context: 'description',
+                postProcess: 'sentenceCase',
+            }),
+            isHidden:
+                !isElectron || settings.displayMode !== LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+            title: t('setting.lidaClipsAmbientSyncMode', { postProcess: 'sentenceCase' }),
         },
         {
             control: (

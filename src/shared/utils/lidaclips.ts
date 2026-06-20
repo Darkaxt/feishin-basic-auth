@@ -1,5 +1,21 @@
 export const LIDACLIPS_API_KEY_SECRET_KEY = 'lidaclips:api-key';
 
+export const LIDA_CLIPS_DISPLAY_MODE = {
+    AMBIENT_BACKGROUND: 'ambientBackground',
+    PLAYER: 'player',
+} as const;
+
+export type LidaClipsDisplayMode =
+    (typeof LIDA_CLIPS_DISPLAY_MODE)[keyof typeof LIDA_CLIPS_DISPLAY_MODE];
+
+export const LIDA_CLIPS_AMBIENT_SYNC_MODE = {
+    FIT_SONG: 'fitSong',
+    NATURAL: 'natural',
+} as const;
+
+export type LidaClipsAmbientSyncMode =
+    (typeof LIDA_CLIPS_AMBIENT_SYNC_MODE)[keyof typeof LIDA_CLIPS_AMBIENT_SYNC_MODE];
+
 export type LidaClipsClip = {
     album?: null | string;
     artist?: null | string;
@@ -55,7 +71,9 @@ export type LidaClipsServerProxyAuthSource = {
 };
 
 export type LidaClipsSettings = {
+    ambientSyncMode: LidaClipsAmbientSyncMode;
     baseUrl: string;
+    displayMode: LidaClipsDisplayMode;
     enabled: boolean;
 };
 
@@ -93,6 +111,8 @@ type ServerProxyAuthLike = {
 
 const HTTP_PROTOCOLS = new Set(['http:', 'https:']);
 const SERVER_PROXY_BASIC_AUTH_SECRET_PREFIX = 'proxy-basic-auth';
+const AMBIENT_MIN_PLAYBACK_RATE = 0.75;
+const AMBIENT_MAX_PLAYBACK_RATE = 1.5;
 const STREAM_FORWARD_HEADERS = new Set([
     'if-match',
     'if-modified-since',
@@ -270,8 +290,96 @@ export const selectLidaClipsStreamRequestHeaders = (
     return forwardedHeaders;
 };
 
-export const shouldShowLidaClipsTab = (settings: Pick<LidaClipsSettings, 'enabled'>): boolean => {
-    return settings.enabled;
+export const shouldShowLidaClipsTab = (
+    settings: Partial<Pick<LidaClipsSettings, 'displayMode'>> &
+        Pick<LidaClipsSettings, 'enabled'> & {
+            lookupStatus?: LidaClipsLookupResult['status'];
+        },
+): boolean => {
+    return settings.enabled && settings.lookupStatus === 'ok';
+};
+
+export const sanitizeLidaClipsRuntimeState = <
+    T extends {
+        clipModeActive?: unknown;
+        clipModeTransferRatio?: unknown;
+        clipModeTransferSongUniqueId?: unknown;
+    },
+>(
+    state: T,
+): T & {
+    clipModeActive: false;
+    clipModeTransferRatio: null;
+    clipModeTransferSongUniqueId: null;
+} => {
+    return {
+        ...state,
+        clipModeActive: false,
+        clipModeTransferRatio: null,
+        clipModeTransferSongUniqueId: null,
+    };
+};
+
+export const shouldUseLidaClipsAmbientBackground = ({
+    dynamicBackground,
+    enabled,
+    mode,
+    status,
+}: {
+    dynamicBackground: boolean;
+    enabled: boolean;
+    mode: LidaClipsDisplayMode;
+    status?: LidaClipsLookupResult['status'];
+}): boolean => {
+    return (
+        enabled &&
+        dynamicBackground &&
+        mode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND &&
+        status === 'ok'
+    );
+};
+
+const clamp = (value: number, min: number, max: number): number => {
+    return Math.max(min, Math.min(max, value));
+};
+
+export const mapLidaClipsProgress = ({
+    sourceCurrentTime,
+    sourceDuration,
+    targetDuration,
+}: {
+    sourceCurrentTime: number;
+    sourceDuration: number;
+    targetDuration: number;
+}): number => {
+    if (sourceDuration <= 0 || targetDuration <= 0) {
+        return 0;
+    }
+
+    const progress = clamp(sourceCurrentTime / sourceDuration, 0, 1);
+    return progress * targetDuration;
+};
+
+export const getLidaClipsAmbientPlaybackRate = ({
+    clipDuration,
+    mode,
+    songDuration,
+}: {
+    clipDuration?: null | number;
+    mode: LidaClipsAmbientSyncMode;
+    songDuration?: null | number;
+}): number => {
+    if (
+        mode !== LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG ||
+        !clipDuration ||
+        !songDuration ||
+        clipDuration <= 0 ||
+        songDuration <= 0
+    ) {
+        return 1;
+    }
+
+    return clamp(clipDuration / songDuration, AMBIENT_MIN_PLAYBACK_RATE, AMBIENT_MAX_PLAYBACK_RATE);
 };
 
 export const getLidaClipsFallbackTab = ({

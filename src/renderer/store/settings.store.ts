@@ -41,6 +41,7 @@ import {
     PlayerType,
     TableColumn,
 } from '/@/shared/types/types';
+import { LIDA_CLIPS_AMBIENT_SYNC_MODE, LIDA_CLIPS_DISPLAY_MODE } from '/@/shared/utils/lidaclips';
 
 const utils = isElectron() ? window.api.utils : null;
 
@@ -590,7 +591,15 @@ const LyricsSettingsSchema = z.object({
 });
 
 const LidaClipsSettingsSchema = z.object({
+    ambientSyncMode: z.enum([
+        LIDA_CLIPS_AMBIENT_SYNC_MODE.NATURAL,
+        LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG,
+    ]),
     baseUrl: z.string(),
+    displayMode: z.enum([
+        LIDA_CLIPS_DISPLAY_MODE.PLAYER,
+        LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+    ]),
     enabled: z.boolean(),
 });
 
@@ -1304,7 +1313,9 @@ const initialState: SettingsState = {
         globalMediaHotkeys: true,
     },
     lidaClips: {
+        ambientSyncMode: LIDA_CLIPS_AMBIENT_SYNC_MODE.NATURAL,
         baseUrl: '',
+        displayMode: LIDA_CLIPS_DISPLAY_MODE.PLAYER,
         enabled: false,
     },
     lists: {
@@ -2513,25 +2524,47 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     state.playback.type = DEFAULT_DESKTOP_PLAYER_TYPE;
                 }
 
-                if (version <= 28) {
-                    state.lidaClips = initialState.lidaClips;
-                }
-
-                if (version <= 29) {
-                    const lidaClips = state.lidaClips as
+                const normalizeLidaClipsSettings = (
+                    lidaClips:
                         | undefined
-                        | { baseUrl?: unknown; enabled?: unknown };
+                        | {
+                              ambientSyncMode?: unknown;
+                              baseUrl?: unknown;
+                              displayMode?: unknown;
+                              enabled?: unknown;
+                          },
+                ) => {
+                    const displayMode =
+                        lidaClips?.displayMode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND ||
+                        lidaClips?.displayMode === LIDA_CLIPS_DISPLAY_MODE.PLAYER
+                            ? lidaClips.displayMode
+                            : initialState.lidaClips.displayMode;
+                    const ambientSyncMode =
+                        lidaClips?.ambientSyncMode === LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG ||
+                        lidaClips?.ambientSyncMode === LIDA_CLIPS_AMBIENT_SYNC_MODE.NATURAL
+                            ? lidaClips.ambientSyncMode
+                            : initialState.lidaClips.ambientSyncMode;
 
-                    state.lidaClips = {
+                    return {
+                        ambientSyncMode,
                         baseUrl:
                             typeof lidaClips?.baseUrl === 'string'
                                 ? lidaClips.baseUrl
                                 : initialState.lidaClips.baseUrl,
+                        displayMode,
                         enabled:
                             typeof lidaClips?.enabled === 'boolean'
                                 ? lidaClips.enabled
                                 : initialState.lidaClips.enabled,
                     };
+                };
+
+                if (version <= 28) {
+                    state.lidaClips = initialState.lidaClips;
+                }
+
+                if (version <= 29) {
+                    state.lidaClips = normalizeLidaClipsSettings(state.lidaClips);
                 }
 
                 if (version <= 30) {
@@ -2565,10 +2598,14 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     );
                 }
 
+                if (version <= 31) {
+                    state.lidaClips = normalizeLidaClipsSettings(state.lidaClips);
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 31,
+            version: 32,
         },
     ),
 );

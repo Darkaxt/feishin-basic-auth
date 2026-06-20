@@ -113,6 +113,8 @@ const SIDEBAR_PLAYLIST_FOLDER_VIEWS = new Set(['navigation', 'single', 'tree']);
 const SIDEBAR_PLAYLIST_MODES = new Set(['compact', 'expanded']);
 const AUTO_DJ_MODES = new Set(['albums', 'songs']);
 const AUTO_DJ_STRATEGIES = new Set(['library_random', 'similar']);
+const LIDACLIPS_DISPLAY_MODES = new Set(['ambientBackground', 'player']);
+const LIDACLIPS_AMBIENT_SYNC_MODES = new Set(['fitSong', 'natural']);
 
 export type EnvSettingsOverrides = DeepPartial<
     Pick<
@@ -417,6 +419,18 @@ const ENV_SETTING_SPECS: EnvSettingSpec[] = [
     { key: 'FS_LYRICS_TRANSLATION_API_KEY', path: ['lyrics', 'translationApiKey'], type: 'string' },
     { key: 'FS_LIDACLIPS_ENABLED', path: ['lidaClips', 'enabled'], type: 'bool' },
     { key: 'FS_LIDACLIPS_BASE_URL', path: ['lidaClips', 'baseUrl'], type: 'string' },
+    {
+        enumSet: LIDACLIPS_DISPLAY_MODES,
+        key: 'FS_LIDACLIPS_DISPLAY_MODE',
+        path: ['lidaClips', 'displayMode'],
+        type: 'enum',
+    },
+    {
+        enumSet: LIDACLIPS_AMBIENT_SYNC_MODES,
+        key: 'FS_LIDACLIPS_AMBIENT_SYNC_MODE',
+        path: ['lidaClips', 'ambientSyncMode'],
+        type: 'enum',
+    },
     {
         key: 'FS_LYRICS_TRANSLATION_TARGET_LANGUAGE',
         path: ['lyrics', 'translationTargetLanguage'],

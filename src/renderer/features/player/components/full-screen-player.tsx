@@ -15,6 +15,7 @@ import styles from './full-screen-player.module.css';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import { LidaClipsAmbientBackground } from '/@/renderer/features/lidaclips/components/lidaclips-ambient-background';
 import { FullScreenPlayerImage } from '/@/renderer/features/player/components/full-screen-player-image';
 import { FullScreenPlayerQueue } from '/@/renderer/features/player/components/full-screen-player-queue';
 import {
@@ -612,6 +613,7 @@ const PlayerContainer = memo(
                     dynamicBackground={dynamicBackground}
                     dynamicIsImage={dynamicIsImage}
                 />
+                <LidaClipsAmbientBackground dynamicBackground={dynamicBackground} />
                 {children}
             </motion.div>
         );

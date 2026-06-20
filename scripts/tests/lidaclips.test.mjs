@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import test from 'node:test';
 
 const lidaClips = await import('../../src/shared/utils/lidaclips.ts');
@@ -128,9 +130,167 @@ test('rankLidaClips prefers official, then score, then newest update', () => {
     );
 });
 
-test('shouldShowLidaClipsTab hides the tab when disabled', () => {
+test('shouldShowLidaClipsTab keeps the tab available when ambient background is enabled', () => {
     assert.equal(lidaClips.shouldShowLidaClipsTab({ enabled: false }), false);
-    assert.equal(lidaClips.shouldShowLidaClipsTab({ enabled: true }), true);
+    assert.equal(
+        lidaClips.shouldShowLidaClipsTab({
+            displayMode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.PLAYER,
+            enabled: true,
+            lookupStatus: 'ok',
+        }),
+        true,
+    );
+    assert.equal(
+        lidaClips.shouldShowLidaClipsTab({
+            displayMode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+            enabled: true,
+            lookupStatus: 'ok',
+        }),
+        true,
+    );
+});
+
+test('shouldShowLidaClipsTab hides loading and no-match tracks', () => {
+    assert.equal(
+        lidaClips.shouldShowLidaClipsTab({
+            enabled: true,
+            lookupStatus: undefined,
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldShowLidaClipsTab({
+            enabled: true,
+            lookupStatus: 'no-match',
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldShowLidaClipsTab({
+            enabled: true,
+            lookupStatus: 'error',
+        }),
+        false,
+    );
+});
+
+test('shouldUseLidaClipsAmbientBackground requires enabled ambient mode and dynamic background', () => {
+    assert.equal(
+        lidaClips.shouldUseLidaClipsAmbientBackground({
+            dynamicBackground: true,
+            enabled: true,
+            mode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+            status: 'ok',
+        }),
+        true,
+    );
+    assert.equal(
+        lidaClips.shouldUseLidaClipsAmbientBackground({
+            dynamicBackground: false,
+            enabled: true,
+            mode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+            status: 'ok',
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldUseLidaClipsAmbientBackground({
+            dynamicBackground: true,
+            enabled: true,
+            mode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.PLAYER,
+            status: 'ok',
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldUseLidaClipsAmbientBackground({
+            dynamicBackground: true,
+            enabled: true,
+            mode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+            status: 'no-match',
+        }),
+        false,
+    );
+});
+
+test('fullscreen background video layer stays above album art and below overlay', () => {
+    const css = readFileSync(
+        resolve('src/renderer/features/player/components/full-screen-player.module.css'),
+        'utf8',
+    );
+    const zIndexes = {};
+
+    for (const className of ['background-image', 'background-video', 'background-image-overlay']) {
+        const match = css.match(new RegExp(`\\.${className}\\s*\\{[^}]*z-index:\\s*(-?\\d+)`, 'm'));
+
+        assert.ok(match, `missing z-index for ${className}`);
+        zIndexes[className] = Number(match[1]);
+    }
+
+    assert.ok(zIndexes['background-video'] > zIndexes['background-image']);
+    assert.ok(zIndexes['background-image-overlay'] > zIndexes['background-video']);
+});
+
+test('mapLidaClipsProgress maps percentage between song and clip durations', () => {
+    assert.equal(
+        lidaClips.mapLidaClipsProgress({
+            sourceCurrentTime: 90,
+            sourceDuration: 180,
+            targetDuration: 300,
+        }),
+        150,
+    );
+    assert.equal(
+        lidaClips.mapLidaClipsProgress({
+            sourceCurrentTime: 999,
+            sourceDuration: 180,
+            targetDuration: 300,
+        }),
+        300,
+    );
+    assert.equal(
+        lidaClips.mapLidaClipsProgress({
+            sourceCurrentTime: 90,
+            sourceDuration: 0,
+            targetDuration: 300,
+        }),
+        0,
+    );
+});
+
+test('getLidaClipsAmbientPlaybackRate plays naturally by default and bounds fit-to-song mode', () => {
+    assert.equal(
+        lidaClips.getLidaClipsAmbientPlaybackRate({
+            clipDuration: 300,
+            mode: lidaClips.LIDA_CLIPS_AMBIENT_SYNC_MODE.NATURAL,
+            songDuration: 180,
+        }),
+        1,
+    );
+    assert.equal(
+        lidaClips.getLidaClipsAmbientPlaybackRate({
+            clipDuration: 210,
+            mode: lidaClips.LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG,
+            songDuration: 180,
+        }),
+        210 / 180,
+    );
+    assert.equal(
+        lidaClips.getLidaClipsAmbientPlaybackRate({
+            clipDuration: 600,
+            mode: lidaClips.LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG,
+            songDuration: 180,
+        }),
+        1.5,
+    );
+    assert.equal(
+        lidaClips.getLidaClipsAmbientPlaybackRate({
+            clipDuration: 90,
+            mode: lidaClips.LIDA_CLIPS_AMBIENT_SYNC_MODE.FIT_SONG,
+            songDuration: 180,
+        }),
+        0.75,
+    );
 });
 
 test('getLidaClipsFallbackTab prefers visualizer when web audio is available', () => {
@@ -174,6 +334,25 @@ test('shouldExitLidaClipsModeForTab exits only when leaving clip playback surfac
     assert.equal(lidaClips.shouldExitLidaClipsModeForTab('queue'), true);
     assert.equal(lidaClips.shouldExitLidaClipsModeForTab('related'), true);
     assert.equal(lidaClips.shouldExitLidaClipsModeForTab('lyrics'), true);
+});
+
+test('sanitizeLidaClipsRuntimeState clears sticky playback flags before persistence', () => {
+    assert.deepEqual(
+        lidaClips.sanitizeLidaClipsRuntimeState({
+            activeTab: 'clips',
+            clipModeActive: true,
+            clipModeTransferRatio: 0.5,
+            clipModeTransferSongUniqueId: 'song-1',
+            dynamicBackground: true,
+        }),
+        {
+            activeTab: 'clips',
+            clipModeActive: false,
+            clipModeTransferRatio: null,
+            clipModeTransferSongUniqueId: null,
+            dynamicBackground: true,
+        },
+    );
 });
 
 test('shouldPauseAfterAutoNext keeps audio paused for clip-mode queue advancement', () => {

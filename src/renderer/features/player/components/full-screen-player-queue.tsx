@@ -9,6 +9,7 @@ import {
     LidaClipsPanel,
     LidaClipsPlaybackCoordinator,
 } from '/@/renderer/features/lidaclips/components/lidaclips-panel';
+import { useLidaClipsCurrentSongLookup } from '/@/renderer/features/lidaclips/hooks/use-lidaclips-current-song-lookup';
 import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { FullScreenSimilarSongs } from '/@/renderer/features/player/components/full-screen-similar-songs';
@@ -40,7 +41,11 @@ export const FullScreenPlayerQueue = () => {
     const { setStore } = useFullScreenPlayerStoreActions();
     const { webAudio } = usePlaybackSettings();
     const lidaClipsSettings = useLidaClipsSettings();
-    const showLidaClipsTab = shouldShowLidaClipsTab(lidaClipsSettings);
+    const { data: lidaClipsData } = useLidaClipsCurrentSongLookup(lidaClipsSettings.enabled);
+    const showLidaClipsTab = shouldShowLidaClipsTab({
+        ...lidaClipsSettings,
+        lookupStatus: lidaClipsData?.status,
+    });
     const visualizerType = useSettingsStore((store) => store.visualizer.type);
 
     useEffect(() => {
@@ -119,7 +124,7 @@ export const FullScreenPlayerQueue = () => {
                 } as CSSProperties
             }
         >
-            {showLidaClipsTab ? <LidaClipsPlaybackCoordinator /> : null}
+            {lidaClipsSettings.enabled ? <LidaClipsPlaybackCoordinator /> : null}
             <Group
                 align="center"
                 className="full-screen-player-queue-header"

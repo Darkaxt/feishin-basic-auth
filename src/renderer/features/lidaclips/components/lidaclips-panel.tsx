@@ -1,21 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { SyntheticEvent, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './lidaclips-panel.module.css';
 
-import {
-    getLidaClipsQueryFromSong,
-    lidaClipsQueries,
-} from '/@/renderer/features/lidaclips/api/lidaclips-api';
+import { useLidaClipsCurrentSongLookup } from '/@/renderer/features/lidaclips/hooks/use-lidaclips-current-song-lookup';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
-    useAuthStore,
-    useLidaClipsSettings,
     usePlaybackSettings,
     usePlayerActions,
-    usePlayerSong,
+    usePlayerDuration,
     usePlayerStoreBase,
+    usePlayerTimestamp,
+    useSettingsStore,
 } from '/@/renderer/store';
 import {
     useFullScreenPlayerStore,
@@ -25,46 +21,12 @@ import { Center } from '/@/shared/components/center/center';
 import { Spinner } from '/@/shared/components/spinner/spinner';
 import { Text } from '/@/shared/components/text/text';
 import {
-    createLidaClipsProxyAuthSourceFromServer,
     getLidaClipsFallbackTab,
     getLidaClipsPlaybackDecision,
+    LIDA_CLIPS_DISPLAY_MODE,
+    mapLidaClipsProgress,
     shouldStopLidaClipsModeAfterAutoNext,
 } from '/@/shared/utils/lidaclips';
-
-const useLidaClipsCurrentSongLookup = (enabled: boolean) => {
-    const currentSong = usePlayerSong();
-    const settings = useLidaClipsSettings();
-    const songServer = useAuthStore((state) =>
-        currentSong?._serverId ? state.serverList[currentSong._serverId] : null,
-    );
-
-    const lookupQuery = useMemo(() => getLidaClipsQueryFromSong(currentSong), [currentSong]);
-    const proxyAuth = useMemo(
-        () => createLidaClipsProxyAuthSourceFromServer(songServer),
-        [songServer],
-    );
-
-    const { data, isLoading } = useQuery(
-        lidaClipsQueries.clip({
-            options: {
-                enabled: Boolean(enabled && settings.enabled && lookupQuery),
-            },
-            proxyAuth,
-            query: lookupQuery ?? { album: '', artist: '', track: '' },
-            settings,
-        }),
-    );
-    const clipStreamUrl = data?.status === 'ok' ? data.clip.localStreamUrl : null;
-
-    return {
-        clipStreamUrl,
-        currentSong,
-        data,
-        isLoading,
-        lookupQuery,
-        settings,
-    };
-};
 
 export const LidaClipsPlaybackCoordinator = () => {
     const { clipModeActive } = useFullScreenPlayerStore();
@@ -138,10 +100,13 @@ export const LidaClipsPlaybackCoordinator = () => {
 export const LidaClipsPanel = () => {
     const { t } = useTranslation();
     const videoRef = useRef<HTMLVideoElement>(null);
-    const { activeTab, clipModeActive } = useFullScreenPlayerStore();
+    const { activeTab, clipModeActive, clipModeTransferRatio, clipModeTransferSongUniqueId } =
+        useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { mediaPause } = usePlayer();
     const { mediaAutoNext } = usePlayerActions();
+    const playerTimestamp = usePlayerTimestamp();
+    const songDuration = usePlayerDuration();
     const { clipStreamUrl, currentSong, data, isLoading, lookupQuery, settings } =
         useLidaClipsCurrentSongLookup(true);
 
@@ -164,6 +129,76 @@ export const LidaClipsPanel = () => {
         }
     }, [mediaAutoNext, setStore]);
 
+    const handleVideoLoadedMetadata = useCallback(
+        (event: SyntheticEvent<HTMLVideoElement>) => {
+            if (
+                !Number.isFinite(event.currentTarget.duration) ||
+                event.currentTarget.duration <= 0
+            ) {
+                return;
+            }
+
+            if (
+                clipModeTransferRatio !== null &&
+                clipModeTransferRatio !== undefined &&
+                clipModeTransferSongUniqueId === currentSong?._uniqueId
+            ) {
+                event.currentTarget.currentTime = mapLidaClipsProgress({
+                    sourceCurrentTime: clipModeTransferRatio,
+                    sourceDuration: 1,
+                    targetDuration: event.currentTarget.duration,
+                });
+                setStore({
+                    clipModeTransferRatio: null,
+                    clipModeTransferSongUniqueId: null,
+                });
+                return;
+            }
+
+            if (
+                settings.displayMode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND &&
+                songDuration &&
+                songDuration > 0
+            ) {
+                event.currentTarget.currentTime = mapLidaClipsProgress({
+                    sourceCurrentTime: playerTimestamp,
+                    sourceDuration: songDuration,
+                    targetDuration: event.currentTarget.duration,
+                });
+            }
+        },
+        [
+            clipModeTransferRatio,
+            clipModeTransferSongUniqueId,
+            currentSong?._uniqueId,
+            playerTimestamp,
+            setStore,
+            settings.displayMode,
+            songDuration,
+        ],
+    );
+
+    const captureClipTransfer = useCallback(
+        (video: HTMLVideoElement) => {
+            const latestDisplayMode = useSettingsStore.getState().lidaClips.displayMode;
+
+            if (latestDisplayMode !== LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND) {
+                return;
+            }
+
+            if (!Number.isFinite(video.duration) || video.duration <= 0) {
+                return;
+            }
+
+            setStore({
+                clipModeActive: false,
+                clipModeTransferRatio: Math.max(0, Math.min(1, video.currentTime / video.duration)),
+                clipModeTransferSongUniqueId: currentSong?._uniqueId ?? null,
+            });
+        },
+        [currentSong?._uniqueId, setStore],
+    );
+
     useEffect(() => {
         const video = videoRef.current;
 
@@ -179,11 +214,12 @@ export const LidaClipsPanel = () => {
 
         return () => {
             if (!video) return;
+            captureClipTransfer(video);
             video.pause();
             video.removeAttribute('src');
             video.load();
         };
-    }, [clipStreamUrl, currentSong?.id]);
+    }, [captureClipTransfer, clipStreamUrl, currentSong?.id]);
 
     if (!settings.enabled) {
         return null;
@@ -242,6 +278,7 @@ export const LidaClipsPanel = () => {
                     className={styles.video}
                     controls
                     onEnded={handleVideoEnded}
+                    onLoadedMetadata={handleVideoLoadedMetadata}
                     onPlay={handleVideoPlay}
                     preload="metadata"
                     ref={videoRef}
