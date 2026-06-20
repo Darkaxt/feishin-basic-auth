@@ -1032,7 +1032,7 @@ export const JellyfinController: InternalControllerEndpoint = {
                 Fields: JF_FIELDS.PLAYLIST_LIST,
                 IncludeItemTypes: 'Playlist',
                 Limit: query.limit,
-                MediaTypes: 'Audio',
+                MediaTypes: 'Audio, Unknown',
                 Recursive: true,
                 SearchTerm: query.searchTerm,
                 SortBy: playlistListSortMap.jellyfin[query.sortBy],
