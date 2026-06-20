@@ -15,10 +15,15 @@ import {
     usePlayerSong,
     usePlayerStore,
     useSettingsStore,
+    useTimestampStoreBase,
 } from '/@/renderer/store';
 import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
 import { PlayerStatus } from '/@/shared/types/types';
 import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
+import {
+    getRestoredPlaybackStartTime,
+    normalizePlaybackStartTime,
+} from '/@/shared/utils/playback-restore';
 
 export interface MpvPlayerEngineHandle extends AudioPlayer {}
 
@@ -312,12 +317,21 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                 const nextSongUrl = song ? await getSongUrl(song, transcode, true) : undefined;
                 mpvPlayer?.setQueueNext(nextSongUrl);
             },
-            onPlayerPlay: () => {
-                replaceMpvQueue(transcode);
+            onPlayerPlay: (properties) => {
+                const playerData = usePlayerStore.getState().getPlayerData();
+                replaceMpvQueue(transcode, {
+                    startTime: getRestoredPlaybackStartTime({
+                        currentSongId: playerData.currentSong?._uniqueId,
+                        savedSongId: properties.id,
+                        savedTimestamp: useTimestampStoreBase.getState().timestamp,
+                    }),
+                });
             },
             onQueueCleared: () => {},
-            onQueueRestored: () => {
-                replaceMpvQueue(transcode);
+            onQueueRestored: (properties) => {
+                replaceMpvQueue(transcode, {
+                    startTime: normalizePlaybackStartTime(properties.position),
+                });
             },
         },
         [transcode],
@@ -379,11 +393,14 @@ async function handleMpvAutoNext(transcode: {
     mpvPlayer?.autoNext(nextSongUrl);
 }
 
-async function replaceMpvQueue(transcode: {
-    bitrate?: number | undefined;
-    enabled: boolean;
-    format?: string | undefined;
-}) {
+async function replaceMpvQueue(
+    transcode: {
+        bitrate?: number | undefined;
+        enabled: boolean;
+        format?: string | undefined;
+    },
+    options?: { startTime?: number },
+) {
     // Don't override queue if radio is active
     const radioState = useRadioStore.getState();
 
@@ -398,5 +415,5 @@ async function replaceMpvQueue(transcode: {
     const nextSongUrl = playerData.nextSong
         ? await getSongUrl(playerData.nextSong, transcode, true)
         : undefined;
-    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false);
+    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false, options?.startTime);
 }

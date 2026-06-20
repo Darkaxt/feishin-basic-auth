@@ -293,6 +293,41 @@ test('getLidaClipsAmbientPlaybackRate plays naturally by default and bounds fit-
     );
 });
 
+test('shouldCaptureForegroundLidaClipsTransfer requires actual foreground clip playback', () => {
+    assert.equal(
+        lidaClips.shouldCaptureForegroundLidaClipsTransfer({
+            duration: 240,
+            playbackStarted: false,
+            targetDisplayMode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldCaptureForegroundLidaClipsTransfer({
+            duration: 240,
+            playbackStarted: true,
+            targetDisplayMode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+        }),
+        true,
+    );
+    assert.equal(
+        lidaClips.shouldCaptureForegroundLidaClipsTransfer({
+            duration: 240,
+            playbackStarted: true,
+            targetDisplayMode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.PLAYER,
+        }),
+        false,
+    );
+    assert.equal(
+        lidaClips.shouldCaptureForegroundLidaClipsTransfer({
+            duration: Number.NaN,
+            playbackStarted: true,
+            targetDisplayMode: lidaClips.LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND,
+        }),
+        false,
+    );
+});
+
 test('getLidaClipsFallbackTab prefers visualizer when web audio is available', () => {
     assert.equal(lidaClips.getLidaClipsFallbackTab({ webAudio: true }), 'visualizer');
     assert.equal(lidaClips.getLidaClipsFallbackTab({ webAudio: false }), 'queue');

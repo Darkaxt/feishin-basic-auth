@@ -382,6 +382,23 @@ export const getLidaClipsAmbientPlaybackRate = ({
     return clamp(clipDuration / songDuration, AMBIENT_MIN_PLAYBACK_RATE, AMBIENT_MAX_PLAYBACK_RATE);
 };
 
+export const shouldCaptureForegroundLidaClipsTransfer = ({
+    duration,
+    playbackStarted,
+    targetDisplayMode,
+}: {
+    duration: number;
+    playbackStarted: boolean;
+    targetDisplayMode: LidaClipsDisplayMode;
+}): boolean => {
+    return (
+        playbackStarted &&
+        targetDisplayMode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND &&
+        Number.isFinite(duration) &&
+        duration > 0
+    );
+};
+
 export const getLidaClipsFallbackTab = ({
     webAudio,
 }: {

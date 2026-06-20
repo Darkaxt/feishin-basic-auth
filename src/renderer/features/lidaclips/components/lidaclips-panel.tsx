@@ -25,6 +25,7 @@ import {
     getLidaClipsPlaybackDecision,
     LIDA_CLIPS_DISPLAY_MODE,
     mapLidaClipsProgress,
+    shouldCaptureForegroundLidaClipsTransfer,
     shouldStopLidaClipsModeAfterAutoNext,
 } from '/@/shared/utils/lidaclips';
 
@@ -100,6 +101,7 @@ export const LidaClipsPlaybackCoordinator = () => {
 export const LidaClipsPanel = () => {
     const { t } = useTranslation();
     const videoRef = useRef<HTMLVideoElement>(null);
+    const foregroundPlaybackStartedRef = useRef(false);
     const { activeTab, clipModeActive, clipModeTransferRatio, clipModeTransferSongUniqueId } =
         useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
@@ -111,6 +113,7 @@ export const LidaClipsPanel = () => {
         useLidaClipsCurrentSongLookup(true);
 
     const handleVideoPlay = useCallback(() => {
+        foregroundPlaybackStartedRef.current = true;
         setStore({ activeTab: 'clips', clipModeActive: true });
         mediaPause();
     }, [mediaPause, setStore]);
@@ -182,11 +185,13 @@ export const LidaClipsPanel = () => {
         (video: HTMLVideoElement) => {
             const latestDisplayMode = useSettingsStore.getState().lidaClips.displayMode;
 
-            if (latestDisplayMode !== LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND) {
-                return;
-            }
-
-            if (!Number.isFinite(video.duration) || video.duration <= 0) {
+            if (
+                !shouldCaptureForegroundLidaClipsTransfer({
+                    duration: video.duration,
+                    playbackStarted: foregroundPlaybackStartedRef.current,
+                    targetDisplayMode: latestDisplayMode,
+                })
+            ) {
                 return;
             }
 
@@ -215,6 +220,7 @@ export const LidaClipsPanel = () => {
         return () => {
             if (!video) return;
             captureClipTransfer(video);
+            foregroundPlaybackStartedRef.current = false;
             video.pause();
             video.removeAttribute('src');
             video.load();
@@ -280,7 +286,11 @@ export const LidaClipsPanel = () => {
                     onEnded={handleVideoEnded}
                     onLoadedMetadata={handleVideoLoadedMetadata}
                     onPlay={handleVideoPlay}
-                    preload="metadata"
+                    preload={
+                        settings.displayMode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND
+                            ? 'none'
+                            : 'metadata'
+                    }
                     ref={videoRef}
                     src={data.clip.localStreamUrl}
                 />

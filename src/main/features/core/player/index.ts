@@ -12,6 +12,7 @@ import { store } from '../settings';
 
 import { isMacOS, isWindows } from '/@/main/env';
 import { PlayerData } from '/@/shared/types/domain-types';
+import { normalizePlaybackStartTime } from '/@/shared/utils/playback-restore';
 
 declare module 'node-mpv';
 
@@ -373,41 +374,49 @@ ipcMain.on('player-seek-to', async (_event, time: number) => {
 });
 
 // Sets the queue in position 0 and 1 to the given data. Used when manually starting a song or using the next/prev buttons
-ipcMain.on('player-set-queue', async (_event, current?: string, next?: string, pause?: boolean) => {
-    if (!current && !next) {
-        try {
-            await getMpvInstance()?.clearPlaylist();
-            await getMpvInstance()?.pause();
-            return;
-        } catch (err: any | NodeMpvError) {
-            mpvLog({ action: `Failed to clear play queue` }, err);
-        }
-    }
-
-    try {
-        if (current) {
+ipcMain.on(
+    'player-set-queue',
+    async (_event, current?: string, next?: string, pause?: boolean, startTime?: number) => {
+        if (!current && !next) {
             try {
-                await getMpvInstance()?.load(current, 'replace');
-            } catch (error: any | NodeMpvError) {
-                mpvLog({ action: `Failed to load current song` }, error);
+                await getMpvInstance()?.clearPlaylist();
+                await getMpvInstance()?.pause();
+                return;
+            } catch (err: any | NodeMpvError) {
+                mpvLog({ action: `Failed to clear play queue` }, err);
+            }
+        }
+
+        try {
+            if (current) {
+                try {
+                    await getMpvInstance()?.load(current, 'replace');
+                } catch (error: any | NodeMpvError) {
+                    mpvLog({ action: `Failed to load current song` }, error);
+                    await getMpvInstance()?.play();
+                }
+
+                if (next) {
+                    await getMpvInstance()?.load(next, 'append');
+                }
+            }
+
+            const normalizedStartTime = normalizePlaybackStartTime(startTime);
+            if (normalizedStartTime !== undefined) {
+                await getMpvInstance()?.goToPosition(normalizedStartTime);
+            }
+
+            if (pause) {
+                await getMpvInstance()?.pause();
+            } else if (pause === false) {
+                // Only force play if pause is explicitly false
                 await getMpvInstance()?.play();
             }
-
-            if (next) {
-                await getMpvInstance()?.load(next, 'append');
-            }
+        } catch (err: any | NodeMpvError) {
+            mpvLog({ action: `Failed to set play queue` }, err);
         }
-
-        if (pause) {
-            await getMpvInstance()?.pause();
-        } else if (pause === false) {
-            // Only force play if pause is explicitly false
-            await getMpvInstance()?.play();
-        }
-    } catch (err: any | NodeMpvError) {
-        mpvLog({ action: `Failed to set play queue` }, err);
-    }
-});
+    },
+);
 
 // Replaces the queue in position 1 to the given data
 ipcMain.on('player-set-queue-next', async (_event, url?: string) => {
