@@ -151,6 +151,7 @@ export enum PlayerShuffle {
 export enum PlayerStatus {
     PAUSED = 'paused',
     PLAYING = 'playing',
+    STOPPED = 'stopped',
 }
 
 export enum PlayerStyle {
