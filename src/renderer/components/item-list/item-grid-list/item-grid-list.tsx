@@ -345,6 +345,7 @@ export interface ItemGridListProps {
     gap?: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     getItem?: (index: number) => ItemCardProps['data'];
     getItemIndex?: (rowId: string) => number | undefined;
+    getLoadedItems?: () => unknown[];
     getRowId?: ((item: unknown) => string) | string;
     initialTop?: {
         to: number;
@@ -374,6 +375,7 @@ const BaseItemGridList = ({
     gap = 'sm',
     getItem,
     getItemIndex,
+    getLoadedItems,
     getRowId,
     initialTop,
     itemCount,
@@ -403,9 +405,18 @@ const BaseItemGridList = ({
         [data, getItem],
     );
 
+    const dataRef = useRef(data);
+    const getLoadedItemsRef = useRef(getLoadedItems);
+    dataRef.current = data;
+    getLoadedItemsRef.current = getLoadedItems;
+
     const getDataFn = useCallback(() => {
-        return data;
-    }, [data]);
+        const loadedItems = getLoadedItemsRef.current?.();
+        if (loadedItems?.length) {
+            return loadedItems;
+        }
+        return dataRef.current ?? [];
+    }, []);
 
     const extractRowId = useMemo(() => createExtractRowId(getRowId), [getRowId]);
 
@@ -786,6 +797,7 @@ const BaseItemGridList = ({
 
     useListHotkeys({
         controls,
+        focusContainerRef: rootRef,
         focused,
         internalState,
         itemType,
