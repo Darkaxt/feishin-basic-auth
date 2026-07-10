@@ -218,6 +218,7 @@ const AudioPlayerTypeConfig = () => {
                     value: PlayerType.LOCAL,
                 },
                 { label: 'Web', value: PlayerType.WEB },
+                { label: 'Jukebox', value: PlayerType.JUKEBOX },
             ]}
             defaultValue={playbackSettings.type}
             disabled={status === PlayerStatus.PLAYING}

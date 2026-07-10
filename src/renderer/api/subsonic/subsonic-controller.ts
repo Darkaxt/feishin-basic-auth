@@ -1395,6 +1395,22 @@ export const SubsonicController: InternalControllerEndpoint = {
         if (subsonicFeatures[SubsonicExtensions.PLAYBACK_REPORT]) {
             features.reportPlayback = [1];
         }
+        try {
+            const jukeboxStatus = await ssApiClient(apiClientProps).jukeboxControl({
+                query: { action: 'status' },
+            });
+
+            if (jukeboxStatus.status === 200 && !(jukeboxStatus.body as any)?.error) {
+                features[ServerFeature.JUKEBOX] = [1];
+            } else {
+                console.log(
+                    'Jukebox endpoint returned an error payload:',
+                    (jukeboxStatus.body as any)?.error,
+                );
+            }
+        } catch (error) {
+            console.log('Jukebox is not supported by this server:', error);
+        }
 
         return { features, id: apiClientProps.server?.id, version: ping.body.serverVersion };
     },
@@ -2051,6 +2067,25 @@ export const SubsonicController: InternalControllerEndpoint = {
             isAdmin: Boolean(res.body.user.adminRole),
             name: res.body.user.username,
         };
+    },
+    jukeboxControl: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const res = await ssApiClient(apiClientProps).jukeboxControl({
+            query: {
+                action: query.action,
+                gain: query.gain,
+                id: query.id,
+                index: query.index,
+                offset: query.offset,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to control jukebox');
+        }
+
+        return res.body;
     },
     removeFromPlaylist: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({
