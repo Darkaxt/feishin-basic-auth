@@ -816,6 +816,7 @@ export interface TableItemProps {
 interface ItemTableListProps {
     activeRowId?: string;
     autoFitColumns?: boolean;
+    autoScrollToActiveRow?: boolean;
     CellComponent?: JSXElementConstructor<CellComponentProps<TableItemProps>>;
     cellPadding?: 'lg' | 'md' | 'sm' | 'xl' | 'xs';
     columns: ItemTableListColumnConfig[];
@@ -1255,6 +1256,7 @@ ItemTableListStickyUI.displayName = 'ItemTableListStickyUI';
 const BaseItemTableList = ({
     activeRowId,
     autoFitColumns = false,
+    autoScrollToActiveRow = false,
     CellComponent = ItemTableListColumn,
     cellPadding = 'sm',
     columns,
@@ -1411,47 +1413,10 @@ const BaseItemTableList = ({
         onScrollEndRef.current = onScrollEnd;
     }, [onScrollEnd]);
 
-    const {
-        calculateScrollTopForIndex,
-        DEFAULT_ROW_HEIGHT,
-        scrollToTableIndex,
-        scrollToTableOffset,
-    } = useTableScrollToIndex({
-        cellPadding,
-        columns: parsedColumns,
-        data,
-        enableAlternateRowColors,
-        enableExpansion,
-        enableHeader,
-        enableHorizontalBorders,
-        enableRowHoverHighlight,
-        enableSelection,
-        enableVerticalBorders,
-        itemType,
-        pinnedLeftColumnRef,
-        pinnedRightColumnRef,
-        playerContext,
-        rowHeight,
-        rowRef,
-        size,
-        tableId,
-    });
-
-    useTablePaneSync({
-        enableDrag,
-        enableDragScroll,
-        enableHeader,
-        handleRef,
-        onScrollEndRef,
-        pinnedLeftColumnCount,
-        pinnedLeftColumnRef,
-        pinnedRightColumnCount,
-        pinnedRightColumnRef,
-        pinnedRowRef,
-        rowRef,
-        scrollContainerRef,
-        scrollShadowStore,
-    });
+    const hasAlbumGroupColumn = useMemo(
+        () => parsedColumns.some((col) => col.id === TableColumn.ALBUM_GROUP),
+        [parsedColumns],
+    );
 
     const getRowHeight = useCallback(
         (index: number, cellProps: TableItemProps) => {
@@ -1515,6 +1480,99 @@ const BaseItemTableList = ({
         [albumGroupImageSize, enableHeader, headerHeight, rowHeight, pinnedRowCount, size],
     );
 
+    const scrollCellProps = useMemo<TableItemProps>(
+        () => ({
+            albumGroupContentHeights,
+            albumGroupImageSize,
+            cellPadding,
+            columns: parsedColumns,
+            controls: {} as ItemControls,
+            data: dataWithGroups,
+            enableAlternateRowColors,
+            enableExpansion,
+            enableHeader,
+            enableHorizontalBorders,
+            enableRowHoverHighlight,
+            enableSelection,
+            enableVerticalBorders,
+            getRowHeight,
+            getRowItem: (rowIndex: number) => {
+                if (shouldUseAccessor && getItem) {
+                    if (enableHeader && rowIndex === 0) {
+                        return null;
+                    }
+
+                    const dataIndex = enableHeader ? rowIndex - 1 : rowIndex;
+                    return getItem(dataIndex);
+                }
+
+                return dataWithGroups[rowIndex];
+            },
+            hasAlbumGroupColumn,
+            internalState: {} as ItemListStateActions,
+            itemType,
+            playerContext,
+            size,
+            tableId,
+        }),
+        [
+            albumGroupContentHeights,
+            albumGroupImageSize,
+            cellPadding,
+            dataWithGroups,
+            enableAlternateRowColors,
+            enableExpansion,
+            enableHeader,
+            enableHorizontalBorders,
+            enableRowHoverHighlight,
+            enableSelection,
+            enableVerticalBorders,
+            getItem,
+            getRowHeight,
+            hasAlbumGroupColumn,
+            itemType,
+            parsedColumns,
+            playerContext,
+            shouldUseAccessor,
+            size,
+            tableId,
+        ],
+    );
+
+    const {
+        calculateScrollTopForIndex,
+        getRowHeightAtIndex,
+        scrollToTableIndex,
+        scrollToTableOffset,
+    } = useTableScrollToIndex({
+        albumGroupContentHeights,
+        autoScrollToActiveRow,
+        enableHeader,
+        getRowHeight,
+        hasAlbumGroupColumn,
+        pinnedLeftColumnRef,
+        pinnedRightColumnRef,
+        pinnedRowCount,
+        rowRef,
+        scrollCellProps,
+    });
+
+    useTablePaneSync({
+        enableDrag,
+        enableDragScroll,
+        enableHeader,
+        handleRef,
+        onScrollEndRef,
+        pinnedLeftColumnCount,
+        pinnedLeftColumnRef,
+        pinnedRightColumnCount,
+        pinnedRightColumnRef,
+        pinnedRowRef,
+        rowRef,
+        scrollContainerRef,
+        scrollShadowStore,
+    });
+
     // Create a wrapper for getRowHeight that doesn't require cellProps (for sticky group rows hook)
     const getRowHeightWrapper = useCallback(
         (index: number) => {
@@ -1574,28 +1632,21 @@ const BaseItemTableList = ({
 
     const { handleKeyDown } = useTableKeyboardNavigation({
         calculateScrollTopForIndex,
-        cellPadding,
         data,
-        DEFAULT_ROW_HEIGHT,
         enableHeader,
         enableSelection,
         extractRowId,
         getItem,
         getItemIndex,
+        getRowHeightAtIndex,
         getStateItem,
         hasRequiredStateItemProperties,
         internalState,
         itemCount: baseItemCount,
-        itemType,
-        parsedColumns,
         pinnedRightColumnCount,
         pinnedRightColumnRef,
-        playerContext,
-        rowHeight,
         rowRef,
         scrollToTableIndex,
-        size,
-        tableId,
     });
 
     useTableInitialScroll({
@@ -1606,6 +1657,7 @@ const BaseItemTableList = ({
     });
 
     useTableImperativeHandle({
+        autoScrollToActiveRow,
         enableHeader,
         handleRef,
         internalState,
