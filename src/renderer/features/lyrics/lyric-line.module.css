@@ -7,8 +7,10 @@
     opacity: var(--lyric-opacity);
     transform: scale(var(--lyric-scale));
     transform-origin: var(--lyric-scale-origin) center;
-    transition: transform 0.166s var(--karaoke-anim-delay, 0s);
-    will-change: transform;
+    transition:
+        opacity 0.4s ease-in-out,
+        transform 0.4s ease-in-out;
+    will-change: opacity, transform;
 }
 
 .lyric-line:global(.lyrics-line-active),

@@ -1,15 +1,8 @@
-/* Past (sung) lines stay fully visible */
-.synchronized-lyrics:has(.lyrics-line-active)
-    .lyric-line:not(.lyrics-line-active, .lyrics-line-active ~ .lyric-line) {
-    opacity: 1;
-    filter: none;
-}
-
 .synchronized-lyrics .lyric-line.lyrics-line-active {
     opacity: 1 !important;
 }
 
-.synchronized-lyrics:has(.lyrics-line-active) .lyric-line.lyrics-line-active ~ .lyric-line {
+.synchronized-lyrics:has(.lyrics-line-active) .lyric-line:not(.lyrics-line-active) {
     opacity: var(--lyric-opacity, 0.3);
 }
 

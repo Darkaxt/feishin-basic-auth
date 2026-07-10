@@ -11,23 +11,12 @@
     initial-value: 0;
 }
 
-/* Past (sung) lines stay fully visible */
-.synchronized-karaoke-lyrics:has(.lyrics-line-active)
-    :is(.karaoke-line, .lyric-line):not(
-        .lyrics-line-active,
-        .lyrics-line-active ~ :is(.karaoke-line, .lyric-line)
-    ) {
-    opacity: 1;
-    filter: none;
-}
-
 .synchronized-karaoke-lyrics :is(.karaoke-line, .lyric-line).lyrics-line-active {
     opacity: 1 !important;
 }
 
 .synchronized-karaoke-lyrics:has(.lyrics-line-active)
-    :is(.karaoke-line, .lyric-line).lyrics-line-active
-    ~ :is(.karaoke-line, .lyric-line) {
+    :is(.karaoke-line, .lyric-line):not(.lyrics-line-active) {
     opacity: var(--lyric-opacity, 0.3);
 }
 
@@ -54,7 +43,7 @@
     vertical-align: baseline;
 }
 
-.karaoke-word.sung {
+:is(.karaoke-line, .lyric-line).lyrics-line-active .karaoke-word.sung {
     color: var(--theme-colors-foreground);
 }
 
@@ -143,7 +132,7 @@
     );
 }
 
-.karaoke-word.sung .karaoke-word-highlight {
+:is(.karaoke-line, .lyric-line).lyrics-line-active .karaoke-word.sung .karaoke-word-highlight {
     opacity: 1;
     transition: none;
 
