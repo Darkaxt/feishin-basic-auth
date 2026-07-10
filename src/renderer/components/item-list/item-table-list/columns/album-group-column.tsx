@@ -93,6 +93,8 @@ export const AlbumGroupColumn = (props: ItemTableListInnerColumn) => {
             <AlbumGroupHeader
                 groupRowCount={groupRowCount}
                 onPlay={handlePlay}
+                rowIndex={props.rowIndex}
+                setAlbumGroupContentHeight={props.setAlbumGroupContentHeight}
                 size={props.size === 'default' ? 'normal' : props.size}
                 song={item}
             />

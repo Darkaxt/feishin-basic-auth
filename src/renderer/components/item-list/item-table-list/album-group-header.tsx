@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import clsx from 'clsx';
+import { ReactElement, useLayoutEffect, useRef, useState } from 'react';
 import { generatePath, Link } from 'react-router';
 
 import imageColumnStyles from '../item-detail-list/columns/image-column.module.css';
@@ -21,6 +22,8 @@ import { Play } from '/@/shared/types/types';
 interface AlbumGroupHeaderProps {
     groupRowCount?: number;
     onPlay?: (playType: Play) => void;
+    rowIndex?: number;
+    setAlbumGroupContentHeight?: (rowIndex: number, height: number) => void;
     size?: 'compact' | 'large' | 'normal';
     song: Song | undefined;
 }
@@ -28,10 +31,13 @@ interface AlbumGroupHeaderProps {
 export const AlbumGroupHeader = ({
     groupRowCount,
     onPlay,
+    rowIndex,
+    setAlbumGroupContentHeight,
     size = 'normal',
     song,
 }: AlbumGroupHeaderProps): ReactElement => {
     const [isHovered, setIsHovered] = useState(false);
+    const [resolvedInfoHeight, setResolvedInfoHeight] = useState<number | undefined>();
     const playButtonBehavior = usePlayButtonBehavior();
     const albumImageSize = useAlbumGroupImageSize();
     const rowHeight = {
@@ -65,6 +71,31 @@ export const AlbumGroupHeader = ({
                   zIndex: 1,
               }
             : undefined;
+
+    const infoRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        const infoEl = infoRef.current;
+        if (!infoEl) return;
+
+        const measure = () => {
+            const contentHeight = infoEl.scrollHeight;
+            const resolved = Math.max(infoHeight ?? 0, contentHeight);
+
+            setResolvedInfoHeight(resolved);
+
+            if (rowIndex !== undefined && setAlbumGroupContentHeight) {
+                setAlbumGroupContentHeight(rowIndex, contentHeight);
+            }
+        };
+
+        measure();
+
+        const resizeObserver = new ResizeObserver(measure);
+        resizeObserver.observe(infoEl);
+
+        return () => resizeObserver.disconnect();
+    }, [infoHeight, rowIndex, setAlbumGroupContentHeight]);
 
     return (
         <div
@@ -100,7 +131,11 @@ export const AlbumGroupHeader = ({
                     </div>
                 )}
             </div>
-            <div className={styles.info} style={{ height: infoHeight }}>
+            <div
+                className={clsx(styles.info, albumImageSize > 0 && styles.enlargedImage)}
+                ref={infoRef}
+                style={{ minHeight: resolvedInfoHeight ?? infoHeight }}
+            >
                 <div className={styles.albumName}>
                     {song?.albumId && albumPath ? (
                         <Link state={{ item: song }} to={albumPath}>
@@ -118,12 +153,14 @@ export const AlbumGroupHeader = ({
                         rootTextProps={{ fw: 400, size: 'xs' }}
                     />
                 </div>
-                <AlbumGroupControls
-                    albumId={song?.albumId}
-                    isGroupHovered={isHovered}
-                    serverId={song?._serverId}
-                    serverType={song?._serverType}
-                />
+                <div className={styles.controlsRow}>
+                    <AlbumGroupControls
+                        albumId={song?.albumId}
+                        isGroupHovered={isHovered}
+                        serverId={song?._serverId}
+                        serverType={song?._serverType}
+                    />
+                </div>
             </div>
         </div>
     );
