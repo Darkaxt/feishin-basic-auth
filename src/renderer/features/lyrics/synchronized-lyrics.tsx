@@ -44,7 +44,6 @@ export const SynchronizedLyrics = ({
     name,
     offsetMs,
     pronunciationLyrics,
-    remote,
     romajiLyrics,
     settingsKey = 'default',
     source,
@@ -253,15 +252,15 @@ export const SynchronizedLyrics = ({
                         alignment={settings.alignment}
                         className="lyric-credit"
                         fontSize={settings.fontSize}
-                        text={`Provided by ${source}`}
+                        text={`${source}`}
                     />
                 )}
-                {settings.showMatch && remote && (
+                {settings.showMatch && (
                     <LyricLine
                         alignment={settings.alignment}
                         className="lyric-credit"
                         fontSize={settings.fontSize}
-                        text={`"${name} by ${artist}"`}
+                        text={`${name} — ${artist}`}
                     />
                 )}
                 {normalizedLyrics.map((rawLine, idx) => {
