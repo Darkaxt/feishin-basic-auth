@@ -78,6 +78,10 @@ export function WaveSurferPlayer() {
                 return;
             }
 
+            if (num === 1) {
+                setTimestamp(e.playedSeconds);
+            }
+
             switch (transitionType) {
                 case PlayerStyle.CROSSFADE:
                     crossfadeHandler({
@@ -106,13 +110,17 @@ export function WaveSurferPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, num, player2, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, player2, setTimestamp, transitionType, volume],
     );
 
     const onProgressPlayer2 = useCallback(
         (e: PlayerOnProgressProps) => {
             if (!playerRef.current?.player2()) {
                 return;
+            }
+
+            if (num === 2) {
+                setTimestamp(e.playedSeconds);
             }
 
             switch (transitionType) {
@@ -143,7 +151,7 @@ export function WaveSurferPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, num, player1, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, player1, setTimestamp, transitionType, volume],
     );
 
     const handleOnEndedPlayer1 = useCallback(() => {
@@ -237,7 +245,7 @@ export function WaveSurferPlayer() {
                 transitionType === PlayerStyle.CROSSFADE ||
                 transitionType === PlayerStyle.GAPLESS
             ) {
-                setTimestamp(Number(currentTime.toFixed(0)));
+                setTimestamp(currentTime);
             }
         }, 500);
 
