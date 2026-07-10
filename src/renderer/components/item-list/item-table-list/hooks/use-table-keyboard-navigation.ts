@@ -4,7 +4,6 @@ import {
     ItemListStateActions,
     ItemListStateItemWithRequiredProperties,
 } from '/@/renderer/components/item-list/helpers/item-list-state';
-import { LibraryItem } from '/@/shared/types/domain-types';
 
 interface UseTableKeyboardNavigationProps {
     calculateScrollTopForIndex: (index: number) => number;
@@ -21,7 +20,6 @@ interface UseTableKeyboardNavigationProps {
     ) => item is ItemListStateItemWithRequiredProperties;
     internalState: ItemListStateActions;
     itemCount?: number;
-    itemType: LibraryItem;
     pinnedRightColumnCount: number;
     pinnedRightColumnRef: React.RefObject<HTMLDivElement | null>;
     rowRef: React.RefObject<HTMLDivElement | null>;
