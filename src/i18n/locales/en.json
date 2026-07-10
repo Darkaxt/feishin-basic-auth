@@ -784,6 +784,7 @@
         "artistConfiguration_description": "Configure what items are shown, and in what order, on the album artist page",
         "artistReleaseTypeConfiguration": "Artist release type configuration",
         "artistReleaseTypeConfiguration_description": "Configure what release types are shown, and in what order, on the album artist page",
+        "audioDeviceDefault": "System default",
         "audioDevice_description": "Select the audio device to use for playback",
         "audioDevice": "Audio device",
         "audioExclusiveMode_description": "Enable exclusive output mode. In this mode, the system is usually locked out, and only mpv will be able to output audio. Visualizer system audio capture will not work while this is enabled",
