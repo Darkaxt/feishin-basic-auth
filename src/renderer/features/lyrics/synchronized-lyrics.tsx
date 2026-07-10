@@ -26,6 +26,7 @@ import {
 import { PlayerStatus } from '/@/shared/types/types';
 
 export interface SynchronizedLyricsProps extends Omit<FullLyricsMetadata, 'lyrics'> {
+    extraOverlayLyrics?: SynchronizedLyricsData[];
     lyrics: SynchronizedLyricsData;
     offsetMs?: number;
     pronunciationLyrics?: null | SynchronizedLyricsData;
@@ -223,10 +224,11 @@ export const SynchronizedLyrics = ({
     const getOverlayText = (
         overlayLyrics: null | SynchronizedLyricsData | undefined,
         startMs: number,
+        lineIndex: number,
         fallback?: null | string,
     ) => {
         if (overlayLyrics) {
-            return findOverlayLineByTime(overlayLyrics, startMs);
+            return findOverlayLineByTime(overlayLyrics, startMs, lineIndex);
         }
 
         return fallback;
@@ -269,11 +271,13 @@ export const SynchronizedLyrics = ({
                     const pronunciationText = getOverlayText(
                         pronunciationLyrics,
                         lineStartMs,
+                        idx,
                         romajiLyrics?.[idx] ? getLyricLineText(romajiLyrics[idx]) : undefined,
                     );
                     const translationText = getOverlayText(
                         translationLyrics,
                         lineStartMs,
+                        idx,
                         translatedLyrics?.split('\n')[idx],
                     );
 

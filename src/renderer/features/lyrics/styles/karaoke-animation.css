@@ -56,9 +56,24 @@
     font-weight: 400;
 }
 
-.karaoke-word.karaoke-romaji-word {
+.karaoke-word.karaoke-overlay-word {
     font-size: inherit;
     font-weight: 600;
+}
+
+.karaoke-word.karaoke-overlay-pronunciation {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.karaoke-word.karaoke-overlay-translation {
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.karaoke-word.karaoke-overlay-generic {
+    font-size: 0.8em;
+    font-weight: 500;
 }
 
 .karaoke-word-text,

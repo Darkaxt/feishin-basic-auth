@@ -567,6 +567,10 @@
                 "useImageAspectRatio": "Use image aspect ratio"
             },
             "lyrics": "Lyrics",
+            "lyricLayers": "Lyric layers",
+            "lyricLanguage": "Language",
+            "showPronunciation": "Pronunciation",
+            "showTranslation": "Translation",
             "related": "Related",
             "upNext": "Up next",
             "visualizer": "Visualizer",
