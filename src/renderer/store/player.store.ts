@@ -1048,21 +1048,45 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     const state = get();
                     const currentIndex = state.player.index;
                     const player = state.player;
+                    const repeat = player.repeat;
+                    const isShuffle = isShuffleEnabled(state);
                     const queue = state.getQueueOrder();
-                    const isLastTrack = currentIndex === queue.items.length - 1;
+                    const playbackLength = isShuffle
+                        ? state.queue.shuffled.length
+                        : queue.items.length;
 
-                    let nextIndex: number;
+                    if (repeat === PlayerRepeat.ONE) {
+                        // Manual next while repeat-one is active should still advance in the queue.
+                        const nextIndex = Math.min(playbackLength - 1, currentIndex + 1);
 
-                    if (player.repeat === PlayerRepeat.ALL && isLastTrack) {
-                        // Repeat all: wrap to first track when on last track
-                        nextIndex = 0;
-                    } else if (player.repeat === PlayerRepeat.NONE && isLastTrack) {
-                        // Repeat none: stay on last track if already there
-                        nextIndex = currentIndex;
-                    } else {
-                        // Otherwise, advance to next track (including repeat ONE for manual navigation)
-                        // When shuffle is enabled, currentIndex is already the position in the shuffled array
-                        nextIndex = Math.min(queue.items.length - 1, currentIndex + 1);
+                        set((state) => {
+                            state.player.index = nextIndex;
+                            state.player.playerNum = 1;
+                            setTimestampStore(0);
+                        });
+
+                        eventEmitter.emit('MEDIA_NEXT', {
+                            currentIndex,
+                            nextIndex,
+                        });
+                        return;
+                    }
+
+                    const { nextIndex, shouldStop } = calculateNextIndex(
+                        currentIndex,
+                        playbackLength,
+                        repeat,
+                    );
+
+                    if (shouldStop) {
+                        set((state) => {
+                            state.player.status = PlayerStatus.STOPPED;
+                            state.player.playerNum = 1;
+                            setTimestampStore(0);
+                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
+                        });
+                        emitPlayerStop(get, true);
+                        return;
                     }
 
                     set((state) => {
