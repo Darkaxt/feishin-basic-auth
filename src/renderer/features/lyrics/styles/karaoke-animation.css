@@ -11,36 +11,32 @@
     initial-value: 0;
 }
 
-/* Container-level line context blur/fade (karaoke sync only) */
+/* Past (sung) lines stay fully visible */
 .synchronized-karaoke-lyrics:has(.lyrics-line-active)
     :is(.karaoke-line, .lyric-line):not(
         .lyrics-line-active,
         .lyrics-line-active ~ :is(.karaoke-line, .lyric-line)
     ) {
-    opacity: var(--lyric-opacity, 0.3);
-    filter: blur(2.5px);
+    opacity: 1;
+    filter: none;
 }
 
 .synchronized-karaoke-lyrics :is(.karaoke-line, .lyric-line).lyrics-line-active {
     opacity: 1 !important;
-    filter: blur(0);
 }
 
 .synchronized-karaoke-lyrics:has(.lyrics-line-active)
     :is(.karaoke-line, .lyric-line).lyrics-line-active
     ~ :is(.karaoke-line, .lyric-line) {
     opacity: var(--lyric-opacity, 0.3);
-    filter: blur(0);
 }
 
 .synchronized-karaoke-lyrics :is(.karaoke-line, .lyric-line).lyrics-line-animating {
     opacity: 1 !important;
-    filter: blur(0) !important;
 }
 
 .synchronized-karaoke-lyrics :is(.karaoke-line, .lyric-line):hover {
     opacity: 1 !important;
-    filter: blur(0) !important;
 }
 
 /* Word highlight via stacked text twin + gradient swipe */
@@ -148,7 +144,11 @@
 }
 
 .karaoke-word.sung .karaoke-word-highlight {
-    opacity: 0;
+    opacity: 1;
+    transition: none;
+
+    --lyric-transition-amount-start: 1.4;
+    --lyric-transition-amount-end: 1.5;
 }
 
 .karaoke-word ruby {
