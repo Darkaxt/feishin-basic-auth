@@ -84,7 +84,12 @@ export const AlbumGroupColumn = (props: ItemTableListInnerColumn) => {
     }
 
     return (
-        <TableColumnContainer {...props} enableAlternateRowColors={false}>
+        <TableColumnContainer
+            {...props}
+            dragRef={null}
+            enableAlternateRowColors={false}
+            isDraggedOver={null}
+        >
             <AlbumGroupHeader
                 groupRowCount={groupRowCount}
                 onPlay={handlePlay}

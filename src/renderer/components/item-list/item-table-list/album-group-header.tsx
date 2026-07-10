@@ -1,15 +1,19 @@
 import { ReactElement, useState } from 'react';
+import { generatePath, Link } from 'react-router';
 
 import imageColumnStyles from '../item-detail-list/columns/image-column.module.css';
+import { AlbumGroupControls } from './album-group-controls';
 import styles from './album-group-header.module.css';
 import { TableItemSize } from './item-table-list';
 
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
+import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import {
     LONG_PRESS_PLAY_BEHAVIOR,
     PlayTooltip,
 } from '/@/renderer/features/shared/components/play-button-group';
+import { AppRoute } from '/@/renderer/router/routes';
 import { useAlbumGroupImageSize, usePlayButtonBehavior } from '/@/renderer/store';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
@@ -35,6 +39,11 @@ export const AlbumGroupHeader = ({
         large: TableItemSize.LARGE,
         normal: TableItemSize.DEFAULT,
     }[size];
+
+    const albumPath = song?.albumId
+        ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, { albumId: song.albumId })
+        : null;
+
     // The album group spans the combined row height, but when the image is
     // enlarged the group's last row is grown so the total reaches the img size.
     const infoHeight =
@@ -58,13 +67,12 @@ export const AlbumGroupHeader = ({
             : undefined;
 
     return (
-        <div className={styles.container}>
-            <div
-                className={styles.imageContainer}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                style={imageContainerStyle}
-            >
+        <div
+            className={styles.container}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div className={styles.imageContainer} style={imageContainerStyle}>
                 <ItemImage
                     className={imageColumnStyles.compactImage}
                     enableDebounce
@@ -93,8 +101,29 @@ export const AlbumGroupHeader = ({
                 )}
             </div>
             <div className={styles.info} style={{ height: infoHeight }}>
-                <div className={styles.albumName}>{song?.album ?? ''}</div>
-                <div className={styles.artistName}>{song?.albumArtistName ?? ''}</div>
+                <div className={styles.albumName}>
+                    {song?.albumId && albumPath ? (
+                        <Link state={{ item: song }} to={albumPath}>
+                            {song.album ?? ''}
+                        </Link>
+                    ) : (
+                        (song?.album ?? '')
+                    )}
+                </div>
+                <div className={styles.artistName}>
+                    <JoinedArtists
+                        artistName={song?.albumArtistName ?? ''}
+                        artists={song?.albumArtists ?? []}
+                        linkProps={{ fw: 400 }}
+                        rootTextProps={{ fw: 400, size: 'xs' }}
+                    />
+                </div>
+                <AlbumGroupControls
+                    albumId={song?.albumId}
+                    isGroupHovered={isHovered}
+                    serverId={song?._serverId}
+                    serverType={song?._serverType}
+                />
             </div>
         </div>
     );
