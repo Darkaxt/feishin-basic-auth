@@ -238,7 +238,7 @@ export function WebPlayer() {
         promise.then(() => {
             playerRef.current?.player1()?.ref?.getInternalPlayer().pause();
 
-            // If mediaAutoNext resulted in a paused state (e.g. end of queue,
+            // If mediaAutoNext resulted in a stopped/paused state (e.g. end of queue,
             // or pauseOnNextSongEnd flag), stop all audio instead of restoring volume.
             const currentStatus = usePlayerStoreBase.getState().player.status;
             if (currentStatus !== PlayerStatus.PLAYING) {

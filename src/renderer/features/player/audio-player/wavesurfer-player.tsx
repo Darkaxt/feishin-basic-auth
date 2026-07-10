@@ -16,6 +16,7 @@ import {
     usePlayerData,
     usePlayerMuted,
     usePlayerProperties,
+    usePlayerStoreBase,
     usePlayerVolume,
 } from '/@/renderer/store';
 import { PlayerStatus, PlayerStyle } from '/@/shared/types/types';
@@ -153,7 +154,13 @@ export function WaveSurferPlayer() {
 
         promise.then(() => {
             playerRef.current?.player1()?.ref?.pause();
-            playerRef.current?.setVolume(volume);
+
+            const currentStatus = usePlayerStoreBase.getState().player.status;
+            if (currentStatus !== PlayerStatus.PLAYING) {
+                playerRef.current?.pause();
+            } else {
+                playerRef.current?.setVolume(volume);
+            }
             setIsTransitioning(false);
         });
     }, [mediaAutoNext, volume]);
@@ -166,7 +173,13 @@ export function WaveSurferPlayer() {
 
         promise.then(() => {
             playerRef.current?.player2()?.ref?.pause();
-            playerRef.current?.setVolume(volume);
+
+            const currentStatus = usePlayerStoreBase.getState().player.status;
+            if (currentStatus !== PlayerStatus.PLAYING) {
+                playerRef.current?.pause();
+            } else {
+                playerRef.current?.setVolume(volume);
+            }
             setIsTransitioning(false);
         });
     }, [mediaAutoNext, volume]);

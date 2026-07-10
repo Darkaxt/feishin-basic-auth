@@ -207,25 +207,25 @@ function calculateNextIndex(
     currentIndex: number,
     queueLength: number,
     repeat: PlayerRepeat,
-): { nextIndex: number; shouldPause: boolean } {
+): { nextIndex: number; shouldStop: boolean } {
     const isLastTrack = currentIndex === queueLength - 1;
 
     if (repeat === PlayerRepeat.ONE) {
         // Repeat one: stay on the same track
-        return { nextIndex: currentIndex, shouldPause: false };
+        return { nextIndex: currentIndex, shouldStop: false };
     } else if (repeat === PlayerRepeat.ALL) {
         // Repeat all: loop to first track if at the end
         if (isLastTrack) {
-            return { nextIndex: 0, shouldPause: false };
+            return { nextIndex: 0, shouldStop: false };
         } else {
-            return { nextIndex: currentIndex + 1, shouldPause: false };
+            return { nextIndex: currentIndex + 1, shouldStop: false };
         }
     } else {
-        // Repeat none: move to next track, or pause if at the end
+        // Repeat none: move to next track, or stop if at the end
         if (isLastTrack) {
-            return { nextIndex: currentIndex, shouldPause: true };
+            return { nextIndex: currentIndex, shouldStop: true };
         } else {
-            return { nextIndex: currentIndex + 1, shouldPause: false };
+            return { nextIndex: currentIndex + 1, shouldStop: false };
         }
     }
 }
@@ -290,6 +290,19 @@ function emitPlayerPlayEvent(
             });
         }
     }
+}
+
+function emitPlayerStop(get: () => PlayerState, reset: boolean): void {
+    const currentState = get();
+    const queue = currentState.getQueue();
+    const currentIndex = currentState.player.index;
+    const currentSong = queue.items[currentIndex];
+
+    eventEmitter.emit('PLAYER_STOP', {
+        id: currentSong?._uniqueId,
+        index: currentIndex !== undefined && currentIndex >= 0 ? currentIndex : undefined,
+        reset,
+    });
 }
 
 // Helper function to find shuffled position for a given queue index
@@ -921,11 +934,12 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         ? stateSnapshot.queue.shuffled.length
                         : queue.items.length;
 
-                    const { nextIndex: nextPlaybackIndex, shouldPause } = calculateNextIndex(
+                    const { nextIndex: nextPlaybackIndex, shouldStop } = calculateNextIndex(
                         currentIndex,
                         playbackLength,
                         repeat,
                     );
+
                     const isRepeatOneSameTrack =
                         repeat === PlayerRepeat.ONE && nextPlaybackIndex === currentIndex;
                     // Dual web players alternate for gapless/crossfade between tracks. Repeat-one
@@ -937,9 +951,12 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                           ? 2
                           : 1;
                     const pauseOnNext = player.pauseOnNextSongEnd;
-                    const newStatus =
-                        shouldPause || pauseOnNext ? PlayerStatus.PAUSED : PlayerStatus.PLAYING;
-                    const shouldKeepCurrentPlayer = newStatus === PlayerStatus.PAUSED;
+                    const newStatus = shouldStop
+                        ? PlayerStatus.STOPPED
+                        : pauseOnNext
+                          ? PlayerStatus.PAUSED
+                          : PlayerStatus.PLAYING;
+                    const shouldKeepCurrentPlayer = newStatus !== PlayerStatus.PLAYING;
                     const shouldSwapPlayer = !isRepeatOneSameTrack && !shouldKeepCurrentPlayer;
 
                     set((state) => {
@@ -948,10 +965,18 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         setTimestampStore(0);
                         state.player.status = newStatus;
 
+                        if (shouldStop) {
+                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
+                        }
+
                         if (pauseOnNext) {
                             state.player.pauseOnNextSongEnd = false;
                         }
                     });
+
+                    if (shouldStop) {
+                        emitPlayerStop(get, true);
+                    }
 
                     if (repeat === PlayerRepeat.ONE && nextPlaybackIndex === currentIndex) {
                         eventEmitter.emit('PLAYER_REPEATED', {
@@ -1242,19 +1267,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         }
                     });
 
-                    const currentState = get();
-                    const queue = currentState.getQueue();
-                    const currentIndex = currentState.player.index;
-                    const currentSong = queue.items[currentIndex];
-
-                    eventEmitter.emit('PLAYER_STOP', {
-                        id: currentSong?._uniqueId,
-                        index:
-                            currentIndex !== undefined && currentIndex >= 0
-                                ? currentIndex
-                                : undefined,
-                        reset,
-                    });
+                    emitPlayerStop(get, reset);
                 },
                 mediaToggleMute: () => {
                     set((state) => {
