@@ -247,7 +247,11 @@
             "related": "相關",
             "upNext": "即將播放",
             "visualizer": "視覺化",
-            "noLyrics": "未找到歌詞"
+            "noLyrics": "未找到歌詞",
+            "lyricLayers": "歌詞圖層",
+            "lyricLanguage": "語言",
+            "showPronunciation": "發音",
+            "showTranslation": "翻譯"
         },
         "playlistList": {
             "title": "$t(entity.playlist, {\"count\": 2})"
@@ -911,7 +915,9 @@
                 "verticalBorders": "列邊框線",
                 "showHeader": "顯示標題",
                 "albumGroupConfig": "專輯群組設定",
-                "albumImageSize": "專輯圖片大小"
+                "albumImageSize": "專輯圖片大小",
+                "albumGroupMetadata": "中繼資料欄位",
+                "albumGroupShowFavoriteRating": "顯示最愛與評分"
             },
             "label": {
                 "actions": "$t(common.action, {\"count\": 2})",

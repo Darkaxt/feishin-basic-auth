@@ -43,8 +43,14 @@
     vertical-align: baseline;
 }
 
-:is(.karaoke-line, .lyric-line).lyrics-line-active .karaoke-word.sung {
-    color: var(--theme-colors-foreground);
+:is(.karaoke-line, .lyric-line).lyrics-line-active
+    .karaoke-word.sung:not(.lyrics-word-animating, .lyrics-word-pre-animating)
+    .karaoke-word-highlight {
+    opacity: 1;
+    transition: none;
+
+    --lyric-transition-amount-start: 1.4;
+    --lyric-transition-amount-end: 1.5;
 }
 
 .karaoke-line.lyrics-line-pre-animating {
@@ -145,14 +151,6 @@
         var(--theme-colors-foreground) calc(100% * var(--lyric-transition-amount-start)),
         #0000 calc(100% * var(--lyric-transition-amount-end) + 1px)
     );
-}
-
-:is(.karaoke-line, .lyric-line).lyrics-line-active .karaoke-word.sung .karaoke-word-highlight {
-    opacity: 1;
-    transition: none;
-
-    --lyric-transition-amount-start: 1.4;
-    --lyric-transition-amount-end: 1.5;
 }
 
 .karaoke-word ruby {
