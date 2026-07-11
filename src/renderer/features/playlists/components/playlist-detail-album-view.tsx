@@ -125,7 +125,10 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
 
                 const rowSongs = (item as PlaylistAlbumRow)._playlistSongs;
                 if (itemType === LibraryItem.ALBUM && rowSongs?.length) {
-                    player.addToQueueByData(rowSongs, playType);
+                    player.addToQueueByData(
+                        sortSongList(rowSongs, SongListSort.ALBUM, SortOrder.ASC),
+                        playType,
+                    );
                     return;
                 }
                 player.addToQueueByFetch(item._serverId, [item.id], itemType, playType);
