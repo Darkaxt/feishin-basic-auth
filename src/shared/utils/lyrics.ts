@@ -1,4 +1,9 @@
-import type { LyricsResponse, SynchronizedLyricsArray } from '../types/domain-types';
+import type {
+    LyricsResponse,
+    SyncedCueLine,
+    SynchronizedLyricLine,
+    SynchronizedLyrics,
+} from '../types/domain-types';
 
 export const LYRIC_LINE_BREAK = '_BREAK_';
 
@@ -26,25 +31,30 @@ const parseTimeTag = (minute: string, second: string, milli?: string) => {
 const cleanLyricText = (text: string) => text.replaceAll(enhancedTimeTagExp, '').trim();
 
 const addSyncedLine = (
-    lines: SynchronizedLyricsArray,
+    lines: SynchronizedLyrics,
     lineIndexByTime: Map<number, number>,
     time: number,
     text: string,
+    cueLines?: SyncedCueLine[],
 ) => {
     const cleanText = cleanLyricText(text);
     const existingIndex = lineIndexByTime.get(time);
 
     if (existingIndex == null) {
         lineIndexByTime.set(time, lines.length);
-        lines.push([time, cleanText]);
+        lines.push({
+            ...(cueLines ? { cueLines } : {}),
+            startMs: time,
+            text: cleanText,
+        });
         return;
     }
 
-    lines[existingIndex][1] = appendLyricLine(lines[existingIndex][1], cleanText);
+    lines[existingIndex].text = appendLyricLine(lines[existingIndex].text, cleanText);
 };
 
 export const parseLyricsForDisplay = (lyrics: string): LyricsResponse => {
-    const formattedLyrics: SynchronizedLyricsArray = [];
+    const formattedLyrics: SynchronizedLyrics = [];
     const lineIndexByTime = new Map<number, number>();
     let offsetMs = 0;
 
@@ -75,13 +85,13 @@ export const parseLyricsForDisplay = (lyrics: string): LyricsResponse => {
             const cleanText = cleanLyricText(rawLine);
             if (cleanText) {
                 const lastLine = formattedLyrics[formattedLyrics.length - 1];
-                lastLine[1] = appendLyricLine(lastLine[1], cleanText);
+                lastLine.text = appendLyricLine(lastLine.text, cleanText);
             }
         }
     }
 
     if (formattedLyrics.length > 0) {
-        return formattedLyrics.sort((a, b) => a[0] - b[0]);
+        return formattedLyrics.sort((a, b) => a.startMs - b.startMs);
     }
 
     for (const rawLine of lyrics.split(/\r?\n/)) {
@@ -104,45 +114,66 @@ export const parseLyricsForDisplay = (lyrics: string): LyricsResponse => {
     }
 
     if (formattedLyrics.length > 0) {
-        return formattedLyrics.sort((a, b) => a[0] - b[0]);
+        return formattedLyrics.sort((a, b) => a.startMs - b.startMs);
     }
 
     return lyrics;
 };
 
 export const mergeSyncedLyricTranslations = (
-    mainLyrics: SynchronizedLyricsArray,
-    translationTracks: SynchronizedLyricsArray[],
-): SynchronizedLyricsArray => {
+    mainLyrics: SynchronizedLyrics,
+    translationTracks: SynchronizedLyrics[],
+): SynchronizedLyrics => {
     if (translationTracks.length === 0) return mainLyrics;
 
-    const translationMaps = translationTracks.map((track) => new Map(track));
+    const translationMaps = translationTracks.map(
+        (track) => new Map(track.map((line) => [line.startMs, line.text])),
+    );
 
-    return mainLyrics.map(([time, text], index) => {
-        let mergedText = text;
+    return mainLyrics.map((line, index) => {
+        let mergedText = line.text;
 
         for (let trackIndex = 0; trackIndex < translationTracks.length; trackIndex += 1) {
-            const exactMatch = translationMaps[trackIndex].get(time);
-            const fallbackMatch = translationTracks[trackIndex][index]?.[1];
+            const exactMatch = translationMaps[trackIndex].get(line.startMs);
+            const fallbackMatch = translationTracks[trackIndex][index]?.text;
             mergedText = appendLyricLine(mergedText, exactMatch ?? fallbackMatch ?? '');
         }
 
-        return [time, mergedText];
+        return {
+            ...line,
+            text: mergedText,
+        };
     });
 };
 
 export const mergeDuplicateSyncedLyricLines = (
-    lyrics: SynchronizedLyricsArray,
-): SynchronizedLyricsArray => {
-    const mergedLyrics: SynchronizedLyricsArray = [];
+    lyrics: SynchronizedLyrics,
+): SynchronizedLyrics => {
+    const mergedLyrics: SynchronizedLyrics = [];
     const lineIndexByTime = new Map<number, number>();
 
-    for (const [time, text] of lyrics) {
-        addSyncedLine(mergedLyrics, lineIndexByTime, time, text);
+    for (const lyric of lyrics) {
+        addSyncedLine(
+            mergedLyrics,
+            lineIndexByTime,
+            lyric.startMs,
+            lyric.text,
+            lyric.cueLines,
+        );
     }
 
-    return mergedLyrics.sort((a, b) => a[0] - b[0]);
+    return mergedLyrics.sort((a, b) => a.startMs - b.startMs);
 };
+
+export const toSynchronizedLyricLine = (
+    lyric: SynchronizedLyricLine | [number, string],
+): SynchronizedLyricLine =>
+    Array.isArray(lyric)
+        ? {
+              startMs: lyric[0],
+              text: lyric[1],
+          }
+        : lyric;
 
 export const formatLyricTextForExport = (text: string) => {
     return text.split(LYRIC_LINE_BREAK).join('\n');

@@ -426,12 +426,40 @@ const lyricLine = z.object({
     value: z.string(),
 });
 
+const lyricAgentRole = z.enum(['main', 'voice', 'bg', 'group']);
+
+const lyricAgent = z.object({
+    id: z.string(),
+    name: z.string().optional(),
+    role: lyricAgentRole,
+});
+
+const lyricCue = z.object({
+    byteEnd: z.number(),
+    byteStart: z.number(),
+    end: z.number(),
+    start: z.number(),
+    value: z.string(),
+});
+
+const lyricCueLine = z.object({
+    agentId: z.string().optional(),
+    cue: z.array(lyricCue).optional(),
+    end: z.number(),
+    index: z.number(),
+    start: z.number(),
+    value: z.string(),
+});
+
+const structuredLyricKind = z.enum(['main', 'translation', 'pronunciation']);
+
 const structuredLyric = z.object({
     agent: z.string().optional(),
+    agents: z.array(lyricAgent).optional(),
     cueLine: z.array(lyricCueLine).optional(),
     displayArtist: z.string().optional(),
     displayTitle: z.string().optional(),
-    kind: z.string().optional(),
+    kind: structuredLyricKind.optional(),
     lang: z.string(),
     line: z.array(lyricLine),
     offset: z.number().optional(),
@@ -826,6 +854,53 @@ const reportPlaybackParameters = z.object({
 
 const reportPlayback = z.null();
 
+const jukeboxControlParameters = z.object({
+    action: z.enum([
+        'start',
+        'stop',
+        'skip',
+        'set',
+        'get',
+        'setGain',
+        'add',
+        'clear',
+        'remove',
+        'shuffle',
+        'status',
+    ]),
+    gain: z.number().optional(),
+    id: z.union([z.string(), z.array(z.string())]).optional(),
+    index: z.number().optional(),
+    offset: z.number().optional(),
+});
+
+const jukeboxPlaylistEntry = z.object({
+    album: z.string().optional(),
+    artist: z.string().optional(),
+    coverArt: z.string().optional(),
+    duration: z.number().optional(),
+    id: z.string(),
+    isDir: z.boolean(),
+    parent: z.string().optional(),
+    title: z.string(),
+});
+
+const jukeboxStatus = z.object({
+    currentIndex: z.number().optional(),
+    gain: z.number(),
+    playing: z.boolean(),
+    position: z.number().optional(),
+});
+
+const jukeboxPlaylist = jukeboxStatus.extend({
+    entry: z.array(jukeboxPlaylistEntry).optional(),
+});
+
+const jukeboxControl = z.object({
+    jukeboxPlaylist: jukeboxPlaylist.optional(),
+    jukeboxStatus: jukeboxStatus.optional(),
+});
+
 export const ssType = {
     _body: {
         getTranscodeDecision: transcodeDecisionRequestBody,
@@ -855,6 +930,7 @@ export const ssType = {
         getStarred: getStarredParameters,
         getTranscodeDecision: transcodeDecisionParameters,
         getTranscodeStream: getTranscodeStreamParameters,
+        jukeboxControl: jukeboxControlParameters,
         randomSongList: randomSongListParameters,
         removeFavorite: removeFavoriteParameters,
         reportPlayback: reportPlaybackParameters,
@@ -903,6 +979,9 @@ export const ssType = {
         getStarred,
         getTranscodeDecision,
         internetRadioStation,
+        jukeboxControl,
+        jukeboxPlaylist,
+        jukeboxStatus,
         musicFolderList,
         ping,
         playlist,

@@ -9,6 +9,7 @@ import md5 from 'md5';
 import { z } from 'zod';
 
 import { contract, ssApiClient } from '/@/renderer/api/subsonic/subsonic-api';
+import { mapStructuredLyric } from '/@/renderer/api/subsonic/subsonic-structured-lyrics';
 import {
     getDefaultTranscodingProfiles,
     getDirectPlayProfiles,
@@ -1435,6 +1436,22 @@ export const SubsonicController: InternalControllerEndpoint = {
         if (subsonicFeatures[SubsonicExtensions.PLAYBACK_REPORT]) {
             features.reportPlayback = [1];
         }
+        try {
+            const jukeboxStatus = await ssApiClient(apiClientProps).jukeboxControl({
+                query: { action: 'status' },
+            });
+
+            if (jukeboxStatus.status === 200 && !(jukeboxStatus.body as any)?.error) {
+                features[ServerFeature.JUKEBOX] = [1];
+            } else {
+                console.log(
+                    'Jukebox endpoint returned an error payload:',
+                    (jukeboxStatus.body as any)?.error,
+                );
+            }
+        } catch (error) {
+            console.log('Jukebox is not supported by this server:', error);
+        }
 
         return { features, id: apiClientProps.server?.id, version: ping.body.serverVersion };
     },
@@ -1987,15 +2004,16 @@ export const SubsonicController: InternalControllerEndpoint = {
     },
     getStructuredLyrics: async (args) => {
         const { apiClientProps, query } = args;
+        const server = apiClientProps.server;
         const supportsEnhancedLyrics = hasFeatureWithVersion(
-            apiClientProps.server,
+            server,
             ServerFeature.LYRICS_MULTIPLE_STRUCTURED,
             2,
         );
 
         const res = await ssApiClient(apiClientProps).getStructuredLyrics({
             query: {
-                ...(supportsEnhancedLyrics ? { enhanced: true } : {}),
+                enhanced: supportsEnhancedLyrics ? true : undefined,
                 id: query.songId,
             },
         });
@@ -2010,57 +2028,34 @@ export const SubsonicController: InternalControllerEndpoint = {
             return [];
         }
 
-        const hasMainLyrics = lyrics.some((lyric) => lyric.kind !== 'translation');
-        const translationTracks = lyrics
-            .filter((lyric) => lyric.kind === 'translation' && lyric.synced)
-            .map((lyric) =>
-                mergeDuplicateSyncedLyricLines(
-                    lyric.line.flatMap((line) =>
-                        line.start == null ? [] : [[line.start, line.value]],
-                    ),
-                ),
-            )
+        const source = apiClientProps.server?.name || 'music server';
+        const mappedLyrics = lyrics.map((lyric) => mapStructuredLyric(lyric, source));
+        const hasSyncedMainLyrics = mappedLyrics.some(
+            (lyric) => lyric.synced && (!lyric.kind || lyric.kind === 'main'),
+        );
+        const translationTracks = mappedLyrics
+            .filter((lyric) => lyric.synced && lyric.kind === 'translation')
+            .map((lyric) => (lyric.synced ? mergeDuplicateSyncedLyricLines(lyric.lyrics) : []))
             .filter((lyric) => lyric.length > 0);
 
-        return lyrics.flatMap<StructuredLyric>((lyric) => {
-            if (hasMainLyrics && lyric.kind === 'translation') {
+        return mappedLyrics.flatMap<StructuredLyric>((lyric) => {
+            if (hasSyncedMainLyrics && lyric.synced && lyric.kind === 'translation') {
                 return [];
             }
 
-            const baseLyric = {
-                artist: lyric.displayArtist || '',
-                lang: lyric.lang,
-                name: lyric.displayTitle || '',
-                offsetMs: lyric.offset,
-                remote: false,
-                source: apiClientProps.server?.name || 'music server',
-            };
-
-            if (lyric.synced) {
-                const syncedLyrics = mergeDuplicateSyncedLyricLines(
-                    lyric.line.flatMap((line) =>
-                        line.start == null ? [] : [[line.start, line.value]],
-                    ),
-                );
-
+            if (hasSyncedMainLyrics && lyric.synced && (!lyric.kind || lyric.kind === 'main')) {
                 return [
                     {
-                        ...baseLyric,
-                        lyrics:
-                            lyric.kind === 'translation'
-                                ? syncedLyrics
-                                : mergeSyncedLyricTranslations(syncedLyrics, translationTracks),
-                        synced: true,
+                        ...lyric,
+                        lyrics: mergeSyncedLyricTranslations(
+                            mergeDuplicateSyncedLyricLines(lyric.lyrics),
+                            translationTracks,
+                        ),
                     },
                 ];
             }
-            return [
-                {
-                    ...baseLyric,
-                    lyrics: lyric.line.map((line) => [line.value]).join('\n'),
-                    synced: false,
-                },
-            ];
+
+            return [lyric];
         });
     },
     getTopSongs: async (args) => {
@@ -2129,6 +2124,25 @@ export const SubsonicController: InternalControllerEndpoint = {
             isAdmin: Boolean(res.body.user.adminRole),
             name: res.body.user.username,
         };
+    },
+    jukeboxControl: async (args) => {
+        const { apiClientProps, query } = args;
+
+        const res = await ssApiClient(apiClientProps).jukeboxControl({
+            query: {
+                action: query.action,
+                gain: query.gain,
+                id: query.id,
+                index: query.index,
+                offset: query.offset,
+            },
+        });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to control jukebox');
+        }
+
+        return res.body;
     },
     removeFromPlaylist: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({

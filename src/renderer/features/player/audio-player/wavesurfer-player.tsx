@@ -80,6 +80,10 @@ export function WaveSurferPlayer() {
                 return;
             }
 
+            if (num === 1) {
+                setTimestamp(e.playedSeconds);
+            }
+
             switch (transitionType) {
                 case PlayerStyle.CROSSFADE:
                     crossfadeHandler({
@@ -108,13 +112,17 @@ export function WaveSurferPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, num, player2, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, player2, setTimestamp, transitionType, volume],
     );
 
     const onProgressPlayer2 = useCallback(
         (e: PlayerOnProgressProps) => {
             if (!playerRef.current?.player2()) {
                 return;
+            }
+
+            if (num === 2) {
+                setTimestamp(e.playedSeconds);
             }
 
             switch (transitionType) {
@@ -145,11 +153,10 @@ export function WaveSurferPlayer() {
                     break;
             }
         },
-        [crossfadeDuration, isTransitioning, num, player1, transitionType, volume],
+        [crossfadeDuration, isTransitioning, num, player1, setTimestamp, transitionType, volume],
     );
 
     const handleOnEndedPlayer1 = useCallback(() => {
-        let nextStatus = PlayerStatus.PLAYING;
         const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
         const playerState = usePlayerStoreBase.getState();
         const shouldStopClipMode =
@@ -159,17 +166,19 @@ export function WaveSurferPlayer() {
                 pauseOnNext: playerState.player.pauseOnNextSongEnd,
             });
         const promise = new Promise((resolve) => {
-            const playerData = mediaAutoNext({
+            mediaAutoNext({
                 keepPaused: clipModeActive,
             });
-            nextStatus = playerData.status;
             resolve(true);
         });
 
         promise.then(() => {
             playerRef.current?.player1()?.ref?.pause();
-            if (nextStatus === PlayerStatus.PAUSED) {
+
+            const currentStatus = usePlayerStoreBase.getState().player.status;
+            if (currentStatus !== PlayerStatus.PLAYING) {
                 playerRef.current?.setVolume(0);
+                playerRef.current?.pause();
             } else {
                 playerRef.current?.setVolume(volume);
             }
@@ -181,7 +190,6 @@ export function WaveSurferPlayer() {
     }, [mediaAutoNext, volume]);
 
     const handleOnEndedPlayer2 = useCallback(() => {
-        let nextStatus = PlayerStatus.PLAYING;
         const clipModeActive = useFullScreenPlayerStore.getState().clipModeActive;
         const playerState = usePlayerStoreBase.getState();
         const shouldStopClipMode =
@@ -191,17 +199,19 @@ export function WaveSurferPlayer() {
                 pauseOnNext: playerState.player.pauseOnNextSongEnd,
             });
         const promise = new Promise((resolve) => {
-            const playerData = mediaAutoNext({
+            mediaAutoNext({
                 keepPaused: clipModeActive,
             });
-            nextStatus = playerData.status;
             resolve(true);
         });
 
         promise.then(() => {
             playerRef.current?.player2()?.ref?.pause();
-            if (nextStatus === PlayerStatus.PAUSED) {
+
+            const currentStatus = usePlayerStoreBase.getState().player.status;
+            if (currentStatus !== PlayerStatus.PLAYING) {
                 playerRef.current?.setVolume(0);
+                playerRef.current?.pause();
             } else {
                 playerRef.current?.setVolume(volume);
             }
@@ -265,7 +275,7 @@ export function WaveSurferPlayer() {
                 transitionType === PlayerStyle.CROSSFADE ||
                 transitionType === PlayerStyle.GAPLESS
             ) {
-                setTimestamp(Number(currentTime.toFixed(0)));
+                setTimestamp(currentTime);
             }
         }, 500);
 
