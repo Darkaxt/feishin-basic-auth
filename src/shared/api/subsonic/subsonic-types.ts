@@ -404,22 +404,6 @@ const structuredLyricsParameters = z.object({
     id: z.string(),
 });
 
-const lyricCue = z.object({
-    byteEnd: z.number().optional(),
-    byteStart: z.number().optional(),
-    end: z.number().optional(),
-    start: z.number().optional(),
-    value: z.string(),
-});
-
-const lyricCueLine = z.object({
-    cue: z.array(lyricCue).optional(),
-    end: z.number().optional(),
-    index: z.number().optional(),
-    start: z.number().optional(),
-    value: z.string(),
-});
-
 const lyricLine = z.object({
     end: z.number().optional(),
     start: z.number().optional(),

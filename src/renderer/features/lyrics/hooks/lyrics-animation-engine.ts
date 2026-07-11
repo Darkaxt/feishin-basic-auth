@@ -157,9 +157,7 @@ const collectLineParts = (lineElement: HTMLElement): PartData[] => {
 };
 
 const collectOverlayParts = (lineElement: HTMLElement): PartData[] => {
-    const words = lineElement.querySelectorAll<HTMLElement>(
-        '.karaoke-overlay-word[data-duration]',
-    );
+    const words = lineElement.querySelectorAll<HTMLElement>('.karaoke-overlay-word[data-duration]');
 
     return Array.from(words).map((element) => ({
         animationStartTimeMs: Number.POSITIVE_INFINITY,
@@ -263,11 +261,7 @@ const setupPartAnimation = (part: PartData, interpolatedTimeSec: number, now: nu
     part.isAnimating = true;
 };
 
-const animateWordParts = (
-    parts: PartData[],
-    interpolatedTimeSec: number,
-    now: number,
-): void => {
+const animateWordParts = (parts: PartData[], interpolatedTimeSec: number, now: number): void => {
     for (const part of parts) {
         const partEnd = part.time + part.duration;
 

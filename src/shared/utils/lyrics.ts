@@ -146,27 +146,19 @@ export const mergeSyncedLyricTranslations = (
     });
 };
 
-export const mergeDuplicateSyncedLyricLines = (
-    lyrics: SynchronizedLyrics,
-): SynchronizedLyrics => {
+export const mergeDuplicateSyncedLyricLines = (lyrics: SynchronizedLyrics): SynchronizedLyrics => {
     const mergedLyrics: SynchronizedLyrics = [];
     const lineIndexByTime = new Map<number, number>();
 
     for (const lyric of lyrics) {
-        addSyncedLine(
-            mergedLyrics,
-            lineIndexByTime,
-            lyric.startMs,
-            lyric.text,
-            lyric.cueLines,
-        );
+        addSyncedLine(mergedLyrics, lineIndexByTime, lyric.startMs, lyric.text, lyric.cueLines);
     }
 
     return mergedLyrics.sort((a, b) => a.startMs - b.startMs);
 };
 
 export const toSynchronizedLyricLine = (
-    lyric: SynchronizedLyricLine | [number, string],
+    lyric: [number, string] | SynchronizedLyricLine,
 ): SynchronizedLyricLine =>
     Array.isArray(lyric)
         ? {
