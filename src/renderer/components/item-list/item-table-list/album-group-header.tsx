@@ -1,26 +1,33 @@
 import clsx from 'clsx';
-import { ReactElement, useLayoutEffect, useRef, useState } from 'react';
+import { ReactElement, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { generatePath, Link } from 'react-router';
 
 import imageColumnStyles from '../item-detail-list/columns/image-column.module.css';
 import { AlbumGroupControls } from './album-group-controls';
 import styles from './album-group-header.module.css';
+import { AlbumGroupMetadata, renderAlbumGroupMetadataItem } from './album-group-metadata';
 import { TableItemSize } from './item-table-list';
 
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
-import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import {
     LONG_PRESS_PLAY_BEHAVIOR,
     PlayTooltip,
 } from '/@/renderer/features/shared/components/play-button-group';
 import { AppRoute } from '/@/renderer/router/routes';
-import { useAlbumGroupImageSize, usePlayButtonBehavior } from '/@/renderer/store';
+import {
+    useAlbumGroupImageSize,
+    useAlbumGroupItems,
+    useAlbumGroupShowFavoriteRating,
+    usePlayButtonBehavior,
+} from '/@/renderer/store';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
 interface AlbumGroupHeaderProps {
     groupRowCount?: number;
+    metadata: AlbumGroupMetadata;
     onPlay?: (playType: Play) => void;
     rowIndex?: number;
     setAlbumGroupContentHeight?: (rowIndex: number, height: number) => void;
@@ -30,12 +37,16 @@ interface AlbumGroupHeaderProps {
 
 export const AlbumGroupHeader = ({
     groupRowCount,
+    metadata,
     onPlay,
     rowIndex,
     setAlbumGroupContentHeight,
     size = 'normal',
     song,
 }: AlbumGroupHeaderProps): ReactElement => {
+    const { t } = useTranslation();
+    const albumGroupItems = useAlbumGroupItems();
+    const showFavoriteRating = useAlbumGroupShowFavoriteRating();
     const [isHovered, setIsHovered] = useState(false);
     const [resolvedInfoHeight, setResolvedInfoHeight] = useState<number | undefined>();
     const playButtonBehavior = usePlayButtonBehavior();
@@ -49,6 +60,16 @@ export const AlbumGroupHeader = ({
     const albumPath = song?.albumId
         ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, { albumId: song.albumId })
         : null;
+
+    const metadataRows = useMemo(() => {
+        return albumGroupItems
+            .filter((item) => !item.disabled)
+            .map((item) => ({
+                content: renderAlbumGroupMetadataItem(item.id, song, metadata, t),
+                id: item.id,
+            }))
+            .filter((item) => item.content != null);
+    }, [albumGroupItems, metadata, song, t]);
 
     // The album group spans the combined row height, but when the image is
     // enlarged the group's last row is grown so the total reaches the img size.
@@ -145,22 +166,21 @@ export const AlbumGroupHeader = ({
                         (song?.album ?? '')
                     )}
                 </div>
-                <div className={styles.artistName}>
-                    <JoinedArtists
-                        artistName={song?.albumArtistName ?? ''}
-                        artists={song?.albumArtists ?? []}
-                        linkProps={{ fw: 400 }}
-                        rootTextProps={{ fw: 400, size: 'xs' }}
-                    />
-                </div>
-                <div className={styles.controlsRow}>
-                    <AlbumGroupControls
-                        albumId={song?.albumId}
-                        isGroupHovered={isHovered}
-                        serverId={song?._serverId}
-                        serverType={song?._serverType}
-                    />
-                </div>
+                {metadataRows.map((row) => (
+                    <div className={styles.metadataRow} key={row.id}>
+                        {row.content}
+                    </div>
+                ))}
+                {showFavoriteRating && (
+                    <div className={styles.controlsRow}>
+                        <AlbumGroupControls
+                            albumId={song?.albumId}
+                            isGroupHovered={isHovered}
+                            serverId={song?._serverId}
+                            serverType={song?._serverType}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

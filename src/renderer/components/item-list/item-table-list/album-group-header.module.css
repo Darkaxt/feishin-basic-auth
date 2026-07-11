@@ -43,8 +43,8 @@
 }
 
 .info {
-    display: grid;
-    grid-template-rows: auto auto auto;
+    display: flex;
+    flex-direction: column;
     gap: 0;
     align-content: start;
     min-width: 0;
@@ -71,7 +71,7 @@
     }
 }
 
-.artist-name {
+.metadata-row {
     font-size: var(--theme-font-size-xs);
     line-height: 1.25;
     overflow-wrap: anywhere;
