@@ -1557,6 +1557,17 @@ const BaseItemTableList = ({
         scrollCellProps,
     });
 
+    const scrollSyncKey = useMemo(
+        () =>
+            parsedColumns
+                .map(
+                    (col) =>
+                        `${col.id}:${col.pinned ?? 'none'}:${col.width}:${col.isEnabled !== false}`,
+                )
+                .join('|'),
+        [parsedColumns],
+    );
+
     useTablePaneSync({
         enableDrag,
         enableDragScroll,
@@ -1571,6 +1582,7 @@ const BaseItemTableList = ({
         rowRef,
         scrollContainerRef,
         scrollShadowStore,
+        scrollSyncKey,
     });
 
     // Create a wrapper for getRowHeight that doesn't require cellProps (for sticky group rows hook)
