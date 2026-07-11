@@ -105,6 +105,7 @@ export const AlbumGroupColumn = (props: ItemTableListInnerColumn) => {
                 setAlbumGroupContentHeight={props.setAlbumGroupContentHeight}
                 size={props.size === 'default' ? 'normal' : props.size}
                 song={item}
+                storedContentHeight={props.albumGroupContentHeights?.get(props.rowIndex)}
             />
         </TableColumnContainer>
     );

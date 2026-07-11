@@ -1312,7 +1312,7 @@ const BaseItemTableList = ({
 
     useEffect(() => {
         setAlbumGroupContentHeights(new Map());
-    }, [baseItemCount, data]);
+    }, [baseItemCount]);
 
     const totalItemCount = enableHeader ? baseItemCount + 1 : baseItemCount;
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);

@@ -38,6 +38,7 @@ interface AlbumGroupHeaderProps {
     setAlbumGroupContentHeight?: (rowIndex: number, height: number) => void;
     size?: AlbumGroupTextSize;
     song: Song | undefined;
+    storedContentHeight?: number;
 }
 
 export const AlbumGroupHeader = ({
@@ -48,6 +49,7 @@ export const AlbumGroupHeader = ({
     setAlbumGroupContentHeight,
     size = 'normal',
     song,
+    storedContentHeight,
 }: AlbumGroupHeaderProps): ReactElement => {
     const { t } = useTranslation();
     const albumGroupItems = useAlbumGroupItems();
@@ -121,7 +123,13 @@ export const AlbumGroupHeader = ({
         resizeObserver.observe(infoEl);
 
         return () => resizeObserver.disconnect();
-    }, [infoHeight, rowIndex, setAlbumGroupContentHeight]);
+    }, [
+        infoHeight,
+        metadataRows.length,
+        rowIndex,
+        setAlbumGroupContentHeight,
+        storedContentHeight,
+    ]);
 
     return (
         <div
