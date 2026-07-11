@@ -234,6 +234,28 @@ export const SynchronizedKaraokeLyrics = ({
         syncFromCurrentTimestamp();
     }, [offsetMs, syncFromCurrentTimestamp]);
 
+    // Rebuild animation state when async romaji overlay data arrives after initial mount.
+    // Without this, overlayParts stay empty until a pause/resume triggers rebuildLyricsData().
+    useEffect(() => {
+        if (syncedRomajiLyrics == null) {
+            return;
+        }
+
+        const frame = requestAnimationFrame(() => {
+            rebuildLyricsData();
+
+            const timestamp = useTimestampStoreBase.getState().timestamp;
+            const isPlaying = statusRef.current === PlayerStatus.PLAYING;
+            syncAtTime(timestamp * 1000 + delayMsRef.current, isPlaying, {
+                eventCreationTime: playbackAnchorRef.current.eventCreationTime,
+                forceReset: true,
+                forceResync: true,
+            });
+        });
+
+        return () => cancelAnimationFrame(frame);
+    }, [delayMsRef, rebuildLyricsData, syncAtTime, syncedRomajiLyrics]);
+
     useEffect(() => {
         statusRef.current = usePlayerStoreBase.getState().player.status;
 
