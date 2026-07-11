@@ -6,7 +6,11 @@ import { generatePath, Link } from 'react-router';
 import imageColumnStyles from '../item-detail-list/columns/image-column.module.css';
 import { AlbumGroupControls } from './album-group-controls';
 import styles from './album-group-header.module.css';
-import { AlbumGroupMetadata, renderAlbumGroupMetadataItem } from './album-group-metadata';
+import {
+    AlbumGroupMetadata,
+    AlbumGroupTextSize,
+    renderAlbumGroupMetadataItem,
+} from './album-group-metadata';
 import { TableItemSize } from './item-table-list';
 
 import { ItemImage } from '/@/renderer/components/item-image/item-image';
@@ -22,6 +26,7 @@ import {
     useAlbumGroupShowFavoriteRating,
     usePlayButtonBehavior,
 } from '/@/renderer/store';
+import { Text } from '/@/shared/components/text/text';
 import { LibraryItem, Song } from '/@/shared/types/domain-types';
 import { Play } from '/@/shared/types/types';
 
@@ -31,7 +36,7 @@ interface AlbumGroupHeaderProps {
     onPlay?: (playType: Play) => void;
     rowIndex?: number;
     setAlbumGroupContentHeight?: (rowIndex: number, height: number) => void;
-    size?: 'compact' | 'large' | 'normal';
+    size?: AlbumGroupTextSize;
     song: Song | undefined;
 }
 
@@ -157,19 +162,25 @@ export const AlbumGroupHeader = ({
                 ref={infoRef}
                 style={{ minHeight: resolvedInfoHeight ?? infoHeight }}
             >
-                <div className={styles.albumName}>
-                    {song?.albumId && albumPath ? (
-                        <Link state={{ item: song }} to={albumPath}>
-                            {song.album ?? ''}
-                        </Link>
+                {song?.album &&
+                    (song.albumId && albumPath ? (
+                        <Text
+                            className={styles.albumTitle}
+                            component={Link}
+                            isLink
+                            isNoSelect
+                            state={{ item: song }}
+                            to={albumPath}
+                        >
+                            {song.album}
+                        </Text>
                     ) : (
-                        (song?.album ?? '')
-                    )}
-                </div>
+                        <Text className={styles.albumTitle} isNoSelect>
+                            {song.album}
+                        </Text>
+                    ))}
                 {metadataRows.map((row) => (
-                    <div className={styles.metadataRow} key={row.id}>
-                        {row.content}
-                    </div>
+                    <div key={row.id}>{row.content}</div>
                 ))}
                 {showFavoriteRating && (
                     <div className={styles.controlsRow}>

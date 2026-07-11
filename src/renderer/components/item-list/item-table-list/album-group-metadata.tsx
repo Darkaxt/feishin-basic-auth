@@ -2,7 +2,12 @@ import { TFunction } from 'i18next';
 import { Fragment, ReactNode } from 'react';
 import { generatePath, Link } from 'react-router';
 
-import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
+import styles from './album-group-header.module.css';
+
+import {
+    JOINED_ARTISTS_MUTED_PROPS,
+    JoinedArtists,
+} from '/@/renderer/features/albums/components/joined-artists';
 import { AppRoute } from '/@/renderer/router/routes';
 import { AlbumGroupItem } from '/@/renderer/store';
 import { formatDurationString, formatPartialIsoDateUTC, formatSizeString } from '/@/renderer/utils';
@@ -19,6 +24,23 @@ export type AlbumGroupMetadata = {
     size: number;
     songCount: number;
 };
+
+export type AlbumGroupTextSize = 'compact' | 'large' | 'normal';
+
+const metadataTextProps = {
+    isMuted: true,
+    isNoSelect: true,
+    size: 'xs' as const,
+};
+
+const albumGroupArtistProps = {
+    linkProps: { ...JOINED_ARTISTS_MUTED_PROPS.linkProps, size: 'xs' as const },
+    rootTextProps: { ...JOINED_ARTISTS_MUTED_PROPS.rootTextProps, size: 'xs' as const },
+};
+
+const MetadataTextContainer = ({ children }: { children: ReactNode }) => (
+    <div className={styles.metadataRow}>{children}</div>
+);
 
 export const computeAlbumGroupMetadata = (
     songs: Song[],
@@ -78,17 +100,21 @@ export const renderAlbumGroupMetadataItem = (
             }
 
             return (
-                <JoinedArtists
-                    artistName={song?.albumArtistName ?? ''}
-                    artists={song?.albumArtists ?? []}
-                    linkProps={{ fw: 400 }}
-                    rootTextProps={{ fw: 400, size: 'xs' }}
-                />
+                <div className={styles.metadataRow}>
+                    <JoinedArtists
+                        artistName={song?.albumArtistName ?? ''}
+                        artists={song?.albumArtists ?? []}
+                        linkProps={albumGroupArtistProps.linkProps}
+                        rootTextProps={albumGroupArtistProps.rootTextProps}
+                    />
+                </div>
             );
 
         case AlbumGroupItem.DURATION:
             return metadata.duration > 0 ? (
-                <Text size="xs">{formatDurationString(metadata.duration)}</Text>
+                <MetadataTextContainer>
+                    <Text {...metadataTextProps}>{formatDurationString(metadata.duration)}</Text>
+                </MetadataTextContainer>
             ) : null;
 
         case AlbumGroupItem.GENRES:
@@ -97,14 +123,13 @@ export const renderAlbumGroupMetadataItem = (
             }
 
             return (
-                <>
+                <div className={styles.metadataRow}>
                     {metadata.genres.map((genre, index) => (
                         <Fragment key={genre.id}>
                             <Text
+                                {...metadataTextProps}
                                 component={Link}
-                                fw={400}
                                 isLink
-                                size="xs"
                                 state={{ item: genre }}
                                 to={generatePath(AppRoute.LIBRARY_GENRES_DETAIL, {
                                     genreId: genre.id,
@@ -115,30 +140,46 @@ export const renderAlbumGroupMetadataItem = (
                             {index < metadata.genres.length - 1 && ', '}
                         </Fragment>
                     ))}
-                </>
+                </div>
             );
 
         case AlbumGroupItem.RELEASE_DATE: {
             const releaseDate = formatReleaseDate(metadata);
-            return releaseDate ? <Text size="xs">{releaseDate}</Text> : null;
+            return releaseDate ? (
+                <MetadataTextContainer>
+                    <Text {...metadataTextProps}>{releaseDate}</Text>
+                </MetadataTextContainer>
+            ) : null;
         }
 
         case AlbumGroupItem.RELEASE_TYPE:
-            return metadata.releaseType ? <Text size="xs">{metadata.releaseType}</Text> : null;
+            return metadata.releaseType ? (
+                <MetadataTextContainer>
+                    <Text {...metadataTextProps}>{metadata.releaseType}</Text>
+                </MetadataTextContainer>
+            ) : null;
 
         case AlbumGroupItem.RELEASE_YEAR:
             return metadata.releaseYear != null && metadata.releaseYear > 0 ? (
-                <Text size="xs">{metadata.releaseYear}</Text>
+                <MetadataTextContainer>
+                    <Text {...metadataTextProps}>{metadata.releaseYear}</Text>
+                </MetadataTextContainer>
             ) : null;
 
         case AlbumGroupItem.SIZE:
             return metadata.size > 0 ? (
-                <Text size="xs">{formatSizeString(metadata.size)}</Text>
+                <MetadataTextContainer>
+                    <Text {...metadataTextProps}>{formatSizeString(metadata.size)}</Text>
+                </MetadataTextContainer>
             ) : null;
 
         case AlbumGroupItem.SONG_COUNT:
             return metadata.songCount > 0 ? (
-                <Text size="xs">{t('entity.trackWithCount', { count: metadata.songCount })}</Text>
+                <MetadataTextContainer>
+                    <Text {...metadataTextProps}>
+                        {t('entity.trackWithCount', { count: metadata.songCount })}
+                    </Text>
+                </MetadataTextContainer>
             ) : null;
 
         default:
