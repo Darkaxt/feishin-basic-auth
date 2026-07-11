@@ -55,6 +55,10 @@ export const PlaylistDetailAlbumView = ({ data }: { data: PlaylistSongListRespon
             ? searchLibraryItems(filtered, searchTerm, LibraryItem.SONG)
             : filtered;
 
+        if (searchTerm?.trim()) {
+            return searched;
+        }
+
         return sortSongList(
             searched,
             (query.sortBy as SongListSort) ?? SongListSort.ID,
