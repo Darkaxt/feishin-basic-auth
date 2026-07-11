@@ -23,10 +23,10 @@ const ALBUM_GROUP_ITEM_LABELS: Array<[AlbumGroupItem, string]> = [
     [AlbumGroupItem.SIZE, 'table.column.size'],
 ];
 
-const mergeItems = (
-    items: SortableItem<AlbumGroupItem>[],
-    itemLabels: Array<[string, string]>,
-): SortableItem<AlbumGroupItem>[] => {
+const mergeItems = <K extends string, T extends SortableItem<K>>(
+    items: T[],
+    itemLabels: Array<[K, string]>,
+): T[] => {
     const allItemIds = itemLabels.map(([key]) => key);
 
     const missingItemIds = allItemIds.filter((id) => !items.some((item) => item.id === id));
@@ -36,7 +36,7 @@ const mergeItems = (
         ...(missingItemIds.map((id) => ({
             disabled: true,
             id,
-        })) as SortableItem<AlbumGroupItem>[]),
+        })) as T[]),
     ];
 
     const uniqueMerged = merged.filter(
@@ -52,7 +52,8 @@ export const AlbumGroupMetadataConfig = memo(() => {
     const { setAlbumGroupItems } = useSettingsStoreActions();
 
     const items = useMemo(
-        () => mergeItems(albumGroupItems, ALBUM_GROUP_ITEM_LABELS),
+        () =>
+            mergeItems(albumGroupItems as SortableItem<AlbumGroupItem>[], ALBUM_GROUP_ITEM_LABELS),
         [albumGroupItems],
     );
 
