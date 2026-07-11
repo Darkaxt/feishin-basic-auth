@@ -88,7 +88,7 @@ const formatReleaseDate = (metadata: AlbumGroupMetadata): null | string => {
 };
 
 export const renderAlbumGroupMetadataItem = (
-    itemId: AlbumGroupItem,
+    itemId: `${AlbumGroupItem}`,
     song: Song | undefined,
     metadata: AlbumGroupMetadata,
     t: TFunction,
