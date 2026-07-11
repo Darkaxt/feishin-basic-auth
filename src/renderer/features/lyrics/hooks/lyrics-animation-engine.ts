@@ -697,8 +697,7 @@ export const tickLyricsAnimation = (state: AnimEngineState, opts: TickOptions): 
 
     const ss = state.scroll;
     const scrollPausedByUser = ss.scrollResumeTime >= now;
-    const canAutoscroll =
-        follow && (!scrollPausedByUser || ss.pendingScroll || ss.scrollPos === -1);
+    const canAutoscroll = follow && !scrollPausedByUser;
 
     if (canAutoscroll) {
         if (activeElems.length === 0 && lines.length > 0) {
@@ -754,14 +753,20 @@ export const tickLyricsAnimation = (state: AnimEngineState, opts: TickOptions): 
 
     if (ss.wasUserScrolling && ss.scrollResumeTime < now) {
         ss.wasUserScrolling = false;
+        ss.pendingScroll = true;
     }
 
     return activeLineIndex;
 };
 
 export const handleLyricsUserScroll = (state: AnimEngineState, pauseDurationMs = 3000): void => {
-    state.scroll.wasUserScrolling = true;
-    state.scroll.scrollResumeTime = Date.now() + pauseDurationMs;
+    const ss = state.scroll;
+    cancelActiveLyricsScroll(ss);
+    ss.programmaticScrollUntil = 0;
+    ss.skipScrolls = 0;
+    ss.skipScrollsDecayTimes = [];
+    ss.wasUserScrolling = true;
+    ss.scrollResumeTime = Date.now() + pauseDurationMs;
 };
 
 export const resumeLyricsAutoscroll = (state: AnimEngineState): void => {

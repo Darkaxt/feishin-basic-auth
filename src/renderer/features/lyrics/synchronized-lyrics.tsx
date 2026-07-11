@@ -126,6 +126,8 @@ export const SynchronizedLyrics = ({
             const timeInMs = timestamp * 1000 + delayMsRef.current;
 
             if (Math.abs(timeInMs - lastSyncedTimeRef.current) > SEEK_DETECT_THRESHOLD_MS) {
+                resumeAutoscroll();
+                resumeEngineAutoscroll();
                 syncAtTime(timeInMs, true, true);
             } else {
                 syncAtTime(timeInMs, true);
@@ -135,7 +137,7 @@ export const SynchronizedLyrics = ({
         };
 
         rafRef.current = requestAnimationFrame(runTick);
-    }, [delayMsRef, stopRaf, syncAtTime]);
+    }, [delayMsRef, resumeAutoscroll, resumeEngineAutoscroll, stopRaf, syncAtTime]);
 
     const syncFromCurrentTimestamp = useCallback(() => {
         const timestamp = useTimestampStoreBase.getState().timestamp;
@@ -205,12 +207,14 @@ export const SynchronizedLyrics = ({
             }
 
             if (Math.abs(timeInMs - lastSyncedTimeRef.current) > SEEK_DETECT_THRESHOLD_MS) {
+                resumeAutoscroll();
+                resumeEngineAutoscroll();
                 syncAtTime(timeInMs, true, true);
             }
         });
 
         return unsubscribe;
-    }, [delayMsRef, syncAtTime]);
+    }, [delayMsRef, resumeAutoscroll, resumeEngineAutoscroll, syncAtTime]);
 
     const handleContainerClick = useCallback(
         (event: React.MouseEvent<HTMLDivElement>) => {

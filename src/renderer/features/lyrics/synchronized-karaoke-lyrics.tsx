@@ -150,7 +150,9 @@ export const SynchronizedKaraokeLyrics = ({
                 eventCreationTime: options?.eventCreationTime ?? Date.now(),
                 forceResync: options?.forceResync ?? false,
             });
-            lastSyncedTimeRef.current = timeInMs;
+            const eventCreationTime = options?.eventCreationTime ?? Date.now();
+            const interpolatedOffsetMs = isPlaying ? Date.now() - eventCreationTime : 0;
+            lastSyncedTimeRef.current = timeInMs + interpolatedOffsetMs;
         },
         [rebuildLyricsData, reset, tick],
     );
@@ -267,6 +269,8 @@ export const SynchronizedKaraokeLyrics = ({
             }
 
             if (isSeek) {
+                resumeAutoscroll();
+                resumeEngineAutoscroll();
                 syncAtTime(timeInMs, true, {
                     eventCreationTime: playbackAnchorRef.current.eventCreationTime,
                     forceReset: true,
@@ -276,7 +280,7 @@ export const SynchronizedKaraokeLyrics = ({
         });
 
         return unsubscribe;
-    }, [delayMsRef, syncAtTime, updatePlaybackAnchor]);
+    }, [delayMsRef, resumeAutoscroll, resumeEngineAutoscroll, syncAtTime, updatePlaybackAnchor]);
 
     const getOverlayText = (
         overlayLyrics: null | SynchronizedLyricsData | undefined,
