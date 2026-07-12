@@ -360,11 +360,15 @@ export const SynchronizedKaraokeLyrics = ({
                         lineStartMs,
                         idx,
                     );
+                    const lineLevelRomaji =
+                        syncedRomajiLyrics == null && romajiLyrics?.[idx]
+                            ? getLyricLineText(romajiLyrics[idx])
+                            : undefined;
                     const pronunciationText = getOverlayText(
                         pronunciationLyrics,
                         lineStartMs,
                         idx,
-                        romajiLyrics?.[idx] ? getLyricLineText(romajiLyrics[idx]) : undefined,
+                        lineLevelRomaji,
                     );
                     const translationText = getOverlayText(
                         translationLyrics,
@@ -407,7 +411,11 @@ export const SynchronizedKaraokeLyrics = ({
                             lineIndex={idx}
                             pronunciationCueLines={pronunciationCueLines}
                             pronunciationText={pronunciationText}
-                            romajiCueLines={syncedRomajiLyrics?.[idx] ?? null}
+                            romajiCueLines={
+                                syncedRomajiLyrics != null
+                                    ? (syncedRomajiLyrics[idx] ?? null)
+                                    : undefined
+                            }
                             translatedText={translationText}
                             translationCueLines={translationCueLines}
                         />
