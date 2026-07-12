@@ -448,7 +448,7 @@ export const PitchControls = () => {
                 </Button>
             )}
             <Text size="xs" style={{ fontFamily: 'monospace' }} ta="center" w="60px">
-                {speed.toFixed(2)}% {speedToPitch(speed) > 0 && '+'}
+                {speed.toFixed(2)}x {speedToPitch(speed) > 0 && '+'}
                 {speedToPitch(speed) == 0 && '±'}
                 {speedToPitch(speed).toFixed(2)}st
             </Text>
