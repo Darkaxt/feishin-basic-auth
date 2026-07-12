@@ -2236,7 +2236,7 @@ export const SubsonicController: InternalControllerEndpoint = {
                 mediaId: query.id,
                 mediaType: query.mediaType,
                 playbackRate: query.playbackRate,
-                positionMs: query.position ?? 0,
+                positionMs: Math.round(query.position ?? 0),
             };
 
             const reportPlayback = (state: 'paused' | 'playing' | 'starting' | 'stopped') => {
