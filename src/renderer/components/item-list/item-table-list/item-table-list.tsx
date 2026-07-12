@@ -45,6 +45,7 @@ import { useTablePaneSync } from '/@/renderer/components/item-list/item-table-li
 import { useTableRowModel } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-row-model';
 import { useTableScrollToIndex } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-scroll-to-index';
 import {
+    getAlbumGroupHeightKey,
     getAlbumGroupRowCount,
     getAlbumGroupSpanHeight,
     getAlbumGroupStartRowIndex,
@@ -176,7 +177,7 @@ const ItemTableScrollShadowRight = memo(function ItemTableScrollShadowRight({
 ItemTableScrollShadowRight.displayName = 'ItemTableScrollShadowRight';
 
 interface VirtualizedTableGridProps {
-    albumGroupContentHeights: Map<number, number>;
+    albumGroupContentHeights: Map<string, number>;
     calculatedColumnWidths: number[];
     CellComponent: JSXElementConstructor<CellComponentProps<TableItemProps>>;
     data: unknown[];
@@ -194,7 +195,7 @@ interface VirtualizedTableGridProps {
     pinnedRowCount: number;
     pinnedRowRef: React.RefObject<HTMLDivElement | null>;
     scrollShadowStore: TableScrollShadowStore;
-    setAlbumGroupContentHeight: (rowIndex: number, height: number) => void;
+    setAlbumGroupContentHeight: (groupKey: string, height: number) => void;
     tableConfig: ItemTableListConfig;
     totalColumnCount: number;
     totalRowCount: number;
@@ -773,7 +774,7 @@ export interface TableGroupHeader {
 
 export interface TableItemProps {
     adjustedRowIndexMap?: Map<number, number>;
-    albumGroupContentHeights?: Map<number, number>;
+    albumGroupContentHeights?: Map<string, number>;
     albumGroupImageSize?: number;
     calculatedColumnWidths?: number[];
     cellPadding?: ItemTableListProps['cellPadding'];
@@ -807,7 +808,7 @@ export interface TableItemProps {
     pinnedRightColumnWidths?: number[];
     playerContext: PlayerContext;
     playlistId?: string;
-    setAlbumGroupContentHeight?: (rowIndex: number, height: number) => void;
+    setAlbumGroupContentHeight?: (groupKey: string, height: number) => void;
     size?: ItemTableListProps['size'];
     startRowIndex?: number;
     tableId: string;
@@ -1298,14 +1299,14 @@ const BaseItemTableList = ({
     const albumGroupImageSize = useAlbumGroupImageSize();
     const baseItemCount = itemCount ?? data.length;
     const [albumGroupContentHeights, setAlbumGroupContentHeights] = useState(
-        () => new Map<number, number>(),
+        () => new Map<string, number>(),
     );
 
-    const setAlbumGroupContentHeight = useCallback((rowIndex: number, height: number) => {
+    const setAlbumGroupContentHeight = useCallback((groupKey: string, height: number) => {
         setAlbumGroupContentHeights((prev) => {
-            if (prev.get(rowIndex) === height) return prev;
+            if (prev.get(groupKey) === height) return prev;
             const next = new Map(prev);
-            next.set(rowIndex, height);
+            next.set(groupKey, height);
             return next;
         });
     }, []);
@@ -1460,8 +1461,12 @@ const BaseItemTableList = ({
                         cellProps.getRowItem,
                         cellProps.enableHeader,
                     );
+                    const groupStartItem = cellProps.getRowItem?.(groupStartRowIndex);
+                    const groupHeightKey = getAlbumGroupHeightKey(groupStartItem, groupRowCount);
                     const contentHeight =
-                        cellProps.albumGroupContentHeights?.get(groupStartRowIndex) ?? 0;
+                        (groupHeightKey
+                            ? cellProps.albumGroupContentHeights?.get(groupHeightKey)
+                            : undefined) ?? 0;
                     const totalGroupHeight = getAlbumGroupSpanHeight(
                         groupRowCount,
                         baseHeight,
