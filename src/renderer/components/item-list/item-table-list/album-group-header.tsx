@@ -59,7 +59,7 @@ export const AlbumGroupHeader = ({
         null,
     );
     const playButtonBehavior = usePlayButtonBehavior();
-    const albumImageSize = useAlbumGroupImageSize();
+    const albumImageSize = useAlbumGroupImageSize() || 96;
     const rowHeight = {
         compact: TableItemSize.COMPACT,
         large: TableItemSize.LARGE,
