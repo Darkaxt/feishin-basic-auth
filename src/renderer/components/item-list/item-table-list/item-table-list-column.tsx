@@ -391,22 +391,18 @@ const NonMutedColumns = [TableColumn.TITLE, TableColumn.TITLE_ARTIST, TableColum
  * Keep in sync with album-group-header styles (title line-clamp, metadata xs, controls).
  */
 export function estimateAlbumGroupContentHeight({
-    hasEnlargedImage,
     metadataRowCount,
     showControls,
 }: {
-    hasEnlargedImage: boolean;
     metadataRowCount: number;
     showControls: boolean;
 }): number {
     const TITLE_LINE_HEIGHT = 20;
     const TITLE_MAX_LINES = 3;
     const METADATA_LINE_HEIGHT = 18;
-    const CONTROLS_HEIGHT = 26;
-    const PADDING_TOP = hasEnlargedImage ? 8 : 0;
+    const CONTROLS_HEIGHT = 38;
 
     return (
-        PADDING_TOP +
         TITLE_LINE_HEIGHT * TITLE_MAX_LINES +
         Math.max(0, metadataRowCount) * METADATA_LINE_HEIGHT +
         (showControls ? CONTROLS_HEIGHT : 0)
@@ -459,13 +455,23 @@ export function getAlbumGroupRowCount(
     return end - start + 1;
 }
 
+export const ALBUM_GROUP_STACK_GAP = 12;
+
 export function getAlbumGroupSpanHeight(
     groupRowCount: number,
     baseHeight: number,
     albumGroupImageSize: number,
     contentHeight = 0,
+    options?: { isVertical?: boolean },
 ): number {
     const rowSpanHeight = groupRowCount * baseHeight;
+    const isVertical = options?.isVertical ?? false;
+
+    if (isVertical) {
+        const imageSize = albumGroupImageSize > 0 ? albumGroupImageSize : 96;
+        return Math.max(rowSpanHeight, imageSize + ALBUM_GROUP_STACK_GAP + contentHeight);
+    }
+
     const imageSpanHeight =
         albumGroupImageSize > 0 ? Math.max(albumGroupImageSize, rowSpanHeight) : rowSpanHeight;
 
@@ -565,9 +571,6 @@ function ClampedCell({
 // standard height and the reserved space below is left empty (uniform
 // background) for the overflowing album image.
 function getAlbumGroupClampHeight(props: ItemTableListInnerColumn): null | number {
-    const albumImageSize = props.albumGroupImageSize ?? 0;
-
-    if (albumImageSize <= 0) return null;
     if (props.type === TableColumn.ALBUM_GROUP) return null;
     if (!isAlbumGroupingActive(props.columns)) return null;
 
@@ -583,6 +586,8 @@ function getAlbumGroupClampHeight(props: ItemTableListInnerColumn): null | numbe
         return null;
     }
 
+    const albumImageSize = props.albumGroupImageSize ?? 0;
+    const isVertical = props.albumGroupVerticalLayout ?? false;
     const baseHeight = baseRowHeightForSize(props.size);
     const groupRowCount = getAlbumGroupRowCount(
         props.rowIndex,
@@ -600,12 +605,18 @@ function getAlbumGroupClampHeight(props: ItemTableListInnerColumn): null | numbe
     const measuredContentHeight = groupHeightKey
         ? props.albumGroupContentHeights?.get(groupHeightKey)
         : undefined;
-    const contentHeight = measuredContentHeight ?? props.estimatedAlbumGroupContentHeight ?? 0;
+    // Never reserve less than the estimate — early measure can miss the async
+    // favorites/ratings row (AlbumGroupControls returns null until album loads).
+    const contentHeight = Math.max(
+        measuredContentHeight ?? 0,
+        props.estimatedAlbumGroupContentHeight ?? 0,
+    );
     const totalGroupHeight = getAlbumGroupSpanHeight(
         groupRowCount,
         baseHeight,
         albumImageSize,
         contentHeight,
+        { isVertical },
     );
 
     // Only clamp when the row was actually grown to fit the image or wrapped text.

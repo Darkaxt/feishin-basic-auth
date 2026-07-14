@@ -78,6 +78,7 @@ import {
     useAlbumGroupImageSize,
     useAlbumGroupItems,
     useAlbumGroupShowFavoriteRating,
+    useAlbumGroupVerticalLayout,
     usePlayerStore,
 } from '/@/renderer/store';
 import { animationProps } from '/@/shared/components/animations/animation-props';
@@ -235,6 +236,7 @@ const VirtualizedTableGrid = ({
 }: VirtualizedTableGridProps) => {
     const { enableHeader, enableRowHoverHighlight, getRowHeight, groups } = tableConfig;
     const albumGroupImageSize = useAlbumGroupImageSize();
+    const albumGroupVerticalLayout = useAlbumGroupVerticalLayout();
     const hoverDelegateRef = useRef<HTMLDivElement | null>(null);
 
     useRowInteractionDelegate({
@@ -396,6 +398,7 @@ const VirtualizedTableGrid = ({
         () => ({
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             calculatedColumnWidths,
             cellPadding: tableConfig.cellPadding,
             columns: tableConfig.columns,
@@ -435,6 +438,7 @@ const VirtualizedTableGrid = ({
         [
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             calculatedColumnWidths,
             dataWithGroups,
             estimatedAlbumGroupContentHeight,
@@ -746,8 +750,7 @@ const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, next
             nextProps.calculatedColumnWidths,
         ) &&
         prevProps.albumGroupContentHeights === nextProps.albumGroupContentHeights &&
-        prevProps.estimatedAlbumGroupContentHeight ===
-            nextProps.estimatedAlbumGroupContentHeight &&
+        prevProps.estimatedAlbumGroupContentHeight === nextProps.estimatedAlbumGroupContentHeight &&
         prevProps.setAlbumGroupContentHeight === nextProps.setAlbumGroupContentHeight &&
         prevProps.tableConfig === nextProps.tableConfig &&
         prevProps.data === nextProps.data &&
@@ -788,7 +791,7 @@ export interface TableItemProps {
     adjustedRowIndexMap?: Map<number, number>;
     albumGroupContentHeights?: Map<string, number>;
     albumGroupImageSize?: number;
-    estimatedAlbumGroupContentHeight?: number;
+    albumGroupVerticalLayout?: boolean;
     calculatedColumnWidths?: number[];
     cellPadding?: ItemTableListProps['cellPadding'];
     columns: ItemTableListColumnConfig[];
@@ -805,6 +808,7 @@ export interface TableItemProps {
     enableRowHoverHighlight?: ItemTableListProps['enableRowHoverHighlight'];
     enableSelection?: ItemTableListProps['enableSelection'];
     enableVerticalBorders?: ItemTableListProps['enableVerticalBorders'];
+    estimatedAlbumGroupContentHeight?: number;
     getAdjustedRowIndex?: (rowIndex: number) => number;
     getGroupRenderData?: () => unknown[];
     getRowHeight: (index: number, cellProps: TableItemProps) => number;
@@ -1312,6 +1316,7 @@ const BaseItemTableList = ({
     const albumGroupImageSize = useAlbumGroupImageSize();
     const albumGroupItems = useAlbumGroupItems();
     const albumGroupShowFavoriteRating = useAlbumGroupShowFavoriteRating();
+    const albumGroupVerticalLayout = useAlbumGroupVerticalLayout();
     const albumGroupMetadataRowCount = useMemo(
         () => albumGroupItems.filter((item) => !item.disabled).length,
         [albumGroupItems],
@@ -1319,11 +1324,10 @@ const BaseItemTableList = ({
     const estimatedAlbumGroupContentHeight = useMemo(
         () =>
             estimateAlbumGroupContentHeight({
-                hasEnlargedImage: (albumGroupImageSize || 96) > 0,
                 metadataRowCount: albumGroupMetadataRowCount,
                 showControls: albumGroupShowFavoriteRating,
             }),
-        [albumGroupImageSize, albumGroupMetadataRowCount, albumGroupShowFavoriteRating],
+        [albumGroupMetadataRowCount, albumGroupShowFavoriteRating],
     );
     const baseItemCount = itemCount ?? data.length;
     const [albumGroupContentHeights, setAlbumGroupContentHeights] = useState(
@@ -1341,7 +1345,7 @@ const BaseItemTableList = ({
 
     useEffect(() => {
         setAlbumGroupContentHeights(new Map());
-    }, [baseItemCount]);
+    }, [albumGroupShowFavoriteRating, albumGroupVerticalLayout, baseItemCount]);
 
     const totalItemCount = enableHeader ? baseItemCount + 1 : baseItemCount;
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);
@@ -1496,12 +1500,16 @@ const BaseItemTableList = ({
                         : undefined;
                     // Prefer measured height when present; otherwise reserve with a stable
                     // estimate so newly virtualized groups do not jump after mount measure.
-                    const contentHeight = measuredContentHeight ?? estimatedAlbumGroupContentHeight;
+                    const contentHeight = Math.max(
+                        measuredContentHeight ?? 0,
+                        estimatedAlbumGroupContentHeight,
+                    );
                     const totalGroupHeight = getAlbumGroupSpanHeight(
                         groupRowCount,
                         baseHeight,
                         albumGroupImageSize,
                         contentHeight,
+                        { isVertical: albumGroupVerticalLayout },
                     );
                     const lastRowHeight = totalGroupHeight - (groupRowCount - 1) * baseHeight;
                     if (lastRowHeight > baseHeight) {
@@ -1514,6 +1522,7 @@ const BaseItemTableList = ({
         },
         [
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             enableHeader,
             estimatedAlbumGroupContentHeight,
             headerHeight,
@@ -1527,6 +1536,7 @@ const BaseItemTableList = ({
         () => ({
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             cellPadding,
             columns: parsedColumns,
             controls: {} as ItemControls,
@@ -1562,6 +1572,7 @@ const BaseItemTableList = ({
         [
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             cellPadding,
             dataWithGroups,
             enableAlternateRowColors,
