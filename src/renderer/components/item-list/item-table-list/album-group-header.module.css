@@ -55,9 +55,14 @@
 }
 
 .album-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     font-weight: 500;
     overflow-wrap: anywhere;
     white-space: normal;
+    -webkit-box-orient: vertical;
 }
 
 .metadata-row {

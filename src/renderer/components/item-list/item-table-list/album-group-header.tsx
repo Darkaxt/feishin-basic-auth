@@ -123,7 +123,13 @@ export const AlbumGroupHeader = ({
                 setResolved({ forInfoHeight: infoHeight, height: resolvedHeight });
             }
 
-            if (groupKey !== undefined && setAlbumGroupContentHeight) {
+            // Only persist heights that exceed the image/row floor. Equal values
+            // still replaced the Map and re-rendered the virtualizer on mount.
+            if (
+                groupKey !== undefined &&
+                setAlbumGroupContentHeight &&
+                contentHeight > (infoHeight ?? 0)
+            ) {
                 setAlbumGroupContentHeight(groupKey, contentHeight);
             }
         };
@@ -135,6 +141,7 @@ export const AlbumGroupHeader = ({
 
         return () => resizeObserver.disconnect();
     }, [
+        albumImageSize,
         groupKey,
         groupRowCount,
         infoHeight,

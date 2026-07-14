@@ -384,6 +384,35 @@ export const ItemTableListColumn = memo(ItemTableListColumnBase, (prevProps, nex
 
 const NonMutedColumns = [TableColumn.TITLE, TableColumn.TITLE_ARTIST, TableColumn.TITLE_COMBINED];
 
+/**
+ * Stable content-height estimate for album-group info (title + metadata + controls).
+ * Used by the virtualizer before a group header mounts/measures, so scrolling in
+ * new groups does not jump when measured height is written later.
+ * Keep in sync with album-group-header styles (title line-clamp, metadata xs, controls).
+ */
+export function estimateAlbumGroupContentHeight({
+    hasEnlargedImage,
+    metadataRowCount,
+    showControls,
+}: {
+    hasEnlargedImage: boolean;
+    metadataRowCount: number;
+    showControls: boolean;
+}): number {
+    const TITLE_LINE_HEIGHT = 20;
+    const TITLE_MAX_LINES = 3;
+    const METADATA_LINE_HEIGHT = 18;
+    const CONTROLS_HEIGHT = 26;
+    const PADDING_TOP = hasEnlargedImage ? 8 : 0;
+
+    return (
+        PADDING_TOP +
+        TITLE_LINE_HEIGHT * TITLE_MAX_LINES +
+        Math.max(0, metadataRowCount) * METADATA_LINE_HEIGHT +
+        (showControls ? CONTROLS_HEIGHT : 0)
+    );
+}
+
 /** Stable key for album-group content heights (survives row moves; not row index). */
 export function getAlbumGroupHeightKey(item: unknown, groupRowCount?: number): string | undefined {
     if (!item || typeof item !== 'object') return undefined;
@@ -568,8 +597,10 @@ function getAlbumGroupClampHeight(props: ItemTableListInnerColumn): null | numbe
     );
     const groupStartItem = props.getRowItem?.(groupStartRowIndex);
     const groupHeightKey = getAlbumGroupHeightKey(groupStartItem, groupRowCount);
-    const contentHeight =
-        (groupHeightKey ? props.albumGroupContentHeights?.get(groupHeightKey) : undefined) ?? 0;
+    const measuredContentHeight = groupHeightKey
+        ? props.albumGroupContentHeights?.get(groupHeightKey)
+        : undefined;
+    const contentHeight = measuredContentHeight ?? props.estimatedAlbumGroupContentHeight ?? 0;
     const totalGroupHeight = getAlbumGroupSpanHeight(
         groupRowCount,
         baseHeight,
