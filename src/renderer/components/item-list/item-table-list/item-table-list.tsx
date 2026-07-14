@@ -126,25 +126,6 @@ export enum TableItemSize {
     LARGE = 88,
 }
 
-const ItemTableScrollShadowTop = memo(function ItemTableScrollShadowTop({
-    enableHeader,
-    enableScrollShadow,
-    scrollShadowStore,
-}: {
-    enableHeader: boolean;
-    enableScrollShadow: boolean;
-    scrollShadowStore: TableScrollShadowStore;
-}) {
-    const { showTopShadow } = useSyncExternalStore(
-        scrollShadowStore.subscribe,
-        scrollShadowStore.getSnapshot,
-    );
-    if (!enableHeader || !enableScrollShadow || !showTopShadow) return null;
-    return <div className={styles.itemTableTopScrollShadow} />;
-});
-
-ItemTableScrollShadowTop.displayName = 'ItemTableScrollShadowTop';
-
 const ItemTableScrollShadowLeft = memo(function ItemTableScrollShadowLeft({
     enableScrollShadow,
     pinnedLeftColumnCount,
@@ -585,11 +566,6 @@ const VirtualizedTableGrid = ({
                         />
                     </div>
                 )}
-                <ItemTableScrollShadowTop
-                    enableHeader={!!enableHeader}
-                    enableScrollShadow={enableScrollShadow}
-                    scrollShadowStore={scrollShadowStore}
-                />
                 {!!pinnedLeftColumnCount && (
                     <div
                         className={styles.itemTablePinnedColumnsContainer}
@@ -644,11 +620,6 @@ const VirtualizedTableGrid = ({
                         />
                     </div>
                 )}
-                <ItemTableScrollShadowTop
-                    enableHeader={!!enableHeader}
-                    enableScrollShadow={enableScrollShadow}
-                    scrollShadowStore={scrollShadowStore}
-                />
                 <div className={styles.itemTableGridContainer} ref={mergedRowRef}>
                     <Grid
                         cellComponent={RowCell}
@@ -707,11 +678,6 @@ const VirtualizedTableGrid = ({
                             />
                         </div>
                     )}
-                    <ItemTableScrollShadowTop
-                        enableHeader={!!enableHeader}
-                        enableScrollShadow={enableScrollShadow}
-                        scrollShadowStore={scrollShadowStore}
-                    />
                     <div
                         className={styles.itemTablePinnedRightColumnsContainer}
                         ref={pinnedRightColumnRef}
@@ -1627,7 +1593,6 @@ const BaseItemTableList = ({
     useTablePaneSync({
         enableDrag,
         enableDragScroll,
-        enableHeader,
         handleRef,
         onScrollEndRef,
         pinnedLeftColumnCount,

@@ -30,7 +30,6 @@ const getPaneElements = ({
 export const useTablePaneSync = ({
     enableDrag,
     enableDragScroll,
-    enableHeader,
     handleRef,
     onScrollEndRef,
     pinnedLeftColumnCount,
@@ -45,7 +44,6 @@ export const useTablePaneSync = ({
 }: {
     enableDrag: boolean | undefined;
     enableDragScroll: boolean | undefined;
-    enableHeader: boolean;
     handleRef: React.RefObject<null | { internalState: ItemListStateActions }>;
     onScrollEndRef: React.RefObject<
         ((offset: number, internalState: ItemListStateActions) => void) | undefined
@@ -634,34 +632,4 @@ export const useTablePaneSync = ({
             row.removeEventListener('scroll', checkScrollPosition);
         };
     }, [pinnedLeftColumnCount, pinnedRightColumnCount, rowRef, scrollShadowStore]);
-
-    // Handle top shadow visibility based on vertical scroll
-    useEffect(() => {
-        const row = rowRef.current?.childNodes[0] as HTMLDivElement;
-        const pinnedRight = pinnedRightColumnRef.current?.childNodes[0] as HTMLDivElement;
-
-        if (!row || !enableHeader) {
-            const timeout = setTimeout(() => {
-                scrollShadowStore.setSnapshot({ showTopShadow: false });
-            }, 0);
-
-            return () => clearTimeout(timeout);
-        }
-
-        const scrollElement = pinnedRightColumnCount > 0 && pinnedRight ? pinnedRight : row;
-
-        const checkScrollPosition = throttle(() => {
-            const currentScrollTop = scrollElement.scrollTop;
-            scrollShadowStore.setSnapshot({ showTopShadow: currentScrollTop > 0 });
-        }, 50);
-
-        checkScrollPosition();
-
-        scrollElement.addEventListener('scroll', checkScrollPosition, { passive: true });
-
-        return () => {
-            checkScrollPosition.cancel();
-            scrollElement.removeEventListener('scroll', checkScrollPosition);
-        };
-    }, [enableHeader, pinnedRightColumnCount, pinnedRightColumnRef, rowRef, scrollShadowStore]);
 };
