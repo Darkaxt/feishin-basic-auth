@@ -629,7 +629,9 @@ function showHorizontalBorderFor(props: ItemTableListInnerColumn, isLastRow: boo
     if (!props.enableHorizontalBorders || !props.enableHeader || props.rowIndex <= 0) {
         return false;
     }
-    if (isAlbumGroupingActive(props.columns)) {
+    // Album group uses group top/bottom edges only (no mid-group lines that would
+    // cut through artwork). Other columns keep per-row borders.
+    if (props.type === TableColumn.ALBUM_GROUP) {
         return isLastInAlbumGroup(
             props.rowIndex,
             props.getRowItem,
@@ -747,7 +749,8 @@ export const TableColumnTextContainer = (
     };
 
     const showHorizontalBorder = showHorizontalBorderFor(props, isLastRow);
-    const showVerticalBorder = !!props.enableVerticalBorders && !isLastColumn;
+    const showVerticalBorder =
+        !!props.enableVerticalBorders && !isLastColumn && props.type !== TableColumn.ALBUM_GROUP;
 
     const cell = (
         <div
@@ -913,7 +916,8 @@ export const TableColumnContainer = (
     };
 
     const showHorizontalBorder = showHorizontalBorderFor(props, isLastRow);
-    const showVerticalBorder = !!props.enableVerticalBorders && !isLastColumn;
+    const showVerticalBorder =
+        !!props.enableVerticalBorders && !isLastColumn && props.type !== TableColumn.ALBUM_GROUP;
 
     const cell = (
         <div
