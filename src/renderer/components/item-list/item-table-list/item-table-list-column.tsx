@@ -1246,9 +1246,7 @@ export const columnLabelMap: Record<TableColumn, ReactNode | string> = {
     [TableColumn.ALBUM_COUNT]: i18n.t('table.column.albumCount', {
         postProcess: 'upperCase',
     }) as string,
-    [TableColumn.ALBUM_GROUP]: i18n.t('table.config.label.albumGroup', {
-        postProcess: 'upperCase',
-    }) as string,
+    [TableColumn.ALBUM_GROUP]: '',
     [TableColumn.ARTIST]: i18n.t('table.column.artist', { postProcess: 'upperCase' }) as string,
     [TableColumn.BIOGRAPHY]: i18n.t('table.column.biography', {
         postProcess: 'upperCase',
