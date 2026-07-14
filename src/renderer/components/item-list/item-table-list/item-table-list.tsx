@@ -1464,12 +1464,10 @@ const BaseItemTableList = ({
                     const measuredContentHeight = groupHeightKey
                         ? cellProps.albumGroupContentHeights?.get(groupHeightKey)
                         : undefined;
-                    // Prefer measured height when present; otherwise reserve with a stable
-                    // estimate so newly virtualized groups do not jump after mount measure.
-                    const contentHeight = Math.max(
-                        measuredContentHeight ?? 0,
-                        estimatedAlbumGroupContentHeight,
-                    );
+                    // Prefer measured info height once available; otherwise reserve with a
+                    // stable estimate so newly virtualized groups do not jump after mount.
+                    // Controls-row min-height covers favorites/ratings before the album loads.
+                    const contentHeight = measuredContentHeight ?? estimatedAlbumGroupContentHeight;
                     const totalGroupHeight = getAlbumGroupSpanHeight(
                         groupRowCount,
                         baseHeight,

@@ -397,13 +397,14 @@ export function estimateAlbumGroupContentHeight({
     metadataRowCount: number;
     showControls: boolean;
 }): number {
+    // Prefer a single title line for the pre-measure floor. Wrapped titles are
+    // picked up by the measured content height after mount.
     const TITLE_LINE_HEIGHT = 20;
-    const TITLE_MAX_LINES = 3;
     const METADATA_LINE_HEIGHT = 18;
     const CONTROLS_HEIGHT = 38;
 
     return (
-        TITLE_LINE_HEIGHT * TITLE_MAX_LINES +
+        TITLE_LINE_HEIGHT +
         Math.max(0, metadataRowCount) * METADATA_LINE_HEIGHT +
         (showControls ? CONTROLS_HEIGHT : 0)
     );
@@ -455,7 +456,8 @@ export function getAlbumGroupRowCount(
     return end - start + 1;
 }
 
-export const ALBUM_GROUP_STACK_GAP = 12;
+export const ALBUM_GROUP_STACK_GAP = 8;
+export const ALBUM_GROUP_CELL_PADDING = 8;
 
 export function getAlbumGroupSpanHeight(
     groupRowCount: number,
@@ -466,16 +468,22 @@ export function getAlbumGroupSpanHeight(
 ): number {
     const rowSpanHeight = groupRowCount * baseHeight;
     const isVertical = options?.isVertical ?? false;
+    const paddingY = ALBUM_GROUP_CELL_PADDING * 2;
 
     if (isVertical) {
         const imageSize = albumGroupImageSize > 0 ? albumGroupImageSize : 96;
-        return Math.max(rowSpanHeight, imageSize + ALBUM_GROUP_STACK_GAP + contentHeight);
+        return Math.max(
+            rowSpanHeight,
+            imageSize + ALBUM_GROUP_STACK_GAP + contentHeight + paddingY,
+        );
     }
 
     const imageSpanHeight =
-        albumGroupImageSize > 0 ? Math.max(albumGroupImageSize, rowSpanHeight) : rowSpanHeight;
+        albumGroupImageSize > 0
+            ? Math.max(albumGroupImageSize + paddingY, rowSpanHeight)
+            : rowSpanHeight;
 
-    return Math.max(imageSpanHeight, contentHeight);
+    return Math.max(imageSpanHeight, contentHeight > 0 ? contentHeight + paddingY : 0);
 }
 
 export function getAlbumGroupStartRowIndex(
@@ -605,12 +613,10 @@ function getAlbumGroupClampHeight(props: ItemTableListInnerColumn): null | numbe
     const measuredContentHeight = groupHeightKey
         ? props.albumGroupContentHeights?.get(groupHeightKey)
         : undefined;
-    // Never reserve less than the estimate — early measure can miss the async
-    // favorites/ratings row (AlbumGroupControls returns null until album loads).
-    const contentHeight = Math.max(
-        measuredContentHeight ?? 0,
-        props.estimatedAlbumGroupContentHeight ?? 0,
-    );
+    // Prefer measured info height once available. The controls row keeps a
+    // min-height placeholder while the album query loads, so early measures
+    // already reserve favorites/ratings space.
+    const contentHeight = measuredContentHeight ?? props.estimatedAlbumGroupContentHeight ?? 0;
     const totalGroupHeight = getAlbumGroupSpanHeight(
         groupRowCount,
         baseHeight,
