@@ -46,6 +46,7 @@ import { useTablePaneSync } from '/@/renderer/components/item-list/item-table-li
 import { useTableRowModel } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-row-model';
 import { useTableScrollToIndex } from '/@/renderer/components/item-list/item-table-list/hooks/use-table-scroll-to-index';
 import {
+    estimateAlbumGroupContentHeight,
     getAlbumGroupHeightKey,
     getAlbumGroupRowCount,
     getAlbumGroupSpanHeight,
@@ -75,7 +76,13 @@ import {
 } from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
 import { PlayerContext, usePlayer } from '/@/renderer/features/player/context/player-context';
-import { useAlbumGroupImageSize, usePlayerStore } from '/@/renderer/store';
+import {
+    useAlbumGroupImageSize,
+    useAlbumGroupItems,
+    useAlbumGroupShowFavoriteRating,
+    useAlbumGroupVerticalLayout,
+    usePlayerStore,
+} from '/@/renderer/store';
 import { animationProps } from '/@/shared/components/animations/animation-props';
 import { useFocusWithin } from '/@/shared/hooks/use-focus-within';
 import { useMergedRef } from '/@/shared/hooks/use-merged-ref';
@@ -120,25 +127,6 @@ export enum TableItemSize {
     DEFAULT = 64,
     LARGE = 88,
 }
-
-const ItemTableScrollShadowTop = memo(function ItemTableScrollShadowTop({
-    enableHeader,
-    enableScrollShadow,
-    scrollShadowStore,
-}: {
-    enableHeader: boolean;
-    enableScrollShadow: boolean;
-    scrollShadowStore: TableScrollShadowStore;
-}) {
-    const { showTopShadow } = useSyncExternalStore(
-        scrollShadowStore.subscribe,
-        scrollShadowStore.getSnapshot,
-    );
-    if (!enableHeader || !enableScrollShadow || !showTopShadow) return null;
-    return <div className={styles.itemTableTopScrollShadow} />;
-});
-
-ItemTableScrollShadowTop.displayName = 'ItemTableScrollShadowTop';
 
 const ItemTableScrollShadowLeft = memo(function ItemTableScrollShadowLeft({
     enableScrollShadow,
@@ -185,6 +173,7 @@ interface VirtualizedTableGridProps {
     data: unknown[];
     dataWithGroups: (null | unknown)[];
     enableScrollShadow: boolean;
+    estimatedAlbumGroupContentHeight: number;
     getItem?: (index: number) => undefined | unknown;
     headerHeight: number;
     mergedRowRef: React.Ref<HTMLDivElement>;
@@ -210,6 +199,7 @@ const VirtualizedTableGrid = ({
     data,
     dataWithGroups,
     enableScrollShadow,
+    estimatedAlbumGroupContentHeight,
     getItem,
     headerHeight,
     mergedRowRef,
@@ -229,6 +219,7 @@ const VirtualizedTableGrid = ({
 }: VirtualizedTableGridProps) => {
     const { enableHeader, enableRowHoverHighlight, getRowHeight, groups } = tableConfig;
     const albumGroupImageSize = useAlbumGroupImageSize();
+    const albumGroupVerticalLayout = useAlbumGroupVerticalLayout();
     const hoverDelegateRef = useRef<HTMLDivElement | null>(null);
 
     useRowInteractionDelegate({
@@ -390,6 +381,7 @@ const VirtualizedTableGrid = ({
         () => ({
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             calculatedColumnWidths,
             cellPadding: tableConfig.cellPadding,
             columns: tableConfig.columns,
@@ -405,6 +397,7 @@ const VirtualizedTableGrid = ({
             enableRowHoverHighlight: tableConfig.enableRowHoverHighlight,
             enableSelection: tableConfig.enableSelection,
             enableVerticalBorders: tableConfig.enableVerticalBorders,
+            estimatedAlbumGroupContentHeight,
             getAdjustedRowIndex,
             getGroupRenderData,
             getRowHeight: tableConfig.getRowHeight,
@@ -428,8 +421,10 @@ const VirtualizedTableGrid = ({
         [
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             calculatedColumnWidths,
             dataWithGroups,
+            estimatedAlbumGroupContentHeight,
             getAdjustedRowIndex,
             getGroupRenderData,
             getRowItem,
@@ -573,11 +568,6 @@ const VirtualizedTableGrid = ({
                         />
                     </div>
                 )}
-                <ItemTableScrollShadowTop
-                    enableHeader={!!enableHeader}
-                    enableScrollShadow={enableScrollShadow}
-                    scrollShadowStore={scrollShadowStore}
-                />
                 {!!pinnedLeftColumnCount && (
                     <div
                         className={styles.itemTablePinnedColumnsContainer}
@@ -632,11 +622,6 @@ const VirtualizedTableGrid = ({
                         />
                     </div>
                 )}
-                <ItemTableScrollShadowTop
-                    enableHeader={!!enableHeader}
-                    enableScrollShadow={enableScrollShadow}
-                    scrollShadowStore={scrollShadowStore}
-                />
                 <div className={styles.itemTableGridContainer} ref={mergedRowRef}>
                     <Grid
                         cellComponent={RowCell}
@@ -695,11 +680,6 @@ const VirtualizedTableGrid = ({
                             />
                         </div>
                     )}
-                    <ItemTableScrollShadowTop
-                        enableHeader={!!enableHeader}
-                        enableScrollShadow={enableScrollShadow}
-                        scrollShadowStore={scrollShadowStore}
-                    />
                     <div
                         className={styles.itemTablePinnedRightColumnsContainer}
                         ref={pinnedRightColumnRef}
@@ -738,6 +718,7 @@ const MemoizedVirtualizedTableGrid = memo(VirtualizedTableGrid, (prevProps, next
             nextProps.calculatedColumnWidths,
         ) &&
         prevProps.albumGroupContentHeights === nextProps.albumGroupContentHeights &&
+        prevProps.estimatedAlbumGroupContentHeight === nextProps.estimatedAlbumGroupContentHeight &&
         prevProps.setAlbumGroupContentHeight === nextProps.setAlbumGroupContentHeight &&
         prevProps.tableConfig === nextProps.tableConfig &&
         prevProps.data === nextProps.data &&
@@ -778,6 +759,7 @@ export interface TableItemProps {
     adjustedRowIndexMap?: Map<number, number>;
     albumGroupContentHeights?: Map<string, number>;
     albumGroupImageSize?: number;
+    albumGroupVerticalLayout?: boolean;
     calculatedColumnWidths?: number[];
     cellPadding?: ItemTableListProps['cellPadding'];
     columns: ItemTableListColumnConfig[];
@@ -794,6 +776,7 @@ export interface TableItemProps {
     enableRowHoverHighlight?: ItemTableListProps['enableRowHoverHighlight'];
     enableSelection?: ItemTableListProps['enableSelection'];
     enableVerticalBorders?: ItemTableListProps['enableVerticalBorders'];
+    estimatedAlbumGroupContentHeight?: number;
     getAdjustedRowIndex?: (rowIndex: number) => number;
     getGroupRenderData?: () => unknown[];
     getRowHeight: (index: number, cellProps: TableItemProps) => number;
@@ -1299,6 +1282,21 @@ const BaseItemTableList = ({
     const { playlistId: routePlaylistId } = useParams() as { playlistId?: string };
     const tableId = useId();
     const albumGroupImageSize = useAlbumGroupImageSize();
+    const albumGroupItems = useAlbumGroupItems();
+    const albumGroupShowFavoriteRating = useAlbumGroupShowFavoriteRating();
+    const albumGroupVerticalLayout = useAlbumGroupVerticalLayout();
+    const albumGroupMetadataRowCount = useMemo(
+        () => albumGroupItems.filter((item) => !item.disabled).length,
+        [albumGroupItems],
+    );
+    const estimatedAlbumGroupContentHeight = useMemo(
+        () =>
+            estimateAlbumGroupContentHeight({
+                metadataRowCount: albumGroupMetadataRowCount,
+                showControls: albumGroupShowFavoriteRating,
+            }),
+        [albumGroupMetadataRowCount, albumGroupShowFavoriteRating],
+    );
     const baseItemCount = itemCount ?? data.length;
     const [albumGroupContentHeights, setAlbumGroupContentHeights] = useState(
         () => new Map<string, number>(),
@@ -1315,7 +1313,7 @@ const BaseItemTableList = ({
 
     useEffect(() => {
         setAlbumGroupContentHeights(new Map());
-    }, [baseItemCount]);
+    }, [albumGroupShowFavoriteRating, albumGroupVerticalLayout, baseItemCount]);
 
     const totalItemCount = enableHeader ? baseItemCount + 1 : baseItemCount;
     const [centerContainerWidth, setCenterContainerWidth] = useState(0);
@@ -1465,15 +1463,19 @@ const BaseItemTableList = ({
                     );
                     const groupStartItem = cellProps.getRowItem?.(groupStartRowIndex);
                     const groupHeightKey = getAlbumGroupHeightKey(groupStartItem, groupRowCount);
-                    const contentHeight =
-                        (groupHeightKey
-                            ? cellProps.albumGroupContentHeights?.get(groupHeightKey)
-                            : undefined) ?? 0;
+                    const measuredContentHeight = groupHeightKey
+                        ? cellProps.albumGroupContentHeights?.get(groupHeightKey)
+                        : undefined;
+                    // Prefer measured info height once available; otherwise reserve with a
+                    // stable estimate so newly virtualized groups do not jump after mount.
+                    // Controls-row min-height covers favorites/ratings before the album loads.
+                    const contentHeight = measuredContentHeight ?? estimatedAlbumGroupContentHeight;
                     const totalGroupHeight = getAlbumGroupSpanHeight(
                         groupRowCount,
                         baseHeight,
                         albumGroupImageSize,
                         contentHeight,
+                        { isVertical: albumGroupVerticalLayout },
                     );
                     const lastRowHeight = totalGroupHeight - (groupRowCount - 1) * baseHeight;
                     if (lastRowHeight > baseHeight) {
@@ -1484,13 +1486,23 @@ const BaseItemTableList = ({
 
             return baseHeight;
         },
-        [albumGroupImageSize, enableHeader, headerHeight, rowHeight, pinnedRowCount, size],
+        [
+            albumGroupImageSize,
+            albumGroupVerticalLayout,
+            enableHeader,
+            estimatedAlbumGroupContentHeight,
+            headerHeight,
+            rowHeight,
+            pinnedRowCount,
+            size,
+        ],
     );
 
     const scrollCellProps = useMemo<TableItemProps>(
         () => ({
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             cellPadding,
             columns: parsedColumns,
             controls: {} as ItemControls,
@@ -1502,6 +1514,7 @@ const BaseItemTableList = ({
             enableRowHoverHighlight,
             enableSelection,
             enableVerticalBorders,
+            estimatedAlbumGroupContentHeight,
             getRowHeight,
             getRowItem: (rowIndex: number) => {
                 if (shouldUseAccessor && getItem) {
@@ -1525,6 +1538,7 @@ const BaseItemTableList = ({
         [
             albumGroupContentHeights,
             albumGroupImageSize,
+            albumGroupVerticalLayout,
             cellPadding,
             dataWithGroups,
             enableAlternateRowColors,
@@ -1534,6 +1548,7 @@ const BaseItemTableList = ({
             enableRowHoverHighlight,
             enableSelection,
             enableVerticalBorders,
+            estimatedAlbumGroupContentHeight,
             getItem,
             getRowHeight,
             hasAlbumGroupColumn,
@@ -1578,7 +1593,6 @@ const BaseItemTableList = ({
     useTablePaneSync({
         enableDrag,
         enableDragScroll,
-        enableHeader,
         handleRef,
         onScrollEndRef,
         pinnedLeftColumnCount,
@@ -1891,6 +1905,7 @@ const BaseItemTableList = ({
                 data={data}
                 dataWithGroups={dataWithGroups}
                 enableScrollShadow={enableScrollShadow}
+                estimatedAlbumGroupContentHeight={estimatedAlbumGroupContentHeight}
                 getItem={getItem}
                 headerHeight={headerHeight}
                 mergedRowRef={mergedRowRef}

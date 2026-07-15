@@ -10,8 +10,8 @@ test('parseLyricsForDisplay merges duplicate timestamps as translated lyric line
 [00:12.918]Second translation`);
 
     assert.deepEqual(result, [
-        [10358, 'Original line_BREAK_Translated line'],
-        [12918, 'Second original_BREAK_Second translation'],
+        { startMs: 10358, text: 'Original line_BREAK_Translated line' },
+        { startMs: 12918, text: 'Second original_BREAK_Second translation' },
     ]);
 });
 
@@ -19,7 +19,7 @@ test('parseLyricsForDisplay collapses duplicate timestamps when the text is iden
     const result = lyrics.parseLyricsForDisplay(`[00:10.358]Same line
 [00:10.358]Same line`);
 
-    assert.deepEqual(result, [[10358, 'Same line']]);
+    assert.deepEqual(result, [{ startMs: 10358, text: 'Same line' }]);
 });
 
 test('parseLyricsForDisplay treats untimestamped continuation lines as translated lyric lines', () => {
@@ -29,8 +29,8 @@ Translated line
 Second translation`);
 
     assert.deepEqual(result, [
-        [1000, 'Original line_BREAK_Translated line'],
-        [2500, 'Second original_BREAK_Second translation'],
+        { startMs: 1000, text: 'Original line_BREAK_Translated line' },
+        { startMs: 2500, text: 'Second original_BREAK_Second translation' },
     ]);
 });
 
@@ -39,8 +39,8 @@ test('parseLyricsForDisplay handles LRC offset, repeated timestamps, and enhance
 [00:01.000][00:02.000]<00:01.000>Hello <00:01.500>world`);
 
     assert.deepEqual(result, [
-        [1100, 'Hello world'],
-        [2100, 'Hello world'],
+        { startMs: 1100, text: 'Hello world' },
+        { startMs: 2100, text: 'Hello world' },
     ]);
 });
 
@@ -50,61 +50,61 @@ test('parseLyricsForDisplay preserves a trailing blank timestamp from exported L
 [00:02.00]`);
 
     assert.deepEqual(result, [
-        [1000, 'Original line_BREAK_Translated line'],
-        [2000, ''],
+        { startMs: 1000, text: 'Original line_BREAK_Translated line' },
+        { startMs: 2000, text: '' },
     ]);
 });
 
 test('mergeSyncedLyricTranslations appends OpenSubsonic translation tracks by timestamp', () => {
     const result = lyrics.mergeSyncedLyricTranslations(
         [
-            [2747, 'Original one'],
-            [6214, 'Original two'],
+            { startMs: 2747, text: 'Original one' },
+            { startMs: 6214, text: 'Original two' },
         ],
         [
             [
-                [2747, 'Translated one'],
-                [6214, 'Translated two'],
+                { startMs: 2747, text: 'Translated one' },
+                { startMs: 6214, text: 'Translated two' },
             ],
         ],
     );
 
     assert.deepEqual(result, [
-        [2747, 'Original one_BREAK_Translated one'],
-        [6214, 'Original two_BREAK_Translated two'],
+        { startMs: 2747, text: 'Original one_BREAK_Translated one' },
+        { startMs: 6214, text: 'Original two_BREAK_Translated two' },
     ]);
 });
 
 test('mergeDuplicateSyncedLyricLines folds duplicate OpenSubsonic timestamps into one line', () => {
     const result = lyrics.mergeDuplicateSyncedLyricLines([
-        [10358, 'Original line'],
-        [10358, 'Translated line'],
-        [12918, 'Second original'],
+        { startMs: 10358, text: 'Original line' },
+        { startMs: 10358, text: 'Translated line' },
+        { startMs: 12918, text: 'Second original' },
     ]);
 
     assert.deepEqual(result, [
-        [10358, 'Original line_BREAK_Translated line'],
-        [12918, 'Second original'],
+        { startMs: 10358, text: 'Original line_BREAK_Translated line' },
+        { startMs: 12918, text: 'Second original' },
     ]);
 });
 
 test('mergeSyncedLyricTranslations falls back to line index when timestamps differ', () => {
     const result = lyrics.mergeSyncedLyricTranslations(
         [
-            [1000, 'Original one'],
-            [2000, 'Original two'],
+            { startMs: 1000, text: 'Original one' },
+            { startMs: 2000, text: 'Original two' },
         ],
         [
             [
-                [1010, 'Translated one'],
-                [2010, 'Translated two'],
+                { startMs: 1010, text: 'Translated one' },
+                { startMs: 2010, text: 'Translated two' },
             ],
         ],
     );
 
     assert.deepEqual(result, [
-        [1000, 'Original one_BREAK_Translated one'],
-        [2000, 'Original two_BREAK_Translated two'],
+        { startMs: 1000, text: 'Original one_BREAK_Translated one' },
+        { startMs: 2000, text: 'Original two_BREAK_Translated two' },
     ]);
 });
 

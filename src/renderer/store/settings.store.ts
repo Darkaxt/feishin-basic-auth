@@ -490,6 +490,7 @@ export const GeneralSettingsSchema = z.object({
     albumGroupImageSize: z.number(),
     albumGroupItems: z.array(SortableItemSchema(AlbumGroupItemSchema)),
     albumGroupShowFavoriteRating: z.boolean(),
+    albumGroupVerticalLayout: z.boolean(),
     artistBackground: z.boolean(),
     artistBackgroundBlur: z.number(),
     artistItems: z.array(SortableItemSchema(ArtistItemSchema)),
@@ -1227,6 +1228,7 @@ const initialState: SettingsState = {
         albumGroupImageSize: 0,
         albumGroupItems,
         albumGroupShowFavoriteRating: true,
+        albumGroupVerticalLayout: true,
         artistBackground: true,
         artistBackgroundBlur: 3,
         artistItems,
@@ -2801,6 +2803,9 @@ export const useAlbumGroupImageSize = () =>
 
 export const useAlbumGroupShowFavoriteRating = () =>
     useSettingsStore((state) => state.general.albumGroupShowFavoriteRating);
+
+export const useAlbumGroupVerticalLayout = () =>
+    useSettingsStore((state) => state.general.albumGroupVerticalLayout);
 
 export const useVolumeWidth = () => useSettingsStore((state) => state.general.volumeWidth, shallow);
 
