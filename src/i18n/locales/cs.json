@@ -720,7 +720,8 @@
                 "showHeader": "Zobrazit záhlaví",
                 "albumImageSize": "Velikost obrázku alba",
                 "albumGroupConfig": "Nastavení skupiny alb",
-                "albumGroupShowFavoriteRating": "Zobrazit oblíbené a hodnocení"
+                "albumGroupShowFavoriteRating": "Zobrazit oblíbené a hodnocení",
+                "albumGroupMetadata": "Pole metadat"
             },
             "label": {
                 "releaseDate": "Datum vydání",
@@ -922,7 +923,8 @@
             "noLyrics": "Nenalezeny žádné texty",
             "lyricLanguage": "Jazyk",
             "showPronunciation": "Výslovnost",
-            "showTranslation": "Překlad"
+            "showTranslation": "Překlad",
+            "lyricLayers": "Vrstvy textů"
         },
         "appMenu": {
             "selectServer": "Vybrat server",
