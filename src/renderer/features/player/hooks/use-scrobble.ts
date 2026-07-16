@@ -67,9 +67,9 @@ Jellyfin progress APIs still use playback position (ticks), not listen time:
   - pause / unpause
 
 Other events:
-  - When the song changes: sends 'stop' for the previous track; sends 'start'
-    when the new track is playing; clears submission flag and listen accumulator
-    for the new track.
+  - When the song changes: sends 'stop' for the previous non-Jellyfin track;
+    sends 'start' when the new track is playing; clears submission flag and
+    listen accumulator for the new track.
 
   - When the song is restarted (near 0 after 10s+): clears submission flag
     and listen accumulator.
@@ -403,8 +403,10 @@ export const useScrobble = () => {
                     );
                 }
 
-                // Send stop scrobble for the track that was playing before the change
-                if (previousSong?.id) {
+                // Jellyfin does not need a stop event when advancing to another song.
+                const skipStopScrobble = previousSong?._serverType === ServerType.JELLYFIN;
+
+                if (previousSong?.id && !skipStopScrobble) {
                     sendScrobble.mutate(
                         {
                             apiClientProps: { serverId: previousSong._serverId || '' },
