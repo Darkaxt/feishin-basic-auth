@@ -177,6 +177,54 @@ export const useScrobble = () => {
         });
     }, []);
 
+    const sendProgressAfterSubmission = useCallback(
+        (song: QueueSong) => {
+            const activeSong = usePlayerStore.getState().getCurrentSong();
+            const status = usePlayerStore.getState().player.status;
+
+            // Because Jellyfin uses the stop event for submission, we need to send another
+            // progress update after submission so that the song continues to progress in the dashboard
+            const shouldSendProgress =
+                song._serverType !== ServerType.JELLYFIN ||
+                activeSong?._uniqueId !== song._uniqueId ||
+                status !== PlayerStatus.PLAYING;
+
+            if (!shouldSendProgress) {
+                return;
+            }
+
+            sendScrobble.mutate(
+                {
+                    apiClientProps: { serverId: song._serverId || '' },
+                    query: {
+                        albumId: song.albumId,
+                        event: 'unpause',
+                        id: song.id,
+                        mediaType: song._itemType.includes('song') ? 'song' : 'podcast',
+                        playbackRate,
+                        position: getPositionValue(
+                            useTimestampStoreBase.getState().timestamp,
+                            true,
+                        ),
+                        submission: false,
+                    },
+                },
+                {
+                    onSuccess: () => {
+                        logFn.debug(logMsg[LogCategory.SCROBBLE].scrobbledTimeupdate, {
+                            category: LogCategory.SCROBBLE,
+                            meta: {
+                                id: song.id,
+                                reason: 'after submission',
+                            },
+                        });
+                    },
+                },
+            );
+        },
+        [playbackRate, sendScrobble],
+    );
+
     const handleScrobbleFromProgress = useCallback(
         (properties: { timestamp: number }, prev: { timestamp: number }) => {
             if (!isScrobbleEnabled || isPrivateModeEnabled) return;
@@ -301,6 +349,7 @@ export const useScrobble = () => {
                                         reason: 'from listened time',
                                     },
                                 });
+                                sendProgressAfterSubmission(currentSong);
                             },
                         },
                     );
@@ -309,7 +358,13 @@ export const useScrobble = () => {
                 }
             }
         },
-        [isScrobbleEnabled, isPrivateModeEnabled, sendScrobble, playbackRate],
+        [
+            isScrobbleEnabled,
+            isPrivateModeEnabled,
+            sendScrobble,
+            playbackRate,
+            sendProgressAfterSubmission,
+        ],
     );
 
     const handleScrobbleFromSongChange = useCallback(
@@ -792,6 +847,7 @@ export const useScrobble = () => {
                                     reason: 'forced from UI',
                                 },
                             });
+                            sendProgressAfterSubmission(song);
                         },
                     },
                 );
@@ -818,7 +874,14 @@ export const useScrobble = () => {
         });
 
         return () => registerScrobbleManualHandlers(null);
-    }, [flushScrobbleDebug, isPrivateModeEnabled, isScrobbleEnabled, playbackRate, sendScrobble]);
+    }, [
+        flushScrobbleDebug,
+        isPrivateModeEnabled,
+        isScrobbleEnabled,
+        playbackRate,
+        sendProgressAfterSubmission,
+        sendScrobble,
+    ]);
 
     usePlayerEvents(
         {
