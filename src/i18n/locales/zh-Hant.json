@@ -75,7 +75,7 @@
         "noResultsFromQuery": "查詢回傳了無結果",
         "note": "注釋",
         "additionalParticipants": "額外參與者",
-        "newVersion": "新版本 ({{version}}) 已被安裝",
+        "newVersion": "已安裝新版本 ({{version}})",
         "viewReleaseNotes": "查看發行註記",
         "albumGain": "專輯增益",
         "albumPeak": "專輯峰值",
@@ -180,7 +180,7 @@
             "playShuffled": "$t(player.shuffle)",
             "shareItem": "分享項目",
             "showDetails": "取得資訊",
-            "goToAlbum": "前往 $t(entity.album, {\"count\": 1})",
+            "goToAlbum": "前往$t(entity.album, {\"count\": 1})",
             "goToAlbumArtist": "前往 $t(entity.albumArtist, {\"count\": 1})",
             "moveItems": "$t(action.moveItems)",
             "goTo": "前往"
@@ -244,7 +244,7 @@
                 "lyricPaddingRight": "歌詞右側邊距 (%)"
             },
             "lyrics": "歌詞",
-            "related": "相關",
+            "related": "相關歌曲",
             "upNext": "即將播放",
             "visualizer": "視覺化",
             "noLyrics": "未找到歌詞",
@@ -285,7 +285,7 @@
             "title": "$t(entity.albumArtist, {\"count\": 2})"
         },
         "albumDetail": {
-            "moreFromArtist": "更多來自 $t(entity.artist, {\"count\": 1}) 的作品",
+            "moreFromArtist": "更多來自該$t(entity.artist, {\"count\": 1})的作品",
             "moreFromGeneric": "更多 {{item}} 作品",
             "released": "發行"
         },
@@ -312,10 +312,10 @@
             "nowPlaying": "正在播放",
             "playlists": "$t(entity.playlist, {\"count\": 2})",
             "myLibrary": "我的媒體庫",
-            "shared": "已分享 $t(entity.playlist, {\"count\": 2})",
+            "shared": "共享$t(entity.playlist, {\"count\": 2})",
             "favorites": "$t(entity.favorite, {\"count\": 2})",
             "radio": "$t(entity.radioStation, {\"count\": 2})",
-            "collections": "收藏"
+            "collections": "收藏集"
         },
         "trackList": {
             "title": "$t(entity.track, {\"count\": 2})",
@@ -327,15 +327,15 @@
             "appearsOn": "出現在",
             "recentReleases": "最近發行",
             "viewDiscography": "查看音樂作品",
-            "relatedArtists": "關聯 $t(entity.artist, {\"count\": 2})",
+            "relatedArtists": "相關$t(entity.artist, {\"count\": 2})",
             "topSongs": "熱門歌曲",
             "topSongsFrom": "{{title}} 的熱門歌曲",
             "viewAll": "檢視所有",
-            "viewAllTracks": "檢視所有 $t(entity.track, {\"count\": 2})",
+            "viewAllTracks": "檢視所有$t(entity.track, {\"count\": 2})",
             "groupingTypeAll": "所有發行類型",
             "groupingTypePrimary": "主要發行類型",
-            "favoriteSongs": "最愛歌曲",
-            "favoriteSongsFrom": "{{title}} 的最愛歌曲",
+            "favoriteSongs": "收藏的歌曲",
+            "favoriteSongsFrom": "{{title}} 收藏的歌曲",
             "topSongsCommunity": "社群",
             "topSongsPersonal": "個人"
         },
@@ -370,10 +370,10 @@
         },
         "collections": {
             "overrideExisting": "複寫現有的",
-            "saveAsCollection": "儲存為收藏"
+            "saveAsCollection": "儲存為收藏集"
         },
         "releasenotes": {
-            "commitsSinceStable": "提交自 {{stable}}",
+            "commitsSinceStable": "自 {{stable}} 以來的提交",
             "noNewCommits": "在此區間內沒有新的提交",
             "noStableReleaseToCompare": "沒有穩定的發行可供比較"
         }
@@ -504,7 +504,7 @@
         "hotkey_unfavoritePreviousSong": "取消收藏 $t(common.previousSong)",
         "hotkey_zoomIn": "放大",
         "hotkey_zoomOut": "縮小",
-        "language_description": "設定應用程式的語言 （$t(common.restartRequired)）",
+        "language_description": "設定應用程式的語言（$t(common.restartRequired)）",
         "lyricFetch": "從網路取得歌詞",
         "lyricFetch_description": "從多個網路來源取得歌詞",
         "lyricFetchProvider": "歌詞來源",
@@ -606,11 +606,11 @@
         "customCssEnable_description": "允許撰寫自訂 CSS",
         "customCssNotice": "警告：即使已限制某些用法（不允許 URL() 和 content:），但使用自訂 CSS 仍然會透過更改介面帶來風險",
         "customCss": "自訂 CSS",
-        "customCss_description": "自訂 CSS 內容。注意：內容和遠端 URL 是不允許使用的屬性。您的內容預覽如下所示。由於需要進行清理，因此存在一些您未設定的其他欄位。桌面端：feishin 在應用程式配置目錄中讀取和寫入 custom.css，並在檔案更改時重新載入",
+        "customCss_description": "自訂 CSS 內容。注意：不允許使用 content 與遠端 URL 屬性。下方會顯示內容預覽。由於系統會進行淨化處理，因此可能會出現一些你未設定的額外欄位。桌面端：Feishin 會讀取及寫入應用程式設定目錄中的 custom.css，並在檔案變更時自動重新載入",
         "discordPausedStatus": "暫停時顯示 Rich Presence",
         "discordPausedStatus_description": "啟用後，播放器暫停時將顯示狀態",
-        "discordListening": "將狀態設為\"正在聽\"",
-        "discordListening_description": "將狀態顯示為\"正在聽\"而不是\"正在玩\"",
+        "discordListening": "將狀態設為「正在聽」",
+        "discordListening_description": "將狀態顯示為「正在聽」而不是「正在玩」",
         "discordServeImage": "從伺服器提供 {{discord}} 圖片",
         "discordServeImage_description": "從伺服器本身分享 {{discord}} Rich Presence的封面圖片，僅支援 Jellyfin 與 Navidrome。{{discord}} 會透過機器人擷取圖片，因此您的伺服器必須能從公開網路連線",
         "externalLinks": "顯示外部連結",
@@ -915,13 +915,13 @@
                 "pagination_paginate": "分頁式",
                 "alternateRowColors": "隔行上色",
                 "horizontalBorders": "行邊框線",
-                "rowHoverHighlight": "滑鼠懸停Highlight",
+                "rowHoverHighlight": "滑鼠懸停時醒目顯示",
                 "verticalBorders": "列邊框線",
                 "showHeader": "顯示標題",
                 "albumGroupConfig": "專輯群組設定",
                 "albumImageSize": "專輯圖片大小",
                 "albumGroupMetadata": "中繼資料欄位",
-                "albumGroupShowFavoriteRating": "顯示最愛與評分",
+                "albumGroupShowFavoriteRating": "顯示收藏與評分",
                 "albumGroupVerticalLayout": "垂直佈局"
             },
             "label": {
@@ -1000,23 +1000,23 @@
         }
     },
     "action": {
-        "addToFavorites": "新增至 $t(entity.favorite, {\"count\": 2})",
+        "addToFavorites": "新增至$t(entity.favorite, {\"count\": 2})",
         "clearQueue": "清空佇列",
-        "createPlaylist": "建立 $t(entity.playlist, {\"count\": 1})",
-        "deletePlaylist": "刪除 $t(entity.playlist, {\"count\": 1})",
-        "addToPlaylist": "新增至 $t(entity.playlist, {\"count\": 1})",
+        "createPlaylist": "建立$t(entity.playlist, {\"count\": 1})",
+        "deletePlaylist": "刪除$t(entity.playlist, {\"count\": 1})",
+        "addToPlaylist": "新增至$t(entity.playlist, {\"count\": 1})",
         "deselectAll": "取消全選",
-        "editPlaylist": "編輯 $t(entity.playlist, {\"count\": 1})",
+        "editPlaylist": "編輯$t(entity.playlist, {\"count\": 1})",
         "goToPage": "前往頁面",
         "moveToBottom": "移至底部",
         "moveToTop": "移至頂部",
         "refresh": "$t(common.refresh)",
-        "removeFromFavorites": "從 $t(entity.favorite, {\"count\": 2}) 移除",
-        "removeFromPlaylist": "從 $t(entity.playlist, {\"count\": 1}) 移除",
+        "removeFromFavorites": "從$t(entity.favorite, {\"count\": 2})移除",
+        "removeFromPlaylist": "從$t(entity.playlist, {\"count\": 1})移除",
         "removeFromQueue": "從佇列中移除",
         "setRating": "評分",
         "toggleSmartPlaylistEditor": "切換 $t(entity.smartPlaylist) 編輯器",
-        "viewPlaylists": "查看 $t(entity.playlist, {\"count\": 2})",
+        "viewPlaylists": "查看$t(entity.playlist, {\"count\": 2})",
         "moveToNext": "移至下一項",
         "openIn": {
             "lastfm": "在 Last.fm 中開啟",
@@ -1035,15 +1035,16 @@
         "moveDown": "向下移動",
         "holdToMoveToTop": "按住以移動至頂部",
         "holdToMoveToBottom": "按住以移動至底部",
-        "createRadioStation": "建立 $t(entity.radioStation, {\"count\": 1})",
-        "deleteRadioStation": "刪除 $t(entity.radioStation, {\"count\": 1})",
+        "createRadioStation": "建立$t(entity.radioStation, {\"count\": 1})",
+        "deleteRadioStation": "刪除$t(entity.radioStation, {\"count\": 1})",
         "openApplicationDirectory": "開啟應用程式目錄",
         "addOrRemoveFromSelection": "新增或移除選取項目",
         "selectAll": "全選",
         "selectRangeOfItems": "批量選取",
         "goToCurrent": "前往當前項目",
         "expandAllFolders": "展開所有資料夾",
-        "collapseAllFolders": "摺疊所有資料夾"
+        "collapseAllFolders": "摺疊所有資料夾",
+        "createPlaylistFromQueue": "從佇列建立$t(entity.playlist, {\"count\": 1})"
     },
     "entity": {
         "album_other": "專輯",
@@ -1058,7 +1059,7 @@
         "genreWithCount_other": "{{count}} 種曲風",
         "playlist_other": "播放清單",
         "playlistWithCount_other": "{{count}} 個播放清單",
-        "smartPlaylist": "智慧 $t(entity.playlist, {\"count\": 1})",
+        "smartPlaylist": "智慧$t(entity.playlist, {\"count\": 1})",
         "track_other": "曲目",
         "trackWithCount_other": "{{count}} 個曲目",
         "albumWithCount_other": "{{count}} 張專輯",
@@ -1139,18 +1140,18 @@
             "input_playlists": "$t(entity.playlist, {\"count\": 2})",
             "input_skipDuplicates": "跳過重複",
             "success": "新增 $t(entity.trackWithCount, {\"count\": {{message}} }) 到 $t(entity.playlistWithCount, {\"count\": {{numOfPlaylists}} })",
-            "title": "新增到 $t(entity.playlist, {\"count\": 1})",
-            "create": "建立 $t(entity.playlist, {\"count\": 1}) {{playlist}}",
-            "searchOrCreate": "搜尋 $t(entity.playlist, {\"count\": 2}) 或輸入內容以建立新項目",
-            "noneAdded": "沒有曲目新增到 $t(entity.playlist, {\"count\": 1}) '{{playlist}}'"
+            "title": "新增到$t(entity.playlist, {\"count\": 1})",
+            "create": "建立$t(entity.playlist, {\"count\": 1}) {{playlist}}",
+            "searchOrCreate": "搜尋$t(entity.playlist, {\"count\": 2})或輸入內容以建立新項目",
+            "noneAdded": "沒有曲目新增到$t(entity.playlist, {\"count\": 1}) '{{playlist}}'"
         },
         "createPlaylist": {
             "input_description": "$t(common.description)",
             "input_name": "$t(common.name)",
             "input_owner": "$t(common.owner)",
             "input_public": "公開",
-            "success": "已成功建立 $t(entity.playlist, {\"count\": 1})",
-            "title": "建立 $t(entity.playlist, {\"count\": 1})"
+            "success": "已成功建立$t(entity.playlist, {\"count\": 1})",
+            "title": "建立$t(entity.playlist, {\"count\": 1})"
         },
         "lyricSearch": {
             "input_name": "$t(common.name)",
@@ -1171,14 +1172,14 @@
             "title": "更新伺服器"
         },
         "deletePlaylist": {
-            "input_confirm": "輸入 $t(entity.playlist, {\"count\": 1}) 的名稱進行確認",
-            "title": "刪除 $t(entity.playlist, {\"count\": 1})",
-            "success": "$t(entity.playlist, {\"count\": 1}) 已成功刪除"
+            "input_confirm": "輸入$t(entity.playlist, {\"count\": 1})的名稱進行確認",
+            "title": "刪除$t(entity.playlist, {\"count\": 1})",
+            "success": "$t(entity.playlist, {\"count\": 1})已成功刪除"
         },
         "editPlaylist": {
-            "title": "編輯 $t(entity.playlist, {\"count\": 1})",
+            "title": "編輯$t(entity.playlist, {\"count\": 1})",
             "publicJellyfinNote": "Jellyfin 出於某種原因，不會顯示播放清單是否公開。如果您希望保持公開狀態，請選擇以下輸入",
-            "success": "$t(entity.playlist, {\"count\": 1}) 更新成功"
+            "success": "$t(entity.playlist, {\"count\": 1})更新成功"
         },
         "shareItem": {
             "allowDownloading": "允許下載",
@@ -1232,6 +1233,9 @@
         },
         "editRadioStation": {
             "success": "電台更新成功"
+        },
+        "createPrefilledPlaylist": {
+            "title": "從選取的歌曲建立$t(entity.playlist, {\"count\": 1})"
         }
     },
     "releaseType": {
