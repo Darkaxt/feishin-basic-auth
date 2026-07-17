@@ -1204,7 +1204,8 @@
                 "albumImageSize": "Rozmiar obrazów albumów",
                 "albumGroupConfig": "Konfiguracja grupy albumów",
                 "albumGroupMetadata": "Pola metadanych",
-                "albumGroupShowFavoriteRating": "Pokaż ulubione i oceny"
+                "albumGroupShowFavoriteRating": "Pokaż ulubione i oceny",
+                "albumGroupVerticalLayout": "Pionowy układ"
             },
             "label": {
                 "releaseDate": "Data premiery",

@@ -1205,7 +1205,8 @@
                 "albumImageSize": "Tamaño de la imagen del álbum",
                 "albumGroupConfig": "Configuración del grupo del álbum",
                 "albumGroupMetadata": "Campos de metadatos",
-                "albumGroupShowFavoriteRating": "Mostrar favoritos y calificaciones"
+                "albumGroupShowFavoriteRating": "Mostrar favoritos y calificaciones",
+                "albumGroupVerticalLayout": "Diseño vertical"
             },
             "view": {
                 "table": "Tabla",
