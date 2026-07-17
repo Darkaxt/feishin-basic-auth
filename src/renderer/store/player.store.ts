@@ -45,10 +45,7 @@ interface Actions {
     getCurrentSong: () => QueueSong | undefined;
     getPlayerData: () => PlayerData;
     getQueue: (groupBy?: QueueGroupingProperty) => GroupedQueue;
-    getQueueOrder: () => {
-        groups: { count: number; name: string }[];
-        items: QueueSong[];
-    };
+    getQueueOrder: () => GroupedQueue;
     increaseVolume: (value: number) => void;
     isFirstTrackInQueue: () => boolean;
     isLastTrackInQueue: () => boolean;
