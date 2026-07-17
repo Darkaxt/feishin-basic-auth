@@ -37,7 +37,7 @@
         "manage": "管理",
         "maximize": "最大化",
         "ok": "好",
-        "owner": "所有者",
+        "owner": "擁有者",
         "path": "路徑",
         "playerMustBePaused": "播放器必須先暫停",
         "previousSong": "上一首 $t(entity.track, {\"count\": 1})",
@@ -194,7 +194,7 @@
             }
         },
         "home": {
-            "explore": "從媒體庫中搜尋",
+            "explore": "探索你的音樂庫",
             "recentlyPlayed": "最近播放",
             "title": "$t(common.home)",
             "mostPlayed": "最多播放",
@@ -369,7 +369,7 @@
             "privateMode": "(私人模式)"
         },
         "collections": {
-            "overrideExisting": "複寫現有的",
+            "overrideExisting": "覆寫現有項目",
             "saveAsCollection": "儲存為收藏集"
         },
         "releasenotes": {
@@ -713,7 +713,7 @@
         "showVisualizerInSidebar_description": "在播放佇列增加一個面板來顯示視覺化效果",
         "showVisualizerInSidebar": "在播放器側邊欄顯示視覺化效果",
         "transcode": "啟用轉碼功能",
-        "queryBuilderCustomFields_inputLabel": "唱片公司",
+        "queryBuilderCustomFields_inputLabel": "欄位名稱",
         "queryBuilderCustomFields_inputTag": "標籤",
         "queryBuilderCustomFields": "自訂欄位",
         "audioFadeOnStatusChange": "狀態變更時音訊淡入淡出",
@@ -874,7 +874,7 @@
         "compressorReset_description": "將所有壓縮器參數恢復為預設值",
         "compressorSavePreset_description": "將目前壓縮器設定儲存為具名預設",
         "compressorThreshold_description": "開始進行壓縮的訊號電平。",
-        "compressorThreshold": "閥值",
+        "compressorThreshold": "閾值",
         "enableRomaji_description": "在日文歌詞下方顯示羅馬拼音。",
         "enableRomaji": "啟用羅馬拼音顯示",
         "windowBarTrackinfo": "在視窗標題列顯示曲目資訊",
@@ -1388,7 +1388,7 @@
         "mirror": "鏡像",
         "miscellaneousSettings": "雜項設定",
         "alphaBars": "Alpha 條",
-        "ansiBands": "ASNI 波段",
+        "ansiBands": "ANSI 波段",
         "ledBars": "LED 條",
         "trueLeds": "真實 LED",
         "lumiBars": "輝光條",
@@ -1414,7 +1414,7 @@
                 "10": "[10] 線 / 區域圖表"
             },
             "colorMode": {
-                "gradient": "梯度",
+                "gradient": "漸層",
                 "barIndex": "條-指數",
                 "barLevel": "條-高度"
             },
