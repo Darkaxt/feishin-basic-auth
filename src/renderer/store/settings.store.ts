@@ -763,6 +763,35 @@ const AutoDJSettingsSchema = z.object({
     timing: z.number(),
 });
 
+const TagAutocompleteSourceSchema = z.string();
+
+const TagConfigSchema = z.object({
+    autocompleteSource: TagAutocompleteSourceSchema,
+    customValues: z.array(z.string()),
+    multiValue: z.boolean(),
+});
+
+const TagEditorSettingsSchema = z.object({
+    tagConfigs: z.record(z.string(), TagConfigSchema),
+    triggerRescan: z.boolean(),
+});
+
+export type TagAutocompleteSource = string;
+export type TagConfig = z.infer<typeof TagConfigSchema>;
+
+export const SERVER_TAG_AUTOCOMPLETE_PREFIX = 'tag:';
+
+export const isServerTagAutocompleteSource = (source: string): boolean =>
+    source.startsWith(SERVER_TAG_AUTOCOMPLETE_PREFIX);
+
+export const getServerTagAutocompleteName = (source: string): null | string =>
+    isServerTagAutocompleteSource(source)
+        ? source.slice(SERVER_TAG_AUTOCOMPLETE_PREFIX.length)
+        : null;
+
+export const toServerTagAutocompleteSource = (tagName: string): string =>
+    `${SERVER_TAG_AUTOCOMPLETE_PREFIX}${tagName}`;
+
 /**
  * This schema is used for validation of the imported settings json
  */
@@ -787,6 +816,7 @@ export const ValidationSettingsStateSchema = z.object({
         z.literal('window'),
         z.string(),
     ]),
+    tagEditor: TagEditorSettingsSchema,
     visualizer: VisualizerSettingsSchema,
     window: WindowSettingsSchema,
 });
@@ -2019,6 +2049,56 @@ const initialState: SettingsState = {
         username: 'feishin',
     },
     tab: 'general',
+    tagEditor: {
+        tagConfigs: {
+            albumArtist: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: false,
+            },
+            ALBUMARTISTS: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: true,
+            },
+            albumArtistSort: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: false,
+            },
+            ALBUMARTISTSSORT: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: true,
+            },
+            artist: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: true,
+            },
+            ARTISTS: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: true,
+            },
+            artistSort: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: true,
+            },
+            ARTISTSSORT: {
+                autocompleteSource: 'serverArtists',
+                customValues: [],
+                multiValue: true,
+            },
+            genre: {
+                autocompleteSource: 'serverGenres',
+                customValues: [],
+                multiValue: true,
+            },
+        },
+        triggerRescan: true,
+    },
     visualizer: {
         audiomotionanalyzer: {
             alphaBars: false,
@@ -2766,6 +2846,8 @@ export const useCssSettings = () => useSettingsStore((state) => state.css, shall
 
 export const useQueryBuilderSettings = () =>
     useSettingsStore((state) => state.queryBuilder, shallow);
+
+export const useTagEditorSettings = () => useSettingsStore((state) => state.tagEditor, shallow);
 
 const getSettingsStoreVersion = () => useSettingsStore.persist.getOptions().version!;
 

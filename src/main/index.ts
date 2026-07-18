@@ -330,7 +330,7 @@ ipcMain.on('input-focus-state', (_event, focused: boolean) => {
     if (inputFocused === next) return;
     inputFocused = next;
     if (isMacOS()) {
-        rebuildMainMenu();
+        updateMainMenu();
     }
 });
 
@@ -389,21 +389,30 @@ export const getMainWindow = () => {
     return mainWindow;
 };
 
+const getMainMenuState = (): MenuPlaybackState => ({
+    accelerators: playbackMenuAccelerators,
+    inputFocused,
+    playbackStatus: currentPlaybackStatus,
+    privateMode: currentPrivateMode,
+    repeatMode: currentRepeatMode,
+    shuffleEnabled: currentShuffleEnabled,
+    sidebarCollapsed: currentSidebarCollapsed,
+});
+
 const rebuildMainMenu = () => {
     if (!menuBuilder || !mainWindow) return;
 
-    menuBuilder.buildMenu({
-        accelerators: inputFocused ? {} : playbackMenuAccelerators,
-        playbackStatus: currentPlaybackStatus,
-        privateMode: currentPrivateMode,
-        repeatMode: currentRepeatMode,
-        shuffleEnabled: currentShuffleEnabled,
-        sidebarCollapsed: currentSidebarCollapsed,
-    });
+    menuBuilder.buildMenu(getMainMenuState());
 
     if (process.platform !== 'darwin') {
         Menu.setApplicationMenu(null);
     }
+};
+
+const updateMainMenu = () => {
+    if (!menuBuilder || !mainWindow) return;
+
+    menuBuilder.updateMenu(getMainMenuState());
 };
 
 export const sendToastToRenderer = ({
@@ -964,11 +973,11 @@ ipcMain.on(
         }
 
         playbackMenuAccelerators = {
+            globalSearch: getMenuAccelerator(data, BindingActions.GLOBAL_SEARCH),
             next: getMenuAccelerator(data, BindingActions.NEXT),
-            playPause:
-                getMenuAccelerator(data, BindingActions.PLAY_PAUSE) ||
-                getMenuAccelerator(data, BindingActions.PLAY) ||
-                getMenuAccelerator(data, BindingActions.PAUSE),
+            pause: getMenuAccelerator(data, BindingActions.PAUSE),
+            play: getMenuAccelerator(data, BindingActions.PLAY),
+            playPause: getMenuAccelerator(data, BindingActions.PLAY_PAUSE),
             previous: getMenuAccelerator(data, BindingActions.PREVIOUS),
             repeat: getMenuAccelerator(data, BindingActions.TOGGLE_REPEAT),
             seekBackward: getMenuAccelerator(data, BindingActions.SKIP_BACKWARD),
@@ -1189,7 +1198,7 @@ ipcMain.on('update-playback', (_event, status: PlayerStatus) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-repeat', (_event, repeat: PlayerRepeat) => {
@@ -1197,7 +1206,7 @@ ipcMain.on('update-repeat', (_event, repeat: PlayerRepeat) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-shuffle', (_event, shuffle: boolean) => {
@@ -1205,7 +1214,7 @@ ipcMain.on('update-shuffle', (_event, shuffle: boolean) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-private-mode', (_event, privateMode: boolean) => {
@@ -1213,7 +1222,7 @@ ipcMain.on('update-private-mode', (_event, privateMode: boolean) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });
 
 ipcMain.on('update-sidebar-collapsed', (_event, collapsedSidebar: boolean) => {
@@ -1221,5 +1230,5 @@ ipcMain.on('update-sidebar-collapsed', (_event, collapsedSidebar: boolean) => {
 
     if (!isMacOS()) return;
 
-    rebuildMainMenu();
+    updateMainMenu();
 });

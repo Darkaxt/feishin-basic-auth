@@ -550,7 +550,8 @@
         "selectAll": "Seleccionar todo",
         "goToCurrent": "Ir al elemento actual",
         "collapseAllFolders": "Contraer todas las carpetas",
-        "expandAllFolders": "Expandir todas las carpetas"
+        "expandAllFolders": "Expandir todas las carpetas",
+        "createPlaylistFromQueue": "Crear $t(entity.playlist, {\"count\": 1}) desde la cola"
     },
     "common": {
         "backward": "Hacia atrás",
@@ -1104,6 +1105,9 @@
         },
         "editRadioStation": {
             "success": "Estación de radio actualizada con éxito"
+        },
+        "createPrefilledPlaylist": {
+            "title": "Crear $t(entity.playlist, {\"count\": 1}) desde las canciones seleccionadas"
         }
     },
     "table": {

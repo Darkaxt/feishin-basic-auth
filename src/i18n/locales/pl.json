@@ -43,7 +43,8 @@
         "openApplicationDirectory": "Otwórz katalog aplikacji",
         "goToCurrent": "Przejdź do aktualnego elementu",
         "collapseAllFolders": "Zwiń wszystkie foldery",
-        "expandAllFolders": "Rozwiń wszystkie foldery"
+        "expandAllFolders": "Rozwiń wszystkie foldery",
+        "createPlaylistFromQueue": "Utwórz $t(entity.playlist, {\"count\": 1}) z kolejki"
     },
     "common": {
         "increase": "Zwiększ",
@@ -435,6 +436,9 @@
         },
         "editRadioStation": {
             "success": "Stacja radiowa zaktualizowana pomyślnie"
+        },
+        "createPrefilledPlaylist": {
+            "title": "Utwórz $t(entity.playlist, {\"count\": 1}) z wybranych piosenek"
         }
     },
     "page": {
