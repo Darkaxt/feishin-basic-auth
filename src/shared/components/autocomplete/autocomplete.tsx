@@ -1,17 +1,18 @@
-import { Textarea as MantineTextarea, TextareaProps as MantineTextareaProps } from '@mantine/core';
+import type { AutocompleteProps as MantineAutocompleteProps } from '@mantine/core';
+
+import { Autocomplete as MantineAutocomplete } from '@mantine/core';
 import { CSSProperties, forwardRef } from 'react';
 
-import styles from './textarea.module.css';
+import styles from './autocomplete.module.css';
 
-export interface TextareaProps extends MantineTextareaProps {
+export interface AutocompleteProps extends MantineAutocompleteProps {
     maxWidth?: CSSProperties['maxWidth'];
     width?: CSSProperties['width'];
 }
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
     (
         {
-            children,
             classNames,
             maxWidth,
             size = 'sm',
@@ -19,17 +20,18 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             variant = 'default',
             width,
             ...props
-        }: TextareaProps,
+        }: AutocompleteProps,
         ref,
     ) => {
         return (
-            <MantineTextarea
+            <MantineAutocomplete
                 classNames={{
+                    dropdown: styles.dropdown,
                     input: styles.input,
                     label: styles.label,
-                    required: styles.required,
+                    option: styles.option,
                     root: styles.root,
-                    wrapper: styles.wrapper,
+                    section: styles.section,
                     ...classNames,
                 }}
                 ref={ref}
@@ -38,9 +40,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                 style={{ maxWidth, width, ...style }}
                 variant={variant}
                 {...props}
-            >
-                {children}
-            </MantineTextarea>
+            />
         );
     },
 );

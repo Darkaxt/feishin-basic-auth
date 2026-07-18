@@ -2082,6 +2082,17 @@ export const SubsonicController: InternalControllerEndpoint = {
 
         return res.body;
     },
+    refreshItems: async (args) => {
+        const { apiClientProps } = args;
+
+        const res = await ssApiClient(apiClientProps).startScan({ query: {} });
+
+        if (res.status !== 200) {
+            throw new Error('Failed to start scan');
+        }
+
+        return null;
+    },
     removeFromPlaylist: async ({ apiClientProps, query }) => {
         const res = await ssApiClient(apiClientProps).updatePlaylist({
             query: {

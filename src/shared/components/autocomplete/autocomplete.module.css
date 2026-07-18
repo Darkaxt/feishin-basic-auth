@@ -1,5 +1,7 @@
 .root {
-    transition: width 0.3s ease-in-out;
+    & [data-disabled='true'] {
+        opacity: 0.6;
+    }
 }
 
 .input {
@@ -26,6 +28,22 @@
     margin-bottom: var(--theme-spacing-sm);
 }
 
-.required {
-    color: var(--theme-colors-state-error);
+.section {
+    color: var(--theme-colors-foreground-muted);
+}
+
+.dropdown {
+    padding: var(--theme-spacing-xs);
+    color: var(--theme-colors-surface-foreground);
+    background: var(--theme-colors-surface);
+    border: 1px solid var(--theme-colors-border);
+}
+
+.option {
+    position: relative;
+    padding: var(--theme-spacing-sm) var(--theme-spacing-md);
+}
+
+.option:hover {
+    background: lighten(var(--theme-colors-surface), 5%);
 }
