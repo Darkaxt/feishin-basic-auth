@@ -559,9 +559,14 @@ export const GeneralSettingsSchema = z.object({
     sideQueueType: SideQueueTypeSchema,
     skipButtons: SkipButtonsSchema,
     spotify: z.boolean(),
-    theme: z.nativeEnum(AppTheme),
-    themeDark: z.nativeEnum(AppTheme),
-    themeLight: z.nativeEnum(AppTheme),
+    // Accepts either a built-in AppTheme id or a custom theme id (the
+    // filename, without extension, of a JSON file in the themes folder).
+    // Custom theme ids aren't statically known, so this can't be a
+    // nativeEnum(AppTheme) any more; getAppTheme() falls back to the
+    // default theme if the stored id doesn't resolve to anything.
+    theme: z.string(),
+    themeDark: z.string(),
+    themeLight: z.string(),
     useThemeAccentColor: z.boolean(),
     useThemePrimaryShade: z.boolean(),
     volumeWheelStep: z.number(),
@@ -2069,7 +2074,7 @@ const initialState: SettingsState = {
             ALBUMARTISTSSORT: {
                 autocompleteSource: 'serverArtists',
                 customValues: [],
-                multiValue: true,
+                multiValue: false,
             },
             artist: {
                 autocompleteSource: 'serverArtists',
@@ -2084,12 +2089,12 @@ const initialState: SettingsState = {
             artistSort: {
                 autocompleteSource: 'serverArtists',
                 customValues: [],
-                multiValue: true,
+                multiValue: false,
             },
             ARTISTSSORT: {
                 autocompleteSource: 'serverArtists',
                 customValues: [],
-                multiValue: true,
+                multiValue: false,
             },
             genre: {
                 autocompleteSource: 'serverGenres',
@@ -2771,6 +2776,22 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
 
                 if (version <= 31) {
                     state.lidaClips = normalizeLidaClipsSettings(state.lidaClips);
+                }
+
+                if (version < 32) {
+                    const tagConfigs = state.tagEditor?.tagConfigs;
+                    if (tagConfigs) {
+                        for (const key of [
+                            'albumArtistSort',
+                            'ALBUMARTISTSSORT',
+                            'artistSort',
+                            'ARTISTSSORT',
+                        ] as const) {
+                            if (tagConfigs[key]) {
+                                tagConfigs[key].multiValue = false;
+                            }
+                        }
+                    }
                 }
 
                 return persistedState;

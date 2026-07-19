@@ -1,4 +1,5 @@
 import './autodiscover';
+import './custom-themes';
 import './lidaclips';
 import './lyrics';
 import './player';

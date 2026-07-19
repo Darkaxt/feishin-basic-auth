@@ -234,13 +234,10 @@ export const SynchronizedKaraokeLyrics = ({
         syncFromCurrentTimestamp();
     }, [offsetMs, syncFromCurrentTimestamp]);
 
-    // Rebuild animation state when async romaji overlay data arrives after initial mount.
-    // Without this, overlayParts stay empty until a pause/resume triggers rebuildLyricsData().
+    // Rebuild animation state when timed overlay DOM changes (pronunciation, translation,
+    // async romaji, or extra overlays). Without this, overlayParts stay empty/stale until
+    // pause/resume triggers rebuildLyricsData().
     useEffect(() => {
-        if (syncedRomajiLyrics == null) {
-            return;
-        }
-
         const frame = requestAnimationFrame(() => {
             rebuildLyricsData();
 
@@ -254,7 +251,15 @@ export const SynchronizedKaraokeLyrics = ({
         });
 
         return () => cancelAnimationFrame(frame);
-    }, [delayMsRef, rebuildLyricsData, syncAtTime, syncedRomajiLyrics]);
+    }, [
+        delayMsRef,
+        extraOverlayLyrics,
+        pronunciationLyrics,
+        rebuildLyricsData,
+        syncAtTime,
+        syncedRomajiLyrics,
+        translationLyrics,
+    ]);
 
     useEffect(() => {
         statusRef.current = usePlayerStoreBase.getState().player.status;

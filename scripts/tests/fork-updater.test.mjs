@@ -4,6 +4,11 @@ import { resolve } from 'node:path';
 import test from 'node:test';
 
 const sourcePath = resolve(process.cwd(), 'src/main/index.ts');
+const githubReleasesSourcePath = resolve(
+    process.cwd(),
+    'src/renderer/hooks/use-github-releases.ts',
+);
+const releaseNotesSourcePath = resolve(process.cwd(), 'src/renderer/release-notes-modal.tsx');
 
 test('fork updater targets BasicAuth prereleases without allowing downgrades', () => {
     const source = readFileSync(sourcePath, 'utf8');
@@ -12,4 +17,18 @@ test('fork updater targets BasicAuth prereleases without allowing downgrades', (
     assert.match(source, /repo:\s*'feishin-basic-auth'/u);
     assert.doesNotMatch(source, /allowPrerelease\s*=\s*false/u);
     assert.match(source, /allowDowngrade\s*=\s*false/u);
+});
+
+test('renderer update checks and release notes target fork prereleases', () => {
+    const githubReleasesSource = readFileSync(githubReleasesSourcePath, 'utf8');
+    const releaseNotesSource = readFileSync(releaseNotesSourcePath, 'utf8');
+
+    assert.match(
+        githubReleasesSource,
+        /api\.github\.com\/repos\/Darkaxt\/feishin-basic-auth\/releases/u,
+    );
+    assert.doesNotMatch(githubReleasesSource, /\$\{GITHUB_RELEASES_URL\}\/latest/u);
+    assert.doesNotMatch(githubReleasesSource, /repos\/jeffvli\/feishin/u);
+    assert.match(releaseNotesSource, /github\.com\/Darkaxt\/feishin-basic-auth/u);
+    assert.doesNotMatch(releaseNotesSource, /github\.com\/jeffvli\/feishin/u);
 });
