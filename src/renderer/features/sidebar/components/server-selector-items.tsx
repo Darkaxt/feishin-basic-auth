@@ -1,5 +1,6 @@
 import { openModal } from '@mantine/modals';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
@@ -17,12 +18,14 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { ServerListItemWithCredential, ServerType } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
+const localSettings = isElectron() ? window.api.localSettings : null;
+
 export const ServerSelectorItems = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const currentServer = useCurrentServer();
     const serverList = useServerList();
-    const { setCurrentServer, setMusicFolderId } = useAuthStoreActions();
+    const { logout, setCurrentServer, setMusicFolderId } = useAuthStoreActions();
 
     const { data: musicFolders } = useQuery(
         currentServer
@@ -89,6 +92,21 @@ export const ServerSelectorItems = () => {
         });
     };
 
+    const handleLogout = async () => {
+        const serverId = currentServer.id;
+
+        // Cancel in-flight requests before clearing credentials so they don't
+        // retry/refetch with an empty token and surface auth error toasts.
+        await queryClient.cancelQueries();
+        localSettings?.passwordRemove(serverId);
+        logout();
+
+        // Defer cache clear until after authenticated routes unmount.
+        setTimeout(() => {
+            queryClient.clear();
+        }, 0);
+    };
+
     return (
         <>
             <DropdownMenu.Label>{t('page.appMenu.selectServer')}</DropdownMenu.Label>
@@ -121,13 +139,23 @@ export const ServerSelectorItems = () => {
                 );
             })}
             {!isServerLock() && (
-                <DropdownMenu.Item
-                    leftSection={<Icon icon="edit" />}
-                    onClick={handleManageServersModal}
-                >
-                    {t('page.appMenu.manageServers')}
-                </DropdownMenu.Item>
+                <>
+                    <DropdownMenu.Divider />
+                    <DropdownMenu.Item
+                        leftSection={<Icon icon="edit" />}
+                        onClick={handleManageServersModal}
+                    >
+                        {t('page.appMenu.manageServers')}
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                        leftSection={<Icon color="error" icon="signOut" />}
+                        onClick={handleLogout}
+                    >
+                        {t('page.appMenu.logout')}
+                    </DropdownMenu.Item>
+                </>
             )}
+            {!isServerLock() && <></>}
             {musicFolders && musicFolders.items.length > 0 && (
                 <>
                     <DropdownMenu.Divider />

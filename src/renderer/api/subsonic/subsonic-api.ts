@@ -4,6 +4,7 @@ import qs from 'qs';
 import { z } from 'zod';
 
 import i18n from '/@/i18n/i18n';
+import { useAuthStore } from '/@/renderer/store';
 import { getServerUrl } from '/@/renderer/utils/normalize-server-url';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
 import { hasFeature } from '/@/shared/api/utils';
@@ -391,10 +392,14 @@ axiosClient.interceptors.response.use(
         if (data['subsonic-response'].status !== 'ok') {
             // Suppress code related to non-linked lastfm or spotify from Navidrome
             if (data['subsonic-response'].error.code !== 0) {
-                toast.error({
-                    message: data['subsonic-response'].error.message,
-                    title: i18n.t('error.genericError') as string,
-                });
+                const isAuthenticated = Boolean(useAuthStore.getState().currentServer?.credential);
+
+                if (isAuthenticated) {
+                    toast.error({
+                        message: data['subsonic-response'].error.message,
+                        title: i18n.t('error.genericError') as string,
+                    });
+                }
 
                 // Since we do status === 200, override this value with the error code
                 response.status = data['subsonic-response'].error.code;
@@ -470,6 +475,10 @@ export const ssApiClient = (args: {
 
     return initClient(contract, {
         api: async ({ body, headers, method, path, rawQuery }) => {
+            if (server && !server.credential) {
+                throw new Error('Not authenticated');
+            }
+
             let baseUrl: string | undefined;
             const authParams: Record<string, any> = {};
 

@@ -502,6 +502,7 @@
             "goBack": "Go back",
             "goForward": "Go forward",
             "manageServers": "Manage servers",
+            "logout": "Logout",
             "privateModeOff": "Turn off private mode",
             "privateModeOn": "Turn on private mode",
             "openBrowserDevtools": "Open browser devtools",
