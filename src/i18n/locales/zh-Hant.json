@@ -120,7 +120,9 @@
         "numberOfResults": "{{numberOfResults}} 項結果",
         "grouping": "分組",
         "back": "返回",
-        "openFolder": "開啟資料夾"
+        "openFolder": "開啟資料夾",
+        "saveAndClose": "儲存並關閉",
+        "undo": "還原"
     },
     "error": {
         "endpointNotImplementedError": "{{serverType}} 尚未實作端點 {{endpoint}}",
@@ -183,7 +185,8 @@
             "goToAlbum": "前往$t(entity.album, {\"count\": 1})",
             "goToAlbumArtist": "前往 $t(entity.albumArtist, {\"count\": 1})",
             "moveItems": "$t(action.moveItems)",
-            "goTo": "前往"
+            "goTo": "前往",
+            "editMetadata": "編輯後設資料"
         },
         "globalSearch": {
             "title": "指令",
@@ -194,7 +197,7 @@
             }
         },
         "home": {
-            "explore": "探索你的音樂庫",
+            "explore": "探索你的媒體庫",
             "recentlyPlayed": "最近播放",
             "title": "$t(common.home)",
             "mostPlayed": "最多播放",
@@ -350,7 +353,27 @@
         "itemDetail": {
             "copyPath": "複製路徑至剪貼簿",
             "copiedPath": "成功複製路徑",
-            "openFile": "在檔案管理器中顯示曲目"
+            "openFile": "在檔案管理器中顯示曲目",
+            "tagConfiguration": "標籤配置",
+            "addTagConfig": "新增標籤…",
+            "multiValueToggle": "多重值",
+            "autocompleteSource": "自動完成來源",
+            "customValues": "自訂值",
+            "addCustomValue": "新增自訂值…",
+            "serverSuggestions": "伺服器",
+            "fileNotWritable": "檔案無法訪問或無法寫入",
+            "triggerRescan": "儲存後重新掃描媒體庫",
+            "addField": "新增欄位…",
+            "emptyFields": "欄位不可為空",
+            "tagsTab": "標籤",
+            "artworkTab": "專輯照",
+            "removeArtwork": "移除專輯照",
+            "noArtwork": "無專輯照",
+            "multipleValues": "(多重值)",
+            "multipleArtworks": "多重專輯照",
+            "noLocalSongs": "未找到具有本地檔案路徑的歌曲",
+            "readPartialFailure": "{{count}} 個檔案無法讀取後設資料 (共 {{total}} 個)",
+            "writePartialFailure": "{{count}} 個檔案儲存失敗"
         },
         "playlist": {
             "reorder": "僅當按 ID 排序時才啟用重新排序"
@@ -528,7 +551,7 @@
         "replayGainFallback": "{{ReplayGain}}後備替代",
         "replayGainFallback_description": "歌曲沒有{{ReplayGain}}標籤時使用的增益（以分貝為單位）",
         "replayGainMode": "{{ReplayGain}}模式",
-        "replayGainMode_description": "根據歌曲標籤中儲存的{{ReplayGain}}值調整音量增益",
+        "replayGainMode_description": "根據歌曲後設資料中儲存的{{ReplayGain}}值調整音量增益",
         "replayGainMode_optionAlbum": "$t(entity.album, {\"count\": 1})",
         "replayGainMode_optionNone": "$t(common.none)",
         "replayGainMode_optionTrack": "$t(entity.track, {\"count\": 1})",
@@ -587,7 +610,7 @@
         "replayGainClipping_description": "自動降低增益以防止{{ReplayGain}}造成削波",
         "showSkipButtons": "顯示跳過按鈕",
         "themeDark_description": "應用程式將使用深色主題",
-        "clearQueryCache_description": "Feishin 的「軟清除」。這將會刷新播放清單、曲目標籤並重置儲存的歌詞。會保留設定、伺服器憑證和暫存圖片",
+        "clearQueryCache_description": "Feishin 的「軟清除」。這將會刷新播放清單、曲目後設資料並重置儲存的歌詞。會保留設定、伺服器憑證和暫存圖片",
         "clearCache": "清除瀏覽器快取",
         "clearCache_description": "Feishin 的「硬清除」。除了清除 Feishin 的快取、清除瀏覽器快取（儲存的圖片和其他資源）。會保留伺服器憑證和設定",
         "clearQueryCache": "清除 Feishin 快取",
@@ -920,7 +943,7 @@
                 "showHeader": "顯示標題",
                 "albumGroupConfig": "專輯群組設定",
                 "albumImageSize": "專輯圖片大小",
-                "albumGroupMetadata": "中繼資料欄位",
+                "albumGroupMetadata": "後設資料欄位",
                 "albumGroupShowFavoriteRating": "顯示收藏與評分",
                 "albumGroupVerticalLayout": "垂直佈局"
             },
