@@ -4,6 +4,7 @@ import qs from 'qs';
 import { z } from 'zod';
 
 import i18n from '/@/i18n/i18n';
+import { authenticationFailure } from '/@/renderer/api/utils';
 import { useAuthStore } from '/@/renderer/store';
 import { getServerUrl } from '/@/renderer/utils/normalize-server-url';
 import { ssType } from '/@/shared/api/subsonic/subsonic-types';
@@ -11,6 +12,8 @@ import { hasFeature } from '/@/shared/api/utils';
 import { toast } from '/@/shared/components/toast/toast';
 import { ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
+
+const SUBSONIC_AUTH_ERROR_CODE = 40;
 
 const c = initContract();
 
@@ -392,17 +395,25 @@ axiosClient.interceptors.response.use(
         if (data['subsonic-response'].status !== 'ok') {
             // Suppress code related to non-linked lastfm or spotify from Navidrome
             if (data['subsonic-response'].error.code !== 0) {
-                const isAuthenticated = Boolean(useAuthStore.getState().currentServer?.credential);
+                const currentServer = useAuthStore.getState().currentServer;
+                const isAuthenticated = Boolean(currentServer?.credential);
+                const errorCode = data['subsonic-response'].error.code;
+                const errorMessage = data['subsonic-response'].error.message as string | undefined;
+                // Servers may return code as string ("40") — coerce before comparing
+                const numericCode = Number(errorCode);
+                const isAuthError = numericCode === SUBSONIC_AUTH_ERROR_CODE;
 
-                if (isAuthenticated) {
+                if (isAuthenticated && isAuthError) {
+                    authenticationFailure(currentServer, errorMessage);
+                } else if (isAuthenticated) {
                     toast.error({
-                        message: data['subsonic-response'].error.message,
+                        message: errorMessage,
                         title: i18n.t('error.genericError') as string,
                     });
                 }
 
                 // Since we do status === 200, override this value with the error code
-                response.status = data['subsonic-response'].error.code;
+                response.status = numericCode || errorCode;
             }
         }
 

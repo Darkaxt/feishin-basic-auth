@@ -92,7 +92,9 @@ function ServerSelector() {
                 const isNavidromeExpired =
                     server.type === ServerType.NAVIDROME && !server.ndCredential;
                 const isJellyfinExpired = server.type === ServerType.JELLYFIN && !server.credential;
-                const isSessionExpired = isNavidromeExpired || isJellyfinExpired;
+                const isSubsonicExpired = server.type === ServerType.SUBSONIC && !server.credential;
+                const isSessionExpired =
+                    isNavidromeExpired || isJellyfinExpired || isSubsonicExpired;
 
                 const logo =
                     server.type === ServerType.NAVIDROME
@@ -113,7 +115,11 @@ function ServerSelector() {
                             return handleCredentialsModal(server);
                         }}
                         size="lg"
-                        variant={server.id === currentServer?.id ? 'filled' : 'default'}
+                        variant={
+                            server.id === currentServer?.id && !isSessionExpired
+                                ? 'filled'
+                                : 'default'
+                        }
                     >
                         <Group className={styles.serverRow} justify="space-between">
                             <Group>

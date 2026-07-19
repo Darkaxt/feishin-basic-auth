@@ -114,7 +114,9 @@ export const ServerSelectorItems = () => {
                 const isNavidromeExpired =
                     server.type === ServerType.NAVIDROME && !server.ndCredential;
                 const isJellyfinExpired = server.type === ServerType.JELLYFIN && !server.credential;
-                const isSessionExpired = isNavidromeExpired || isJellyfinExpired;
+                const isSubsonicExpired = server.type === ServerType.SUBSONIC && !server.credential;
+                const isSessionExpired =
+                    isNavidromeExpired || isJellyfinExpired || isSubsonicExpired;
 
                 const logo =
                     server.type === ServerType.NAVIDROME
@@ -125,7 +127,7 @@ export const ServerSelectorItems = () => {
 
                 return (
                     <DropdownMenu.Item
-                        isSelected={currentServer?.id === server.id}
+                        isSelected={currentServer?.id === server.id && !isSessionExpired}
                         key={`server-${server.id}`}
                         leftSection={<img src={logo} style={{ height: '1rem', width: '1rem' }} />}
                         onClick={() => {
