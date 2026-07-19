@@ -1,4 +1,4 @@
-import { openModal } from '@mantine/modals';
+import { closeAllModals, openModal } from '@mantine/modals';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import isElectron from 'is-electron';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { isServerLock } from '/@/renderer/features/action-required/utils/window-
 import JellyfinLogo from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
+import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { ServerList } from '/@/renderer/features/servers/components/server-list';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -15,7 +16,11 @@ import { useAuthStoreActions, useCurrentServer, useServerList } from '/@/rendere
 import { hasFeature } from '/@/shared/api/utils';
 import { DropdownMenu } from '/@/shared/components/dropdown-menu/dropdown-menu';
 import { Icon } from '/@/shared/components/icon/icon';
-import { ServerListItemWithCredential, ServerType } from '/@/shared/types/domain-types';
+import {
+    ServerListItem,
+    ServerListItemWithCredential,
+    ServerType,
+} from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
 const localSettings = isElectron() ? window.api.localSettings : null;
@@ -37,6 +42,31 @@ export const ServerSelectorItems = () => {
         navigate(AppRoute.HOME);
         setCurrentServer(server);
         setMusicFolderId(undefined);
+    };
+
+    const handleCredentialsModal = async (server: ServerListItem) => {
+        let password: null | string = null;
+
+        try {
+            if (localSettings && server.savePassword) {
+                password = await localSettings.passwordGet(server.id);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+
+        openModal({
+            children: (
+                <EditServerForm
+                    isUpdate
+                    onCancel={closeAllModals}
+                    password={password}
+                    server={server}
+                />
+            ),
+            size: 'sm',
+            title: t('form.updateServer.title'),
+        });
     };
 
     const supportsMultiSelect = hasFeature(currentServer, ServerFeature.MUSIC_FOLDER_MULTISELECT);
@@ -131,10 +161,15 @@ export const ServerSelectorItems = () => {
                         key={`server-${server.id}`}
                         leftSection={<img src={logo} style={{ height: '1rem', width: '1rem' }} />}
                         onClick={() => {
-                            if (!isSessionExpired) {
+                            if (isSessionExpired) {
+                                handleCredentialsModal(server);
+                            } else {
                                 handleSetCurrentServer(server);
                             }
                         }}
+                        rightSection={
+                            isSessionExpired ? <Icon icon="lock" /> : <Icon icon="arrowRight" />
+                        }
                     >
                         {server.name}
                     </DropdownMenu.Item>
