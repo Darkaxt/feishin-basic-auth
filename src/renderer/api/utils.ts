@@ -9,10 +9,7 @@ const localSettings = isElectron() ? window.api.localSettings : null;
 
 const AUTH_FAILURE_TOAST_ID = 'auth-failure';
 
-export const authenticationFailure = (
-    currentServer: null | ServerListItem,
-    message?: string,
-) => {
+export const authenticationFailure = (currentServer: null | ServerListItem, message?: string) => {
     const store = useAuthStore.getState();
     const serverId = currentServer?.id ?? store.currentServer?.id;
 
