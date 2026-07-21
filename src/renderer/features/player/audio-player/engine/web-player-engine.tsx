@@ -263,11 +263,13 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
         networkRetryCount2.current = 0;
     }, [src1, src2]);
 
-    // When not transitioning, ensure only the active player can play (e.g. after seek/prev during transition)
+    // When not playing, always pause both players — even during a transition
     useEffect(() => {
-        if (isTransitioning) return;
         if (playerStatus !== PlayerStatus.PLAYING) {
             pauseBothPlayers();
+            return;
+        }
+        if (isTransitioning) {
             return;
         }
         if (playerNum === 1) {
