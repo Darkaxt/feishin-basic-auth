@@ -122,7 +122,11 @@
         "back": "返回",
         "openFolder": "開啟資料夾",
         "saveAndClose": "儲存並關閉",
-        "undo": "還原"
+        "undo": "還原",
+        "lastScan": "上次掃描 {{date}}",
+        "scanFolderCount": "{{count}} 個資料夾",
+        "scanItemCount": "{{count}} 個項目",
+        "scanningLibrary": "正在掃描媒體庫…"
     },
     "error": {
         "endpointNotImplementedError": "{{serverType}} 尚未實作端點 {{endpoint}}",

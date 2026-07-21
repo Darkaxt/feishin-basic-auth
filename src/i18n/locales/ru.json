@@ -178,7 +178,11 @@
         "back": "Назад",
         "openFolder": "Открыть папку",
         "saveAndClose": "Сохранить и закрыть",
-        "undo": "Отменить"
+        "undo": "Отменить",
+        "lastScan": "Последнее сканирование {{date}}",
+        "scanFolderCount": "{{count}} папок",
+        "scanItemCount": "{{count}} элементов",
+        "scanningLibrary": "Сканирование библиотеки…"
     },
     "entity": {
         "album_one": "Альбом",
@@ -605,7 +609,7 @@
             "newlyAdded": "Недавно добавленные релизы",
             "title": "$t(common.home)",
             "explore": "Изучить свою библиотеку",
-            "recentlyPlayed": "игралось недавно",
+            "recentlyPlayed": "Недавно прослушано",
             "recentlyReleased": "Новинки",
             "genres": "$t(entity.genre, {\"count\": 2})"
         },

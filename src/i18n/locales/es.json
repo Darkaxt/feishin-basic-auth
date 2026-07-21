@@ -684,7 +684,11 @@
         "back": "Atrás",
         "openFolder": "Abrir carpeta",
         "saveAndClose": "Guardar y cerrar",
-        "undo": "Deshacer"
+        "undo": "Deshacer",
+        "lastScan": "Último escaneo {{date}}",
+        "scanFolderCount": "{{count}} carpetas",
+        "scanItemCount": "{{count}} elementos",
+        "scanningLibrary": "Escaneando biblioteca…"
     },
     "error": {
         "remotePortWarning": "Reiniciar el servidor para aplicar el nuevo puerto",

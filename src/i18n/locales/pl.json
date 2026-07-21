@@ -177,7 +177,11 @@
         "back": "Wstecz",
         "openFolder": "Otwórz folder",
         "saveAndClose": "Zapisz i zamknij",
-        "undo": "Cofnij"
+        "undo": "Cofnij",
+        "lastScan": "Ostatnie skanowanie {{date}}",
+        "scanFolderCount": "{{count}} folderów",
+        "scanItemCount": "{{count}} elementów",
+        "scanningLibrary": "Skanowanie biblioteki…"
     },
     "entity": {
         "genre_one": "Gatunek",
@@ -493,7 +497,8 @@
             "selectMusicFolder": "Wybierz folder muzyki",
             "noMusicFolder": "Nie wybrano folderu muzyki",
             "multipleMusicFolders": "Wybrano {{count}} folderów muzyki",
-            "commandPalette": "Otwórz paletę komend"
+            "commandPalette": "Otwórz paletę komend",
+            "logout": "Wyloguj"
         },
         "contextMenu": {
             "addToPlaylist": "$t(action.addToPlaylist)",

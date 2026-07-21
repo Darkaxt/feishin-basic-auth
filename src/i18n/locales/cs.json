@@ -684,7 +684,11 @@
         "back": "Zpět",
         "openFolder": "Otevřít složku",
         "saveAndClose": "Uložit a zavřít",
-        "undo": "Vrátit"
+        "undo": "Vrátit",
+        "lastScan": "Poslední sken {{date}}",
+        "scanFolderCount": "{{count}} složek",
+        "scanItemCount": "{{count}} položek",
+        "scanningLibrary": "Skenování knihovny…"
     },
     "table": {
         "config": {
