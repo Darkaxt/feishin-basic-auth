@@ -16,8 +16,10 @@ test('pnpm lockfile does not pin vulnerable tmp versions', () => {
     assert.doesNotMatch(lockfile, /^\s{2}tmp@0\.2\.[0-6]:$/mu);
 });
 
-test('pnpm lockfile does not pin vulnerable brace-expansion 5.x versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@5\.0\.[0-5]:$/mu);
+test('pnpm lockfile does not pin vulnerable brace-expansion versions', () => {
+    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@1\.1\.(?:\d|1[0-5]):$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@2\.(?:0\.\d+|1\.[01]):$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@(?:[34]\.\d+\.\d+|5\.0\.[0-6]):$/mu);
 });
 
 test('pnpm lockfile does not pin vulnerable react-router versions', () => {
