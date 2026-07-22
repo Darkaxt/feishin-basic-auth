@@ -2,6 +2,7 @@ import isElectron from 'is-electron';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { toTag } from '/@/renderer/hooks';
 import { Button } from '/@/shared/components/button/button';
 import { Dialog } from '/@/shared/components/dialog/dialog';
 import { Group } from '/@/shared/components/group/group';
@@ -63,7 +64,7 @@ export const UpdateAvailableDialog = () => {
                     </Button>
                     <Button
                         component="a"
-                        href="https://github.com/jeffvli/feishin/releases/latest"
+                        href={`https://github.com/Darkaxt/feishin-basic-auth/releases/tag/${toTag(version)}`}
                         onClick={handleDismiss}
                         rightSection={<Icon icon="externalLink" size="sm" />}
                         size="xs"

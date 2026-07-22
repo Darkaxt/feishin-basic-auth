@@ -178,7 +178,11 @@
         "back": "Назад",
         "openFolder": "Открыть папку",
         "saveAndClose": "Сохранить и закрыть",
-        "undo": "Отменить"
+        "undo": "Отменить",
+        "lastScan": "Последнее сканирование {{date}}",
+        "scanFolderCount": "{{count}} папок",
+        "scanItemCount": "{{count}} элементов",
+        "scanningLibrary": "Сканирование библиотеки…"
     },
     "entity": {
         "album_one": "Альбом",
@@ -605,7 +609,7 @@
             "newlyAdded": "Недавно добавленные релизы",
             "title": "$t(common.home)",
             "explore": "Изучить свою библиотеку",
-            "recentlyPlayed": "игралось недавно",
+            "recentlyPlayed": "Недавно прослушано",
             "recentlyReleased": "Новинки",
             "genres": "$t(entity.genre, {\"count\": 2})"
         },
@@ -1130,9 +1134,7 @@
         "logLevel": "Уровень логирования",
         "logLevel_description": "Устанавливает минимальный уровень логирования для отображения. Режим «Отладка» показывает все записи в журнале, режим «Ошибка» — только ошибки",
         "logLevel_optionDebug": "Отладка",
-        "logLevel_optionError": "Ошибка",
         "logLevel_optionInfo": "Информация",
-        "logLevel_optionWarn": "Предупреждение",
         "mpvExtraParameters": "дополнительные параметры mpv",
         "mpvExtraParameters_description": "Дополнительные аргументы для передачи в mpv",
         "musicbrainz_description": "Показывать ссылки на MusicBrainz на страницах исполнителя/альбома, если идентификатор MusicBrainz существует",

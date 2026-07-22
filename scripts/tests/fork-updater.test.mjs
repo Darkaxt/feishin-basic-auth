@@ -9,6 +9,11 @@ const githubReleasesSourcePath = resolve(
     'src/renderer/hooks/use-github-releases.ts',
 );
 const releaseNotesSourcePath = resolve(process.cwd(), 'src/renderer/release-notes-modal.tsx');
+const updateDialogSourcePath = resolve(process.cwd(), 'src/renderer/update-available-dialog.tsx');
+const updateButtonSourcePath = resolve(
+    process.cwd(),
+    'src/renderer/features/settings/components/update-available-button.tsx',
+);
 
 test('fork updater targets BasicAuth prereleases without allowing downgrades', () => {
     const source = readFileSync(sourcePath, 'utf8');
@@ -22,6 +27,8 @@ test('fork updater targets BasicAuth prereleases without allowing downgrades', (
 test('renderer update checks and release notes target fork prereleases', () => {
     const githubReleasesSource = readFileSync(githubReleasesSourcePath, 'utf8');
     const releaseNotesSource = readFileSync(releaseNotesSourcePath, 'utf8');
+    const updateDialogSource = readFileSync(updateDialogSourcePath, 'utf8');
+    const updateButtonSource = readFileSync(updateButtonSourcePath, 'utf8');
 
     assert.match(
         githubReleasesSource,
@@ -31,4 +38,8 @@ test('renderer update checks and release notes target fork prereleases', () => {
     assert.doesNotMatch(githubReleasesSource, /repos\/jeffvli\/feishin/u);
     assert.match(releaseNotesSource, /github\.com\/Darkaxt\/feishin-basic-auth/u);
     assert.doesNotMatch(releaseNotesSource, /github\.com\/jeffvli\/feishin/u);
+    assert.match(updateDialogSource, /github\.com\/Darkaxt\/feishin-basic-auth/u);
+    assert.doesNotMatch(updateDialogSource, /github\.com\/jeffvli\/feishin/u);
+    assert.match(updateButtonSource, /github\.com\/Darkaxt\/feishin-basic-auth/u);
+    assert.doesNotMatch(updateButtonSource, /github\.com\/jeffvli\/feishin/u);
 });

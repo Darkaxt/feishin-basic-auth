@@ -1,7 +1,9 @@
 import { strict as assert } from 'node:assert';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const proxyAuth = await import('../../src/shared/utils/proxy-auth.ts');
+const diagnostics = await import('../../src/shared/utils/sanitize-for-diagnostics.ts');
 
 test('sanitizeServerUrl strips URL credentials and preserves the server URL', () => {
     const result = proxyAuth.sanitizeServerUrl('https://proxy-user:p%40ss@example.test/music/');
@@ -53,4 +55,32 @@ test('redactProxyAuthFromText removes Basic headers and URL credentials from dia
         ),
         'Authorization: Basic <redacted> https://<proxy-auth>@example.test/rest',
     );
+});
+
+test('diagnostic sanitizer redacts API keys and credentials embedded in strings', () => {
+    assert.deepEqual(
+        diagnostics.sanitizeForDiagnostics({
+            lidaClipsApiKey: 'clips-secret',
+            nested: {
+                message:
+                    'Authorization: Basic cHJveHk6c2VjcmV0 https://proxy:secret@example.test/rest',
+            },
+        }),
+        {
+            lidaClipsApiKey: '[Redacted]',
+            nested: {
+                message: 'Authorization: Basic <redacted> https://<proxy-auth>@example.test/rest',
+            },
+        },
+    );
+});
+
+test('main and renderer loggers sanitize metadata before writing or forwarding it', async () => {
+    const [mainLogger, rendererLogger] = await Promise.all([
+        readFile('src/main/logger.ts', 'utf8'),
+        readFile('src/renderer/utils/logger.ts', 'utf8'),
+    ]);
+
+    assert.match(mainLogger, /sanitizeForDiagnostics\(item\)/);
+    assert.match(rendererLogger, /sanitizeForDiagnostics\(meta\)/);
 });

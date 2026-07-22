@@ -352,11 +352,9 @@
         "autoDJ_timing_description": "El número de canciones restantes en la cola antes de que DJ automático se dispare",
         "autoDJ_timing": "Tiempo",
         "logLevel": "Nivel de registro",
-        "logLevel_description": "Establece el mínimo nivel de registro a mostrar. Depuración muestra todos los registros, error solo muestra errores",
+        "logLevel_description": "Establece el nivel de registro mínimo a mostrar",
         "logLevel_optionDebug": "Depuración",
-        "logLevel_optionError": "Error",
         "logLevel_optionInfo": "Información",
-        "logLevel_optionWarn": "Advertencia",
         "useThemeAccentColor": "Usar color de acentuación de tema",
         "useThemeAccentColor_description": "Usa el color principal definido en el tema seleccionado en lugar del color de acentuación personalizado",
         "artistRadioCount_description": "Establece el número de canciones a buscar para la radio de artista y de pista",
@@ -504,7 +502,10 @@
         "microtonalPitchControls": "Controles de tono microtonales",
         "microtonalPitchControls_description": "Añade más controles de tono para moverse entre semitonos",
         "hotkey_playbackNextAlbum": "Siguiente álbum",
-        "hotkey_playbackPreviousAlbum": "Álbum anterior"
+        "hotkey_playbackPreviousAlbum": "Álbum anterior",
+        "logLevel_optionDebugDescription": "Incluye información, más información de depuración desarrollada y respuestas redactadas de las API",
+        "logLevel_optionInfoDescription": "Incluye información, advertencias y errores",
+        "exportDiagnostics": "Exportar diagnósticos"
     },
     "action": {
         "editPlaylist": "Editar $t(entity.playlist, {\"count\": 1})",
@@ -684,7 +685,11 @@
         "back": "Atrás",
         "openFolder": "Abrir carpeta",
         "saveAndClose": "Guardar y cerrar",
-        "undo": "Deshacer"
+        "undo": "Deshacer",
+        "lastScan": "Último escaneo {{date}}",
+        "scanFolderCount": "{{count}} carpetas",
+        "scanItemCount": "{{count}} elementos",
+        "scanningLibrary": "Escaneando biblioteca…"
     },
     "error": {
         "remotePortWarning": "Reiniciar el servidor para aplicar el nuevo puerto",

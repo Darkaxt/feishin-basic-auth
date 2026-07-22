@@ -21,7 +21,6 @@ import {
     Tray,
 } from 'electron';
 import electronLocalShortcut from 'electron-localshortcut';
-import log from 'electron-log/main';
 import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
 import { access, constants } from 'fs';
 import path, { join } from 'path';
@@ -33,9 +32,10 @@ import { installProxyAuthInterceptor } from './features/core/proxy-auth';
 import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
 import { canHandleVisualizerDisplayMedia } from './features/core/visualizer';
+import log, { autoUpdaterLogInterface } from './logger';
 import MenuBuilder, { MenuPlaybackState } from './menu';
 import './features';
-import { autoUpdaterLogInterface, createLog, hotkeyToElectronAccelerator } from './utils';
+import { hotkeyToElectronAccelerator } from './utils';
 
 import { disableAutoUpdates, isLinux, isMacOS, isWindows } from '/@/main/env';
 import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
@@ -64,12 +64,20 @@ type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoU
 class AppUpdater {
     constructor() {
         const effectiveChannel = store.get('release_channel') as string;
-        console.log('Effective update channel:', effectiveChannel);
+        log.info('Effective update channel:', effectiveChannel);
         if (effectiveChannel === 'alpha') {
             checkAllChannelsAndGetBest().then(({ result, updater: updaterInstance }) => {
+                attachUpdaterMilestoneLogs(updaterInstance);
+
                 if (!result?.isUpdateAvailable) {
+                    log.info('Updater check complete', { available: false });
                     return;
                 }
+
+                log.info('Updater check complete', {
+                    available: true,
+                    version: result.updateInfo.version,
+                });
 
                 updaterInstance.autoInstallOnAppQuit = true;
                 updaterInstance.autoRunAppAfterInstall = true;
@@ -79,6 +87,7 @@ class AppUpdater {
                         result.updateInfo.version,
                     );
                 } else {
+                    log.info('Updater download starting', { version: result.updateInfo.version });
                     updaterInstance.autoDownload = true;
                     updaterInstance.checkForUpdatesAndNotify();
                 }
@@ -86,24 +95,63 @@ class AppUpdater {
             return;
         }
 
-        configureAndGetUpdater();
+        const updater = configureAndGetUpdater();
+        attachUpdaterMilestoneLogs(updater);
+
         if (isMacOS()) {
             autoUpdater.autoDownload = false;
             autoUpdater
                 .checkForUpdates()
                 .then((result) => {
                     if (result?.isUpdateAvailable) {
+                        log.info('Updater check complete', {
+                            available: true,
+                            version: result.updateInfo.version,
+                        });
                         getMainWindow()?.webContents.send(
                             'update-available',
                             result.updateInfo.version,
                         );
+                    } else {
+                        log.info('Updater check complete', { available: false });
                     }
                 })
-                .catch((err) => console.error('Check for updates failed', err));
+                .catch((err) => log.error('Check for updates failed', err));
         } else {
             autoUpdater.checkForUpdatesAndNotify();
         }
     }
+}
+
+function attachUpdaterMilestoneLogs(updater: UpdaterInstance): void {
+    let downloadStarted = false;
+
+    updater.on('checking-for-update', () => {
+        log.info('Updater checking for update');
+    });
+
+    updater.on('update-available', (info) => {
+        log.info('Updater update available', { version: info.version });
+    });
+
+    updater.on('update-not-available', (info) => {
+        log.info('Updater update not available', { version: info.version });
+    });
+
+    updater.on('download-progress', () => {
+        if (!downloadStarted) {
+            downloadStarted = true;
+            log.info('Updater download starting');
+        }
+    });
+
+    updater.on('update-downloaded', (info) => {
+        log.info('Updater download complete', { version: info.version });
+    });
+
+    updater.on('error', (error) => {
+        log.error('Updater error', error);
+    });
 }
 
 // When release channel is alpha, check alpha and latest for updates and return
@@ -123,7 +171,7 @@ async function checkAllChannelsAndGetBest(): Promise<{
     const alphaUpdater = createAlphaUpdaterInstance({ probeOnly: true });
 
     try {
-        console.log('Checking for updates on alpha channel');
+        log.info('Checking for updates on alpha channel');
         const alphaResult = await alphaUpdater.checkForUpdates();
         if (
             alphaResult?.updateInfo?.version &&
@@ -139,7 +187,7 @@ async function checkAllChannelsAndGetBest(): Promise<{
 
     try {
         const latestUpdater = createGithubUpdaterInstance('latest', { probeOnly: true });
-        console.log('Checking for updates on latest channel (GitHub)');
+        log.info('Checking for updates on latest channel (GitHub)');
         const latestResult = await latestUpdater.checkForUpdates();
         if (
             latestResult?.updateInfo?.version &&
@@ -175,13 +223,13 @@ function configureAndGetUpdater(): UpdaterInstance {
     let releaseChannel = store.get('release_channel');
     const isNotConfigured = !releaseChannel;
 
-    console.log('Release channel:', releaseChannel);
-    console.log('Is beta version:', isBetaVersion);
-    console.log('Is alpha version:', isAlphaVersion);
-    console.log('Is not configured:', isNotConfigured);
+    log.info('Release channel:', releaseChannel);
+    log.info('Is beta version:', isBetaVersion);
+    log.info('Is alpha version:', isAlphaVersion);
+    log.info('Is not configured:', isNotConfigured);
 
     if (isNotConfigured) {
-        console.log('Release channel not configured, setting default channel');
+        log.info('Release channel not configured, setting default channel');
         const defaultChannel = isAlphaVersion ? 'alpha' : isBetaVersion ? 'beta' : 'latest';
         store.set('release_channel', defaultChannel);
         releaseChannel = defaultChannel;
@@ -190,11 +238,9 @@ function configureAndGetUpdater(): UpdaterInstance {
     const effectiveChannel = store.get('release_channel') as string;
 
     if (effectiveChannel === 'alpha') {
-        log.transports.file.level = 'info';
         return createAlphaUpdaterInstance();
     }
 
-    log.transports.file.level = 'info';
     autoUpdater.logger = autoUpdaterLogInterface;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.autoRunAppAfterInstall = true;
@@ -218,7 +264,6 @@ function configureAndGetUpdater(): UpdaterInstance {
  * Used when checking multiple channels or when the winning channel is beta/latest.
  */
 function configureAutoUpdaterForChannel(channel: 'beta' | 'latest'): void {
-    log.transports.file.level = 'info';
     autoUpdater.logger = autoUpdaterLogInterface;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.autoRunAppAfterInstall = true;
@@ -298,7 +343,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 process.on('uncaughtException', (error: any) => {
-    console.error('Error in main process', error);
+    log.error('Error in main process', error);
 });
 
 if (store.get('ignore_ssl')) {
@@ -322,6 +367,13 @@ let currentPrivateMode = false;
 let currentRepeatMode: PlayerRepeat = PlayerRepeat.NONE;
 let currentSidebarCollapsed = false;
 let currentShuffleEnabled = false;
+
+app.on('before-quit', () => {
+    if (isMacOS()) {
+        forceQuit = true;
+    }
+    log.info('App quitting', { reason: exitFromTray ? 'tray' : 'before-quit' });
+});
 let playbackMenuAccelerators: MenuPlaybackState['accelerators'] = {};
 let inputFocused = false;
 
@@ -359,10 +411,7 @@ const installExtensions = async () => {
                 { forceDownload },
             )
             .then((installedExtensions) => {
-                createLog({
-                    message: `Installed extension: ${installedExtensions}`,
-                    type: 'info',
-                });
+                log.info(`Installed extension: ${installedExtensions}`);
             })
             .catch(() => {
                 // Ignore
@@ -544,7 +593,7 @@ const validateUrl = (url: string): boolean => {
 
 async function createWindow(first = true): Promise<void> {
     if (isDevelopment) {
-        await installExtensions().catch(console.log);
+        await installExtensions().catch((error) => log.error(error));
     }
 
     const nativeFrame = store.get('window_window_bar_style', 'linux') === 'linux';
@@ -638,6 +687,7 @@ async function createWindow(first = true): Promise<void> {
     });
 
     ipcMain.on('window-quit', () => {
+        log.info('App quitting', { reason: 'window-quit' });
         shutdownServer();
         mainWindow?.close();
         app.exit();
@@ -703,9 +753,23 @@ async function createWindow(first = true): Promise<void> {
             mainWindow.show();
             createWinThumbarButtons();
         }
+
+        log.info('Main window created', { startMinimized: startWindowMinimized && first });
+    });
+
+    mainWindow.webContents.on('render-process-gone', (_event, details) => {
+        log.error('Renderer process gone', {
+            exitCode: details.exitCode,
+            reason: details.reason,
+        });
+    });
+
+    mainWindow.webContents.on('unresponsive', () => {
+        log.error('Renderer process unresponsive');
     });
 
     mainWindow.on('closed', () => {
+        log.info('Main window closed');
         ipcMain.removeHandler('window-clear-cache');
         ipcMain.removeHandler('app-check-for-updates');
         mainWindow = null;
@@ -718,10 +782,12 @@ async function createWindow(first = true): Promise<void> {
 
         if (!exitFromTray && store.get('window_exit_to_tray')) {
             event.preventDefault();
+            log.info('Main window hidden to tray');
             mainWindow?.hide();
         }
 
         if (forceQuit) {
+            log.info('App quitting', { reason: 'forceQuit' });
             app.exit();
         }
     });
@@ -729,18 +795,13 @@ async function createWindow(first = true): Promise<void> {
     (mainWindow as any).on('minimize', (event: any) => {
         if (store.get('window_minimize_to_tray') === true) {
             event.preventDefault();
+            log.info('Main window minimized to tray');
             mainWindow?.hide();
         }
     });
 
     if (isWindows()) {
         app.setAppUserModelId('eu.remaxku.feishin.basicauth');
-    }
-
-    if (isMacOS()) {
-        app.on('before-quit', () => {
-            forceQuit = true;
-        });
     }
 
     menuBuilder = new MenuBuilder(mainWindow);
@@ -952,19 +1013,6 @@ ipcMain.on(
     },
 );
 
-ipcMain.on(
-    'logger',
-    (
-        _event,
-        data: {
-            message: string;
-            type: 'debug' | 'error' | 'info' | 'success' | 'verbose' | 'warning';
-        },
-    ) => {
-        createLog(data);
-    },
-);
-
 ipcMain.handle('power-save-blocker-start', (_event, { full }: { full: boolean }) => {
     if (powerSaveBlockerId !== null) {
         return powerSaveBlockerId;
@@ -1047,6 +1095,15 @@ if (!singleInstance) {
 
     app.whenReady()
         .then(() => {
+            log.info('App ready', {
+                arch: process.arch,
+                electron: process.versions.electron,
+                ignoreCors: !!store.get('ignore_cors'),
+                ignoreSsl: !!store.get('ignore_ssl'),
+                platform: process.platform,
+                version: packageJson.version,
+            });
+
             protocol.handle('feishin', async () => {
                 const filePath = store.get('local_font_path');
                 if (typeof filePath !== 'string') {
@@ -1117,7 +1174,7 @@ if (!singleInstance) {
                 }
             });
         })
-        .catch(console.log);
+        .catch((error) => log.error(error));
 }
 
 // Register 'open-item' handler globally, ensuring it is only registered once
