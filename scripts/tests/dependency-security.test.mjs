@@ -5,7 +5,7 @@ import test from 'node:test';
 const lockfile = readFileSync(new URL('../../pnpm-lock.yaml', import.meta.url), 'utf8');
 
 test('pnpm lockfile does not pin vulnerable fast-uri versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}fast-uri@3\.1\.[01]:$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}fast-uri@3\.1\.[0-3]:$/mu);
 });
 
 test('pnpm lockfile does not pin vulnerable fast-xml-builder versions', () => {
@@ -28,7 +28,7 @@ test('pnpm lockfile does not pin vulnerable react-router versions', () => {
 });
 
 test('pnpm lockfile does not pin vulnerable dompurify versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}dompurify@3\.4\.(?:[0-9]|10):$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}dompurify@3\.4\.(?:[0-9]|1[01]):$/mu);
 });
 
 test('pnpm lockfile does not pin vulnerable esbuild versions', () => {
@@ -37,7 +37,18 @@ test('pnpm lockfile does not pin vulnerable esbuild versions', () => {
 });
 
 test('pnpm lockfile does not pin vulnerable shell-quote versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}shell-quote@1\.(?:[0-7]\.|8\.[0-3]:)/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}shell-quote@1\.(?:[0-7]\.\d+|8\.[0-4]):$/mu);
+});
+
+test('pnpm lockfile does not pin vulnerable js-yaml versions', () => {
+    assert.doesNotMatch(lockfile, /^\s{2}js-yaml@4\.[0-2]\.\d+:$/mu);
+});
+
+test('pnpm lockfile does not pin vulnerable tar versions', () => {
+    assert.doesNotMatch(
+        lockfile,
+        /^\s{2}tar@(?:[0-6]\.\d+\.\d+|7\.[0-4]\.\d+|7\.5\.(?:\d|1[0-8])):$/mu,
+    );
 });
 
 test('pnpm lockfile does not pin vulnerable undici versions', () => {
