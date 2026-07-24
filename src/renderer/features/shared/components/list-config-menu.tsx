@@ -266,10 +266,13 @@ export const ListConfigTable = ({
                             </Table.Tr>
                         );
                     }
+
                     return (
                         <Table.Tr key={option.id}>
                             <Table.Th>{option.label}</Table.Th>
-                            <Table.Td>{option.component}</Table.Td>
+                            <Table.Td>
+                                <div className={styles.control}>{option.component}</div>
+                            </Table.Td>
                         </Table.Tr>
                     );
                 })}

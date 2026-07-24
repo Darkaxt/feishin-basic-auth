@@ -110,8 +110,9 @@ export const PlayerConfig = () => {
                 label: t('player.playbackSpeed'),
             },
             {
-                component: !preservePitch ? <PitchControls /> : <></>,
+                component: <PitchControls />,
                 id: 'pitchControls',
+                isHidden: preservePitch,
                 label: '',
             },
             {
@@ -219,7 +220,7 @@ export const PlayerConfig = () => {
                     variant="subtle"
                 />
             </Popover.Target>
-            <Popover.Dropdown maw={500} miw={320} onClick={(e) => e.stopPropagation()} p="sm">
+            <Popover.Dropdown maw={720} miw={540} onClick={(e) => e.stopPropagation()} p="sm">
                 <Stack gap="sm">
                     <Paper p="md" radius="md">
                         <ListConfigTable options={audioOptions} />
@@ -437,12 +438,8 @@ export const PlaybackSpeedSlider = () => {
             onChange={setSpeed}
             onDoubleClick={() => setSpeed(1)}
             step={0.01}
-            styles={{
-                markLabel: {},
-                root: {},
-            }}
             value={speed}
-            w="240px"
+            w="320px"
         />
     );
 };
@@ -467,13 +464,13 @@ export const PitchControls = () => {
     };
 
     return (
-        <Group gap={microtonal ? 'xs' : 'md'} my="sm" w="100%" wrap="nowrap">
+        <Group gap={microtonal ? 'xs' : 'md'} my="md" w="100%" wrap="nowrap">
             <Button
                 aria-label="-1 semitone"
                 fullWidth
                 fw={400}
                 onClick={() => adjustMusicalSpeed(-1)}
-                size="compact-sm"
+                size="compact-xs"
             >
                 -1st
             </Button>
@@ -483,7 +480,7 @@ export const PitchControls = () => {
                     fullWidth
                     fw={400}
                     onClick={() => adjustMusicalSpeed(-0.1)}
-                    size="compact-sm"
+                    size="compact-xs"
                 >
                     -10ct
                 </Button>
@@ -499,7 +496,7 @@ export const PitchControls = () => {
                     fullWidth
                     fw={400}
                     onClick={() => adjustMusicalSpeed(0.1)}
-                    size="compact-sm"
+                    size="compact-xs"
                 >
                     +10ct
                 </Button>
@@ -509,7 +506,7 @@ export const PitchControls = () => {
                 fullWidth
                 fw={400}
                 onClick={() => adjustMusicalSpeed(1)}
-                size="compact-sm"
+                size="compact-xs"
             >
                 +1st
             </Button>
