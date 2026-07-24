@@ -628,7 +628,8 @@
             "noArtwork": "Kaanepilti pole",
             "multipleValues": "(Mitme väärtusega)",
             "multipleArtworks": "Mitu kaanepilti",
-            "writePartialFailure": "{{count}} faili salvestamine nurjus"
+            "writePartialFailure": "{{count}} faili salvestamine nurjus",
+            "noLocalSongs": "Kohalike failiteedega laule ei leitud"
         },
         "playlist": {
             "reorder": "Ümberreastamine on lubatud vaid ID järgi sorteerimisel"
