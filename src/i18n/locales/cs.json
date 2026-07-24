@@ -505,7 +505,13 @@
         "hotkey_playbackPreviousAlbum": "Předchozí album",
         "logLevel_optionDebugDescription": "Zahrnuje informace, plus podrobné ladicí informace a cenzurované odpovědi API",
         "logLevel_optionInfoDescription": "Zahrnuje informace, varování a chyby",
-        "exportDiagnostics": "Exportovat diagnostiku"
+        "exportDiagnostics": "Exportovat diagnostiku",
+        "autoDJ_allowDuplicates": "Povolit duplicity",
+        "autoDJ_onlySimilar": "Pouze podobné",
+        "showQueueInSidebar": "Zobrazit frontu přehrávání v postranním panelu přehrávače",
+        "showQueueInSidebar_description": "Do postranního panelu přehrávače bude přidán panel zobrazující frontu přehrávání",
+        "autoDJ_allowDuplicates_description": "Povolit automatickému DJ přidávat znovu skladby nebo alba, která již jsou ve frontě přehrávání",
+        "autoDJ_onlySimilar_description": "Přidávat pouze položky, které jsou podobné ke spuštěné skladbě. Počet položek je maximální počet položek k přidání, namísto vyplnění limitu jinými zdroji"
     },
     "action": {
         "editPlaylist": "Upravit $t(entity.playlist, {\"count\": 1})",

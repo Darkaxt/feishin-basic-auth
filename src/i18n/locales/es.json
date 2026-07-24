@@ -505,7 +505,13 @@
         "hotkey_playbackPreviousAlbum": "Álbum anterior",
         "logLevel_optionDebugDescription": "Incluye información, más información de depuración desarrollada y respuestas redactadas de las API",
         "logLevel_optionInfoDescription": "Incluye información, advertencias y errores",
-        "exportDiagnostics": "Exportar diagnósticos"
+        "exportDiagnostics": "Exportar diagnósticos",
+        "autoDJ_allowDuplicates": "Permitir duplicados",
+        "autoDJ_allowDuplicates_description": "Permite que las canciones o álbumes que ya están en cola sean añadidos de nuevo por DJ Automático",
+        "autoDJ_onlySimilar": "Solo similares",
+        "autoDJ_onlySimilar_description": "Añade solamente elementos que sean similares a la canción que lo activó. El número de elementos es tratado como una cantidad máxima de elementos a añadir en lugar de completarse por otras fuentes hasta alcanzar el límite",
+        "showQueueInSidebar": "Mostrar cola de reproducción en la barra lateral del reproductor",
+        "showQueueInSidebar_description": "Se añadirá un panel a la barra lateral del reproductor que muestra la cola de reproducción"
     },
     "action": {
         "editPlaylist": "Editar $t(entity.playlist, {\"count\": 1})",
