@@ -912,7 +912,11 @@
         "hotkey_playbackPreviousAlbum": "上一張專輯",
         "logLevel_optionDebugDescription": "包含 info，另外提供詳細的 debug 資訊與已遮蔽的 API 回應",
         "logLevel_optionInfoDescription": "包含 info、warnings 以及 errors",
-        "exportDiagnostics": "匯出診斷"
+        "exportDiagnostics": "匯出診斷",
+        "autoDJ_allowDuplicates": "允許重複",
+        "autoDJ_allowDuplicates_description": "允許 Auto DJ 再次新增已在佇列中的歌曲或專輯",
+        "autoDJ_onlySimilar": "只有相似",
+        "autoDJ_onlySimilar_description": "僅新增與觸發歌曲相似的項目。項目數量視為新增項目的上限，而非透過其他來源填滿至上限"
     },
     "table": {
         "config": {
