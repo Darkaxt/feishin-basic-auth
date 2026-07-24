@@ -194,58 +194,111 @@ const AutoDJButton = () => {
                         value={settings.mode}
                         w="100%"
                     />
-                    <Select
-                        comboboxProps={{ withinPortal: false }}
-                        data={strategySelectData}
-                        description={strategyLabels.description}
-                        label={strategyLabels.title}
-                        onChange={(value) => {
-                            if (!value) return;
-                            setSettings({
-                                autoDJ:
-                                    settings.mode === AUTO_DJ_MODE.ALBUMS
-                                        ? { albumStrategy: value as AutoDJStrategy }
-                                        : { songStrategy: value as AutoDJStrategy },
-                            });
-                        }}
-                        size="md"
-                        value={strategyValue}
-                        w="100%"
-                    />
-                    <NumberInput
-                        aria-label={itemLabels.title}
-                        description={itemLabels.description}
-                        hideControls={false}
-                        label={itemLabels.title}
-                        max={50}
-                        min={1}
-                        onChange={(e) =>
-                            setSettings({
-                                autoDJ: {
-                                    itemCount: Number(e),
-                                },
-                            })
-                        }
-                        size="md"
-                        value={Number(settings.itemCount)}
-                    />
-                    <NumberInput
-                        aria-label={t('setting.autoDJ_timing')}
-                        description={t('setting.autoDJ_timing_description')}
-                        hideControls={false}
-                        label={t('setting.autoDJ_timing')}
-                        max={5}
-                        min={1}
-                        onChange={(e) =>
-                            setSettings({
-                                autoDJ: {
-                                    timing: Number(e),
-                                },
-                            })
-                        }
-                        size="md"
-                        value={Number(settings.timing)}
-                    />
+                    <Paper p="md" radius="md">
+                        <Select
+                            comboboxProps={{ withinPortal: false }}
+                            data={strategySelectData}
+                            description={strategyLabels.description}
+                            label={strategyLabels.title}
+                            onChange={(value) => {
+                                if (!value) return;
+                                setSettings({
+                                    autoDJ:
+                                        settings.mode === AUTO_DJ_MODE.ALBUMS
+                                            ? { albumStrategy: value as AutoDJStrategy }
+                                            : { songStrategy: value as AutoDJStrategy },
+                                });
+                            }}
+                            size="sm"
+                            value={strategyValue}
+                            variant="filled"
+                            w="100%"
+                        />
+                    </Paper>
+                    <Paper p="md" radius="md">
+                        <NumberInput
+                            aria-label={itemLabels.title}
+                            description={itemLabels.description}
+                            hideControls={false}
+                            label={itemLabels.title}
+                            max={50}
+                            min={1}
+                            onChange={(e) =>
+                                setSettings({
+                                    autoDJ: {
+                                        itemCount: Number(e),
+                                    },
+                                })
+                            }
+                            size="sm"
+                            value={Number(settings.itemCount)}
+                            variant="filled"
+                        />
+                    </Paper>
+                    <Paper p="md" radius="md">
+                        <NumberInput
+                            aria-label={t('setting.autoDJ_timing')}
+                            description={t('setting.autoDJ_timing_description')}
+                            hideControls={false}
+                            label={t('setting.autoDJ_timing')}
+                            max={5}
+                            min={1}
+                            onChange={(e) =>
+                                setSettings({
+                                    autoDJ: {
+                                        timing: Number(e),
+                                    },
+                                })
+                            }
+                            size="sm"
+                            value={Number(settings.timing)}
+                            variant="filled"
+                        />
+                    </Paper>
+                    <Paper p="md" radius="md">
+                        <Group align="center" gap="sm" justify="space-between" wrap="nowrap">
+                            <Stack gap="xs" style={{ flex: 1, minWidth: 0 }}>
+                                <Text fw={600} isNoSelect size="sm">
+                                    {t('setting.autoDJ_allowDuplicates')}
+                                </Text>
+                                <Text isMuted isNoSelect size="xs">
+                                    {t('setting.autoDJ_allowDuplicates_description')}
+                                </Text>
+                            </Stack>
+                            <Switch
+                                checked={settings.allowDuplicates}
+                                onChange={(e) =>
+                                    setSettings({
+                                        autoDJ: {
+                                            allowDuplicates: e.currentTarget.checked,
+                                        },
+                                    })
+                                }
+                            />
+                        </Group>
+                    </Paper>
+                    <Paper p="md" radius="md">
+                        <Group align="center" gap="sm" justify="space-between" wrap="nowrap">
+                            <Stack gap="xs" style={{ flex: 1, minWidth: 0 }}>
+                                <Text fw={600} isNoSelect size="sm">
+                                    {t('setting.autoDJ_onlySimilar')}
+                                </Text>
+                                <Text isMuted isNoSelect size="xs">
+                                    {t('setting.autoDJ_onlySimilar_description')}
+                                </Text>
+                            </Stack>
+                            <Switch
+                                checked={settings.onlySimilar}
+                                onChange={(e) =>
+                                    setSettings({
+                                        autoDJ: {
+                                            onlySimilar: e.currentTarget.checked,
+                                        },
+                                    })
+                                }
+                            />
+                        </Group>
+                    </Paper>
                 </Stack>
             </Popover.Dropdown>
         </Popover>
