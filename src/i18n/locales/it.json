@@ -544,21 +544,21 @@
     "page": {
         "sidebar": {
             "nowPlaying": "In riproduzione",
-            "playlists": "$t(entity.playlist, {\"count\": 2})",
-            "search": "$t(common.search)",
-            "tracks": "$t(entity.track, {\"count\": 2})",
-            "albums": "$t(entity.album, {\"count\": 2})",
-            "genres": "$t(entity.genre, {\"count\": 2})",
-            "folders": "$t(entity.folder, {\"count\": 2})",
-            "settings": "$t(common.setting, {\"count\": 2})",
-            "home": "$t(common.home)",
-            "artists": "$t(entity.artist, {\"count\": 2})",
-            "albumArtists": "$t(entity.albumArtist, {\"count\": 2})",
+            "playlists": "Playlist",
+            "search": "Cerca",
+            "tracks": "Tracce",
+            "albums": "Album",
+            "genres": "Generi",
+            "folders": "Cartelle",
+            "settings": "Impostazioni",
+            "home": "Home",
+            "artists": "Artisti",
+            "albumArtists": "Artisti Album",
             "myLibrary": "La mia libreria",
-            "shared": "$t(entity.playlist, {\"count\": 2}) condivise",
+            "shared": "Playlist condivise",
             "collections": "Collezioni",
-            "favorites": "$t(entity.favorite, {\"count\": 2})",
-            "radio": "$t(entity.radioStation, {\"count\": 2})"
+            "favorites": "Preferiti",
+            "radio": "Stazioni radio"
         },
         "fullscreenPlayer": {
             "config": {
