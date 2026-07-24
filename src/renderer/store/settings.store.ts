@@ -538,6 +538,7 @@ export const GeneralSettingsSchema = z.object({
     qobuz: z.boolean(),
     resume: z.boolean(),
     showLyricsInSidebar: z.boolean(),
+    showQueueInSidebar: z.boolean(),
     showRatings: z.boolean(),
     showVisualizerInSidebar: z.boolean(),
     sidebarCollapsedNavigation: z.boolean(),
@@ -1314,6 +1315,7 @@ const initialState: SettingsState = {
         qobuz: true,
         resume: true,
         showLyricsInSidebar: true,
+        showQueueInSidebar: true,
         showRatings: true,
         showVisualizerInSidebar: true,
         sidebarCollapsedNavigation: true,
@@ -2725,10 +2727,16 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     }
                 }
 
+                if (version < 33) {
+                    if (state.general.showQueueInSidebar === undefined) {
+                        state.general.showQueueInSidebar = true;
+                    }
+                }
+
                 return persistedState;
             },
             name: 'store_settings',
-            version: 32,
+            version: 33,
         },
     ),
 );
@@ -3001,6 +3009,9 @@ export const useCombinedLyricsAndVisualizer = () =>
 
 export const useShowLyricsInSidebar = () =>
     useSettingsStore((state) => state.general.showLyricsInSidebar, shallow);
+
+export const useShowQueueInSidebar = () =>
+    useSettingsStore((state) => state.general.showQueueInSidebar, shallow);
 
 export const useShowVisualizerInSidebar = () =>
     useSettingsStore((state) => state.general.showVisualizerInSidebar, shallow);

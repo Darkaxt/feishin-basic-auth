@@ -1085,6 +1085,8 @@
         "preferLocalLyrics": "Prefer local lyrics",
         "showLyricsInSidebar_description": "A panel will be added to the attached play queue that displays the lyrics",
         "showLyricsInSidebar": "Show lyrics in player sidebar",
+        "showQueueInSidebar_description": "A panel will be added to the player sidebar that displays the play queue",
+        "showQueueInSidebar": "Show play queue in player sidebar",
         "showRatings_description": "Controls if the star ratings feature shows up in the interface",
         "showRatings": "Show star ratings",
         "blurExplicitImages": "Blur explicit images",

@@ -1,0 +1,17 @@
+.table {
+    border-radius: 1rem;
+}
+
+.th {
+    width: 50%;
+    padding: var(--theme-spacing-md) var(--theme-spacing-md) var(--theme-spacing-md) 0;
+    background-color: initial;
+}
+
+.td {
+    padding: 0;
+}
+
+.divider-cell {
+    padding: var(--theme-spacing-md) 0;
+}
