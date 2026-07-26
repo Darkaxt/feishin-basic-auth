@@ -537,6 +537,7 @@ export const GeneralSettingsSchema = z.object({
     primaryShade: z.number().min(0).max(9),
     qobuz: z.boolean(),
     resume: z.boolean(),
+    showFavorites: z.boolean(),
     showLyricsInSidebar: z.boolean(),
     showQueueInSidebar: z.boolean(),
     showRatings: z.boolean(),
@@ -991,6 +992,7 @@ export type DataGridProps = {
 
 export type DataTableProps = z.infer<typeof ItemTableListPropsSchema>;
 export type ItemDetailListProps = z.infer<typeof ItemDetailListPropsSchema>;
+
 export type ItemListSettings = {
     detail?: ItemDetailListProps;
     display: ListDisplayType;
@@ -1005,7 +1007,6 @@ export type PlayerFilter = z.infer<typeof PlayerFilterSchema>;
 export type PlayerFilterField = z.infer<typeof PlayerFilterFieldSchema>;
 
 export type PlayerFilterOperator = z.infer<typeof PlayerFilterOperatorSchema>;
-
 export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
     actions: {
         addCollection: (collection: SavedCollection) => void;
@@ -1031,6 +1032,7 @@ export interface SettingsSlice extends z.infer<typeof SettingsStateSchema> {
     };
 }
 export interface SettingsState extends z.infer<typeof SettingsStateSchema> {}
+
 export type SidebarItemType = z.infer<typeof SidebarItemTypeSchema>;
 
 export type SideQueueLayout = z.infer<typeof SideQueueLayoutSchema>;
@@ -1314,6 +1316,7 @@ const initialState: SettingsState = {
         primaryShade: 6,
         qobuz: true,
         resume: true,
+        showFavorites: true,
         showLyricsInSidebar: true,
         showQueueInSidebar: true,
         showRatings: true,
@@ -2936,6 +2939,9 @@ export const usePlayerbarOpenDrawer = () =>
     useSettingsStore((state) => state.general.playerbarOpenDrawer, shallow);
 
 export const useShowRatings = () => useSettingsStore((state) => state.general.showRatings, shallow);
+
+export const useShowFavorites = () =>
+    useSettingsStore((state) => state.general.showFavorites, shallow);
 
 export const useArtistRadioCount = () =>
     useSettingsStore((state) => state.general.artistRadioCount, shallow);
