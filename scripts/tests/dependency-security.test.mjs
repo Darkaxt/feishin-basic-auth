@@ -17,14 +17,18 @@ test('pnpm lockfile does not pin vulnerable tmp versions', () => {
 });
 
 test('pnpm lockfile does not pin vulnerable brace-expansion versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@1\.1\.(?:\d|1[0-5]):$/mu);
-    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@2\.(?:0\.\d+|1\.[01]):$/mu);
-    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@(?:[34]\.\d+\.\d+|5\.0\.[0-6]):$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}brace-expansion@(?:[0-4]\.\d+\.\d+|5\.0\.[0-7]):$/mu);
 });
 
 test('pnpm lockfile does not pin vulnerable react-router versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}react-router@7\.(?:[0-9]|1[0-4])\./mu);
-    assert.doesNotMatch(lockfile, /^\s{2}react-router@7\.15\.0:/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}react-router@(?:[0-7]\.\d+\.\d+|8\.[0-2]\.\d+):/mu);
+});
+
+test('pnpm lockfile does not pin vulnerable postcss versions', () => {
+    assert.doesNotMatch(
+        lockfile,
+        /^\s{2}postcss@(?:[0-7]\.\d+\.\d+|8\.[0-4]\.\d+|8\.5\.(?:\d|1[0-7])):$/mu,
+    );
 });
 
 test('pnpm lockfile does not pin vulnerable dompurify versions', () => {
@@ -47,7 +51,7 @@ test('pnpm lockfile does not pin vulnerable js-yaml versions', () => {
 test('pnpm lockfile does not pin vulnerable tar versions', () => {
     assert.doesNotMatch(
         lockfile,
-        /^\s{2}tar@(?:[0-6]\.\d+\.\d+|7\.[0-4]\.\d+|7\.5\.(?:\d|1[0-8])):$/mu,
+        /^\s{2}tar@(?:[0-6]\.\d+\.\d+|7\.[0-4]\.\d+|7\.5\.(?:\d|1\d|20)):/mu,
     );
 });
 
