@@ -775,6 +775,16 @@ async function createWindow(first = true): Promise<void> {
         mainWindow = null;
     });
 
+    if (isMacOS()) {
+        mainWindow.on('show', () => {
+            rebuildMainMenu();
+        });
+
+        mainWindow.on('hide', () => {
+            rebuildMainMenu();
+        });
+    }
+
     mainWindow.on('close', (event) => {
         store.set('bounds', mainWindow?.getNormalBounds());
         store.set('maximized', mainWindow?.isMaximized());

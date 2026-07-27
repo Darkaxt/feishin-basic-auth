@@ -7,7 +7,6 @@ import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { getSongUrl } from '/@/renderer/features/player/audio-player/hooks/use-stream-url';
 import { AudioPlayer, PlayerOnProgressProps } from '/@/renderer/features/player/audio-player/types';
-import { resolveVolumeMax } from '/@/renderer/features/player/audio-player/utils/volume';
 import { useRadioStore } from '/@/renderer/features/radio/hooks/use-radio-player';
 import { getMpvProperties } from '/@/renderer/features/settings/components/playback/mpv-properties';
 import {
@@ -19,7 +18,7 @@ import {
     useTimestampStoreBase,
 } from '/@/renderer/store';
 import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
-import { PlayerStatus, PlayerType } from '/@/shared/types/types';
+import { PlayerStatus } from '/@/shared/types/types';
 import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
 import {
     getRestoredPlaybackStartTime,
@@ -364,8 +363,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             }
         },
         increaseVolume(by: number) {
-            const maxVol = resolveVolumeMax(PlayerType.LOCAL, mpvExtraParameters) / 100;
-            const newVol = Math.min(maxVol, internalVolume + by / 100);
+            const newVol = Math.min(1, internalVolume + by / 100);
             setInternalVolume(newVol);
             if (mpvPlayer) {
                 mpvPlayer.volume(newVol * 100);
