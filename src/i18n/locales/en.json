@@ -506,6 +506,7 @@
             "goBack": "Go back",
             "goForward": "Go forward",
             "manageServers": "Manage servers",
+            "rescanLibrary": "Rescan library",
             "logout": "Logout",
             "privateModeOff": "Turn off private mode",
             "privateModeOn": "Turn on private mode",
