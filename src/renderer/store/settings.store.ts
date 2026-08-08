@@ -97,10 +97,12 @@ const PlayerItemSchema = z.enum([
     'sample_rate',
     'track_number',
     'codec',
+    'date',
     'release_year',
     'release_type',
     'release_date',
     'genres',
+    'year',
 ]);
 
 const ArtistItemSchema = z.enum([
@@ -473,6 +475,22 @@ export enum HomeFeatureStyle {
     SINGLE = 'single',
 }
 
+export enum ShareExpirationUnit {
+    DAY = 'day',
+    HOUR = 'hour',
+    MINUTE = 'minute',
+    MONTH = 'month',
+    SECOND = 'second',
+    WEEK = 'week',
+    YEAR = 'year',
+}
+
+const ShareExpirationSchema = z.object({
+    amount: z.number().int().min(1),
+    unit: z.nativeEnum(ShareExpirationUnit),
+    useServerDefault: z.boolean(),
+});
+
 const AutoSaveSchema = z.object({
     count: z.number().min(0),
     enabled: z.boolean(),
@@ -503,6 +521,7 @@ export const GeneralSettingsSchema = z.object({
     buttonSize: z.number(),
     collections: z.array(CollectionSchema),
     combinedLyricsAndVisualizer: z.boolean(),
+    confirmQueueChanges: z.boolean(),
     disabledContextMenu: z.record(z.string(), z.boolean()),
     enableGridMultiSelect: z.boolean(),
     externalLinks: z.boolean(),
@@ -538,6 +557,7 @@ export const GeneralSettingsSchema = z.object({
     primaryShade: z.number().min(0).max(9),
     qobuz: z.boolean(),
     resume: z.boolean(),
+    shareExpiration: ShareExpirationSchema,
     showFavorites: z.boolean(),
     showLyricsInSidebar: z.boolean(),
     showQueueInSidebar: z.boolean(),
@@ -648,6 +668,7 @@ const PlayerFilterFieldSchema = z.enum([
     'duration',
     'genre',
     'year',
+    'releaseYear',
     'note',
     'path',
     'playCount',
@@ -966,6 +987,7 @@ export enum PlayerItem {
     BIT_RATE = 'bit_rate',
     BPM = 'bpm',
     CODEC = 'codec',
+    DATE = 'date',
     DISC_NUMBER = 'disc_number',
     GENRES = 'genres',
     RELEASE_DATE = 'release_date',
@@ -973,6 +995,7 @@ export enum PlayerItem {
     RELEASE_YEAR = 'release_year',
     SAMPLE_RATE = 'sample_rate',
     TRACK_NUMBER = 'track_number',
+    YEAR = 'year',
 }
 
 export enum PlaylistTarget {
@@ -1081,6 +1104,10 @@ export const playerItems: SortableItem<PlayerItem>[] = [
     },
     {
         disabled: true,
+        id: PlayerItem.DATE,
+    },
+    {
+        disabled: true,
         id: PlayerItem.DISC_NUMBER,
     },
     {
@@ -1106,6 +1133,10 @@ export const playerItems: SortableItem<PlayerItem>[] = [
     {
         disabled: true,
         id: PlayerItem.TRACK_NUMBER,
+    },
+    {
+        disabled: false,
+        id: PlayerItem.YEAR,
     },
 ];
 
@@ -1288,6 +1319,7 @@ const initialState: SettingsState = {
         buttonSize: 15,
         collections: [],
         combinedLyricsAndVisualizer: false,
+        confirmQueueChanges: true,
         disabledContextMenu: {},
         enableGridMultiSelect: false,
         externalLinks: true,
@@ -1331,6 +1363,11 @@ const initialState: SettingsState = {
         primaryShade: 6,
         qobuz: true,
         resume: true,
+        shareExpiration: {
+            amount: 1,
+            unit: ShareExpirationUnit.YEAR,
+            useServerDefault: false,
+        },
         showFavorites: true,
         showLyricsInSidebar: true,
         showQueueInSidebar: true,
@@ -1522,10 +1559,14 @@ const initialState: SettingsState = {
                     alignLeftColumns: [
                         TableColumn.TITLE,
                         TableColumn.ALBUM_ARTIST,
-                        TableColumn.YEAR,
+                        TableColumn.RELEASE_YEAR,
                     ],
                     columns: ALBUM_TABLE_COLUMNS,
-                    enabledColumns: [TableColumn.TITLE, TableColumn.ALBUM_ARTIST, TableColumn.YEAR],
+                    enabledColumns: [
+                        TableColumn.TITLE,
+                        TableColumn.ALBUM_ARTIST,
+                        TableColumn.RELEASE_YEAR,
+                    ],
                     pickColumns: [
                         TableColumn.TITLE,
                         TableColumn.DURATION,
@@ -1537,8 +1578,8 @@ const initialState: SettingsState = {
                         TableColumn.PLAY_COUNT,
                         TableColumn.SONG_COUNT,
                         TableColumn.RELEASE_DATE,
+                        TableColumn.RELEASE_YEAR,
                         TableColumn.LAST_PLAYED,
-                        TableColumn.YEAR,
                     ],
                 }),
                 size: 'default',
@@ -1599,10 +1640,14 @@ const initialState: SettingsState = {
                     alignLeftColumns: [
                         TableColumn.TITLE,
                         TableColumn.ALBUM_ARTIST,
-                        TableColumn.YEAR,
+                        TableColumn.RELEASE_YEAR,
                     ],
                     columns: ALBUM_TABLE_COLUMNS,
-                    enabledColumns: [TableColumn.TITLE, TableColumn.ALBUM_ARTIST, TableColumn.YEAR],
+                    enabledColumns: [
+                        TableColumn.TITLE,
+                        TableColumn.ALBUM_ARTIST,
+                        TableColumn.RELEASE_YEAR,
+                    ],
                     pickColumns: [
                         TableColumn.TITLE,
                         TableColumn.DURATION,
@@ -1614,8 +1659,8 @@ const initialState: SettingsState = {
                         TableColumn.PLAY_COUNT,
                         TableColumn.SONG_COUNT,
                         TableColumn.RELEASE_DATE,
+                        TableColumn.RELEASE_YEAR,
                         TableColumn.LAST_PLAYED,
-                        TableColumn.YEAR,
                     ],
                 }),
                 size: 'default',
@@ -1823,15 +1868,17 @@ const initialState: SettingsState = {
                         TableColumn.TITLE,
                         TableColumn.ARTIST,
                         TableColumn.DURATION,
-                        TableColumn.YEAR,
                         TableColumn.BIT_RATE,
                         TableColumn.BPM,
                         TableColumn.CODEC,
+                        TableColumn.DATE,
                         TableColumn.DATE_ADDED,
                         TableColumn.GENRE,
                         TableColumn.LAST_PLAYED,
                         TableColumn.RELEASE_DATE,
+                        TableColumn.RELEASE_YEAR,
                         TableColumn.TRACK_NUMBER,
+                        TableColumn.YEAR,
                     ],
                 }),
                 size: 'default',
@@ -1899,15 +1946,17 @@ const initialState: SettingsState = {
                         TableColumn.TITLE,
                         TableColumn.ARTIST,
                         TableColumn.DURATION,
-                        TableColumn.YEAR,
                         TableColumn.BIT_RATE,
                         TableColumn.BPM,
                         TableColumn.CODEC,
+                        TableColumn.DATE,
                         TableColumn.DATE_ADDED,
                         TableColumn.GENRE,
                         TableColumn.LAST_PLAYED,
                         TableColumn.RELEASE_DATE,
+                        TableColumn.RELEASE_YEAR,
                         TableColumn.TRACK_NUMBER,
+                        TableColumn.YEAR,
                     ],
                 }),
                 size: 'default',
@@ -2759,6 +2808,92 @@ export const useSettingsStore = createWithEqualityFn<SettingsSlice>()(
                     state.autoDJ.albumStrategy = normalizeAutoDjStrategy(
                         state.autoDJ.albumStrategy,
                     );
+                }
+
+                if (version < 29) {
+                    const dateColumn: ItemTableListColumnConfig = {
+                        align: 'center',
+                        autoSize: false,
+                        id: TableColumn.DATE,
+                        isEnabled: false,
+                        pinned: null,
+                        width: 240,
+                    };
+                    const yearColumn: ItemTableListColumnConfig = {
+                        align: 'center',
+                        autoSize: false,
+                        id: TableColumn.YEAR,
+                        isEnabled: false,
+                        pinned: null,
+                        width: 200,
+                    };
+
+                    const listKeysToUpdate: ItemListKey[] = [
+                        ItemListKey.SONG,
+                        ItemListKey.ALBUM_DETAIL,
+                        ItemListKey.FOLDER,
+                        ItemListKey.PLAYLIST_SONG,
+                        ItemListKey.ALBUM_ARTIST_SONG,
+                        ItemListKey.GENRE_SONG,
+                        ItemListKey.QUEUE_SONG,
+                        ItemListKey.FULL_SCREEN,
+                        ItemListKey.SIDE_QUEUE,
+                    ];
+
+                    listKeysToUpdate.forEach((listKey) => {
+                        const listConfig = state.lists[listKey];
+                        if (listConfig?.table?.columns) {
+                            const columns = listConfig.table.columns;
+                            const hasYear = columns.some((col) => col.id === TableColumn.YEAR);
+                            if (!hasYear) {
+                                const releaseYearIndex = columns.findIndex(
+                                    (col) => col.id === TableColumn.RELEASE_YEAR,
+                                );
+                                if (releaseYearIndex >= 0) {
+                                    columns.splice(releaseYearIndex, 0, yearColumn);
+                                } else {
+                                    columns.push(yearColumn);
+                                }
+                            }
+                            const hasDate = columns.some((col) => col.id === TableColumn.DATE);
+                            if (!hasDate) {
+                                const releaseDateIndex = columns.findIndex(
+                                    (col) => col.id === TableColumn.RELEASE_DATE,
+                                );
+                                if (releaseDateIndex >= 0) {
+                                    columns.splice(releaseDateIndex, 0, dateColumn);
+                                } else {
+                                    columns.push(dateColumn);
+                                }
+                            }
+                        }
+                    });
+                    const listConfig = state.lists[ItemListKey.ALBUM];
+                    if (listConfig?.detail?.columns) {
+                        const columns = listConfig.detail.columns;
+                        const hasYear = columns.some((col) => col.id === TableColumn.YEAR);
+                        if (!hasYear) {
+                            const releaseYearIndex = columns.findIndex(
+                                (col) => col.id === TableColumn.RELEASE_YEAR,
+                            );
+                            if (releaseYearIndex >= 0) {
+                                columns.splice(releaseYearIndex, 0, yearColumn);
+                            } else {
+                                columns.push(yearColumn);
+                            }
+                        }
+                        const hasDate = columns.some((col) => col.id === TableColumn.DATE);
+                        if (!hasDate) {
+                            const releaseDateIndex = columns.findIndex(
+                                (col) => col.id === TableColumn.RELEASE_DATE,
+                            );
+                            if (releaseDateIndex >= 0) {
+                                columns.splice(releaseDateIndex, 0, dateColumn);
+                            } else {
+                                columns.push(dateColumn);
+                            }
+                        }
+                    }
                 }
 
                 if (version < 30) {
