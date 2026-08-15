@@ -29,7 +29,14 @@ const _Spinner = ({ ...props }: SpinnerProps) => {
         );
     }
 
-    return <SpinnerIcon className={styles.icon} color={props.color} size={props.size} />;
+    return (
+        <Icon
+            className={styles.icon}
+            color={props.color as IconColor}
+            icon="spinner"
+            size={props.size}
+        />
+    );
 };
 
 _Spinner.displayName = 'Spinner';
