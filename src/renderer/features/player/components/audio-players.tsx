@@ -355,19 +355,21 @@ const AudioPlayersContent = ({
         };
     }, [serverId]);
 
-    if (isRadioActive && playbackType === PlayerType.LOCAL) {
+    if (playbackType === PlayerType.LOCAL) {
         return <MpvPlayer />;
     }
 
-    if (isRadioActive && playbackType === PlayerType.WEB) {
-        return <RadioWebPlayer />;
+    if (playbackType === PlayerType.WEB) {
+        if (isRadioActive) {
+            return <RadioWebPlayer />;
+        }
+
+        return <WebPlayer />;
     }
 
-    return (
-        <>
-            {playbackType === PlayerType.WEB && <WebPlayer />}
-            {playbackType === PlayerType.LOCAL && <MpvPlayer />}
-            {playbackType === PlayerType.JUKEBOX && <JukeboxPlayer />}
-        </>
-    );
+    if (playbackType === PlayerType.JUKEBOX) {
+        return <JukeboxPlayer />;
+    }
+
+    return null;
 };

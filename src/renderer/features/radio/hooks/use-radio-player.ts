@@ -22,6 +22,7 @@ export interface RadioMetadata {
 
 interface RadioStore {
     actions: {
+        clear: () => void;
         pause: () => void;
         play: (
             streamUrl?: string,
@@ -41,8 +42,20 @@ interface RadioStore {
     stationName: null | string;
 }
 
+const CLEARED_RADIO_STATE = {
+    currentStationArt: null,
+    currentStreamUrl: null,
+    isPlaying: false,
+    metadata: null,
+    stationName: null,
+} as const;
+
 export const useRadioStore = createWithEqualityFn<RadioStore>((set) => ({
     actions: {
+        clear: () => {
+            logger.debug('Cleared radio state');
+            set({ ...CLEARED_RADIO_STATE });
+        },
         pause: () => {
             logger.debug('Paused radio playback');
             set({ isPlaying: false });
@@ -92,13 +105,7 @@ export const useRadioStore = createWithEqualityFn<RadioStore>((set) => ({
         stop: () => {
             const playbackType = useSettingsStore.getState().playback.type;
 
-            set({
-                currentStationArt: null,
-                currentStreamUrl: null,
-                isPlaying: false,
-                metadata: null,
-                stationName: null,
-            });
+            set({ ...CLEARED_RADIO_STATE });
 
             // When stopping radio with mpv, just pause instead of calling mediaStop
             // This prevents mpv from quitting
@@ -214,6 +221,14 @@ export const useRadioAudioInstance = () => {
 
     usePlayerEvents(
         {
+            onPlayerPlay: () => {
+                const radioState = useRadioStore.getState();
+                if (!radioState.currentStreamUrl) {
+                    return;
+                }
+
+                actions.clear();
+            },
             onPlayerStatus: (properties, prev) => {
                 const radioState = useRadioStore.getState();
                 if (!radioState.currentStreamUrl) {
