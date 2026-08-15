@@ -8,7 +8,7 @@ import styles from './spinner.module.css';
 import { Icon, IconColor } from '/@/shared/components/icon/icon';
 
 interface SpinnerProps extends IconBaseProps {
-    color?: IconColor;
+    color?: IconColor | string;
     container?: boolean;
     size?: number;
 }
