@@ -1096,7 +1096,13 @@
         "itemDetail": {
             "copyPath": "Kopiatu bidea arbelean",
             "openFile": "Erakutsi pista fitxategi-kudeatzailean",
-            "copiedPath": "Bidea behar bezala kopiatu da"
+            "copiedPath": "Bidea behar bezala kopiatu da",
+            "fileNotWritable": "Fitxategia ez da eskuragarria edo ezin da idatzi",
+            "triggerRescan": "Aktibatu beste liburutegi-eskaneatzea gorde ondoren",
+            "addField": "Gehitu eremua…",
+            "emptyFields": "Eremuak ezin dira hutsik egon",
+            "tagsTab": "Etiketak",
+            "multipleValues": "(Balio Anitzak)"
         },
         "playlist": {
             "reorder": "Berrantolaketa idaren arabera ordenatzean bakarrik gaituta dago"

@@ -70,7 +70,7 @@ test('pnpm lockfile does not pin vulnerable js-yaml versions', () => {
 });
 
 test('pnpm lockfile does not pin vulnerable nanoid versions', () => {
-    assert.doesNotMatch(lockfile, /^\s{2}nanoid@3\.3\.(?:[0-9]|1[0-6]):$/mu);
+    assert.doesNotMatch(lockfile, /^\s{2}nanoid@3\.3\.(?:[0-9]|1[0-7]):$/mu);
 });
 
 test('pnpm lockfile does not pin vulnerable tar versions', () => {

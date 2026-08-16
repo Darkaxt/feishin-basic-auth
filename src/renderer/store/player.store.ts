@@ -58,10 +58,6 @@ interface Actions {
     mediaSeekToTimestamp: (timestamp: number) => void;
     mediaSkipBackward: (offset?: number) => void;
     mediaSkipForward: (offset?: number) => void;
-    /**
-     * @param options.reset - When true (default), sets seekToTimestamp(0) so the engine seeks to start.
-     * Timestamp display is always cleared to 0. Use false when the engine is already idle (e.g. mpv `stopped`) to skip that seek.
-     */
     mediaStop: (options?: { reset?: boolean }) => void;
     mediaToggleMute: () => void;
     mediaTogglePlayPause: () => void;
@@ -228,11 +224,21 @@ function calculateNextIndex(
     }
 }
 
+function clearActiveRadio(): void {
+    const radioState = useRadioPlayerStore.getState();
+    if (radioState.currentStreamUrl) {
+        radioState.actions.clear();
+    }
+}
+
 function emitPlayerPlayEvent(
     targetSongUniqueId: string | undefined,
     set: (fn: (state: PlayerState) => void) => void,
     get: () => PlayerState,
 ): void {
+    // Clear radio before status changes so onPlayerStatus does not restart the stream.
+    clearActiveRadio();
+
     // If playSongId is provided, find the song and start playback on it
     if (targetSongUniqueId) {
         let playIndex: number | undefined;
@@ -508,9 +514,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                             break;
                         }
                         case Play.NOW: {
-                            if (useRadioPlayerStore.getState().currentStreamUrl) {
-                                useRadioPlayerStore.getState().actions.stop();
-                            }
+                            clearActiveRadio();
 
                             set((state) => {
                                 newItems.forEach((item) => {
@@ -566,9 +570,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                             break;
                         }
                         case Play.SHUFFLE: {
-                            if (useRadioPlayerStore.getState().currentStreamUrl) {
-                                useRadioPlayerStore.getState().actions.stop();
-                            }
+                            clearActiveRadio();
 
                             set((state) => {
                                 newItems.forEach((item) => {
@@ -675,6 +677,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
 
                     // If playSongId is provided, find the song and start playback on it
                     if (targetSongUniqueId) {
+                        clearActiveRadio();
+
                         let playIndex: number | undefined;
                         set((state) => {
                             const queue = state.getQueue();
@@ -1140,6 +1144,11 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 mediaPlay: (id?: string) => {
                     let playIndex: number | undefined;
 
+                    // Playing a specific queue song should dismiss radio first.
+                    if (id) {
+                        clearActiveRadio();
+                    }
+
                     set((state) => {
                         if (id) {
                             const queue = state.getQueue();
@@ -1186,6 +1195,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 mediaPlayByIndex: (index: number) => {
                     let playIndex: number | undefined;
                     let songId: string | undefined;
+
+                    clearActiveRadio();
 
                     set((state) => {
                         const queue = state.getQueue();
