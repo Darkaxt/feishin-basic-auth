@@ -22,7 +22,7 @@ mprisPlayer.on('quit', () => {
 });
 
 const hasData = (): boolean => {
-    return mprisPlayer.metadata && !!mprisPlayer.metadata['mpris:length'];
+    return mprisPlayer.metadata && !!mprisPlayer.metadata['mpris:trackid'];
 };
 
 mprisPlayer.on('stop', () => {
