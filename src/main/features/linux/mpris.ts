@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import Player from 'mpris-service';
 
-import { getMainWindow } from '/@/main/index';
+import { getMainWindow, showMainWindow } from '/@/main/index';
 import log from '/@/main/logger';
 import { QueueSong } from '/@/shared/types/domain-types';
 import { PlayerRepeat, PlayerStatus } from '/@/shared/types/types';
@@ -109,7 +109,7 @@ mprisPlayer.on('seek', (event: number) => {
 });
 
 mprisPlayer.on('raise', () => {
-    getMainWindow()?.show();
+    showMainWindow();
 });
 
 ipcMain.on('update-position', (_event, arg: number) => {
