@@ -26,6 +26,7 @@ const config = {
             ],
         ],
         'subject-case': [2, 'never', ['pascal-case', 'upper-case']],
+        'body-max-line-length': [0],
     },
 };
 
