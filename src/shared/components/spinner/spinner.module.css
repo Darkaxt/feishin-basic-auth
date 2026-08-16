@@ -4,8 +4,6 @@
 }
 
 .icon {
-    width: var(--theme-font-size-xl);
-    height: var(--theme-font-size-xl);
     animation: rotating 1s linear infinite;
 }
 

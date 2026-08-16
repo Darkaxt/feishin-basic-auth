@@ -10,12 +10,11 @@ import { Icon, IconColor } from '/@/shared/components/icon/icon';
 interface SpinnerProps extends IconBaseProps {
     color?: IconColor | string;
     container?: boolean;
-    size?: number;
 }
 
 export const SpinnerIcon = LuLoader;
 
-const _Spinner = ({ ...props }: SpinnerProps) => {
+const _Spinner = ({ size = 'xl', ...props }: SpinnerProps) => {
     if (props.container) {
         return (
             <Center className={styles.container}>
@@ -23,19 +22,14 @@ const _Spinner = ({ ...props }: SpinnerProps) => {
                     className={styles.icon}
                     color={props.color as IconColor}
                     icon="spinner"
-                    size={props.size}
+                    size={size}
                 />
             </Center>
         );
     }
 
     return (
-        <Icon
-            className={styles.icon}
-            color={props.color as IconColor}
-            icon="spinner"
-            size={props.size}
-        />
+        <Icon className={styles.icon} color={props.color as IconColor} icon="spinner" size={size} />
     );
 };
 
