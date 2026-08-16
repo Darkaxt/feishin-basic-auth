@@ -26,6 +26,7 @@ const config = {
         ],
         'scope-case': [2, 'always', 'kebab-case'],
         'subject-case': [2, 'never', ['pascal-case', 'upper-case']],
+        'body-max-line-length': [0],
     },
 };
 
