@@ -526,7 +526,7 @@
         "shareExpirationUseServerDefault_description": "Omite una expiración cuando se crean enlaces de compartir para que el servidor pueda aplicar la predeterminada configurada (p. ej. Navidrome DefaultShareExpiration)",
         "confirmQueueChanges": "Confirmar cambios en cola",
         "confirmQueueChanges_description": "Pide confirmación antes de descartar la cola actual",
-        "fullscreenAutoOpenTimeout_description": "Abre el reproductor a pantalla completa automáticamente tras estos minutos de inactividad mientras se reproduce una canción. Dejar vacío para desactivar",
+        "fullscreenAutoOpenTimeout_description": "Abre el reproductor a pantalla completa automáticamente tras estos minutos de inactividad mientras se reproduce una canción. Establece a 0 para desactivar",
         "fullscreenAutoOpenTimeout": "Tiempo de espera de apertura automática del reproductor a pantalla completa (minutos)",
         "sidebarImageEnabled": "Expandir botón del arte del álbum",
         "sidebarImageEnabled_description": "Muestra un botón en el arte del álbum de la barra del reproductor para expandirlo en la barra lateral. Desactivar esto también esconde el botón y contrae el arte del álbum si está expandido actualmente"

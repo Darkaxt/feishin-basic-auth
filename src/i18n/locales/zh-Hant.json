@@ -956,7 +956,7 @@
         "shareExpiration": "預設分享過期時間",
         "shareExpirationUseServerDefault_description": "建立分享時不指定過期時間，以便伺服器套用其設定的預設值 (例如 Navidrome 的 DefaultShareExpiration)",
         "shareExpirationUseServerDefault": "使用伺服器預設過期時間",
-        "fullscreenAutoOpenTimeout_description": "播放歌曲期間，閒置達指定時間後自動開啟全螢幕播放器。留空停用此功能",
+        "fullscreenAutoOpenTimeout_description": "播放歌曲期間，閒置達指定時間後自動開啟全螢幕播放器。設定至0來停用此功能",
         "fullscreenAutoOpenTimeout": "全螢幕播放器自動開啟時間 (分鐘)",
         "sidebarImageEnabled": "展開專輯封面按鈕",
         "sidebarImageEnabled_description": "在播放器欄的專輯封面上顯示按鈕，可將專輯封面展開至側邊欄。停用此選項會隱藏按鈕，且若專輯封面處於展開狀態會將其收合"
