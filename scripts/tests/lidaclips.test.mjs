@@ -241,6 +241,23 @@ test('foreground clip player preloads metadata in ambient background mode', () =
     assert.doesNotMatch(source, /preload=\{[\s\S]*LIDA_CLIPS_DISPLAY_MODE\.AMBIENT_BACKGROUND/);
 });
 
+test('fullscreen modules use persistent labeled tabs instead of icon-only controls', () => {
+    const source = readFileSync(
+        resolve('src/renderer/features/player/components/full-screen-player-queue.tsx'),
+        'utf8',
+    );
+    const css = readFileSync(
+        resolve('src/renderer/features/player/components/full-screen-player-queue.module.css'),
+        'utf8',
+    );
+
+    assert.match(source, /<Button[\s\S]*\{item\.label\}[\s\S]*<\/Button>/);
+    assert.match(source, /label:\s*t\('page\.fullscreenPlayer\.clips'\)/);
+    assert.doesNotMatch(source, /<ActionIcon/);
+    assert.match(css, /\.controls-container\s*\{[^}]*top:\s*0[^}]*right:\s*0[^}]*width:\s*50%/s);
+    assert.doesNotMatch(css, /\.controls-container\s*\{[^}]*bottom:\s*0/s);
+});
+
 test('mapLidaClipsProgress maps percentage between song and clip durations', () => {
     assert.equal(
         lidaClips.mapLidaClipsProgress({

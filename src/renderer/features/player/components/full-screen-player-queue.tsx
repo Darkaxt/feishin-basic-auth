@@ -23,9 +23,8 @@ import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
 } from '/@/renderer/store/full-screen-player.store';
-import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
+import { Button } from '/@/shared/components/button/button';
 import { Group } from '/@/shared/components/group/group';
-import { AppIcon } from '/@/shared/components/icon/icon';
 import { ItemListKey } from '/@/shared/types/types';
 import { shouldExitLidaClipsModeForTab, shouldShowLidaClipsTab } from '/@/shared/utils/lidaclips';
 
@@ -66,7 +65,6 @@ const moduleContentVariants: Variants = {
 
 interface ControlItem {
     active: boolean;
-    icon: keyof typeof AppIcon;
     label: string;
     onClick: () => void;
 }
@@ -98,13 +96,11 @@ const Controls = () => {
         const items: ControlItem[] = [
             {
                 active: activeTab === 'queue',
-                icon: 'queue',
                 label: t('page.fullscreenPlayer.upNext'),
                 onClick: () => toggleTab('queue'),
             },
             {
                 active: activeTab === 'related',
-                icon: 'related',
                 label: t('page.fullscreenPlayer.related'),
                 onClick: () => toggleTab('related'),
             },
@@ -112,7 +108,6 @@ const Controls = () => {
                 ? [
                       {
                           active: activeTab === 'clips',
-                          icon: 'mediaPlay' as const,
                           label: t('page.fullscreenPlayer.clips'),
                           onClick: () => toggleTab('clips'),
                       },
@@ -120,7 +115,6 @@ const Controls = () => {
                 : []),
             {
                 active: activeTab === 'lyrics',
-                icon: 'microphone',
                 label: t('page.fullscreenPlayer.lyrics'),
                 onClick: () => toggleTab('lyrics'),
             },
@@ -129,7 +123,6 @@ const Controls = () => {
         if (webAudio) {
             items.push({
                 active: activeTab === 'visualizer',
-                icon: 'audioLines',
                 label: t('page.fullscreenPlayer.visualizer'),
                 onClick: () => toggleTab('visualizer'),
             });
@@ -140,23 +133,32 @@ const Controls = () => {
 
     return (
         <Group
+            align="center"
             className={clsx(styles.controlsContainer, 'full-screen-player-controls-container')}
-            gap="xs"
-            p="0.5rem"
+            gap={0}
+            grow
+            justify="center"
             pos="absolute"
         >
             {headerItems.map((item) => (
-                <div key={`tab-${item.label}`}>
-                    <ActionIcon
-                        icon={item.icon}
-                        iconProps={{
-                            color: item.active ? 'primary' : undefined,
-                            size: 'lg',
-                        }}
+                <div className={styles.headerItemWrapper} key={`tab-${item.label}`}>
+                    <Button
+                        flex={1}
+                        fw="600"
                         onClick={item.onClick}
-                        tooltip={{ label: item.label }}
-                        variant="subtle"
-                    />
+                        pos="relative"
+                        size="lg"
+                        uppercase
+                        variant="transparent"
+                    >
+                        {item.label}
+                    </Button>
+                    {item.active ? (
+                        <motion.div
+                            className={styles.activeTabIndicator}
+                            layoutId="fullscreen-module-underline"
+                        />
+                    ) : null}
                 </div>
             ))}
         </Group>
