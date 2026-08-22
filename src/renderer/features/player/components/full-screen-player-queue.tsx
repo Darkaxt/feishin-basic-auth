@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import { motion } from 'motion/react';
-import { CSSProperties, lazy, Suspense, useCallback, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion, Variants } from 'motion/react';
+import { lazy, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './full-screen-player-queue.module.css';
@@ -13,13 +13,19 @@ import { useLidaClipsCurrentSongLookup } from '/@/renderer/features/lidaclips/ho
 import { Lyrics } from '/@/renderer/features/lyrics/lyrics';
 import { PlayQueue } from '/@/renderer/features/now-playing/components/play-queue';
 import { FullScreenSimilarSongs } from '/@/renderer/features/player/components/full-screen-similar-songs';
-import { useLidaClipsSettings, usePlaybackSettings, useSettingsStore } from '/@/renderer/store';
+import {
+    useLidaClipsSettings,
+    useListSettings,
+    usePlaybackSettings,
+    useSettingsStore,
+} from '/@/renderer/store';
 import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
 } from '/@/renderer/store/full-screen-player.store';
-import { Button } from '/@/shared/components/button/button';
+import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Group } from '/@/shared/components/group/group';
+import { AppIcon } from '/@/shared/components/icon/icon';
 import { ItemListKey } from '/@/shared/types/types';
 import { shouldExitLidaClipsModeForTab, shouldShowLidaClipsTab } from '/@/shared/utils/lidaclips';
 
@@ -35,9 +41,132 @@ const ButterchurnVisualizer = lazy(() =>
     })),
 );
 
-export const FullScreenPlayerQueue = () => {
+const moduleContentVariants: Variants = {
+    animate: {
+        opacity: 1,
+        transition: {
+            duration: 0.4,
+            ease: 'easeOut',
+        },
+        x: 0,
+    },
+    exit: {
+        opacity: 0,
+        transition: {
+            duration: 0.4,
+            ease: 'easeOut',
+        },
+        x: '10%',
+    },
+    initial: {
+        opacity: 0,
+        x: '10%',
+    },
+};
+
+interface ControlItem {
+    active: boolean;
+    icon: keyof typeof AppIcon;
+    label: string;
+    onClick: () => void;
+}
+
+const Controls = () => {
     const { t } = useTranslation();
-    const { activeTab, expanded, opacity } = useFullScreenPlayerStore();
+    const { activeTab } = useFullScreenPlayerStore();
+    const { setStore } = useFullScreenPlayerStoreActions();
+    const { webAudio } = usePlaybackSettings();
+    const lidaClipsSettings = useLidaClipsSettings();
+    const { data: lidaClipsData } = useLidaClipsCurrentSongLookup(lidaClipsSettings.enabled);
+    const showLidaClipsTab = shouldShowLidaClipsTab({
+        ...lidaClipsSettings,
+        lookupStatus: lidaClipsData?.status,
+    });
+
+    const toggleTab = useCallback(
+        (tab: string) => {
+            const nextTab = activeTab === tab ? '' : tab;
+            setStore({
+                activeTab: nextTab,
+                ...(shouldExitLidaClipsModeForTab(nextTab) ? { clipModeActive: false } : {}),
+            });
+        },
+        [activeTab, setStore],
+    );
+
+    const headerItems = useMemo(() => {
+        const items: ControlItem[] = [
+            {
+                active: activeTab === 'queue',
+                icon: 'queue',
+                label: t('page.fullscreenPlayer.upNext'),
+                onClick: () => toggleTab('queue'),
+            },
+            {
+                active: activeTab === 'related',
+                icon: 'related',
+                label: t('page.fullscreenPlayer.related'),
+                onClick: () => toggleTab('related'),
+            },
+            ...(showLidaClipsTab
+                ? [
+                      {
+                          active: activeTab === 'clips',
+                          icon: 'mediaPlay' as const,
+                          label: t('page.fullscreenPlayer.clips'),
+                          onClick: () => toggleTab('clips'),
+                      },
+                  ]
+                : []),
+            {
+                active: activeTab === 'lyrics',
+                icon: 'microphone',
+                label: t('page.fullscreenPlayer.lyrics'),
+                onClick: () => toggleTab('lyrics'),
+            },
+        ];
+
+        if (webAudio) {
+            items.push({
+                active: activeTab === 'visualizer',
+                icon: 'audioLines',
+                label: t('page.fullscreenPlayer.visualizer'),
+                onClick: () => toggleTab('visualizer'),
+            });
+        }
+
+        return items;
+    }, [activeTab, showLidaClipsTab, t, toggleTab, webAudio]);
+
+    return (
+        <Group
+            className={clsx(styles.controlsContainer, 'full-screen-player-controls-container')}
+            gap="xs"
+            p="0.5rem"
+            pos="absolute"
+        >
+            {headerItems.map((item) => (
+                <div key={`tab-${item.label}`}>
+                    <ActionIcon
+                        icon={item.icon}
+                        iconProps={{
+                            color: item.active ? 'primary' : undefined,
+                            size: 'lg',
+                        }}
+                        onClick={item.onClick}
+                        tooltip={{ label: item.label }}
+                        variant="subtle"
+                    />
+                </div>
+            ))}
+        </Group>
+    );
+};
+
+export const FullScreenPlayerControls = Controls;
+
+export const FullScreenPlayerQueue = () => {
+    const { activeTab } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { webAudio } = usePlaybackSettings();
     const lidaClipsSettings = useLidaClipsSettings();
@@ -47,18 +176,16 @@ export const FullScreenPlayerQueue = () => {
         lookupStatus: lidaClipsData?.status,
     });
     const visualizerType = useSettingsStore((store) => store.visualizer.type);
+    const { table } = useListSettings(ItemListKey.FULL_SCREEN) || {};
+    const queueContainerClassName = clsx(styles.queueContainer, {
+        [styles.queueContainerFadeTopBottom]: !table?.enableHeader,
+    });
 
     useEffect(() => {
         if (activeTab === 'clips' && !showLidaClipsTab) {
-            setStore({ activeTab: 'queue', clipModeActive: false });
+            setStore({ activeTab: '', clipModeActive: false });
         }
     }, [activeTab, setStore, showLidaClipsTab]);
-
-    useEffect(() => {
-        if (!expanded) {
-            setStore({ clipModeActive: false });
-        }
-    }, [expanded, setStore]);
 
     useEffect(() => {
         return () => {
@@ -66,120 +193,81 @@ export const FullScreenPlayerQueue = () => {
         };
     }, [setStore]);
 
-    const setActiveTab = useCallback(
-        (tab: string) => {
-            setStore({
-                activeTab: tab,
-                ...(shouldExitLidaClipsModeForTab(tab) ? { clipModeActive: false } : {}),
-            });
-        },
-        [setStore],
-    );
-
-    const headerItems = useMemo(() => {
-        const items = [
-            {
-                active: activeTab === 'queue',
-                label: t('page.fullscreenPlayer.upNext'),
-                onClick: () => setActiveTab('queue'),
-            },
-            {
-                active: activeTab === 'related',
-                label: t('page.fullscreenPlayer.related'),
-                onClick: () => setActiveTab('related'),
-            },
-            ...(showLidaClipsTab
-                ? [
-                      {
-                          active: activeTab === 'clips',
-                          label: t('page.fullscreenPlayer.clips'),
-                          onClick: () => setActiveTab('clips'),
-                      },
-                  ]
-                : []),
-            {
-                active: activeTab === 'lyrics',
-                label: t('page.fullscreenPlayer.lyrics'),
-                onClick: () => setActiveTab('lyrics'),
-            },
-        ];
-
-        if (webAudio) {
-            items.push({
-                active: activeTab === 'visualizer',
-                label: t('page.fullscreenPlayer.visualizer'),
-                onClick: () => setActiveTab('visualizer'),
-            });
-        }
-
-        return items;
-    }, [activeTab, setActiveTab, showLidaClipsTab, t, webAudio]);
-
     return (
         <div
-            className={clsx(styles.gridContainer, 'full-screen-player-queue-container')}
-            style={
-                {
-                    '--opacity': opacity / 100,
-                } as CSSProperties
-            }
+            className={clsx(styles.gridContainer, 'full-screen-player-queue-container', {
+                [styles.gridContainerCollapsed]: !activeTab,
+            })}
         >
             {lidaClipsSettings.enabled ? <LidaClipsPlaybackCoordinator /> : null}
-            <Group
-                align="center"
-                className="full-screen-player-queue-header"
-                gap={0}
-                grow
-                justify="center"
-                pb="md"
-            >
-                {headerItems.map((item) => (
-                    <div className={styles.headerItemWrapper} key={`tab-${item.label}`}>
-                        <Button
-                            flex={1}
-                            fw="600"
-                            onClick={item.onClick}
-                            pos="relative"
-                            size="lg"
-                            uppercase
-                            variant="transparent"
-                        >
-                            {item.label}
-                        </Button>
-                        {item.active ? (
-                            <motion.div
-                                className={styles.activeTabIndicator}
-                                layoutId="underline"
-                            />
-                        ) : null}
-                    </div>
-                ))}
-            </Group>
-            {activeTab === 'queue' ? (
-                <div className={styles.queueContainer}>
-                    <PlayQueue
-                        enableScrollShadow={false}
-                        listKey={ItemListKey.FULL_SCREEN}
-                        searchTerm={undefined}
-                    />
-                </div>
-            ) : activeTab === 'related' ? (
-                <div className={styles.queueContainer}>
-                    <FullScreenSimilarSongs />
-                </div>
-            ) : activeTab === 'clips' && showLidaClipsTab ? (
-                <LidaClipsPanel />
-            ) : activeTab === 'lyrics' ? (
-                <Lyrics fadeOutNoLyricsMessage={false} />
-            ) : activeTab === 'visualizer' && webAudio ? (
-                <Suspense fallback={<></>}>
-                    {visualizerType === 'butterchurn' ? (
-                        <ButterchurnVisualizer />
-                    ) : (
-                        <AudioMotionAnalyzerVisualizer />
-                    )}
-                </Suspense>
-            ) : null}
+            <AnimatePresence mode="wait">
+                {activeTab === 'queue' ? (
+                    <motion.div
+                        animate="animate"
+                        className={queueContainerClassName}
+                        exit="exit"
+                        initial="initial"
+                        key="queue"
+                        variants={moduleContentVariants}
+                    >
+                        <PlayQueue
+                            enableScrollShadow={false}
+                            listKey={ItemListKey.FULL_SCREEN}
+                            searchTerm={undefined}
+                        />
+                    </motion.div>
+                ) : activeTab === 'related' ? (
+                    <motion.div
+                        animate="animate"
+                        className={queueContainerClassName}
+                        exit="exit"
+                        initial="initial"
+                        key="related"
+                        variants={moduleContentVariants}
+                    >
+                        <FullScreenSimilarSongs />
+                    </motion.div>
+                ) : activeTab === 'clips' && showLidaClipsTab ? (
+                    <motion.div
+                        animate="animate"
+                        className={styles.moduleContent}
+                        exit="exit"
+                        initial="initial"
+                        key="clips"
+                        variants={moduleContentVariants}
+                    >
+                        <LidaClipsPanel />
+                    </motion.div>
+                ) : activeTab === 'lyrics' ? (
+                    <motion.div
+                        animate="animate"
+                        className={styles.moduleContent}
+                        exit="exit"
+                        initial="initial"
+                        key="lyrics"
+                        variants={moduleContentVariants}
+                    >
+                        <Lyrics fadeOutNoLyricsMessage={false} />
+                    </motion.div>
+                ) : activeTab === 'visualizer' && webAudio ? (
+                    <motion.div
+                        animate="animate"
+                        className={styles.moduleContent}
+                        exit="exit"
+                        initial="initial"
+                        key="visualizer"
+                        variants={moduleContentVariants}
+                    >
+                        <Suspense fallback={<></>}>
+                            {visualizerType === 'butterchurn' ? (
+                                <ButterchurnVisualizer />
+                            ) : (
+                                <AudioMotionAnalyzerVisualizer />
+                            )}
+                        </Suspense>
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
         </div>
     );
 };

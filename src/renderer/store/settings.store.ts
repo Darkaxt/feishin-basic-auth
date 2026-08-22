@@ -90,18 +90,21 @@ const AlbumGroupItemSchema = z.enum([
 ]);
 
 const PlayerItemSchema = z.enum([
+    'album',
+    'artist',
     'bit_depth',
     'bit_rate',
     'bpm',
-    'disc_number',
-    'sample_rate',
-    'track_number',
     'codec',
     'date',
-    'release_year',
-    'release_type',
-    'release_date',
+    'disc_number',
     'genres',
+    'release_date',
+    'release_type',
+    'release_year',
+    'sample_rate',
+    'title',
+    'track_number',
     'year',
 ]);
 
@@ -527,6 +530,7 @@ export const GeneralSettingsSchema = z.object({
     externalLinks: z.boolean(),
     followCurrentSong: z.boolean(),
     followSystemTheme: z.boolean(),
+    fullscreenAutoOpenTimeout: z.number().min(0).max(120),
     genreTarget: GenreTargetSchema,
     homeFeature: z.boolean(),
     homeFeatureStyle: z.nativeEnum(HomeFeatureStyle),
@@ -565,6 +569,7 @@ export const GeneralSettingsSchema = z.object({
     showVisualizerInSidebar: z.boolean(),
     sidebarCollapsedNavigation: z.boolean(),
     sidebarCollapseShared: z.boolean(),
+    sidebarImageEnabled: z.boolean(),
     sidebarItems: z.array(SidebarItemTypeSchema),
     sidebarPanelOrder: z.array(SidebarPanelTypeSchema),
     sidebarPlaylistFolders: z.boolean(),
@@ -983,6 +988,8 @@ export enum PlayerbarSliderType {
 }
 
 export enum PlayerItem {
+    ALBUM = 'album',
+    ARTIST = 'artist',
     BIT_DEPTH = 'bit_depth',
     BIT_RATE = 'bit_rate',
     BPM = 'bpm',
@@ -994,6 +1001,7 @@ export enum PlayerItem {
     RELEASE_TYPE = 'release_type',
     RELEASE_YEAR = 'release_year',
     SAMPLE_RATE = 'sample_rate',
+    TITLE = 'title',
     TRACK_NUMBER = 'track_number',
     YEAR = 'year',
 }
@@ -1088,6 +1096,18 @@ export type VersionedSettings = SettingsState & { version: number };
 export const playerItems: SortableItem<PlayerItem>[] = [
     {
         disabled: true,
+        id: PlayerItem.ALBUM,
+    },
+    {
+        disabled: true,
+        id: PlayerItem.ARTIST,
+    },
+    {
+        disabled: true,
+        id: PlayerItem.TITLE,
+    },
+    {
+        disabled: true,
         id: PlayerItem.BIT_DEPTH,
     },
     {
@@ -1099,7 +1119,7 @@ export const playerItems: SortableItem<PlayerItem>[] = [
         id: PlayerItem.BPM,
     },
     {
-        disabled: false,
+        disabled: true,
         id: PlayerItem.CODEC,
     },
     {
@@ -1123,7 +1143,7 @@ export const playerItems: SortableItem<PlayerItem>[] = [
         id: PlayerItem.RELEASE_TYPE,
     },
     {
-        disabled: false,
+        disabled: true,
         id: PlayerItem.RELEASE_YEAR,
     },
     {
@@ -1135,7 +1155,7 @@ export const playerItems: SortableItem<PlayerItem>[] = [
         id: PlayerItem.TRACK_NUMBER,
     },
     {
-        disabled: false,
+        disabled: true,
         id: PlayerItem.YEAR,
     },
 ];
@@ -1222,9 +1242,18 @@ export const sidebarItems: SidebarItemType[] = [
     },
 ];
 
-const homeItems = Object.values(HomeItem).map((item) => ({
+const defaultHomeItemOrder: HomeItem[] = [
+    HomeItem.GENRES,
+    HomeItem.RANDOM,
+    HomeItem.RECENTLY_ADDED,
+    HomeItem.RECENTLY_RELEASED,
+    HomeItem.RECENTLY_PLAYED,
+    HomeItem.MOST_PLAYED,
+];
+
+const homeItems = defaultHomeItemOrder.map((id) => ({
     disabled: false,
-    id: item,
+    id,
 }));
 
 const artistItems = Object.values(ArtistItem).map((item) => ({
@@ -1301,13 +1330,13 @@ const initialState: SettingsState = {
     general: {
         accent: 'rgb(53, 116, 252)',
         albumBackground: false,
-        albumBackgroundBlur: 3,
+        albumBackgroundBlur: 6,
         albumGroupImageSize: 0,
         albumGroupItems,
         albumGroupShowFavoriteRating: true,
         albumGroupVerticalLayout: true,
         artistBackground: true,
-        artistBackgroundBlur: 3,
+        artistBackgroundBlur: 6,
         artistItems,
         artistRadioCount: 20,
         artistReleaseTypeItems,
@@ -1325,6 +1354,7 @@ const initialState: SettingsState = {
         externalLinks: true,
         followCurrentSong: true,
         followSystemTheme: false,
+        fullscreenAutoOpenTimeout: 0,
         genreTarget: GenreTarget.TRACK,
         homeFeature: true,
         homeFeatureStyle: HomeFeatureStyle.SINGLE,
@@ -1375,6 +1405,7 @@ const initialState: SettingsState = {
         showVisualizerInSidebar: true,
         sidebarCollapsedNavigation: true,
         sidebarCollapseShared: false,
+        sidebarImageEnabled: true,
         sidebarItems,
         sidebarPanelOrder: ['queue', 'lyrics', 'visualizer'],
         sidebarPlaylistFolders: false,
@@ -1511,12 +1542,12 @@ const initialState: SettingsState = {
                     align: column.align,
                     autoSize: column.autoSize,
                     id: column.value,
-                    isEnabled: column.isEnabled,
+                    isEnabled: column.value === TableColumn.ROW_INDEX ? false : column.isEnabled,
                     pinned: column.pinned,
                     width: column.width,
                 })),
                 enableAlternateRowColors: false,
-                enableHeader: true,
+                enableHeader: false,
                 enableHorizontalBorders: false,
                 enableRowHoverHighlight: true,
                 enableVerticalBorders: false,
@@ -2014,7 +2045,7 @@ const initialState: SettingsState = {
         },
     },
     lyrics: {
-        alignment: 'center',
+        alignment: 'left',
         delayMs: 0,
         enableAutoTranslation: false,
         enableFurigana: false,
@@ -2025,8 +2056,8 @@ const initialState: SettingsState = {
         followScrollAlignment: 0,
         lineLeadTimeMs: 800,
         preferLocalLyrics: true,
-        showMatch: true,
-        showProvider: true,
+        showMatch: false,
+        showProvider: false,
         sources: [LyricSource.NETEASE, LyricSource.LRCLIB],
         translationApiKey: '',
         translationApiProvider: '',
@@ -2181,7 +2212,7 @@ const initialState: SettingsState = {
             lineWidth: 1.9,
             loRes: false,
             lumiBars: false,
-            maxDecibels: -25,
+            maxDecibels: -15,
             maxFPS: 0,
             maxFreq: 22050,
             minDecibels: -85,
@@ -3070,6 +3101,12 @@ export const useVolumeWidth = () => useSettingsStore((state) => state.general.vo
 
 export const useFollowCurrentSong = () =>
     useSettingsStore((state) => state.general.followCurrentSong, shallow);
+
+export const useFullscreenAutoOpenTimeout = () =>
+    useSettingsStore((state) => state.general.fullscreenAutoOpenTimeout, shallow);
+
+export const useSidebarImageEnabled = () =>
+    useSettingsStore((state) => state.general.sidebarImageEnabled, shallow);
 
 export const useThemeSettings = () =>
     useSettingsStore(

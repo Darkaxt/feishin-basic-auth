@@ -1,4 +1,5 @@
 import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
@@ -6,24 +7,33 @@ import { createWithEqualityFn } from 'zustand/traditional';
 
 import { sanitizeLidaClipsRuntimeState } from '/@/shared/utils/lidaclips';
 
+export type FullScreenPlayerItemAlignment = 'center' | 'left' | 'right';
+
 export interface FullScreenPlayerSlice extends FullScreenPlayerState {
     actions: {
         setStore: (data: Partial<FullScreenPlayerSlice>) => void;
     };
 }
 
+export type FullScreenPlayerTitleDisplayType = 'multiLine' | 'scroll';
+
 interface FullScreenPlayerState {
     activeTab: 'lyrics' | 'queue' | 'related' | string;
     clipModeActive: boolean;
     clipModeTransferRatio?: null | number;
     clipModeTransferSongUniqueId?: null | string;
+    coverArtSize: number;
     dynamicBackground?: boolean;
     dynamicImageBlur: number;
     dynamicIsImage?: boolean;
     expanded: boolean;
     opacity: number;
+    playerItemAlignment: FullScreenPlayerItemAlignment;
+    titleDisplayType: FullScreenPlayerTitleDisplayType;
+    titleLineCount: number;
     useImageAspectRatio: boolean;
     visualizerExpanded: boolean;
+    visualizerReturnToPlayer: boolean;
 }
 
 export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSlice>()(
@@ -35,17 +45,22 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
                         set({ ...get(), ...data });
                     },
                 },
-                activeTab: 'queue',
+                activeTab: '',
                 clipModeActive: false,
                 clipModeTransferRatio: null,
                 clipModeTransferSongUniqueId: null,
+                coverArtSize: 75,
                 dynamicBackground: true,
-                dynamicImageBlur: 1.5,
+                dynamicImageBlur: 6,
                 dynamicIsImage: false,
                 expanded: false,
-                opacity: 60,
+                opacity: 25,
+                playerItemAlignment: 'center',
+                titleDisplayType: 'scroll',
+                titleLineCount: 1,
                 useImageAspectRatio: false,
                 visualizerExpanded: false,
+                visualizerReturnToPlayer: false,
             })),
             { name: 'store_full_screen_player' },
         ),
@@ -55,33 +70,32 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
             },
             migrate: (persistedState, version) => {
                 if (version <= 2) {
-                    return {} as FullScreenPlayerState;
-                }
-
-                if (version <= 3) {
-                    return {
-                        ...(persistedState as FullScreenPlayerState),
-                        clipModeActive: false,
-                    };
+                    return {} as FullScreenPlayerSlice;
                 }
 
                 if (version <= 4) {
-                    return {
-                        ...(persistedState as FullScreenPlayerState),
-                        clipModeTransferRatio: null,
-                        clipModeTransferSongUniqueId: null,
+                    const state = persistedState as { coverArtSize?: number | string };
+                    const legacyCoverArtSizeMap: Record<string, number> = {
+                        large: 100,
+                        medium: 75,
+                        small: 50,
                     };
+
+                    if (typeof state.coverArtSize === 'string') {
+                        state.coverArtSize = legacyCoverArtSizeMap[state.coverArtSize] ?? 75;
+                    }
                 }
 
-                if (version <= 5) {
-                    return sanitizeLidaClipsRuntimeState(persistedState as FullScreenPlayerState);
-                }
-
-                return persistedState;
+                return sanitizeLidaClipsRuntimeState(
+                    persistedState as FullScreenPlayerSlice,
+                ) as FullScreenPlayerSlice;
             },
             name: 'store_full_screen_player',
-            partialize: (state) => sanitizeLidaClipsRuntimeState(state),
-            version: 6,
+            partialize: (state) =>
+                omit(sanitizeLidaClipsRuntimeState(state), [
+                    'visualizerReturnToPlayer',
+                ]) as FullScreenPlayerSlice,
+            version: 7,
         },
     ),
 );

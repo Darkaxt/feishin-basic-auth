@@ -44,6 +44,7 @@ Scope is optional. When present, it must be one of (see `commitlint.config.mjs` 
 | `servers` | Server list, login, connection |
 | `remote` | Remote-control SPA and remote server |
 | `theme` | Themes, CSS variables, custom themes |
+| `ui` | Pages, styling, and shared UI with no single feature owner |
 | `visualizer` | Butterchurn / audio-motion visualizers |
 | `window` | Titlebar, minimize/restore, fullscreen chrome |
 | `sharing` | Shares |

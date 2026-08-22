@@ -21,6 +21,7 @@ const config = {
                 'sharing',
                 'tag-editor',
                 'theme',
+                'ui',
                 'visualizer',
                 'window',
             ],

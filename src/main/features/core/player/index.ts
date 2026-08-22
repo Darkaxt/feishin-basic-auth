@@ -844,10 +844,8 @@ process.on('uncaughtException', async (error) => {
     });
 });
 
-// Handle unhandled rejections - cleanup mpv
-process.on('unhandledRejection', async (reason) => {
+// A rejected background task is not a player shutdown signal. Keep MPV connected so the
+// renderer can continue playback or recover through its normal controls.
+process.on('unhandledRejection', (reason) => {
     log.error('Unhandled rejection:', reason);
-    await cleanupMpv(true).catch(() => {
-        // Ignore cleanup errors
-    });
 });

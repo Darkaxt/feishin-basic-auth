@@ -231,6 +231,16 @@ test('fullscreen background video layer stays above album art and below overlay'
     assert.ok(zIndexes['background-image-overlay'] > zIndexes['background-video']);
 });
 
+test('foreground clip player preloads metadata in ambient background mode', () => {
+    const source = readFileSync(
+        resolve('src/renderer/features/lidaclips/components/lidaclips-panel.tsx'),
+        'utf8',
+    );
+
+    assert.match(source, /preload="metadata"/);
+    assert.doesNotMatch(source, /preload=\{[\s\S]*LIDA_CLIPS_DISPLAY_MODE\.AMBIENT_BACKGROUND/);
+});
+
 test('mapLidaClipsProgress maps percentage between song and clip durations', () => {
     assert.equal(
         lidaClips.mapLidaClipsProgress({

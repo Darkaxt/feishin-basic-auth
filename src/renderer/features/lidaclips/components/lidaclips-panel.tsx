@@ -286,11 +286,7 @@ export const LidaClipsPanel = () => {
                     onEnded={handleVideoEnded}
                     onLoadedMetadata={handleVideoLoadedMetadata}
                     onPlay={handleVideoPlay}
-                    preload={
-                        settings.displayMode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND
-                            ? 'none'
-                            : 'metadata'
-                    }
+                    preload="metadata"
                     ref={videoRef}
                     src={data.clip.localStreamUrl}
                 />

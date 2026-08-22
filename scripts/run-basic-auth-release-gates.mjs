@@ -8,6 +8,7 @@ const commands = [
     ['node', ['--test', 'scripts/tests/default-playback.test.mjs']],
     ['node', ['--test', 'scripts/tests/fork-updater.test.mjs']],
     ['node', ['--test', 'scripts/tests/playback-restore.test.mjs']],
+    ['node', ['--test', 'scripts/tests/mpv-process-errors.test.mjs']],
     ['node', ['--test', 'scripts/tests/lyrics.test.mjs']],
     ['node', ['--test', 'scripts/tests/dependency-security.test.mjs']],
     [
