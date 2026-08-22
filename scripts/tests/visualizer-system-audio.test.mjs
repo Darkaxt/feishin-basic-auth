@@ -1,10 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
-    shouldAutoConnectSystemAudio,
-    shouldOpenSystemAudioConsentPrompt,
-} from '../../src/shared/utils/visualizer-system-audio.ts';
+import * as systemAudio from '../../src/shared/utils/visualizer-system-audio.ts';
+
+const { shouldAutoConnectSystemAudio, shouldOpenSystemAudioConsentPrompt } = systemAudio;
+
+test('system audio capture requests video only on macOS', () => {
+    assert.equal(typeof systemAudio.getVisualizerDisplayMediaOptions, 'function');
+    if (typeof systemAudio.getVisualizerDisplayMediaOptions !== 'function') return;
+
+    assert.deepEqual(systemAudio.getVisualizerDisplayMediaOptions(false), {
+        audio: true,
+        monitorTypeSurfaces: 'include',
+        systemAudio: 'include',
+        video: false,
+        windowAudio: 'system',
+    });
+    assert.deepEqual(systemAudio.getVisualizerDisplayMediaOptions(true), {
+        audio: true,
+        monitorTypeSurfaces: 'include',
+        systemAudio: 'include',
+        video: true,
+        windowAudio: 'system',
+    });
+});
 
 test('system audio consent prompt opens only before a session decision', () => {
     const base = {

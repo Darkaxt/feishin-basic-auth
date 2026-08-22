@@ -13,6 +13,16 @@ export type SystemAudioPromptState =
           promptedThisSession: boolean;
       };
 
+export function getVisualizerDisplayMediaOptions(isMacOS: boolean): DisplayMediaStreamOptions {
+    return {
+        audio: true,
+        monitorTypeSurfaces: 'include',
+        systemAudio: 'include',
+        video: isMacOS,
+        windowAudio: 'system',
+    } as DisplayMediaStreamOptions;
+}
+
 export function shouldAutoConnectSystemAudio({
     canCaptureSystemAudio,
     hasAttemptedConnectionThisSession = false,

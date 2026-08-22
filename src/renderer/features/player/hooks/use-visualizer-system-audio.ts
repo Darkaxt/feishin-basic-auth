@@ -6,6 +6,9 @@ import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
 import { toast } from '/@/shared/components/toast/toast';
 import { PlayerType, WebAudio } from '/@/shared/types/types';
+import { getVisualizerDisplayMediaOptions } from '/@/shared/utils/visualizer-system-audio';
+
+const electronUtils = isElectron() ? window.api.utils : null;
 
 export function useVisualizerSystemAudio(options: {
     onSystemAudioCaptureDenied?: () => void;
@@ -86,13 +89,9 @@ export function useVisualizerSystemAudio(options: {
         setIsConnecting(true);
 
         try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({
-                audio: true,
-                monitorTypeSurfaces: 'include',
-                systemAudio: 'include',
-                video: true,
-                windowAudio: 'system',
-            } as DisplayMediaStreamOptions);
+            const stream = await navigator.mediaDevices.getDisplayMedia(
+                getVisualizerDisplayMediaOptions(Boolean(electronUtils?.isMacOS())),
+            );
 
             stream.getVideoTracks().forEach((track) => track.stop());
 
