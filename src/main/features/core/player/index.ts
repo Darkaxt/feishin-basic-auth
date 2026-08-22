@@ -6,7 +6,7 @@ import { pid } from 'node:process';
 import process from 'process';
 
 import { getMainWindow, sendToastToRenderer } from '../../../index';
-import log from '../../../logger';
+import log, { isBrokenPipeError } from '../../../logger';
 import { store } from '../settings';
 
 import { isMacOS, isWindows } from '/@/main/env';
@@ -838,6 +838,10 @@ process.on('SIGTERM', async () => {
 
 // Handle uncaught exceptions - cleanup mpv before crashing
 process.on('uncaughtException', async (error) => {
+    if (isBrokenPipeError(error)) {
+        return;
+    }
+
     log.error('Uncaught exception:', error);
     await cleanupMpv(true).catch(() => {
         // Ignore cleanup errors during crash

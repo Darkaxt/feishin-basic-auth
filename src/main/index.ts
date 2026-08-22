@@ -32,7 +32,7 @@ import { installProxyAuthInterceptor } from './features/core/proxy-auth';
 import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
 import { canHandleVisualizerDisplayMedia } from './features/core/visualizer';
-import log, { autoUpdaterLogInterface } from './logger';
+import log, { autoUpdaterLogInterface, isBrokenPipeError } from './logger';
 import MenuBuilder, { MenuPlaybackState } from './menu';
 import './features';
 import { hotkeyToElectronAccelerator } from './utils';
@@ -348,6 +348,10 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 process.on('uncaughtException', (error: any) => {
+    if (isBrokenPipeError(error)) {
+        return;
+    }
+
     log.error('Error in main process', error);
 });
 

@@ -16,6 +16,8 @@ export type { LogSeverity } from '/@/shared/logger/types';
 const PROCESS_WIDTH = 10; // width of "[renderer]"
 const LEVEL_WIDTH = 5; // width of "DEBUG" / "ERROR"
 const RESET = '\x1B[0m';
+const consoleLoggingEnabled =
+    process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 const levelColors: Record<string, string> = {
     debug: '\x1B[38;2;100;149;237m', // #6495ED
@@ -66,9 +68,21 @@ const isLogLevel = (value: unknown): value is LogLevel => {
     return value === 'debug' || value === 'info';
 };
 
+export const isBrokenPipeError = (error: unknown): boolean => {
+    return typeof error === 'object' && error !== null && 'code' in error && error.code === 'EPIPE';
+};
+
+const handleConsoleStreamError = (error: NodeJS.ErrnoException) => {
+    log.transports.console.level = false;
+
+    if (!isBrokenPipeError(error)) {
+        log.error('Console transport failed', error);
+    }
+};
+
 export const setLogLevel = (level: LogLevel) => {
     log.transports.file.level = level;
-    log.transports.console.level = level;
+    log.transports.console.level = consoleLoggingEnabled ? level : false;
 };
 
 log.initialize();
@@ -78,6 +92,8 @@ setLogLevel(
 log.transports.file.format = (params) => formatLogLine({ ...params, colorize: false });
 log.transports.file.maxSize = 1024 * 1024 * 10; // 10MB
 log.transports.console.format = (params) => formatLogLine({ ...params, colorize: true });
+process.stdout.on('error', handleConsoleStreamError);
+process.stderr.on('error', handleConsoleStreamError);
 
 ipcMain.on('logger-set-level', (_event, level: unknown) => {
     if (isLogLevel(level)) {
