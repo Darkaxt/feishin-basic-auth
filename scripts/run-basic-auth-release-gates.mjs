@@ -15,6 +15,7 @@ const commands = [
         'node',
         [
             '--test',
+            'scripts/tests/fullscreen-player-image.test.mjs',
             'scripts/tests/genre-context-menu.test.mjs',
             'scripts/tests/visualizer-system-audio.test.mjs',
         ],

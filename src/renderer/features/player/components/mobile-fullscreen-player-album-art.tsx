@@ -20,6 +20,7 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
 import { useSetState } from '/@/shared/hooks/use-set-state';
 import { LibraryItem } from '/@/shared/types/domain-types';
+import { shouldShowFullscreenImagePlaceholder } from '/@/shared/utils/fullscreen-player-image';
 
 const imageVariants: Variants = {
     closed: {
@@ -48,6 +49,7 @@ const MotionImage = motion.img;
 
 const ImageWithPlaceholder = ({
     className,
+    onError,
     placeholderIcon,
     useImageAspectRatio,
     ...props
@@ -56,7 +58,10 @@ const ImageWithPlaceholder = ({
     placeholderIcon?: 'itemAlbum' | 'radio';
     useImageAspectRatio?: boolean;
 }) => {
-    if (!props.src) {
+    const [failedSrc, setFailedSrc] = useState<null | string>(null);
+    const src = typeof props.src === 'string' ? props.src : undefined;
+
+    if (shouldShowFullscreenImagePlaceholder(src, failedSrc)) {
         return (
             <Center
                 style={{
@@ -83,6 +88,10 @@ const ImageWithPlaceholder = ({
                 width: useImageAspectRatio ? 'auto' : '100%',
             }}
             {...props}
+            onError={(event) => {
+                setFailedSrc(src || null);
+                onError?.(event);
+            }}
         />
     );
 };

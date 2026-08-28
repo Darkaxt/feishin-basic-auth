@@ -26,6 +26,7 @@ import { Flex } from '/@/shared/components/flex/flex';
 import { Icon } from '/@/shared/components/icon/icon';
 import { useSetState } from '/@/shared/hooks/use-set-state';
 import { ExplicitStatus, LibraryItem } from '/@/shared/types/domain-types';
+import { shouldShowFullscreenImagePlaceholder } from '/@/shared/utils/fullscreen-player-image';
 
 const imageVariants: Variants = {
     closed: {
@@ -55,6 +56,7 @@ const MotionImage = motion.img;
 const ImageWithPlaceholder = ({
     className,
     explicit,
+    onError,
     placeholderIcon = 'itemAlbum',
     ...props
 }: HTMLMotionProps<'img'> & {
@@ -63,8 +65,10 @@ const ImageWithPlaceholder = ({
     placeholderIcon?: 'itemAlbum' | 'radio';
 }) => {
     const nativeAspectRatio = useNativeAspectRatio();
+    const [failedSrc, setFailedSrc] = useState<null | string>(null);
+    const src = typeof props.src === 'string' ? props.src : undefined;
 
-    if (!props.src) {
+    if (shouldShowFullscreenImagePlaceholder(src, failedSrc)) {
         return (
             <Center
                 style={{
@@ -89,6 +93,10 @@ const ImageWithPlaceholder = ({
                 width: nativeAspectRatio ? 'auto' : '100%',
             }}
             {...props}
+            onError={(event) => {
+                setFailedSrc(src || null);
+                onError?.(event);
+            }}
         />
     );
 };
