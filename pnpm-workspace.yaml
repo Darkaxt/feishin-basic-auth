@@ -1,6 +1,6 @@
 allowBuilds:
     abstract-socket: true
-    electron: true
+    electron: false
     electron-winstaller: true
     esbuild: true
 minimumReleaseAge: 1440
@@ -13,7 +13,7 @@ minimumReleaseAgeExclude:
 overrides:
     'brace-expansion': '5.0.9'
     'dompurify': '3.4.13'
-    'electron': '41.10.4'
+    'electron': '43.4.1'
     'esbuild': '0.28.1'
     'fast-uri': '3.1.5'
     'fast-xml-builder': '1.2.0'

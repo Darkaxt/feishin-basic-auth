@@ -191,7 +191,7 @@ const appRouterModals = {
 
 export const AppRouter = () => {
     const router = (
-        <HashRouter>
+        <HashRouter useTransitions={false}>
             <ModalsProvider modals={appRouterModals}>
                 <RouterErrorBoundary>
                     <Routes>
