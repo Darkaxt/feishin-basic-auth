@@ -29,6 +29,7 @@ import { Icon } from '/@/shared/components/icon/icon';
 import { useSetState } from '/@/shared/hooks/use-set-state';
 import { ExplicitStatus, LibraryItem } from '/@/shared/types/domain-types';
 import { PlayerStatus } from '/@/shared/types/types';
+import { getFullscreenArtworkSlots } from '/@/shared/utils/fullscreen-player-image';
 
 const imageVariants: Variants = {
     closed: {
@@ -156,14 +157,27 @@ export const FullScreenPlayerImage = () => {
         currentSong?._serverId,
         coverArtSize,
     ].join('|');
+    const nextArtworkRequestKey = [
+        nextSong?._uniqueId,
+        nextSong?.imageId,
+        nextImageUrl,
+        nextSong?._serverId,
+        coverArtSize,
+    ].join('|');
 
     const [imageState, setImageState] = useSetState({
         bottomExplicit: nextSong?.explicitStatus === ExplicitStatus.EXPLICIT,
         bottomImage: nextImageUrl,
+        bottomRequestKey: nextArtworkRequestKey,
         current: 0,
         topExplicit: currentSong?.explicitStatus === ExplicitStatus.EXPLICIT,
         topImage: currentImageUrl,
+        topRequestKey: currentArtworkRequestKey,
     });
+    const pendingArtworkRef = useRef<{
+        bottom?: { explicit: boolean; image?: string; requestKey: string };
+        top?: { explicit: boolean; image?: string; requestKey: string };
+    }>({});
 
     const isItemEnabled = (item: PlayerItem) =>
         !playerItems.find((entry) => entry.id === item)?.disabled;
@@ -258,17 +272,31 @@ export const FullScreenPlayerImage = () => {
 
         const isTop = imageStateRef.current.current === 0;
 
-        setImageState({
-            bottomExplicit:
-                (isTop ? currentSong?.explicitStatus : nextSong?.explicitStatus) ===
-                ExplicitStatus.EXPLICIT,
-            bottomImage: isTop ? currentImageUrl : nextImageUrl,
-            current: isTop ? 1 : 0,
-            topExplicit:
-                (isTop ? nextSong?.explicitStatus : currentSong?.explicitStatus) ===
-                ExplicitStatus.EXPLICIT,
-            topImage: isTop ? nextImageUrl : currentImageUrl,
-        });
+        if (isTop) {
+            pendingArtworkRef.current.top = {
+                explicit: nextSong?.explicitStatus === ExplicitStatus.EXPLICIT,
+                image: nextImageUrl,
+                requestKey: nextArtworkRequestKey,
+            };
+            setImageState({
+                bottomExplicit: currentSong?.explicitStatus === ExplicitStatus.EXPLICIT,
+                bottomImage: currentImageUrl,
+                bottomRequestKey: currentArtworkRequestKey,
+                current: 1,
+            });
+        } else {
+            pendingArtworkRef.current.bottom = {
+                explicit: nextSong?.explicitStatus === ExplicitStatus.EXPLICIT,
+                image: nextImageUrl,
+                requestKey: nextArtworkRequestKey,
+            };
+            setImageState({
+                current: 0,
+                topExplicit: currentSong?.explicitStatus === ExplicitStatus.EXPLICIT,
+                topImage: currentImageUrl,
+                topRequestKey: currentArtworkRequestKey,
+            });
+        }
 
         previousSongRef.current = currentSong?._uniqueId;
     }, [
@@ -277,10 +305,40 @@ export const FullScreenPlayerImage = () => {
         currentImageUrl,
         nextSong?._uniqueId,
         nextImageUrl,
+        currentArtworkRequestKey,
+        nextArtworkRequestKey,
         setImageState,
         currentSong?.explicitStatus,
         nextSong?.explicitStatus,
     ]);
+
+    const artworkSlots = getFullscreenArtworkSlots(
+        imageState.current as 0 | 1,
+        imageState.topImage,
+        imageState.bottomImage,
+    );
+
+    const commitPendingArtwork = (slot: 'bottom' | 'top') => {
+        const pending = pendingArtworkRef.current[slot];
+        if (!pending) {
+            return;
+        }
+
+        pendingArtworkRef.current[slot] = undefined;
+        if (slot === 'top') {
+            setImageState({
+                topExplicit: pending.explicit,
+                topImage: pending.image,
+                topRequestKey: pending.requestKey,
+            });
+        } else {
+            setImageState({
+                bottomExplicit: pending.explicit,
+                bottomImage: pending.image,
+                bottomRequestKey: pending.requestKey,
+            });
+        }
+    };
 
     return (
         <Flex
@@ -301,49 +359,48 @@ export const FullScreenPlayerImage = () => {
                 }}
             >
                 <AnimatePresence initial={false} mode="sync">
-                    {!isPlayingRadio && imageState.current === 0 && (
-                        <ImageWithPlaceholder
-                            animate="open"
-                            className="full-screen-player-image"
-                            custom={{ isOpen: imageState.current === 0 }}
-                            draggable={false}
-                            exit="closed"
-                            expectedSrc={currentImageUrl || ''}
-                            explicit={blurExplicitImages && imageState.topExplicit}
-                            initial="closed"
-                            isActiveSong
-                            isPlaying={playerStatus === PlayerStatus.PLAYING}
-                            key={`top-${currentSong?._uniqueId || 'none'}`}
-                            placeholder="var(--theme-colors-foreground-muted)"
-                            requestKey={currentArtworkRequestKey}
-                            shrinkOnPause={shrinkVinylArtworkOnPause}
-                            src={imageState.topImage || ''}
-                            variants={imageVariants}
-                            vinylEnabled={vinylArtworkEnabled}
-                        />
-                    )}
+                    {!isPlayingRadio &&
+                        artworkSlots.map((slot) => {
+                            if (!slot.render) {
+                                return null;
+                            }
 
-                    {!isPlayingRadio && imageState.current === 1 && (
-                        <ImageWithPlaceholder
-                            animate="open"
-                            className="full-screen-player-image"
-                            custom={{ isOpen: imageState.current === 1 }}
-                            draggable={false}
-                            exit="closed"
-                            expectedSrc={currentImageUrl || ''}
-                            explicit={blurExplicitImages && imageState.bottomExplicit}
-                            initial="closed"
-                            isActiveSong
-                            isPlaying={playerStatus === PlayerStatus.PLAYING}
-                            key={`bottom-${currentSong?._uniqueId || 'none'}`}
-                            placeholder="var(--theme-colors-foreground-muted)"
-                            requestKey={currentArtworkRequestKey}
-                            shrinkOnPause={shrinkVinylArtworkOnPause}
-                            src={imageState.bottomImage || ''}
-                            variants={imageVariants}
-                            vinylEnabled={vinylArtworkEnabled}
-                        />
-                    )}
+                            const explicit =
+                                slot.id === 'top'
+                                    ? imageState.topExplicit
+                                    : imageState.bottomExplicit;
+                            const requestKey =
+                                slot.id === 'top'
+                                    ? imageState.topRequestKey
+                                    : imageState.bottomRequestKey;
+
+                            return (
+                                <ImageWithPlaceholder
+                                    animate="open"
+                                    className="full-screen-player-image"
+                                    custom={{ isOpen: slot.active }}
+                                    draggable={false}
+                                    exit="closed"
+                                    expectedSrc={slot.src || ''}
+                                    explicit={blurExplicitImages && explicit}
+                                    initial="closed"
+                                    isActiveSong={slot.active}
+                                    isPlaying={playerStatus === PlayerStatus.PLAYING}
+                                    key={slot.id}
+                                    onAnimationComplete={() => {
+                                        if (!slot.active) {
+                                            commitPendingArtwork(slot.id);
+                                        }
+                                    }}
+                                    placeholder="var(--theme-colors-foreground-muted)"
+                                    requestKey={requestKey}
+                                    shrinkOnPause={shrinkVinylArtworkOnPause}
+                                    src={slot.src || ''}
+                                    variants={imageVariants}
+                                    vinylEnabled={vinylArtworkEnabled}
+                                />
+                            );
+                        })}
 
                     {isPlayingRadio && (
                         <ImageWithPlaceholder

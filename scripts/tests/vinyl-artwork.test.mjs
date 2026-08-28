@@ -5,7 +5,6 @@ const vinyl = await import('../../src/shared/utils/vinyl-artwork.ts');
 
 test('vinyl policy matches the Navic timing and geometry contract', () => {
     assert.equal(vinyl.VINYL_ROTATION_DURATION_MS, 8000);
-    assert.equal(vinyl.VINYL_REVEAL_DURATION_MS, 180);
     assert.equal(vinyl.VINYL_GROOVE_COUNT, 48);
     assert.ok(vinyl.VINYL_SPINDLE_RADIUS < vinyl.VINYL_LABEL_RADIUS);
     assert.ok(vinyl.VINYL_LABEL_RADIUS < vinyl.VINYL_GROOVE_START_RADIUS);
@@ -43,7 +42,7 @@ test('rotation requires active exact artwork and resets every cycle', () => {
     }
 });
 
-test('pause shrink and wide-cover classification are deterministic', () => {
+test('pause restores the normal cover and optionally shrinks it', () => {
     assert.deepEqual(
         vinyl.getVinylPresentation({
             artworkReady: true,
@@ -53,8 +52,23 @@ test('pause shrink and wide-cover classification are deterministic', () => {
             reducedMotion: false,
             shrinkOnPause: true,
         }),
-        { rotate: false, showRecord: true, shrink: true },
+        { rotate: false, showRecord: false, shrink: true },
     );
+
+    assert.deepEqual(
+        vinyl.getVinylPresentation({
+            artworkReady: false,
+            enabled: true,
+            isActiveSong: true,
+            isPlaying: true,
+            reducedMotion: false,
+            shrinkOnPause: true,
+        }),
+        { rotate: false, showRecord: false, shrink: false },
+    );
+});
+
+test('wide-cover classification is deterministic', () => {
     assert.equal(vinyl.isWideVinylArtwork(1179, 1000), false);
     assert.equal(vinyl.isWideVinylArtwork(1180, 1000), true);
 });

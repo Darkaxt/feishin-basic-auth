@@ -110,7 +110,20 @@ export const VinylArtwork = ({
     };
 
     if (!src || failed) {
-        return <>{placeholder}</>;
+        return (
+            <motion.div
+                {...motionProps}
+                className={clsx(className, styles.root, {
+                    [styles.reducedMotion]: reducedMotion,
+                    [styles.shrunk]: presentation.shrink,
+                })}
+                style={{ ...motionProps.style, width: '100%' }}
+            >
+                <div className={styles.surface}>
+                    <div className={styles.placeholder}>{placeholder}</div>
+                </div>
+            </motion.div>
+        );
     }
 
     if (!enabled) {
@@ -127,17 +140,40 @@ export const VinylArtwork = ({
         );
     }
 
+    if (!presentation.showRecord) {
+        return (
+            <motion.div
+                {...motionProps}
+                className={clsx(className, styles.root, styles.cover, {
+                    [styles.reducedMotion]: reducedMotion,
+                    [styles.shrunk]: presentation.shrink,
+                })}
+                style={{ ...motionProps.style, width: '100%' }}
+            >
+                <div className={styles.surface}>
+                    <img
+                        alt=""
+                        className={styles.coverArtwork}
+                        draggable={false}
+                        loading={loading}
+                        onError={handleError}
+                        onLoad={handleLoad}
+                        src={src}
+                        style={imageStyle}
+                    />
+                </div>
+            </motion.div>
+        );
+    }
+
     return (
         <motion.div
             {...motionProps}
             className={clsx(className, styles.root, {
-                [styles.ready]: presentation.showRecord,
                 [styles.reducedMotion]: reducedMotion,
-                [styles.shrunk]: presentation.shrink,
             })}
             style={{ ...motionProps.style, width: '100%' }}
         >
-            {!presentation.showRecord && <div className={styles.placeholder}>{placeholder}</div>}
             <div className={styles.surface}>
                 <div
                     className={clsx(styles.record, {

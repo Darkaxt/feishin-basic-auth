@@ -1,5 +1,4 @@
 export const VINYL_ROTATION_DURATION_MS = 8000;
-export const VINYL_REVEAL_DURATION_MS = 180;
 export const VINYL_SPINDLE_RADIUS = 0.025;
 export const VINYL_LABEL_RADIUS = 0.17;
 export const VINYL_GROOVE_START_RADIUS = 0.24;
@@ -24,13 +23,12 @@ export const getVinylPresentation = ({
     reducedMotion,
     shrinkOnPause,
 }: VinylPresentationInput) => {
-    const showRecord = enabled && artworkReady;
-    const active = showRecord && isActiveSong && isPlaying;
+    const active = enabled && artworkReady && isActiveSong && isPlaying;
 
     return {
         rotate: active && !reducedMotion,
-        showRecord,
-        shrink: showRecord && shrinkOnPause && !active && !reducedMotion,
+        showRecord: active,
+        shrink: enabled && shrinkOnPause && (!isActiveSong || !isPlaying),
     };
 };
 

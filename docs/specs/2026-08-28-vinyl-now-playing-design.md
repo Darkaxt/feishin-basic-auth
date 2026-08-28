@@ -16,8 +16,8 @@ The feature is a presentation of the current song's artwork, not a new playback 
 - Rotate only while the current song is actively playing.
 - Support the desktop and mobile fullscreen players through one shared policy and visual component.
 - Prevent previous-song artwork from flashing during song changes.
-- Reset the record to zero degrees when paused or inactive.
-- Optionally shrink the record while paused or inactive.
+- Restore the normal configured cover shape when paused or inactive.
+- Optionally shrink the normal cover while paused or inactive.
 - Preserve all current LidaClips foreground, ambient background, and fallback behavior.
 - Respect reduced-motion preferences without removing the vinyl appearance.
 
@@ -42,7 +42,7 @@ Add two persisted fullscreen-player settings:
 | Setting | Default | Behavior |
 | --- | --- | --- |
 | `vinylArtworkEnabled` | `false` | Enables the vinyl presentation in desktop and mobile fullscreen players. |
-| `shrinkVinylArtworkOnPause` | `true` | Adds the existing Navic-equivalent inactive padding while paused or when the displayed song is not active. |
+| `shrinkVinylArtworkOnPause` | `true` | Adds the existing Navic-equivalent inactive padding to the normal cover while paused or when the displayed song is not active. |
 
 Expose both settings in General > Fullscreen Player and in the fullscreen quick-settings popover. Disabling vinyl restores the existing Feishin artwork presentation immediately.
 
@@ -55,7 +55,6 @@ Create a pure module, `src/shared/utils/vinyl-artwork.ts`, with constants and de
 | Constant | Value |
 | --- | --- |
 | Rotation duration | `8000 ms` |
-| Artwork reveal duration | `180 ms` |
 | Spindle radius | `0.025 * record radius` |
 | Label radius | `0.17 * record radius` |
 | Groove start radius | `0.24 * record radius` |
@@ -83,21 +82,23 @@ When any condition becomes false, the visible rotation is `0deg`. A later resume
 
 ## Artwork Readiness
 
-Represent an artwork request with the song unique ID, image ID, image URL, server ID, and effective image size. The vinyl surface remains hidden until the loaded image reports success for that exact request.
+Represent an artwork request with the song unique ID, image ID, image URL, server ID, and effective image size. The vinyl surface remains absent until the loaded image reports success for that exact request.
 
 On a song or request change:
 
 1. Clear the resolved request identity.
 2. Reset rotation to zero.
-3. Keep the existing Feishin placeholder visible.
+3. Keep the existing Feishin cover or transition image visible.
 4. Load the new artwork.
-5. After exact-request success, reveal the vinyl surface over `180 ms`.
+5. After exact-request success, replace the normal cover with the vinyl surface only while playback is active.
+
+The fullscreen player keeps both artwork slots mounted. The inactive slot preloads the queue's next cover, the outgoing slot retains the previous cover through its exit animation, and that outgoing slot is repurposed for the following cover only after the animation completes. Empty inactive slots are not rendered, so their placeholders cannot cover the active artwork.
 
 A late success or failure from a previous song must be ignored. If the image fails, use the fullscreen album placeholder and do not draw or rotate a record. A later source change is a new request and must be retried.
 
 ## Visual Template
 
-The artwork and overlay rotate as one compositor layer. The record is always square and clipped to a circle while vinyl mode is enabled.
+The artwork and overlay rotate as one compositor layer. During active playback the record is square and clipped to a circle. Paused or inactive playback uses the normal configured cover shape without the vinyl overlay.
 
 Draw the overlay using theme colors and Navic's exact ratios:
 
@@ -122,9 +123,9 @@ The implementation may defer soft edge compression to a follow-up only if the ba
 
 ## Pause And Inactive State
 
-When `shrinkVinylArtworkOnPause` is enabled, paused or inactive artwork receives an additional `32 px` inset, animated with the existing UI motion conventions. The surrounding artwork container keeps stable dimensions so metadata does not move.
+When `shrinkVinylArtworkOnPause` is enabled, the restored normal cover receives an additional `32 px` inset while paused or inactive, animated with the existing UI motion conventions. The surrounding artwork container keeps stable dimensions so metadata does not move.
 
-When the setting is disabled, pause only stops and resets rotation. It does not resize the artwork.
+When the setting is disabled, pause immediately restores the normal full-size cover. The vinyl overlay is not visible while paused.
 
 ## LidaClips Interaction
 
@@ -136,7 +137,7 @@ When the setting is disabled, pause only stops and resets rotation. It does not 
 
 ## Reduced Motion
 
-When `prefers-reduced-motion: reduce` is active, retain the circular record and overlay but disable rotation and animated shrink/reveal. State changes apply immediately. The user's vinyl setting remains persisted and takes effect normally if reduced motion is later disabled.
+When `prefers-reduced-motion: reduce` is active, retain the circular record and overlay during active playback but disable rotation and animated shrink. State changes apply immediately. The user's vinyl setting remains persisted and takes effect normally if reduced motion is later disabled.
 
 ## Component Integration
 
@@ -173,8 +174,8 @@ The existing two-image crossfade remains responsible for song transitions. `Viny
 ### Renderer Tests
 
 - Desktop and mobile render the same SVG template.
-- Song changes never reveal the previous cover inside the record.
-- Pause resets angle and applies optional shrink without moving metadata.
+- Song changes keep the ordinary cover visible until the exact new artwork is ready; no black placeholder is introduced.
+- Pause restores the normal cover and applies optional shrink without moving metadata.
 - Resume starts a fresh rotation cycle.
 - Explicit-art blur follows the rotating layer.
 - CLIPS, LYRICS, UP NEXT, RELATED, and VISUALIZER tab changes do not restart the record.
