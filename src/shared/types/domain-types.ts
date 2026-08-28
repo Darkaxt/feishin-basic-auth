@@ -435,6 +435,7 @@ type BaseEndpointArgs = {
         server?: null | ServerListItemWithCredential;
         serverId: string;
         signal?: AbortSignal;
+        silent?: boolean;
     };
     context?: ApiContext;
 };
@@ -2063,6 +2064,7 @@ type BaseEndpointArgsWithServer = {
         server: null | ServerListItemWithCredential;
         serverId: string;
         signal?: AbortSignal;
+        silent?: boolean;
     };
     context?: ApiContext;
 };

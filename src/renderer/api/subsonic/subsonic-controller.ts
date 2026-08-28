@@ -56,6 +56,7 @@ import {
     isProxyBasicAuthConfigured,
     withUrlBasicAuth,
 } from '/@/shared/utils/proxy-auth';
+import { isSongNotFoundResponse, SongNotFoundError } from '/@/shared/utils/song-availability';
 
 const localSettings =
     typeof window !== 'undefined' && isElectron() ? window.api.localSettings : null;
@@ -1555,6 +1556,10 @@ export const SubsonicController: InternalControllerEndpoint = {
                 id: query.id,
             },
         });
+
+        if (isSongNotFoundResponse('subsonic', Number(res.status), res.body)) {
+            throw new SongNotFoundError(query.id);
+        }
 
         if (res.status !== 200) {
             throw new Error('Failed to get song detail');

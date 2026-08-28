@@ -1,10 +1,11 @@
 import clsx from 'clsx';
-import { AnimatePresence, HTMLMotionProps, motion, Variants } from 'motion/react';
+import { AnimatePresence, HTMLMotionProps, Variants } from 'motion/react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import styles from './mobile-fullscreen-player.module.css';
 
 import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
+import { VinylArtwork } from '/@/renderer/features/player/components/vinyl-artwork';
 import {
     useIsRadioActive,
     useRadioPlayer,
@@ -14,13 +15,14 @@ import {
     useImageRes,
     usePlayerData,
     usePlayerSong,
+    usePlayerStatus,
 } from '/@/renderer/store';
 import { Center } from '/@/shared/components/center/center';
 import { Icon } from '/@/shared/components/icon/icon';
 import { PlaybackSelectors } from '/@/shared/constants/playback-selectors';
 import { useSetState } from '/@/shared/hooks/use-set-state';
 import { LibraryItem } from '/@/shared/types/domain-types';
-import { shouldShowFullscreenImagePlaceholder } from '/@/shared/utils/fullscreen-player-image';
+import { PlayerStatus } from '/@/shared/types/types';
 
 const imageVariants: Variants = {
     closed: {
@@ -45,53 +47,66 @@ const imageVariants: Variants = {
     },
 };
 
-const MotionImage = motion.img;
-
 const ImageWithPlaceholder = ({
     className,
-    onError,
+    expectedSrc,
+    isActiveSong,
+    isPlaying,
+    loading,
     placeholderIcon,
+    requestKey,
+    shrinkOnPause,
+    src,
     useImageAspectRatio,
-    ...props
-}: HTMLMotionProps<'img'> & {
+    vinylEnabled,
+    ...motionProps
+}: HTMLMotionProps<'div'> & {
+    expectedSrc?: string;
+    isActiveSong: boolean;
+    isPlaying: boolean;
+    loading?: 'eager' | 'lazy';
     placeholder?: string;
     placeholderIcon?: 'itemAlbum' | 'radio';
+    requestKey: string;
+    shrinkOnPause: boolean;
+    src?: string;
     useImageAspectRatio?: boolean;
+    vinylEnabled: boolean;
 }) => {
-    const [failedSrc, setFailedSrc] = useState<null | string>(null);
-    const src = typeof props.src === 'string' ? props.src : undefined;
-
-    if (shouldShowFullscreenImagePlaceholder(src, failedSrc)) {
-        return (
-            <Center
-                style={{
-                    background: 'var(--theme-colors-surface)',
-                    borderRadius: '12px',
-                    height: '100%',
-                    width: '100%',
-                }}
-            >
-                <Icon
-                    color="muted"
-                    icon={placeholderIcon === 'radio' ? 'radio' : 'itemAlbum'}
-                    size="25%"
-                />
-            </Center>
-        );
-    }
+    const placeholder = (
+        <Center
+            style={{
+                background: 'var(--theme-colors-surface)',
+                borderRadius: '12px',
+                height: '100%',
+                width: '100%',
+            }}
+        >
+            <Icon
+                color="muted"
+                icon={placeholderIcon === 'radio' ? 'radio' : 'itemAlbum'}
+                size="25%"
+            />
+        </Center>
+    );
 
     return (
-        <MotionImage
+        <VinylArtwork
             className={clsx(styles.albumImage, className)}
-            style={{
+            enabled={vinylEnabled}
+            expectedSrc={expectedSrc}
+            imageStyle={{
                 objectFit: useImageAspectRatio ? 'contain' : 'cover',
                 width: useImageAspectRatio ? 'auto' : '100%',
             }}
-            {...props}
-            onError={(event) => {
-                setFailedSrc(src || null);
-                onError?.(event);
-            }}
+            isActiveSong={isActiveSong}
+            isPlaying={isPlaying}
+            loading={loading}
+            motionProps={motionProps}
+            placeholder={placeholder}
+            requestKey={requestKey}
+            shrinkOnPause={shrinkOnPause}
+            src={src}
         />
     );
 };
@@ -101,10 +116,12 @@ export const MobileFullscreenPlayerAlbumArt = () => {
     const [mainImageDimensions, setMainImageDimensions] = useState({ idealSize: 1000 });
 
     const { fullScreenPlayer: albumArtRes } = useImageRes();
-    const { useImageAspectRatio } = useFullScreenPlayerStore();
+    const { shrinkVinylArtworkOnPause, useImageAspectRatio, vinylArtworkEnabled } =
+        useFullScreenPlayerStore();
     const isRadioActive = useIsRadioActive();
     const { isPlaying: isRadioPlaying } = useRadioPlayer();
     const currentSong = usePlayerSong();
+    const playerStatus = usePlayerStatus();
     const { nextSong } = usePlayerData();
 
     const isPlayingRadio = isRadioActive && isRadioPlaying;
@@ -122,6 +139,14 @@ export const MobileFullscreenPlayerAlbumArt = () => {
         size: mainImageDimensions.idealSize,
         type: 'fullScreenPlayer',
     });
+
+    const currentArtworkRequestKey = [
+        currentSong?._uniqueId,
+        currentSong?.imageId,
+        currentImageUrl,
+        currentSong?._serverId,
+        mainImageDimensions.idealSize,
+    ].join('|');
 
     const [imageState, setImageState] = useSetState({
         bottomImage: nextImageUrl,
@@ -184,14 +209,20 @@ export const MobileFullscreenPlayerAlbumArt = () => {
                             custom={{ isOpen: true }}
                             draggable={false}
                             exit="closed"
+                            expectedSrc=""
                             initial="closed"
+                            isActiveSong={false}
+                            isPlaying={false}
                             key="radio"
                             loading="eager"
                             placeholder="var(--theme-colors-foreground-muted)"
                             placeholderIcon="radio"
+                            requestKey="radio"
+                            shrinkOnPause={false}
                             src=""
                             useImageAspectRatio={useImageAspectRatio}
                             variants={imageVariants}
+                            vinylEnabled={false}
                         />
                     ) : (
                         <>
@@ -202,13 +233,19 @@ export const MobileFullscreenPlayerAlbumArt = () => {
                                     custom={{ isOpen: imageState.current === 0 }}
                                     draggable={false}
                                     exit="closed"
+                                    expectedSrc={currentImageUrl || ''}
                                     initial="closed"
+                                    isActiveSong
+                                    isPlaying={playerStatus === PlayerStatus.PLAYING}
                                     key={`top-${currentSong?._uniqueId || 'none'}`}
                                     loading="eager"
                                     placeholder="var(--theme-colors-foreground-muted)"
+                                    requestKey={currentArtworkRequestKey}
+                                    shrinkOnPause={shrinkVinylArtworkOnPause}
                                     src={imageState.topImage || ''}
                                     useImageAspectRatio={useImageAspectRatio}
                                     variants={imageVariants}
+                                    vinylEnabled={vinylArtworkEnabled}
                                 />
                             )}
 
@@ -219,13 +256,19 @@ export const MobileFullscreenPlayerAlbumArt = () => {
                                     custom={{ isOpen: imageState.current === 1 }}
                                     draggable={false}
                                     exit="closed"
+                                    expectedSrc={currentImageUrl || ''}
                                     initial="closed"
+                                    isActiveSong
+                                    isPlaying={playerStatus === PlayerStatus.PLAYING}
                                     key={`bottom-${currentSong?._uniqueId || 'none'}`}
                                     loading="eager"
                                     placeholder="var(--theme-colors-foreground-muted)"
+                                    requestKey={currentArtworkRequestKey}
+                                    shrinkOnPause={shrinkVinylArtworkOnPause}
                                     src={imageState.bottomImage || ''}
                                     useImageAspectRatio={useImageAspectRatio}
                                     variants={imageVariants}
+                                    vinylEnabled={vinylArtworkEnabled}
                                 />
                             )}
                         </>

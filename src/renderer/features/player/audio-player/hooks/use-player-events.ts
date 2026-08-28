@@ -34,6 +34,7 @@ interface PlayerEventsCallbacks {
     onPlayerPlay?: (properties: { id: string; index: number }) => void;
     onPlayerProgress?: (properties: { timestamp: number }, prev: { timestamp: number }) => void;
     onPlayerQueueChange?: (queue: QueueData, prev: QueueData) => void;
+    onPlayerQueueSync?: () => void;
     onPlayerRepeat?: (properties: { repeat: PlayerRepeat }, prev: { repeat: PlayerRepeat }) => void;
     onPlayerRepeated?: (properties: { index: number }) => void;
     onPlayerSeek?: (properties: { seconds: number }, prev: { seconds: number }) => void;
@@ -163,6 +164,10 @@ function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
         eventEmitter.on('PLAYER_PLAY', callbacks.onPlayerPlay);
     }
 
+    if (callbacks.onPlayerQueueSync) {
+        eventEmitter.on('PLAYER_QUEUE_SYNC', callbacks.onPlayerQueueSync);
+    }
+
     if (callbacks.onPlayerRepeated) {
         eventEmitter.on('PLAYER_REPEATED', callbacks.onPlayerRepeated);
     }
@@ -194,6 +199,9 @@ function createPlayerEvents(callbacks: PlayerEventsCallbacks): PlayerEvents {
             }
             if (callbacks.onPlayerPlay) {
                 eventEmitter.off('PLAYER_PLAY', callbacks.onPlayerPlay);
+            }
+            if (callbacks.onPlayerQueueSync) {
+                eventEmitter.off('PLAYER_QUEUE_SYNC', callbacks.onPlayerQueueSync);
             }
             if (callbacks.onPlayerRepeated) {
                 eventEmitter.off('PLAYER_REPEATED', callbacks.onPlayerRepeated);

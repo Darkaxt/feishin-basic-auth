@@ -236,13 +236,9 @@ export const SharedFullscreenPlayerSettings = () => {
                             />
                         </Option.Control>
                     </Option>
-                    <Option>
-                        <Option.Control>
-                            <div style={{ width: '100%' }}>
-                                <FullscreenPlayerSettings showDescription={false} />
-                            </div>
-                        </Option.Control>
-                    </Option>
+                    <div style={{ width: '100%' }}>
+                        <FullscreenPlayerSettings showDescription={false} />
+                    </div>
                     {isTitleEnabled && (
                         <Option>
                             <Option.Label>

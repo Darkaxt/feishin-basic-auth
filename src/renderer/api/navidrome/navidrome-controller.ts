@@ -38,6 +38,7 @@ import {
     userListSortMap,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
+import { isSongNotFoundResponse, SongNotFoundError } from '/@/shared/utils/song-availability';
 
 const VERSION_INFO: VersionInfo = [
     // Why 2? Subsonic controller will return 1 for its own implementation
@@ -846,6 +847,10 @@ export const NavidromeController: InternalControllerEndpoint = {
                 id: query.id,
             },
         });
+
+        if (isSongNotFoundResponse('navidrome', res.status, res.body)) {
+            throw new SongNotFoundError(query.id);
+        }
 
         if (res.status !== 200) {
             throw new Error('Failed to get song detail');

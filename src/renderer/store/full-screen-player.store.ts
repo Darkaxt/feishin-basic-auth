@@ -29,9 +29,11 @@ interface FullScreenPlayerState {
     expanded: boolean;
     opacity: number;
     playerItemAlignment: FullScreenPlayerItemAlignment;
+    shrinkVinylArtworkOnPause: boolean;
     titleDisplayType: FullScreenPlayerTitleDisplayType;
     titleLineCount: number;
     useImageAspectRatio: boolean;
+    vinylArtworkEnabled: boolean;
     visualizerExpanded: boolean;
     visualizerReturnToPlayer: boolean;
 }
@@ -56,9 +58,11 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
                 expanded: false,
                 opacity: 25,
                 playerItemAlignment: 'center',
+                shrinkVinylArtworkOnPause: true,
                 titleDisplayType: 'scroll',
                 titleLineCount: 1,
                 useImageAspectRatio: false,
+                vinylArtworkEnabled: false,
                 visualizerExpanded: false,
                 visualizerReturnToPlayer: false,
             })),
@@ -95,7 +99,7 @@ export const useFullScreenPlayerStore = createWithEqualityFn<FullScreenPlayerSli
                 omit(sanitizeLidaClipsRuntimeState(state), [
                     'visualizerReturnToPlayer',
                 ]) as FullScreenPlayerSlice,
-            version: 7,
+            version: 8,
         },
     ),
 );

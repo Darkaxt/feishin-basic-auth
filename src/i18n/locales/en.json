@@ -619,7 +619,11 @@
                 "titleDisplayType_optionScroll": "Scroll",
                 "titleLineCount": "Title line count",
                 "unsynchronized": "Unsynchronized",
-                "useImageAspectRatio": "Use image aspect ratio"
+                "useImageAspectRatio": "Use image aspect ratio",
+                "vinylArtwork": "Vinyl artwork",
+                "vinylArtwork_description": "Render fullscreen cover art as a rotating vinyl record while music is playing",
+                "shrinkVinylArtworkOnPause": "Shrink vinyl when paused",
+                "shrinkVinylArtworkOnPause_description": "Inset the record while playback is paused or the displayed song is inactive"
             },
             "lyrics": "Lyrics",
             "lyricLayers": "Lyric layers",

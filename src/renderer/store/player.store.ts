@@ -26,6 +26,7 @@ import {
     PlayerStyle,
 } from '/@/shared/types/types';
 import { shouldPauseAfterAutoNext } from '/@/shared/utils/lidaclips';
+import { getUnavailableSongRecovery } from '/@/shared/utils/song-availability';
 
 export interface PlayerState extends Actions, State {}
 
@@ -65,6 +66,7 @@ interface Actions {
     moveSelectedToBottom: (items: QueueSong[]) => void;
     moveSelectedToNext: (items: QueueSong[]) => void;
     moveSelectedToTop: (items: QueueSong[]) => void;
+    removeUnavailableSong: (uniqueId: string) => void;
     setCrossfadeDuration: (duration: number) => void;
     setCrossfadeStyle: (style: CrossfadeStyle) => void;
     setPauseOnNextSongEnd: (value: boolean) => void;
@@ -1478,6 +1480,47 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         state.queue.default = newQueue;
                     });
                 },
+                removeUnavailableSong: (uniqueId) => {
+                    const currentState = get();
+                    const currentSong = currentState.getCurrentSong();
+                    if (currentSong?._uniqueId !== uniqueId) {
+                        return;
+                    }
+
+                    const recovery = getUnavailableSongRecovery({
+                        currentIndex: currentState.player.index,
+                        queueLength: currentState.queue.default.length,
+                    });
+
+                    set((state) => {
+                        const queueIndex = state.queue.default.findIndex((id) => id === uniqueId);
+                        if (queueIndex === -1) {
+                            return;
+                        }
+
+                        state.queue.default.splice(queueIndex, 1);
+
+                        if (isShuffleEnabled(state)) {
+                            state.queue.shuffled = state.queue.shuffled
+                                .filter((index) => index !== queueIndex)
+                                .map((index) => (index > queueIndex ? index - 1 : index));
+                        } else {
+                            state.queue.shuffled = [];
+                        }
+
+                        cleanupOrphanedSongs(state);
+                        state.player.index = recovery.nextIndex;
+                        state.player.playerNum = 1;
+                        state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
+
+                        if (recovery.shouldStop) {
+                            state.player.status = PlayerStatus.STOPPED;
+                        }
+                    });
+
+                    setTimestampStore(0);
+                    eventEmitter.emit('PLAYER_QUEUE_SYNC', {});
+                },
                 setQueue: (items, index, position) => {
                     const newItems = items.map(toQueueSong);
                     const newUniqueIds = newItems.map((item) => item._uniqueId);
@@ -1810,6 +1853,7 @@ export const usePlayerActions = () => {
             moveSelectedToBottom: state.moveSelectedToBottom,
             moveSelectedToNext: state.moveSelectedToNext,
             moveSelectedToTop: state.moveSelectedToTop,
+            removeUnavailableSong: state.removeUnavailableSong,
             setCrossfadeDuration: state.setCrossfadeDuration,
             setCrossfadeStyle: state.setCrossfadeStyle,
             setPauseOnNextSongEnd: state.setPauseOnNextSongEnd,

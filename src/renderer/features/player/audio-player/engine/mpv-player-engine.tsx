@@ -366,6 +366,9 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                     }),
                 });
             },
+            onPlayerQueueSync: () => {
+                replaceMpvQueue(transcode);
+            },
             onQueueCleared: () => {},
             onQueueRestored: (properties) => {
                 replaceMpvQueue(transcode, {
@@ -454,5 +457,6 @@ async function replaceMpvQueue(
     const nextSongUrl = playerData.nextSong
         ? await getSongUrl(playerData.nextSong, transcode, true)
         : undefined;
-    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, false, options?.startTime);
+    const shouldPause = playerData.status !== PlayerStatus.PLAYING;
+    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, shouldPause, options?.startTime);
 }

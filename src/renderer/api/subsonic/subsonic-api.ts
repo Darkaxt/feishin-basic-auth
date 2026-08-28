@@ -14,6 +14,7 @@ import { ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
 
 const SUBSONIC_AUTH_ERROR_CODE = 40;
+const SUBSONIC_SILENT_RESPONSE_KEY = '__feishinSilentResponse';
 
 const c = initContract();
 
@@ -402,10 +403,11 @@ axiosClient.interceptors.response.use(
                 // Servers may return code as string ("40") — coerce before comparing
                 const numericCode = Number(errorCode);
                 const isAuthError = numericCode === SUBSONIC_AUTH_ERROR_CODE;
+                const isSilent = data['subsonic-response'][SUBSONIC_SILENT_RESPONSE_KEY] === true;
 
                 if (isAuthenticated && isAuthError) {
                     authenticationFailure(currentServer, errorMessage);
-                } else if (isAuthenticated) {
+                } else if (isAuthenticated && !isSilent) {
                     toast.error({
                         message: errorMessage,
                         title: i18n.t('error.genericError') as string,
@@ -469,7 +471,7 @@ const silentlyTransformResponse = (data: any) => {
     const status = jsonBody ? jsonBody['subsonic-response']?.status : undefined;
 
     if (status && status !== 'ok') {
-        jsonBody['subsonic-response'].error.code = 0;
+        jsonBody['subsonic-response'][SUBSONIC_SILENT_RESPONSE_KEY] = true;
     }
 
     return jsonBody;

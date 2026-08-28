@@ -40,6 +40,7 @@ import {
     UploadPlaylistImageResponse,
 } from '/@/shared/types/domain-types';
 import { ServerFeature } from '/@/shared/types/features-types';
+import { isSongNotFoundResponse, SongNotFoundError } from '/@/shared/utils/song-availability';
 
 const getJellyfinImageRequest = ({
     apiClientProps: { server },
@@ -1316,6 +1317,10 @@ export const JellyfinController: InternalControllerEndpoint = {
                 userId: apiClientProps.server?.userId ?? '',
             },
         });
+
+        if (isSongNotFoundResponse('jellyfin', res.status, res.body)) {
+            throw new SongNotFoundError(query.id);
+        }
 
         if (res.status !== 200) {
             throw new Error('Failed to get song detail');
