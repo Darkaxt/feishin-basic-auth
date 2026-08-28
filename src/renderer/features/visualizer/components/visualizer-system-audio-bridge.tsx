@@ -115,8 +115,13 @@ function VisualizerSystemAudioBridge() {
         closeLocalVisualizerSurfaces();
     }, [closePrompt, persistConsent]);
 
+    const handleCaptureLost = useCallback(() => {
+        hasAttemptedConnectionThisSessionRef.current = false;
+    }, []);
+
     const { connect, isConnected, isConnecting } = useVisualizerSystemAudio({
         onSystemAudioCaptureDenied: handleCaptureDenied,
+        onSystemAudioCaptureLost: handleCaptureLost,
         onSystemAudioCaptureSuccess: handleCaptureSuccess,
         shouldAttemptConnection: canCaptureSystemAudio,
         shouldKeepConnection: shouldKeepSystemAudioConnection,

@@ -4,27 +4,35 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import i18n from '/@/i18n/i18n';
 import { useWebAudio } from '/@/renderer/features/player/hooks/use-webaudio';
 import { usePlaybackType } from '/@/renderer/store/settings.store';
+import { logger } from '/@/renderer/utils/logger';
 import { toast } from '/@/shared/components/toast/toast';
 import { PlayerType, WebAudio } from '/@/shared/types/types';
-import { getVisualizerDisplayMediaOptions } from '/@/shared/utils/visualizer-system-audio';
+import {
+    bindVisualizerSystemAudioRecovery,
+    getVisualizerDisplayMediaOptions,
+} from '/@/shared/utils/visualizer-system-audio';
 
 const electronUtils = isElectron() ? window.api.utils : null;
 
 export function useVisualizerSystemAudio(options: {
     onSystemAudioCaptureDenied?: () => void;
+    onSystemAudioCaptureLost?: () => void;
     onSystemAudioCaptureSuccess?: () => void;
     shouldAttemptConnection: boolean;
     shouldKeepConnection?: boolean;
 }) {
     const {
         onSystemAudioCaptureDenied,
+        onSystemAudioCaptureLost,
         onSystemAudioCaptureSuccess,
         shouldAttemptConnection,
         shouldKeepConnection = shouldAttemptConnection,
     } = options;
     const onDeniedRef = useRef(onSystemAudioCaptureDenied);
+    const onLostRef = useRef(onSystemAudioCaptureLost);
     const onSuccessRef = useRef(onSystemAudioCaptureSuccess);
     onDeniedRef.current = onSystemAudioCaptureDenied;
+    onLostRef.current = onSystemAudioCaptureLost;
     onSuccessRef.current = onSystemAudioCaptureSuccess;
     const playbackType = usePlaybackType();
     const { setWebAudio, webAudio } = useWebAudio();
@@ -32,7 +40,11 @@ export function useVisualizerSystemAudio(options: {
     const streamRef = useRef<MediaStream | null>(null);
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const connectInFlightRef = useRef(false);
+    const shouldAttemptConnectionRef = useRef(shouldAttemptConnection);
+    const [connectionRevision, setConnectionRevision] = useState(0);
     const [isConnecting, setIsConnecting] = useState(false);
+
+    shouldAttemptConnectionRef.current = shouldAttemptConnection;
 
     useEffect(() => {
         webAudioRef.current = webAudio;
@@ -133,9 +145,18 @@ export function useVisualizerSystemAudio(options: {
             const next = { ...latest, visualizerInputs: [source] };
             setWebAudio(next);
             webAudioRef.current = next;
+            setConnectionRevision((revision) => revision + 1);
+            logger.info('Visualizer system audio connected', {
+                trackLabel: audioTracks[0]?.label,
+                trackReadyState: audioTracks[0]?.readyState,
+            });
             onSuccessRef.current?.();
         } catch (e) {
             const name = (e as DOMException)?.name;
+            logger.warn('Visualizer system audio capture failed', {
+                message: (e as Error)?.message,
+                name,
+            });
             if (name === 'NotAllowedError' || name === 'AbortError') {
                 onDeniedRef.current?.();
                 return;
@@ -153,6 +174,34 @@ export function useVisualizerSystemAudio(options: {
 
     const connectRef = useRef(connect);
     connectRef.current = connect;
+
+    useEffect(() => {
+        if (!isElectron() || playbackType !== PlayerType.LOCAL) {
+            return;
+        }
+
+        const observedStream = streamRef.current;
+        const audioTrack = observedStream?.getAudioTracks()[0];
+
+        return bindVisualizerSystemAudioRecovery({
+            audioTrack,
+            mediaDevices: navigator.mediaDevices,
+            onRecoveryNeeded: (reason) => {
+                if (reason === 'track-ended' && streamRef.current !== observedStream) {
+                    return;
+                }
+
+                logger.warn('Visualizer system audio capture needs recovery', { reason });
+                disconnect();
+                onLostRef.current?.();
+                setConnectionRevision((revision) => revision + 1);
+
+                if (shouldAttemptConnectionRef.current) {
+                    void connectRef.current();
+                }
+            },
+        });
+    }, [connectionRevision, disconnect, playbackType]);
 
     return {
         connect: async () => {
