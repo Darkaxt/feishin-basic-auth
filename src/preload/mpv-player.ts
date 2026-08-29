@@ -63,7 +63,7 @@ const seekTo = (seconds: number) => {
 };
 
 const setQueue = (current?: string, next?: string, pause?: boolean, startTime?: number) => {
-    ipcRenderer.send('player-set-queue', current, next, pause, startTime);
+    return ipcRenderer.invoke('player-set-queue', current, next, pause, startTime);
 };
 
 const setQueueNext = (url?: string) => {

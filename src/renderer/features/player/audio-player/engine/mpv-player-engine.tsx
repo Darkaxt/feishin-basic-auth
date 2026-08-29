@@ -20,6 +20,7 @@ import {
 import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
 import { PlayerStatus } from '/@/shared/types/types';
 import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
+import { createMpvQueuePlan, createMpvQueueSyncCoordinator } from '/@/shared/utils/mpv-queue-sync';
 import {
     getRestoredPlaybackStartTime,
     normalizePlaybackStartTime,
@@ -62,9 +63,8 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const currentSong = usePlayerSong();
 
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-    const isInitializedRef = useRef<boolean>(false);
-    const hasPopulatedQueueRef = useRef<boolean>(false);
     const isMountedRef = useRef<boolean>(true);
+    const queueSyncCoordinatorRef = useRef(createMpvQueueSyncCoordinator());
 
     const { mpvAudioDeviceId, transcode } = usePlaybackSettings();
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
@@ -94,6 +94,8 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     // Start the mpv instance on startup
     useEffect(() => {
         isMountedRef.current = true;
+        const queueSyncCoordinator = queueSyncCoordinatorRef.current;
+        queueSyncCoordinator.reset();
 
         const initializeMpv = async () => {
             // Always quit mpv first to ensure clean state, especially during HMR remounts
@@ -112,10 +114,6 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                     attempts++;
                 }
             }
-
-            // Reset initialization state
-            isInitializedRef.current = false;
-            hasPopulatedQueueRef.current = false;
 
             // Initialize mpv with fresh state
             const properties: Record<string, any> = {
@@ -144,28 +142,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                 mpvPlayer?.setProperties({ af: filterStr });
             }
 
-            // After initialization, populate the queue if currentSrc is available
-            // Don't override queue if radio is active
-            const radioState = useRadioStore.getState();
-
-            if (!radioState.currentStreamUrl) {
-                const playerData = usePlayerStore.getState().getPlayerData();
-                const currentSongUrl = playerData.currentSong
-                    ? await getSongUrl(playerData.currentSong, transcode, true)
-                    : undefined;
-                const nextSongUrl = playerData.nextSong
-                    ? await getSongUrl(playerData.nextSong, transcode, true)
-                    : undefined;
-
-                if (currentSongUrl && nextSongUrl && !hasPopulatedQueueRef.current && mpvPlayer) {
-                    const shouldPause =
-                        usePlayerStore.getState().player.status !== PlayerStatus.PLAYING;
-                    mpvPlayer.setQueue(currentSongUrl, nextSongUrl, shouldPause);
-                    hasPopulatedQueueRef.current = true;
-                }
-            }
-
-            isInitializedRef.current = true;
+            await queueSyncCoordinator.markReady(() => replaceMpvQueue(transcode));
         };
 
         initializeMpv();
@@ -174,8 +151,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             isMountedRef.current = false;
             // Quit mpv on unmount
             mpvPlayer?.quit();
-            isInitializedRef.current = false;
-            hasPopulatedQueueRef.current = false;
+            queueSyncCoordinator.reset();
         };
         // Note: volume, speed, preservePitch, and transcode are intentionally not in dependencies.
         // Volume speed, and preservePitch changes are handled by separate useEffects below to avoid
@@ -341,10 +317,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     usePlayerEvents(
         {
             onMediaNext: () => {
-                replaceMpvQueue(transcode);
+                queueSyncCoordinatorRef.current.request(() => replaceMpvQueue(transcode));
             },
             onMediaPrev: () => {
-                replaceMpvQueue(transcode);
+                queueSyncCoordinatorRef.current.request(() => replaceMpvQueue(transcode));
             },
             onNextSongInsertion: async (song) => {
                 const radioState = useRadioStore.getState();
@@ -358,22 +334,26 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             },
             onPlayerPlay: (properties) => {
                 const playerData = usePlayerStore.getState().getPlayerData();
-                replaceMpvQueue(transcode, {
-                    startTime: getRestoredPlaybackStartTime({
-                        currentSongId: playerData.currentSong?._uniqueId,
-                        savedSongId: properties.id,
-                        savedTimestamp: useTimestampStoreBase.getState().timestamp,
+                queueSyncCoordinatorRef.current.request(() =>
+                    replaceMpvQueue(transcode, {
+                        startTime: getRestoredPlaybackStartTime({
+                            currentSongId: playerData.currentSong?._uniqueId,
+                            savedSongId: properties.id,
+                            savedTimestamp: useTimestampStoreBase.getState().timestamp,
+                        }),
                     }),
-                });
+                );
             },
             onPlayerQueueSync: () => {
-                replaceMpvQueue(transcode);
+                queueSyncCoordinatorRef.current.request(() => replaceMpvQueue(transcode));
             },
             onQueueCleared: () => {},
             onQueueRestored: (properties) => {
-                replaceMpvQueue(transcode, {
-                    startTime: normalizePlaybackStartTime(properties.position),
-                });
+                queueSyncCoordinatorRef.current.request(() =>
+                    replaceMpvQueue(transcode, {
+                        startTime: normalizePlaybackStartTime(properties.position),
+                    }),
+                );
             },
         },
         [transcode],
@@ -447,7 +427,7 @@ async function replaceMpvQueue(
     const radioState = useRadioStore.getState();
 
     if (radioState.currentStreamUrl) {
-        return;
+        return false;
     }
 
     const playerData = usePlayerStore.getState().getPlayerData();
@@ -457,6 +437,16 @@ async function replaceMpvQueue(
     const nextSongUrl = playerData.nextSong
         ? await getSongUrl(playerData.nextSong, transcode, true)
         : undefined;
-    const shouldPause = playerData.status !== PlayerStatus.PLAYING;
-    mpvPlayer?.setQueue(currentSongUrl, nextSongUrl, shouldPause, options?.startTime);
+    const plan = createMpvQueuePlan({
+        currentUrl: currentSongUrl,
+        isPlaying: playerData.status === PlayerStatus.PLAYING,
+        nextUrl: nextSongUrl,
+        startTime: options?.startTime,
+    });
+
+    if (!plan || !mpvPlayer) {
+        return false;
+    }
+
+    return mpvPlayer.setQueue(plan.currentUrl, plan.nextUrl, plan.pause, plan.startTime);
 }

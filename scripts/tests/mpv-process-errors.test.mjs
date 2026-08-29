@@ -28,3 +28,15 @@ test('production logging cannot recurse on a broken inherited console pipe', () 
     assert.match(mainHandler[0], /if \(isBrokenPipeError\(error\)\)\s*\{\s*return;/);
     assert.match(playerHandler[0], /if \(isBrokenPipeError\(error\)\)\s*\{\s*return;/);
 });
+
+test('mpv shutdown targets node-mpv child process and waits for its exit', () => {
+    const source = readFileSync(resolve('src/main/features/core/player/index.ts'), 'utf8');
+    const cleanup = source.match(/const cleanupMpv = async[\s\S]*?\n\};/);
+
+    assert.ok(cleanup, 'missing cleanupMpv helper');
+    assert.match(source, /\.mpvPlayer/);
+    assert.match(source, /waitForMpvProcessExit/);
+    assert.doesNotMatch(source, /const QUIT_TIMEOUT_MS/);
+    assert.doesNotMatch(source, /\.mpvProcess|\(instance as any\)\.process/);
+    assert.doesNotMatch(cleanup[0], /instance\.stop/);
+});
