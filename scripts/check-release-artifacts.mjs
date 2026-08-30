@@ -62,14 +62,32 @@ if (missing.length > 0) {
 }
 
 const releaseExtensions = new Set(['.blockmap', '.exe', '.zip']);
-const whitespaceAssets = readdirSync(distPath)
+const releaseAssets = readdirSync(distPath)
     .filter((name) => statSync(resolve(distPath, name)).isFile())
-    .filter((name) => releaseExtensions.has(name.match(/(\.blockmap|\.exe|\.zip)$/)?.[1] ?? ''))
-    .filter((name) => /\s/.test(name));
+    .filter((name) => releaseExtensions.has(name.match(/(\.blockmap|\.exe|\.zip)$/)?.[1] ?? ''));
+const whitespaceAssets = releaseAssets.filter((name) => /\s/.test(name));
+const legacyAssets = releaseAssets.filter((name) => /BasicAuth/iu.test(name));
+const unexpectedNames = releaseAssets.filter((name) => !/^Feishin-/u.test(name));
 
 if (whitespaceAssets.length > 0) {
     fail(
         `Release artifact filenames must not contain whitespace:\n${whitespaceAssets
+            .map((item) => `  - ${item}`)
+            .join('\n')}`,
+    );
+}
+
+if (legacyAssets.length > 0) {
+    fail(
+        `Legacy BasicAuth artifact names are not allowed:\n${legacyAssets
+            .map((item) => `  - ${item}`)
+            .join('\n')}`,
+    );
+}
+
+if (unexpectedNames.length > 0) {
+    fail(
+        `Release artifacts must begin with Feishin-:\n${unexpectedNames
             .map((item) => `  - ${item}`)
             .join('\n')}`,
     );

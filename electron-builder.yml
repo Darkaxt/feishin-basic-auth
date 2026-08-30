@@ -1,6 +1,6 @@
 appId: eu.remaxku.feishin.basicauth
-productName: Feishin BasicAuth
-artifactName: Feishin-BasicAuth-${version}-${os}-${arch}.${ext}
+productName: Feishin
+artifactName: Feishin-${version}-${os}-${arch}.${ext}
 electronVersion: 43.4.1
 directories:
     buildResources: assets
@@ -60,7 +60,7 @@ linux:
         - tar.xz
     category: AudioVideo;Audio;Player
     icon: assets/icons/icon.png
-    artifactName: Feishin-BasicAuth-${version}-${os}-${arch}.${ext}
+    artifactName: Feishin-${version}-${os}-${arch}.${ext}
 
 toolsets:
     appimage: '1.0.3'

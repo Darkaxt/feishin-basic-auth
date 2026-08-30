@@ -1,5 +1,7 @@
 import type { UpdateCheckResult } from 'electron-updater';
 
+import './user-data-path';
+
 import { is } from '@electron-toolkit/utils';
 import {
     app,
@@ -604,7 +606,7 @@ const createTray = () => {
         });
     }
 
-    tray.setToolTip('Feishin BasicAuth');
+    tray.setToolTip('Feishin');
     tray.setContextMenu(contextMenu);
 };
 
