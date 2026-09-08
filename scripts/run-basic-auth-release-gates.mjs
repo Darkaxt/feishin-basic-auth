@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 const full = process.argv.includes('--full');
 
 const commands = [
+    ['node', ['--test', 'scripts/tests/upstream-sync.test.mjs']],
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
     ['node', ['--test', 'scripts/tests/lidaclips.test.mjs']],
     ['node', ['--test', 'scripts/tests/default-playback.test.mjs']],

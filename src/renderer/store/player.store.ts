@@ -90,6 +90,9 @@ interface GroupedQueue {
 
 interface State {
     hydrated: boolean;
+    // Runtime-only: true once the mpv engine has finished initializing.
+    // Top-level keys are not persisted (see partialize), same as `hydrated`.
+    mpvInitialized: boolean;
     player: {
         crossfadeDuration: number;
         crossfadeStyle: CrossfadeStyle;
@@ -168,6 +171,11 @@ export function mapShuffledToQueueIndex(shuffledIndex: number, shuffled: number[
         return shuffled[shuffledIndex];
     }
     return shuffledIndex;
+}
+
+// We need to use a unique id so that the equalityFn can work if attempting to set the same timestamp
+export function uniqueSeekToTimestamp(timestamp: number) {
+    return `${timestamp}-${nanoid()}`;
 }
 
 // Helper function to add new indexes to shuffled array after current position
@@ -338,6 +346,7 @@ function regenerateShuffledIndexesIfNeeded(state: {
 
 const initialState: State = {
     hydrated: false,
+    mpvInitialized: false,
     player: {
         crossfadeDuration: 5,
         crossfadeStyle: CrossfadeStyle.EQUAL_POWER,
@@ -1342,8 +1351,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     const reset = options?.reset !== false;
                     set((state) => {
                         state.player.status = PlayerStatus.STOPPED;
-                        setTimestampStore(0);
                         if (reset) {
+                            setTimestampStore(0);
                             state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
                         }
                     });
@@ -1887,6 +1896,11 @@ export type AddToQueueByUniqueId = {
     uniqueId: string;
 };
 
+export type AddToQueueOptions = {
+    filter?: (song: Song) => boolean;
+    skipConfirmation?: boolean;
+};
+
 export type AddToQueueType = AddToQueueByPlayType | AddToQueueByUniqueId;
 
 export async function addToQueueByData(type: AddToQueueType, data: Song[]) {
@@ -2268,6 +2282,14 @@ export const usePlayerHydrated = () => {
     return usePlayerStoreBase((state) => state.hydrated);
 };
 
+export const useMpvInitialized = () => {
+    return usePlayerStoreBase((state) => state.mpvInitialized);
+};
+
+export const setMpvInitialized = (mpvInitialized: boolean) => {
+    usePlayerStoreBase.setState({ mpvInitialized });
+};
+
 export const usePlayerVolume = () => {
     return usePlayerStoreBase((state) => state.player.volume);
 };
@@ -2422,9 +2444,4 @@ function toQueueSong(item: Song): QueueSong {
         ...item,
         _uniqueId: nanoid(),
     };
-}
-
-// We need to use a unique id so that the equalityFn can work if attempting to set the same timestamp
-function uniqueSeekToTimestamp(timestamp: number) {
-    return `${timestamp}-${nanoid()}`;
 }

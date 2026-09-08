@@ -9,3 +9,4 @@ scripts/basic-auth-smoke/auth/
 scripts/basic-auth-smoke/data/
 .idea
 .scratch
+tsconfig.*.tsbuildinfo

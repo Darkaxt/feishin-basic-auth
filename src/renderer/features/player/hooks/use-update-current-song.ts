@@ -4,12 +4,15 @@ import { useCallback, useEffect } from 'react';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
+import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import {
+    uniqueSeekToTimestamp,
     updateQueueSong,
     usePlayerActions,
     usePlayerHydrated,
     usePlayerSong,
     usePlayerStore,
+    usePlayerStoreBase,
 } from '/@/renderer/store/player.store';
 import { logger } from '/@/renderer/utils/logger';
 import { QueueSong, SongDetailQuery } from '/@/shared/types/domain-types';
@@ -91,6 +94,27 @@ export const useUpdateCurrentSong = () => {
             song: currentSong,
         });
     }, [currentSong, handleSongChange, playerHydrated]);
+    const resetSeekToTimestamp = useCallback(() => {
+        usePlayerStoreBase.setState((state) => {
+            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
+        });
+    }, []);
+
+    usePlayerEvents(
+        {
+            onCurrentSongChange: (properties, prev) => {
+                // Only update if the song actually changed
+                if (
+                    properties.song?.id !== prev.song?.id ||
+                    properties.song?._uniqueId !== prev.song?._uniqueId
+                ) {
+                    // Prevents issues with lingering seekToTimestamp on song autonext
+                    resetSeekToTimestamp();
+                }
+            },
+        },
+        [resetSeekToTimestamp],
+    );
 };
 
 export const UpdateCurrentSongHook = () => {
