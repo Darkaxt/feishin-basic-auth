@@ -83,14 +83,14 @@ Requirements: R8, R9, R10, R11
 Acceptance criteria:
 
 - The release metadata is updated to `1.15.1-ba.17` and committed on `development`.
-- The full Windows release gate passes and the exact release commit is pushed and tagged.
+- The Windows release gate passes except for the Docker-backed BasicAuth smoke test, which the user explicitly waived after Docker Desktop repeatedly crashed before Compose could start; the exact release commit is pushed and tagged.
 - GitHub publishes prerelease `v1.15.1-ba.17` with the established complete asset set.
 - A fresh download of the x64 installer matches GitHub's SHA-256 digest and contains Feishin `1.15.1-ba.17` with the expected signing status.
 - The verified installer upgrades the existing local installation while leaving `C:\Users\darka\AppData\Roaming\Feishin BasicAuth` in place.
 - The installed application reports `1.15.1-ba.17`, launches successfully, and Resume advances the restored track from its saved position.
 - Release build and verification artifacts are transactionally cleaned after deployment evidence is retained.
 
-Verification evidence required: full gate output, commit and tag identity, GitHub release metadata, independent artifact checksum and package inspection, installed executable metadata, real playback progression, and cleanup status.
+Verification evidence required: release gate output with the explicit Docker-smoke waiver recorded, commit and tag identity, GitHub release metadata, independent artifact checksum and package inspection, installed executable metadata, real playback progression, and cleanup status.
 
 ## Current blockers and tracked deferrals
 
