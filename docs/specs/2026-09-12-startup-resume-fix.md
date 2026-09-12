@@ -17,6 +17,10 @@ The supplied screenshot shows `Good 4 U` by Eklipse restored at 0:34 / 2:59 with
 - R5: Determine whether the current 29-commit parent delta contains the relevant fix before choosing a fork-local change or a bounded upstream integration.
 - R6: Add focused regression coverage that fails on the current behavior and passes after the root-cause fix.
 - R7: Verify the narrow real startup Resume workflow where the available environment permits, run the applicable repository gates, and commit the verified result. Do not release or publish without separate authorization.
+- R8: Publish the verified fix as Windows prerelease `v1.15.1-ba.17` from the exact committed `development` source.
+- R9: Preserve the established x64, arm64, architecture-neutral installer, ZIP, blockmap, and `latest.yml` release asset contract.
+- R10: Independently download and verify the published x64 installer, including its GitHub digest, packaged application version, product identity, and signing status relative to the previous release.
+- R11: Install the verified x64 release in place without replacing the existing BasicAuth user-data profile, then verify the installed version and the real cold-start Resume workflow.
 
 ## Staged plan and reconciliation
 
@@ -70,7 +74,25 @@ Verification evidence required: real workflow evidence, final gate output, clean
 
 Evidence: a source build opened against an exact copy of the closed production profile with `Good 4 U` restored at 0:34. Activating Resume changed the player control to playing, MPV reached 34.50 seconds and then 45.45 seconds, and the renderer advanced to 0:44. The non-packaging repository gate, Electron build, task-scoped cleanup, and conventional commit passed.
 
+### Stage 4: Publish and deploy the verified Windows release
+
+Status: ACTIVE
+
+Requirements: R8, R9, R10, R11
+
+Acceptance criteria:
+
+- The release metadata is updated to `1.15.1-ba.17` and committed on `development`.
+- The full Windows release gate passes and the exact release commit is pushed and tagged.
+- GitHub publishes prerelease `v1.15.1-ba.17` with the established complete asset set.
+- A fresh download of the x64 installer matches GitHub's SHA-256 digest and contains Feishin `1.15.1-ba.17` with the expected signing status.
+- The verified installer upgrades the existing local installation while leaving `C:\Users\darka\AppData\Roaming\Feishin BasicAuth` in place.
+- The installed application reports `1.15.1-ba.17`, launches successfully, and Resume advances the restored track from its saved position.
+- Release build and verification artifacts are transactionally cleaned after deployment evidence is retained.
+
+Verification evidence required: full gate output, commit and tag identity, GitHub release metadata, independent artifact checksum and package inspection, installed executable metadata, real playback progression, and cleanup status.
+
 ## Current blockers and tracked deferrals
 
-- Blockers: none.
+- Blockers: none. Stage 4 is active work authorized by the user's delivery clarification.
 - Tracked deferrals: none.
