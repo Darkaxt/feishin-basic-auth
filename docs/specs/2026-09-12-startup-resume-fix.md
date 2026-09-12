@@ -76,7 +76,7 @@ Evidence: a source build opened against an exact copy of the closed production p
 
 ### Stage 4: Publish and deploy the verified Windows release
 
-Status: ACTIVE
+Status: COMPLETE
 
 Requirements: R8, R9, R10, R11
 
@@ -92,7 +92,9 @@ Acceptance criteria:
 
 Verification evidence required: release gate output with the explicit Docker-smoke waiver recorded, commit and tag identity, GitHub release metadata, independent artifact checksum and package inspection, installed executable metadata, real playback progression, and cleanup status.
 
+Evidence: release commit `cd5b5ad7e67b8bfc36554e4d1dfa73ecc41105fa` was pushed to `development` and tagged `v1.15.1-ba.17`. The non-Docker release gates, Windows packaging checks, CodeQL run `34725196551`, and the nine-asset prerelease contract passed; the fork's active generic Test workflow emitted no run. A fresh GitHub download of the x64 installer matched published SHA-256 `c1fbd842fc8ddce6edebac6c5c005d1a8733adc2530c71353cd2d61cc57573b1`. The downloaded installer and ZIP payload both reported Feishin `1.15.1-ba.17` and the expected `NotSigned` status. The installer upgraded `C:\Users\darka\AppData\Local\Programs\Feishin BasicAuth\Feishin.exe` from `1.15.1-ba.16` with exit code 0 while the 507-file BasicAuth profile, total byte count, `config.json` hash, and Chromium Preferences hash remained unchanged before first launch. The installed app restored `Good 4 U` paused at 0:34; the verification action explicitly clicked Resume, after which the UI reached 0:43 and MPV reported 43.84 seconds while running. The verification then returned playback to paused. Transactional cleanup removed the two unpacked build trees plus all remaining `out`, `dist`, and `D:\Temp\feishin-ba17-release` artifacts with zero warnings or residual helper files.
+
 ## Current blockers and tracked deferrals
 
-- Blockers: none. Stage 4 is active work authorized by the user's delivery clarification.
+- Blockers: none.
 - Tracked deferrals: none.
