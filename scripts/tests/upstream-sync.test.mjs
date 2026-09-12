@@ -106,6 +106,7 @@ test('MPV startup preserves queued resume and gates controls until ready', async
             useMpvInitialized: () => initialized,
             usePlaybackSettings: () => ({ transcode: {} }),
             usePlayerActions: () => ({}),
+            usePlayerHydrated: () => true,
             usePlayerSong: () => currentSong,
             usePlayerStore: {
                 getState: () => ({ getPlayerData: () => ({ currentSong, status: 'paused' }) }),
@@ -166,6 +167,87 @@ test('MPV startup preserves queued resume and gates controls until ready', async
         assert.deepEqual(calls, cancelled ? ['quit'] : [['stream', undefined, true, 96]]);
         if (!cancelled) cleanup();
     }
+});
+
+test('MPV waits for persisted player hydration before startup queue sync', async () => {
+    const effects = [];
+    const calls = [];
+    let initialized = false;
+    const mpv = {
+        initialize: async () => calls.push('initialize'),
+        isRunning: async () => false,
+        quit: () => calls.push('quit'),
+        setProperties: () => calls.push('properties'),
+        setQueue: () => {
+            calls.push('queue');
+            return Promise.resolve(true);
+        },
+    };
+    const store = {
+        setMpvInitialized: (ready) => {
+            initialized = ready;
+        },
+        useMpvInitialized: () => initialized,
+        usePlaybackSettings: () => ({ transcode: {} }),
+        usePlayerActions: () => ({}),
+        usePlayerHydrated: () => false,
+        usePlayerSong: () => undefined,
+        usePlayerStore: {
+            getState: () => ({
+                getPlayerData: () => ({ currentSong: undefined, status: 'paused' }),
+            }),
+        },
+        useSettingsStore: (select) =>
+            select({ playback: { mpvExtraParameters: [], mpvProperties: {} } }),
+        useTimestampStoreBase: { getState: () => ({ timestamp: 96 }) },
+    };
+    store.useSettingsStore.getState = () => ({ playback: {} });
+    const { MpvPlayerEngine } = loadSource(
+        'src/renderer/features/player/audio-player/engine/mpv-player-engine.tsx',
+        {
+            '/@/renderer/events/event-emitter': {},
+            '/@/renderer/features/player/audio-player/hooks/use-player-events': {
+                usePlayerEvents: () => {},
+            },
+            '/@/renderer/features/player/audio-player/hooks/use-stream-url': {
+                getSongUrl: async () => undefined,
+            },
+            '/@/renderer/features/radio/hooks/use-radio-player': {
+                useRadioStore: { getState: () => ({}) },
+            },
+            '/@/renderer/features/settings/components/playback/mpv-audio-filters': {
+                buildMpvAudioFilters: () => '',
+            },
+            '/@/renderer/features/settings/components/playback/mpv-properties': {
+                getMpvProperties: () => ({}),
+            },
+            '/@/renderer/store': store,
+            '/@/renderer/store/full-screen-player.store': {},
+            '/@/shared/types/types': { PlayerStatus: { PLAYING: 'playing' } },
+            '/@/shared/utils/lidaclips': {},
+            '/@/shared/utils/mpv-queue-sync':
+                await import('../../src/shared/utils/mpv-queue-sync.ts'),
+            '/@/shared/utils/playback-restore':
+                await import('../../src/shared/utils/playback-restore.ts'),
+            'is-electron': () => true,
+            react: {
+                useEffect: (fn) => effects.push(fn),
+                useImperativeHandle: () => {},
+                useRef: (current) => ({ current }),
+                useState: (value) => [value, () => {}],
+            },
+            'react/jsx-runtime': { jsx: () => null },
+        },
+        { queueMicrotask, window: { api: { mpvPlayer: mpv } } },
+    );
+
+    MpvPlayerEngine({ playerStatus: 'paused', speed: 1, volume: 75 });
+    const cleanup = effects[1]();
+    await new Promise(setImmediate);
+    const initializedBeforeHydration = calls.includes('initialize');
+    cleanup?.();
+
+    assert.equal(initializedBeforeHydration, false);
 });
 
 function loadLyricsExport(formValues) {

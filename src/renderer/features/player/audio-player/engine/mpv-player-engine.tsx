@@ -14,6 +14,7 @@ import {
     useMpvInitialized,
     usePlaybackSettings,
     usePlayerActions,
+    usePlayerHydrated,
     usePlayerSong,
     usePlayerStore,
     useSettingsStore,
@@ -63,6 +64,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
     const [internalVolume, setInternalVolume] = useState(volume / 100 || 0);
     const isInitialized = useMpvInitialized();
+    const playerHydrated = usePlayerHydrated();
     const currentSong = usePlayerSong();
 
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -97,6 +99,10 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
 
     // Start the mpv instance on startup
     useEffect(() => {
+        if (!playerHydrated) {
+            return;
+        }
+
         isMountedRef.current = true;
         const queueSyncCoordinator = queueSyncCoordinatorRef.current;
         queueSyncCoordinator.reset();
@@ -174,7 +180,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         // update callbacks in usePlayerEvents.
         // reloadTrigger is included to allow manual reload via MPV_RELOAD event.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mpvExtraParameters, mpvProperties, mpvAudioDeviceId, reloadTrigger]);
+    }, [mpvExtraParameters, mpvProperties, mpvAudioDeviceId, playerHydrated, reloadTrigger]);
 
     // Update volume
     useEffect(() => {
