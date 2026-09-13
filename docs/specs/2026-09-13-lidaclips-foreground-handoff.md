@@ -56,7 +56,7 @@ Acceptance criteria:
 
 ### Stage 4: Local installation
 
-Status: ACTIVE
+Status: COMPLETE
 
 This stage was authorized by the user's subsequent request to update the local installation.
 
@@ -76,3 +76,9 @@ Acceptance criteria:
 - A fresh production Electron renderer build passes.
 - The isolated Electron instance booted from a task-owned profile on `D:\Temp`, but its different file origin could not read the installed app's authenticated state. The installed profile and active playback were not interrupted for this optional UI check.
 - The Docker-dependent release smoke test was excluded by explicit user instruction.
+- A uniquely versioned Windows x64 NSIS installer was built from commit `43c70c94` and installed silently with exit code 0.
+- The installed executable reports file version `1.15.1-ba.18` and SHA-256 `E7C9808DEA9B1A6B56FCA4032F41F1533504992498DD2BD1602EDE28BD4219FD`.
+- The profile file count, byte count, `config.json` hash, and Chromium `Preferences` hash were identical immediately before and after installation.
+- The installed application relaunched successfully and retained the restored queue in a paused state; no verifier play click or autoplay was used.
+- The task-owned `out` and `dist` packaging trees were transactionally removed, reclaiming 868,183,034 bytes.
+- No GitHub release was published and Docker was not used.
