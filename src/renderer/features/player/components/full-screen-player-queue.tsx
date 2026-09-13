@@ -78,7 +78,7 @@ interface ControlItem {
 
 const Controls = () => {
     const { t } = useTranslation();
-    const { activeTab } = useFullScreenPlayerStore();
+    const { activeTab, clipModeActive } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { webAudio } = usePlaybackSettings();
     const lidaClipsSettings = useLidaClipsSettings();
@@ -93,10 +93,15 @@ const Controls = () => {
             const nextTab = activeTab === tab ? '' : tab;
             setStore({
                 activeTab: nextTab,
-                ...(shouldExitLidaClipsModeForTab(nextTab) ? { clipModeActive: false } : {}),
+                clipModeActive:
+                    nextTab === 'clips'
+                        ? true
+                        : shouldExitLidaClipsModeForTab(nextTab)
+                          ? false
+                          : clipModeActive,
             });
         },
-        [activeTab, setStore],
+        [activeTab, clipModeActive, setStore],
     );
 
     const headerItems = useMemo(() => {

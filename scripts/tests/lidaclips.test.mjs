@@ -241,6 +241,53 @@ test('foreground clip player preloads metadata in ambient background mode', () =
     assert.doesNotMatch(source, /preload=\{[\s\S]*LIDA_CLIPS_DISPLAY_MODE\.AMBIENT_BACKGROUND/);
 });
 
+test('explicit CLIPS selection activates clip mode without enabling startup autoplay', () => {
+    const controlsSource = readFileSync(
+        resolve('src/renderer/features/player/components/full-screen-player-queue.tsx'),
+        'utf8',
+    );
+    const storeSource = readFileSync(
+        resolve('src/renderer/store/full-screen-player.store.ts'),
+        'utf8',
+    );
+
+    assert.match(
+        controlsSource,
+        /clipModeActive:\s*nextTab\s*===\s*'clips'/,
+        'the explicit CLIPS tab action must activate clip mode',
+    );
+    assert.match(
+        storeSource,
+        /sanitizeLidaClipsRuntimeState/,
+        'persisted clip mode must still be cleared during startup restore',
+    );
+});
+
+test('ambient CLIPS presentation reuses one video element for background and foreground', () => {
+    const ambientSource = readFileSync(
+        resolve('src/renderer/features/lidaclips/components/lidaclips-ambient-background.tsx'),
+        'utf8',
+    );
+    const panelSource = readFileSync(
+        resolve('src/renderer/features/lidaclips/components/lidaclips-panel.tsx'),
+        'utf8',
+    );
+
+    assert.match(ambientSource, /backgroundVideoForeground/);
+    assert.match(ambientSource, /controls=\{foregroundActive\}/);
+    assert.match(ambientSource, /muted=\{!foregroundActive\}/);
+    assert.match(
+        panelSource,
+        /dynamicBackground\s*&&\s*settings\.displayMode\s*===\s*LIDA_CLIPS_DISPLAY_MODE\.AMBIENT_BACKGROUND/,
+        'the standalone player must remain available when no ambient video exists',
+    );
+    assert.match(
+        panelSource,
+        /settings\.displayMode\s*===\s*LIDA_CLIPS_DISPLAY_MODE\.AMBIENT_BACKGROUND[\s\S]*return\s*\([\s\S]*clipsContainer/,
+        'ambient mode must reserve the panel without mounting a second video element',
+    );
+});
+
 test('fullscreen modules use persistent labeled tabs instead of icon-only controls', () => {
     const source = readFileSync(
         resolve('src/renderer/features/player/components/full-screen-player-queue.tsx'),

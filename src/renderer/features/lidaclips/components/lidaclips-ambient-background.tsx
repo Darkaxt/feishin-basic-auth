@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLidaClipsCurrentSongLookup } from '/@/renderer/features/lidaclips/hooks/use-lidaclips-current-song-lookup';
@@ -7,8 +8,10 @@ import {
     useFullScreenPlayerStore,
     useFullScreenPlayerStoreActions,
     useLidaClipsSettings,
+    usePlayerActions,
     usePlayerDuration,
     usePlayerStatus,
+    usePlayerStoreBase,
     useSettingsStore,
 } from '/@/renderer/store';
 import { PlayerStatus } from '/@/shared/types/types';
@@ -16,6 +19,7 @@ import {
     getLidaClipsAmbientPlaybackRate,
     LIDA_CLIPS_DISPLAY_MODE,
     mapLidaClipsProgress,
+    shouldStopLidaClipsModeAfterAutoNext,
     shouldUseLidaClipsAmbientBackground,
 } from '/@/shared/utils/lidaclips';
 
@@ -27,11 +31,15 @@ export const LidaClipsAmbientBackground = ({
     dynamicBackground,
 }: LidaClipsAmbientBackgroundProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const previousForegroundActiveRef = useRef(false);
+    const skipSongResumeRef = useRef(false);
     const status = usePlayerStatus();
     const songDuration = usePlayerDuration();
     const settings = useLidaClipsSettings();
-    const { mediaPlay, mediaSeekToTimestamp } = usePlayer();
-    const { clipModeTransferRatio, clipModeTransferSongUniqueId } = useFullScreenPlayerStore();
+    const { mediaPause, mediaPlay, mediaSeekToTimestamp } = usePlayer();
+    const { mediaAutoNext } = usePlayerActions();
+    const { activeTab, clipModeActive, clipModeTransferRatio, clipModeTransferSongUniqueId } =
+        useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { clipStreamUrl, currentSong, data, isLoading, lookupQuery } =
         useLidaClipsCurrentSongLookup(
@@ -41,6 +49,8 @@ export const LidaClipsAmbientBackground = ({
                 dynamicBackground,
             ),
         );
+
+    const foregroundActive = clipModeActive && activeTab === 'clips';
 
     const hasTransfer =
         clipModeTransferRatio !== null &&
@@ -115,6 +125,26 @@ export const LidaClipsAmbientBackground = ({
         status: data?.status,
     });
 
+    const handleVideoEnded = useCallback(() => {
+        if (!foregroundActive) {
+            return;
+        }
+
+        const playerState = usePlayerStoreBase.getState();
+        const playerDataBeforeNext = playerState.getPlayerData();
+        const shouldStopClipMode = shouldStopLidaClipsModeAfterAutoNext({
+            hasNextSong: Boolean(playerDataBeforeNext.nextSong),
+            pauseOnNext: playerState.player.pauseOnNextSongEnd,
+        });
+
+        mediaAutoNext({ keepPaused: true });
+
+        if (shouldStopClipMode) {
+            skipSongResumeRef.current = true;
+            setStore({ clipModeActive: false });
+        }
+    }, [foregroundActive, mediaAutoNext, setStore]);
+
     useEffect(() => {
         if (!hasTransfer || isLoading || !lookupQuery || !data || data.status === 'ok') {
             return;
@@ -153,14 +183,54 @@ export const LidaClipsAmbientBackground = ({
             return;
         }
 
-        video.playbackRate = playbackRate;
+        video.playbackRate = foregroundActive ? 1 : playbackRate;
 
-        if (status === PlayerStatus.PLAYING) {
+        if (foregroundActive || status === PlayerStatus.PLAYING) {
             void video.play().catch(() => {});
         } else {
             video.pause();
         }
-    }, [clipStreamUrl, playbackRate, shouldRender, status]);
+    }, [clipStreamUrl, foregroundActive, playbackRate, shouldRender, status]);
+
+    useEffect(() => {
+        const wasForegroundActive = previousForegroundActiveRef.current;
+        previousForegroundActiveRef.current = foregroundActive;
+
+        if (!wasForegroundActive || foregroundActive) {
+            return;
+        }
+
+        if (skipSongResumeRef.current) {
+            skipSongResumeRef.current = false;
+            return;
+        }
+
+        const video = videoRef.current;
+
+        if (
+            video &&
+            Number.isFinite(video.duration) &&
+            video.duration > 0 &&
+            songDuration &&
+            songDuration > 0
+        ) {
+            mediaSeekToTimestamp(
+                mapLidaClipsProgress({
+                    sourceCurrentTime: video.currentTime,
+                    sourceDuration: video.duration,
+                    targetDuration: songDuration,
+                }),
+            );
+        }
+
+        mediaPlay();
+    }, [foregroundActive, mediaPlay, mediaSeekToTimestamp, songDuration]);
+
+    useEffect(() => {
+        if (foregroundActive) {
+            mediaPause();
+        }
+    }, [foregroundActive, mediaPause]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -202,12 +272,13 @@ export const LidaClipsAmbientBackground = ({
                 return;
             }
 
-            if (status === PlayerStatus.PLAYING) {
+            if (foregroundActive || status === PlayerStatus.PLAYING) {
                 void video.play().catch(() => {});
             }
         },
         [
             clipModeTransferRatio,
+            foregroundActive,
             hasTransfer,
             resumeSongFromTransfer,
             settings.ambientSyncMode,
@@ -222,10 +293,14 @@ export const LidaClipsAmbientBackground = ({
 
     return (
         <video
-            aria-hidden
-            className={styles.backgroundVideo}
+            aria-hidden={!foregroundActive}
+            className={clsx(styles.backgroundVideo, {
+                [styles.backgroundVideoForeground]: foregroundActive,
+            })}
+            controls={foregroundActive}
             key={`${currentSong?._uniqueId ?? 'none'}-${clipStreamUrl}`}
-            muted
+            muted={!foregroundActive}
+            onEnded={handleVideoEnded}
             onLoadedMetadata={handleLoadedMetadata}
             playsInline
             preload="metadata"

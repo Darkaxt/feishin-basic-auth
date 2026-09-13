@@ -82,6 +82,26 @@
     background: var(--theme-colors-background);
 }
 
+.background-video-foreground {
+    top: 6.5rem;
+    right: 1rem;
+    bottom: 3rem;
+    left: calc(50% + 1rem);
+    z-index: 2;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    background: rgb(0 0 0 / 75%);
+    border-radius: 5px;
+
+    @media screen and (orientation: portrait) {
+        top: calc(50% + 4.5rem);
+        right: 1rem;
+        bottom: 1rem;
+        left: 1rem;
+    }
+}
+
 .background-image-overlay {
     position: absolute;
     top: 0;

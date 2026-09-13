@@ -102,8 +102,13 @@ export const LidaClipsPanel = () => {
     const { t } = useTranslation();
     const videoRef = useRef<HTMLVideoElement>(null);
     const foregroundPlaybackStartedRef = useRef(false);
-    const { activeTab, clipModeActive, clipModeTransferRatio, clipModeTransferSongUniqueId } =
-        useFullScreenPlayerStore();
+    const {
+        activeTab,
+        clipModeActive,
+        clipModeTransferRatio,
+        clipModeTransferSongUniqueId,
+        dynamicBackground,
+    } = useFullScreenPlayerStore();
     const { setStore } = useFullScreenPlayerStoreActions();
     const { mediaPause } = usePlayer();
     const { mediaAutoNext } = usePlayerActions();
@@ -229,6 +234,10 @@ export const LidaClipsPanel = () => {
 
     if (!settings.enabled) {
         return null;
+    }
+
+    if (dynamicBackground && settings.displayMode === LIDA_CLIPS_DISPLAY_MODE.AMBIENT_BACKGROUND) {
+        return <div aria-hidden className={styles.clipsContainer} />;
     }
 
     if (!lookupQuery) {
