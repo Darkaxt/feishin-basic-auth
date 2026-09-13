@@ -19,7 +19,7 @@ The user-reported CLIPS behavior and the clarification from 2026-09-13 are the a
 - Reuse the existing ambient video element and current player stores.
 - Do not add autoplay-on-open behavior.
 - Do not add timeouts, sleeps, retries, Docker requirements, new services, or generalized playback infrastructure.
-- Do not publish or deploy a release as part of this implementation.
+- Do not publish a GitHub release as part of this implementation.
 
 ## Stages
 
@@ -53,6 +53,21 @@ Acceptance criteria:
 - The integrated UI workflow is verified in a task-owned development profile when practical.
 - No autoplay-on-open or unrelated playback behavior is introduced.
 - The verified result is committed.
+
+### Stage 4: Local installation
+
+Status: ACTIVE
+
+This stage was authorized by the user's subsequent request to update the local installation.
+
+Acceptance criteria:
+
+- Build a uniquely versioned Windows x64 installer containing the committed fix.
+- Replace the installed Feishin BasicAuth application without replacing or resetting its profile.
+- Verify the installed executable reports the new version and launches successfully.
+- Verify the profile identity and settings files remain unchanged across installation.
+- Remove task-owned packaging output after installation.
+- Do not publish a GitHub release or use Docker.
 
 ## Verification record
 
