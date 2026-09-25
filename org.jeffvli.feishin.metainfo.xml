@@ -47,6 +47,7 @@
     <category>Music</category>
   </categories>
   <releases>
+    <release date="2026-09-26" type="development" version="1.15.1-ba.22"></release>
     <release date="2026-09-25" type="development" version="1.15.1-ba.21"></release>
     <release date="2026-09-25" type="development" version="1.15.1-ba.20"></release>
     <release date="2026-09-25" type="development" version="1.15.1-ba.19"></release>

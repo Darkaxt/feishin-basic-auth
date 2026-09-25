@@ -22,6 +22,7 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { TextScrolling } from '/@/shared/components/text-scrolling/text-scrolling';
 import { Text } from '/@/shared/components/text/text';
 import { useMediaQuery } from '/@/shared/hooks/use-media-query';
+import { dedupeFullscreenDateMetadataItems } from '/@/shared/utils/fullscreen-player-metadata';
 
 type SharedFullscreenPlayerMetadataProps = {
     imageContainerWidth?: null | number;
@@ -46,6 +47,11 @@ export const SharedFullscreenPlayerMetadata = ({
     const showArtist = isItemEnabled(PlayerItem.ARTIST);
     const showAlbum = isItemEnabled(PlayerItem.ALBUM);
 
+    const formattedDate = currentSong?.date ? formatPartialIsoDateUTC(currentSong.date) : undefined;
+    const formattedReleaseDate = currentSong?.releaseDate
+        ? formatPartialIsoDateUTC(currentSong.releaseDate)
+        : undefined;
+
     const builtDataItems = {
         bit_depth: currentSong?.bitDepth && <Badge>{currentSong?.bitDepth} bit</Badge>,
         bit_rate: currentSong?.bitRate && <Badge>{currentSong?.bitRate} kbps</Badge>,
@@ -55,7 +61,7 @@ export const SharedFullscreenPlayerMetadata = ({
             </Badge>
         ),
         codec: currentSong?.container && <Badge>{currentSong?.container}</Badge>,
-        date: currentSong?.date && <Badge>{formatPartialIsoDateUTC(currentSong?.date)}</Badge>,
+        date: formattedDate && <Badge>{formattedDate}</Badge>,
         disc_number: currentSong?.discNumber && (
             <Badge>
                 {t('common.disc')} {currentSong?.discNumber}
@@ -66,9 +72,7 @@ export const SharedFullscreenPlayerMetadata = ({
             currentSong?.genres
                 .slice(0, 2)
                 .map((genre) => <Badge key={genre.id}>{genre.name}</Badge>),
-        release_date: currentSong?.releaseDate && (
-            <Badge>{formatPartialIsoDateUTC(currentSong?.releaseDate)}</Badge>
-        ),
+        release_date: formattedReleaseDate && <Badge>{formattedReleaseDate}</Badge>,
         release_type: currentSong?.tags?.releasetype && (
             <Badge>{currentSong?.tags?.releasetype[0]}</Badge>
         ),
@@ -82,11 +86,18 @@ export const SharedFullscreenPlayerMetadata = ({
         year: currentSong?.year && <Badge>{currentSong?.year}</Badge>,
     };
 
+    const deduplicatedPlayerItems = dedupeFullscreenDateMetadataItems(playerItems, {
+        date: formattedDate,
+        release_date: formattedReleaseDate,
+        release_year: currentSong?.releaseYear,
+        year: currentSong?.year,
+    });
+
     const hasMetadata =
-        !isPlayingRadio && playerItems.some((i) => !i.disabled && builtDataItems[i.id]);
+        !isPlayingRadio && deduplicatedPlayerItems.some((i) => !i.disabled && builtDataItems[i.id]);
 
     const showMetadata =
-        playerItems.some((i) => !i.disabled && builtDataItems[i.id]) ||
+        deduplicatedPlayerItems.some((i) => !i.disabled && builtDataItems[i.id]) ||
         showTitle ||
         showArtist ||
         showAlbum;
@@ -207,7 +218,9 @@ export const SharedFullscreenPlayerMetadata = ({
                         ))}
                     {!isPlayingRadio && hasMetadata && (
                         <Group justify={metadataAlignment} mt="sm" w="100%">
-                            {playerItems.map((i) => !i.disabled && builtDataItems[i.id])}
+                            {deduplicatedPlayerItems.map(
+                                (i) => !i.disabled && builtDataItems[i.id],
+                            )}
                         </Group>
                     )}
                 </Stack>

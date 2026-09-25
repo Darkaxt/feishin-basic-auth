@@ -23,6 +23,7 @@ const commands = [
             '--test',
             'scripts/tests/fullscreen-controls-autohide.test.mjs',
             'scripts/tests/fullscreen-player-image.test.mjs',
+            'scripts/tests/fullscreen-player-metadata.test.mjs',
             'scripts/tests/genre-context-menu.test.mjs',
             'scripts/tests/visualizer-system-audio.test.mjs',
         ],
