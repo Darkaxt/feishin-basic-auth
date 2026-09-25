@@ -47,7 +47,7 @@ Acceptance criteria:
 
 ### Stage 4: Local Windows deployment
 
-Status: ACTIVE
+Status: COMPLETE
 
 This stage was authorized by the user's subsequent request to deploy the feature locally.
 
@@ -81,4 +81,9 @@ Tracked deferrals: 0.
 - `corepack pnpm run build:electron`: passed.
 - Production bundle inspection: the compiled renderer contains the auto-hide CSS and fullscreen activity lifecycle.
 - Generated-output cleanup: the attributed `out` directory was removed after verification; 51,386,908 bytes reclaimed.
-- Local installed application: Stage 4 ACTIVE; deployment evidence pending.
+- Windows x64 NSIS installer `Feishin-1.15.1-ba.20-win-x64.exe` was built without Docker or publication: 176,535,998 bytes, SHA-256 `90434188DDFB1ECE3BB9198A6498421E2130CFBEA05B43FC3475CC0652CC3F04`, unsigned in line with the existing local-build convention.
+- The installer payload reported `1.15.1-ba.20` and contained the fullscreen activity lifecycle, collapsed control rows, and hidden cursor presentation.
+- Silent in-place installation exited 0. The installed executable reports `1.15.1-ba.20`, SHA-256 `95242033F55BD4FB213F47FBC64BA841DE56B01010900A93AD672292B3296245`, and its installed `app.asar` contains the same auto-hide implementation.
+- Before first launch, the existing profile remained exactly 279 files and 212,151,752 bytes; `config.json` retained SHA-256 `52A8EBF49FD0360218A7B0A480744C03A4DDD26C65EA7B8D2DA7CE61DA7371C0` and Chromium `Preferences` retained SHA-256 `F3D1ACE92E5AE17EE09BD9FB1D42165D44ABEE7095A694843457F15FBBDCC018`.
+- The installed application relaunched responsive with the existing queue restored paused and a new MPV child process; no Play/autoplay verification action was used.
+- Task-owned `out` and `dist` packaging output was transactionally removed after installation (443 items, 868,213,913 bytes).
