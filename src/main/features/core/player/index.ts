@@ -8,7 +8,7 @@ import { pid } from 'node:process';
 import process from 'process';
 
 import { getMainWindow, sendToastToRenderer } from '../../../index';
-import log, { isBrokenPipeError } from '../../../logger';
+import log from '../../../logger';
 import { store } from '../settings';
 import { getMpvBinaryCandidates } from './mpv-binary';
 
@@ -41,6 +41,7 @@ const socketPath = isWindows() ? `\\\\.\\pipe\\mpvserver-${pid}` : `/tmp/node-mp
 let suppressRendererPlaybackEvents = false;
 // Bumped on quit so late events from a dying instance are ignored after a new one starts.
 let playbackEventGeneration = 0;
+const expectedMpvProcesses = new WeakSet<ChildProcess>();
 
 const sendRendererPlaybackEvent = (channel: string, ...args: unknown[]) => {
     if (suppressRendererPlaybackEvents) {
@@ -183,6 +184,26 @@ const createMpv = async (data: {
 
     let previousPlaylistPos: number | undefined;
     const eventGeneration = playbackEventGeneration;
+    const mpvProcess = getMpvChildProcess(mpv);
+
+    mpvProcess?.once('exit', (code, signal) => {
+        if (expectedMpvProcesses.has(mpvProcess)) {
+            expectedMpvProcesses.delete(mpvProcess);
+            return;
+        }
+
+        if (eventGeneration !== playbackEventGeneration) {
+            return;
+        }
+
+        suppressRendererPlaybackEvents = true;
+        playbackEventGeneration += 1;
+        if (mpvInstance === mpv) {
+            mpvInstance = null;
+        }
+        log.error('MPV process exited unexpectedly', { code, signal });
+        getMainWindow()?.webContents.send('renderer-mpv-reconnect');
+    });
 
     suppressRendererPlaybackEvents = false;
 
@@ -268,6 +289,7 @@ const quit = async (instance?: MpvAPI | null) => {
         const mpvProcess = getMpvChildProcess(mpv);
         try {
             if (mpvProcess) {
+                expectedMpvProcesses.add(mpvProcess);
                 const exited = waitForMpvProcessExit(mpvProcess);
                 mpvProcess.kill('SIGTERM');
                 await exited;
@@ -837,18 +859,6 @@ process.on('SIGINT', async () => {
 process.on('SIGTERM', async () => {
     await cleanupMpv(true);
     process.exit(0);
-});
-
-// Handle uncaught exceptions - cleanup mpv before crashing
-process.on('uncaughtException', async (error) => {
-    if (isBrokenPipeError(error)) {
-        return;
-    }
-
-    log.error('Uncaught exception:', error);
-    await cleanupMpv(true).catch(() => {
-        // Ignore cleanup errors during crash
-    });
 });
 
 // A rejected background task is not a player shutdown signal. Keep MPV connected so the

@@ -27,6 +27,31 @@ export const sanitizeForDiagnostics = (value: unknown, depth = 0): unknown => {
         return '[Truncated]';
     }
 
+    if (value instanceof Error) {
+        const result: Record<string, unknown> = {
+            message: sanitizeForDiagnostics(value.message, depth + 1),
+            name: sanitizeForDiagnostics(value.name, depth + 1),
+        };
+
+        if (value.stack) {
+            result.stack = sanitizeForDiagnostics(value.stack, depth + 1);
+        }
+
+        if ('cause' in value && value.cause !== undefined) {
+            result.cause = sanitizeForDiagnostics(value.cause, depth + 1);
+        }
+
+        for (const [key, nested] of Object.entries(value)) {
+            if (SENSITIVE_KEY_PATTERN.test(key)) {
+                result[key] = '[Redacted]';
+            } else {
+                result[key] = sanitizeForDiagnostics(nested, depth + 1);
+            }
+        }
+
+        return result;
+    }
+
     if (Array.isArray(value)) {
         return value.map((item) => sanitizeForDiagnostics(item, depth + 1));
     }

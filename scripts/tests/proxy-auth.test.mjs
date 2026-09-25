@@ -75,6 +75,19 @@ test('diagnostic sanitizer redacts API keys and credentials embedded in strings'
     );
 });
 
+test('diagnostic sanitizer preserves useful Error details and sanitizes its cause', () => {
+    const cause = new Error('proxy failed with Basic dXNlcjpwYXNz');
+    const error = new Error('mpv child failed', { cause });
+    error.name = 'MpvRecoveryError';
+
+    const sanitized = diagnostics.sanitizeForDiagnostics(error);
+
+    assert.equal(sanitized.name, 'MpvRecoveryError');
+    assert.equal(sanitized.message, 'mpv child failed');
+    assert.match(sanitized.stack, /MpvRecoveryError: mpv child failed/);
+    assert.equal(sanitized.cause.message, 'proxy failed with Basic <redacted>');
+});
+
 test('main and renderer loggers sanitize metadata before writing or forwarding it', async () => {
     const [mainLogger, rendererLogger] = await Promise.all([
         readFile('src/main/logger.ts', 'utf8'),

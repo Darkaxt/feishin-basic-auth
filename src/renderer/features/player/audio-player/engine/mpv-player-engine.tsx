@@ -70,6 +70,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isMountedRef = useRef<boolean>(true);
     const queueSyncCoordinatorRef = useRef(createMpvQueueSyncCoordinator());
+    const recoveryPositionRef = useRef<null | { songId?: string; timestamp: number }>(null);
 
     const { mpvAudioDeviceId, transcode } = usePlaybackSettings();
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
@@ -83,6 +84,11 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         };
 
         const handleMpvReconnect = () => {
+            const playerData = usePlayerStore.getState().getPlayerData();
+            recoveryPositionRef.current = {
+                songId: playerData.currentSong?._uniqueId,
+                timestamp: useTimestampStoreBase.getState().timestamp,
+            };
             handleMpvReload();
         };
 
@@ -158,8 +164,21 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                 return;
             }
 
-            await queueSyncCoordinator.markReady(() => replaceMpvQueue(transcode));
+            const recoveryPosition = recoveryPositionRef.current;
+            await queueSyncCoordinator.markReady(() =>
+                replaceMpvQueue(transcode, {
+                    startTime: recoveryPosition
+                        ? getRestoredPlaybackStartTime({
+                              currentSongId: usePlayerStore.getState().getPlayerData().currentSong
+                                  ?._uniqueId,
+                              savedSongId: recoveryPosition.songId,
+                              savedTimestamp: recoveryPosition.timestamp,
+                          })
+                        : undefined,
+                }),
+            );
             if (!isCancelled) {
+                recoveryPositionRef.current = null;
                 setMpvInitialized(true);
             }
         };
