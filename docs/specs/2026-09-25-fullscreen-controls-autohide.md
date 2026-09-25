@@ -60,6 +60,21 @@ Acceptance criteria:
 - Remove task-owned packaging output after deployment.
 - Do not use Docker or publish a GitHub release.
 
+### Stage 5: Fullscreen surface correction and local redeployment
+
+Status: ACTIVE
+
+The user's live ba.20 verification found that the bars disappeared while the fullscreen player retained its pre-hide fixed height, exposing the underlying page at the bottom.
+
+Acceptance criteria:
+
+- The fullscreen player surface follows the resized `main-content` row and covers the entire released area.
+- Windowed and bar-visible layout behavior remains unchanged.
+- Focused fullscreen, LidaClips, playback, type, lint, and production build verification pass.
+- A uniquely versioned Windows x64 installer is deployed locally with the existing profile preserved.
+- The installed application contains the correction and relaunches successfully.
+- Task-owned packaging output is removed; Docker and public release publication remain excluded.
+
 ## Reconciliation ledger
 
 | Requirement | Stage | Status | Evidence |

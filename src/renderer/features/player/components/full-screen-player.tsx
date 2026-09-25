@@ -31,11 +31,9 @@ import {
     useFullScreenPlayerStoreActions,
     usePlayerData,
     usePlayerSong,
-    useWindowSettings,
 } from '/@/renderer/store';
 import { Group } from '/@/shared/components/group/group';
 import { LibraryItem } from '/@/shared/types/domain-types';
-import { Platform } from '/@/shared/types/types';
 
 const mainBackground = 'var(--theme-colors-background)';
 
@@ -238,13 +236,9 @@ const BackgroundOverlay = memo(({ dynamicBackground, opacity }: BackgroundOverla
 BackgroundOverlay.displayName = 'BackgroundOverlay';
 
 const containerVariants: Variants = {
-    closed: (custom) => {
-        const { windowBarStyle } = custom;
+    closed: () => {
         return {
-            height:
-                windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS
-                    ? 'calc(100vh - 120px)'
-                    : 'calc(100vh - 90px)',
+            height: '100%',
             position: 'absolute',
             top: '100vh',
             transition: {
@@ -256,13 +250,10 @@ const containerVariants: Variants = {
         };
     },
     open: (custom) => {
-        const { background, dynamicBackground, windowBarStyle } = custom;
+        const { background, dynamicBackground } = custom;
         return {
             backgroundColor: dynamicBackground ? background : mainBackground,
-            height:
-                windowBarStyle === Platform.WINDOWS || windowBarStyle === Platform.MACOS
-                    ? 'calc(100vh - 120px)'
-                    : 'calc(100vh - 90px)',
+            height: '100%',
             left: 0,
             position: 'absolute',
             top: 0,
@@ -282,17 +273,10 @@ interface PlayerContainerProps {
     dynamicBackground: boolean | undefined;
     dynamicIsImage: boolean | undefined;
     opacity: number;
-    windowBarStyle: Platform;
 }
 
 const PlayerContainer = memo(
-    ({
-        children,
-        dynamicBackground,
-        dynamicIsImage,
-        opacity,
-        windowBarStyle,
-    }: PlayerContainerProps) => {
+    ({ children, dynamicBackground, dynamicIsImage, opacity }: PlayerContainerProps) => {
         const currentSong = usePlayerSong();
         const imageUrl = useItemImageUrl({
             id: currentSong?.imageId || undefined,
@@ -310,7 +294,7 @@ const PlayerContainer = memo(
             <motion.div
                 animate="open"
                 className={styles.container}
-                custom={{ background, dynamicBackground, windowBarStyle }}
+                custom={{ background, dynamicBackground }}
                 exit="closed"
                 initial="closed"
                 transition={{ duration: 2 }}
@@ -341,7 +325,6 @@ export const FullScreenPlayer = () => {
         activeTab === 'lyrics' ||
         activeTab === 'visualizer';
 
-    const { windowBarStyle } = useWindowSettings();
     const isRadioActive = useIsRadioActive();
     const { isPlaying: isRadioPlaying } = useRadioPlayer();
 
@@ -364,7 +347,6 @@ export const FullScreenPlayer = () => {
             dynamicBackground={effectiveDynamicBackground}
             dynamicIsImage={dynamicIsImage}
             opacity={opacity}
-            windowBarStyle={windowBarStyle}
         >
             <Group
                 className="full-screen-player-controls-container"

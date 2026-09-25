@@ -50,3 +50,17 @@ test('default layout collapses and fades both fullscreen control bars', () => {
     assert.match(layoutStyles, /cursor:\s*none/);
     assert.match(layoutStyles, /prefers-reduced-motion:\s*reduce/);
 });
+
+test('fullscreen player fills the resized main-content row when controls hide', () => {
+    const fullScreenPlayer = readSource(
+        'src/renderer/features/player/components/full-screen-player.tsx',
+    );
+
+    const containerVariants = fullScreenPlayer.match(
+        /const containerVariants:[\s\S]*?interface PlayerContainerProps/,
+    )?.[0];
+
+    assert.ok(containerVariants, 'fullscreen player container variants must exist');
+    assert.doesNotMatch(containerVariants, /calc\(100vh - (?:90|120)px\)/);
+    assert.equal(containerVariants.match(/height:\s*'100%'/g)?.length, 2);
+});
