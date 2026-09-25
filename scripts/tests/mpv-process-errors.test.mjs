@@ -48,6 +48,26 @@ test('unexpected mpv recovery resumes from the latest matching song position', (
     assert.match(source, /recoveryPositionRef\.current = null/);
 });
 
+test('unexpected mpv recovery snapshots play state before reinitialization', () => {
+    const source = readFileSync(
+        resolve('src/renderer/features/player/audio-player/engine/mpv-player-engine.tsx'),
+        'utf8',
+    );
+
+    assert.match(
+        source,
+        /recoveryPositionRef\.current = \{[\s\S]*isPlaying:\s*playerData\.status === PlayerStatus\.PLAYING/,
+    );
+    assert.match(
+        source,
+        /replaceMpvQueue\(transcode, \{[\s\S]*isPlaying:\s*recoveryPosition\?\.isPlaying/,
+    );
+    assert.match(
+        source,
+        /isPlaying:\s*options\?\.isPlaying \?\? playerData\.status === PlayerStatus\.PLAYING/,
+    );
+});
+
 test('production logging cannot recurse on a broken inherited console pipe', () => {
     const loggerSource = readFileSync(resolve('src/main/logger.ts'), 'utf8');
     const mainSource = readFileSync(resolve('src/main/index.ts'), 'utf8');

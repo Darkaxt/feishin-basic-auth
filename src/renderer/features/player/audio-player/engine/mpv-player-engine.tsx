@@ -70,7 +70,11 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const isMountedRef = useRef<boolean>(true);
     const queueSyncCoordinatorRef = useRef(createMpvQueueSyncCoordinator());
-    const recoveryPositionRef = useRef<null | { songId?: string; timestamp: number }>(null);
+    const recoveryPositionRef = useRef<null | {
+        isPlaying: boolean;
+        songId?: string;
+        timestamp: number;
+    }>(null);
 
     const { mpvAudioDeviceId, transcode } = usePlaybackSettings();
     const mpvExtraParameters = useSettingsStore((store) => store.playback.mpvExtraParameters);
@@ -86,6 +90,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         const handleMpvReconnect = () => {
             const playerData = usePlayerStore.getState().getPlayerData();
             recoveryPositionRef.current = {
+                isPlaying: playerData.status === PlayerStatus.PLAYING,
                 songId: playerData.currentSong?._uniqueId,
                 timestamp: useTimestampStoreBase.getState().timestamp,
             };
@@ -167,6 +172,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             const recoveryPosition = recoveryPositionRef.current;
             await queueSyncCoordinator.markReady(() =>
                 replaceMpvQueue(transcode, {
+                    isPlaying: recoveryPosition?.isPlaying,
                     startTime: recoveryPosition
                         ? getRestoredPlaybackStartTime({
                               currentSongId: usePlayerStore.getState().getPlayerData().currentSong
@@ -461,7 +467,7 @@ async function replaceMpvQueue(
         enabled: boolean;
         format?: string | undefined;
     },
-    options?: { startTime?: number },
+    options?: { isPlaying?: boolean; startTime?: number },
 ) {
     // Don't override queue if radio is active
     const radioState = useRadioStore.getState();
@@ -479,7 +485,7 @@ async function replaceMpvQueue(
         : undefined;
     const plan = createMpvQueuePlan({
         currentUrl: currentSongUrl,
-        isPlaying: playerData.status === PlayerStatus.PLAYING,
+        isPlaying: options?.isPlaying ?? playerData.status === PlayerStatus.PLAYING,
         nextUrl: nextSongUrl,
         startTime: options?.startTime,
     });
