@@ -45,6 +45,21 @@ Acceptance criteria:
 - R1 through R6 reconcile with zero blockers and zero tracked deferrals.
 - The verified result is committed.
 
+### Stage 4: Local Windows deployment
+
+Status: ACTIVE
+
+This stage was authorized by the user's subsequent request to deploy the feature locally.
+
+Acceptance criteria:
+
+- Build a uniquely versioned Windows x64 NSIS installer containing the committed auto-hide feature.
+- Replace the local Feishin BasicAuth installation without replacing or resetting its user profile.
+- Verify the installed executable reports the new version and its packaged renderer contains the auto-hide implementation.
+- Relaunch the installed application successfully with the existing profile.
+- Remove task-owned packaging output after deployment.
+- Do not use Docker or publish a GitHub release.
+
 ## Reconciliation ledger
 
 | Requirement | Stage | Status | Evidence |
@@ -66,3 +81,4 @@ Tracked deferrals: 0.
 - `corepack pnpm run build:electron`: passed.
 - Production bundle inspection: the compiled renderer contains the auto-hide CSS and fullscreen activity lifecycle.
 - Generated-output cleanup: the attributed `out` directory was removed after verification; 51,386,908 bytes reclaimed.
+- Local installed application: Stage 4 ACTIVE; deployment evidence pending.
