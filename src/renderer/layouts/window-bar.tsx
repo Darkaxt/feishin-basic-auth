@@ -218,7 +218,7 @@ export const WindowBar = () => {
     }
 
     return (
-        <div className={styles.windowBar}>
+        <div className={styles.windowBar} id="window-bar">
             {windowBarStyle === Platform.WINDOWS && (
                 <WindowsControls
                     controls={{ handleClose, handleMaximize, handleMinimize }}

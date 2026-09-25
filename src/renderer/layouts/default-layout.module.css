@@ -10,6 +10,31 @@
     gap: 0;
     height: 100%;
     overflow: hidden;
+    transition: grid-template-rows 180ms ease;
+}
+
+.layout > :global(#window-bar),
+.layout > :global(#player-bar) {
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease;
+}
+
+.layout.fullscreen-controls-hidden {
+    grid-template-rows: 0 100dvh 0;
+    cursor: none;
+}
+
+.fullscreen-controls-hidden > :global(#window-bar) {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-100%);
+}
+
+.fullscreen-controls-hidden > :global(#player-bar) {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(100%);
 }
 
 .windows {
@@ -20,4 +45,12 @@
 .macos {
     grid-template-rows: 30px calc(100vh - 120px) 90px;
     grid-template-rows: 30px calc(100dvh - 120px) 90px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .layout,
+    .layout > :global(#window-bar),
+    .layout > :global(#player-bar) {
+        transition: none;
+    }
 }

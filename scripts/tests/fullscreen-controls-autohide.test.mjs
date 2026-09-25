@@ -1,0 +1,52 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type -- Node runs this JavaScript regression directly. */
+
+import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import test from 'node:test';
+
+const readSource = (path) => {
+    const absolutePath = resolve(path);
+    return existsSync(absolutePath) ? readFileSync(absolutePath, 'utf8') : '';
+};
+
+test('whole-document fullscreen controls hide after three seconds of inactivity', () => {
+    const hook = readSource('src/renderer/hooks/use-fullscreen-controls-auto-hide.ts');
+
+    assert.match(hook, /FULLSCREEN_CONTROLS_IDLE_MS = 3_000/);
+    assert.match(hook, /document\.fullscreenElement === document\.documentElement/);
+    assert.match(hook, /window\.setTimeout\([\s\S]*setControlsHidden\(true\)/);
+    assert.match(hook, /fullscreenchange/);
+});
+
+test('fullscreen activity reveals controls and restarts the idle interval', () => {
+    const hook = readSource('src/renderer/hooks/use-fullscreen-controls-auto-hide.ts');
+
+    for (const eventName of ['keydown', 'pointerdown', 'pointermove', 'touchstart', 'wheel']) {
+        assert.match(hook, new RegExp(`['"]${eventName}['"]`));
+    }
+
+    assert.match(hook, /setControlsHidden\(false\)/);
+    assert.match(hook, /clearTimeout/);
+    assert.match(hook, /removeEventListener/);
+});
+
+test('default layout collapses and fades both fullscreen control bars', () => {
+    const layout = readSource('src/renderer/layouts/default-layout.tsx');
+    const layoutStyles = readSource('src/renderer/layouts/default-layout.module.css');
+    const windowBar = readSource('src/renderer/layouts/window-bar.tsx');
+
+    assert.match(layout, /useFullscreenControlsAutoHide/);
+    assert.match(layout, /styles\.fullscreenControlsHidden/);
+    assert.match(windowBar, /id="window-bar"/);
+    assert.match(
+        layoutStyles,
+        /\.fullscreen-controls-hidden[\s\S]*grid-template-rows:\s*0 100dvh 0/,
+    );
+    assert.match(layoutStyles, /#window-bar/);
+    assert.match(layoutStyles, /#player-bar/);
+    assert.match(layoutStyles, /opacity:\s*0/);
+    assert.match(layoutStyles, /pointer-events:\s*none/);
+    assert.match(layoutStyles, /cursor:\s*none/);
+    assert.match(layoutStyles, /prefers-reduced-motion:\s*reduce/);
+});
