@@ -119,6 +119,7 @@ test('MPV startup preserves queued resume and gates controls until ready', async
         const { MpvPlayerEngine } = loadSource(
             'src/renderer/features/player/audio-player/engine/mpv-player-engine.tsx',
             {
+                './player-handoff': { playerHandoff: { pendingLocalSeek: -1 } },
                 '/@/renderer/events/event-emitter': {},
                 '/@/renderer/features/player/audio-player/hooks/use-player-events': {
                     usePlayerEvents: (value) => {
@@ -139,6 +140,7 @@ test('MPV startup preserves queued resume and gates controls until ready', async
                 },
                 '/@/renderer/store': store,
                 '/@/renderer/store/full-screen-player.store': {},
+                '/@/renderer/utils/logger': { logger: { error: () => {} } },
                 '/@/shared/types/types': { PlayerStatus: { PLAYING: 'playing' } },
                 '/@/shared/utils/lidaclips': {},
                 '/@/shared/utils/mpv-queue-sync': queueSync,
@@ -205,6 +207,7 @@ test('MPV waits for persisted player hydration before startup queue sync', async
     const { MpvPlayerEngine } = loadSource(
         'src/renderer/features/player/audio-player/engine/mpv-player-engine.tsx',
         {
+            './player-handoff': { playerHandoff: { pendingLocalSeek: -1 } },
             '/@/renderer/events/event-emitter': {},
             '/@/renderer/features/player/audio-player/hooks/use-player-events': {
                 usePlayerEvents: () => {},
@@ -223,6 +226,7 @@ test('MPV waits for persisted player hydration before startup queue sync', async
             },
             '/@/renderer/store': store,
             '/@/renderer/store/full-screen-player.store': {},
+            '/@/renderer/utils/logger': { logger: { error: () => {} } },
             '/@/shared/types/types': { PlayerStatus: { PLAYING: 'playing' } },
             '/@/shared/utils/lidaclips': {},
             '/@/shared/utils/mpv-queue-sync':
@@ -315,10 +319,13 @@ test('song changes clear stale seeks without resetting a mounted restored song',
                 uniqueSeekToTimestamp: (value) => `${value}-new`,
                 usePlayerActions: () => ({}),
                 usePlayerHydrated: () => true,
+                usePlayerProperties: () => ({ transitionType: 'gapless' }),
                 usePlayerSong: () => undefined,
+                usePlayerStore: { getState: () => ({}) },
                 usePlayerStoreBase: { setState: (update) => update(state) },
             },
             '/@/renderer/utils/logger': {},
+            '/@/shared/types/types': { PlayerStyle: { CROSSFADE: 'crossfade' } },
             '/@/shared/utils/song-availability': {},
             '@tanstack/react-query': { useQueryClient: () => ({}) },
             react: { useCallback: (fn) => fn, useEffect: (fn) => fn() },

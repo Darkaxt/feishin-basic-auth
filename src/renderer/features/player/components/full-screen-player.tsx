@@ -236,33 +236,24 @@ const BackgroundOverlay = memo(({ dynamicBackground, opacity }: BackgroundOverla
 BackgroundOverlay.displayName = 'BackgroundOverlay';
 
 const containerVariants: Variants = {
-    closed: () => {
-        return {
-            height: '100%',
-            position: 'absolute',
-            top: '100vh',
-            transition: {
-                duration: 0.5,
-                ease: 'easeOut',
-            },
-            width: '100vw',
-            y: 0,
-        };
+    closed: {
+        height: '100%',
+        transition: {
+            duration: 0.5,
+            ease: 'easeOut',
+        },
+        y: '100%',
     },
     open: (custom) => {
         const { background, dynamicBackground } = custom;
         return {
             backgroundColor: dynamicBackground ? background : mainBackground,
             height: '100%',
-            left: 0,
-            position: 'absolute',
-            top: 0,
             transition: {
                 delay: 0.1,
                 duration: 0.5,
                 ease: 'easeOut',
             },
-            width: '100vw',
             y: 0,
         };
     },
@@ -278,9 +269,17 @@ interface PlayerContainerProps {
 const PlayerContainer = memo(
     ({ children, dynamicBackground, dynamicIsImage, opacity }: PlayerContainerProps) => {
         const currentSong = usePlayerSong();
+        const isRadioActive = useIsRadioActive();
+        const { currentStationArt: currentRadioStationArt } = useRadioPlayer();
+
+        const imageId = isRadioActive ? currentRadioStationArt?.imageId : currentSong?.imageId;
+        const currentImageUrl = isRadioActive
+            ? currentRadioStationArt?.imageUrl
+            : currentSong?.imageUrl;
+
         const imageUrl = useItemImageUrl({
-            id: currentSong?.imageId || undefined,
-            imageUrl: currentSong?.imageUrl,
+            id: imageId || undefined,
+            imageUrl: currentImageUrl,
             itemType: LibraryItem.SONG,
             type: 'itemCard',
         });

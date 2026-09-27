@@ -165,7 +165,7 @@ export function MpvPlayer() {
     const hasCurrentSong = !!currentSong?.id;
 
     useEffect(() => {
-        if (localPlayerStatus !== PlayerStatus.PLAYING || !hasCurrentSong) {
+        if (status !== PlayerStatus.PLAYING || !hasCurrentSong) {
             return;
         }
 
@@ -185,7 +185,19 @@ export function MpvPlayer() {
         }, 500);
 
         return () => clearInterval(interval);
-    }, [hasCurrentSong, localPlayerStatus, setTimestamp]);
+    }, [hasCurrentSong, status, setTimestamp]);
+
+    useEffect(() => {
+        if (status !== PlayerStatus.PLAYING || localPlayerStatus === PlayerStatus.PLAYING) {
+            return;
+        }
+        if (fadeIntervalRef.current) {
+            clearInterval(fadeIntervalRef.current);
+            fadeIntervalRef.current = null;
+        }
+        setLocalPlayerStatus(PlayerStatus.PLAYING);
+        playerRef.current?.setVolume(volume);
+    }, [status, localPlayerStatus, volume]);
 
     return (
         <MpvPlayerEngine

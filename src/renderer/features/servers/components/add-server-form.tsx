@@ -13,6 +13,12 @@ import JellyfinIcon from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
 import { IgnoreCorsSslSwitches } from '/@/renderer/features/servers/components/ignore-cors-ssl-switches';
+import { JellyfinQuickConnectButton } from '/@/renderer/features/servers/components/jellyfin-quick-connect-button';
+import {
+    JellyfinSignInMethod,
+    JellyfinSignInMethodPicker,
+} from '/@/renderer/features/servers/components/jellyfin-sign-in-method-picker';
+import { useJellyfinQuickConnect } from '/@/renderer/features/servers/hooks/use-jellyfin-quick-connect';
 import { useAuthStoreActions, useServerList } from '/@/renderer/store';
 import { syncProxyAuthToMain } from '/@/renderer/utils/proxy-auth';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -134,13 +140,64 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     const formUrlProxyPassword =
         sanitizeServerUrl(form.values.url).proxyPassword ||
         sanitizeServerUrl(form.values.remoteUrl).proxyPassword;
+    const hasProxyAuthInput = Boolean(
+        form.values.proxyAuthEnabled ||
+        sanitizeServerUrl(form.values.url).proxyUsername ||
+        sanitizeServerUrl(form.values.remoteUrl).proxyUsername,
+    );
+    const [signInMethod, setSignInMethod] = useState<JellyfinSignInMethod>('password');
+    const showQuickConnect =
+        form.values.type === ServerType.JELLYFIN && signInMethod === 'quickConnect';
+
     const isSubmitDisabled =
         !form.values.name ||
         !form.values.url ||
-        !form.values.username ||
+        (!showQuickConnect && !form.values.username) ||
         (form.values.proxyAuthEnabled &&
             (!form.values.proxyAuthUsername.trim() ||
                 (!form.values.proxyAuthPassword && !formUrlProxyPassword)));
+
+    const {
+        code: quickConnectCode,
+        isLoading: isQuickConnectLoading,
+        start: startQuickConnect,
+        stop: stopQuickConnect,
+    } = useJellyfinQuickConnect({
+        onAuthenticated: (data) => {
+            const url = sanitizeServerUrl(form.values.url).url;
+            const serverItem: ServerListItemWithCredential = {
+                credential: data.credential,
+                id: nanoid(),
+                isAdmin: data.isAdmin,
+                name: form.values.name,
+                type: ServerType.JELLYFIN,
+                url,
+                userId: data.userId,
+                username: data.username,
+            };
+
+            if (form.values.remoteUrl?.trim()) {
+                serverItem.remoteUrl = sanitizeServerUrl(form.values.remoteUrl).url;
+            }
+
+            if (form.values.preferRemoteUrl !== undefined) {
+                serverItem.preferRemoteUrl = form.values.preferRemoteUrl;
+            }
+
+            if (form.values.preferInstantMix !== undefined) {
+                serverItem.preferInstantMix = form.values.preferInstantMix;
+            }
+
+            addServer(serverItem);
+            setCurrentServer(serverItem);
+            closeAllModals();
+            toast.success({ message: t('form.addServer.success') });
+        },
+    });
+
+    useEffect(() => {
+        if (!showQuickConnect) stopQuickConnect();
+    }, [showQuickConnect, stopQuickConnect]);
 
     const fillServerDetails = (server: DiscoveredServerItem) => {
         form.setValues({ ...server });
@@ -332,9 +389,13 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                     <SegmentedControl
                         data={ALL_SERVERS}
                         disabled={serverLock}
+                        onChange={(value) => {
+                            form.setFieldValue('type', value);
+                            if (value !== ServerType.JELLYFIN) stopQuickConnect();
+                        }}
                         p="md"
+                        value={form.values.type}
                         withItemsBorders={false}
-                        {...form.getInputProps('type')}
                     />
                     <Group grow>
                         <TextInput
@@ -356,6 +417,9 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                         />
                     </Group>
                     <TextInput
+                        description={t('form.addServer.input', {
+                            context: 'remoteUrlDescription',
+                        })}
                         disabled={serverLock}
                         label={t('form.addServer.input', {
                             context: 'remoteUrl',
@@ -375,9 +439,15 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             })}
                         />
                     )}
-                    {localSettings && (
+                    {isElectron() && (
                         <>
                             <Divider />
+                            <IgnoreCorsSslSwitches />
+                            <Divider />
+                        </>
+                    )}
+                    {localSettings && (
+                        <>
                             <Checkbox
                                 description={t('form.addServer.input', {
                                     context: 'proxyBasicAuthDescription',
@@ -414,23 +484,36 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             <Divider />
                         </>
                     )}
-                    <TextInput
-                        label={t('form.addServer.input', {
-                            context: 'username',
-                        })}
-                        required
-                        {...form.getInputProps('username')}
-                    />
-                    <PasswordInput
-                        description={
-                            form.values.type === ServerType.NAVIDROME &&
-                            t('form.addServer.input', { context: 'passwordNoSSO' })
-                        }
-                        label={t('form.addServer.input', {
-                            context: 'password',
-                        })}
-                        {...form.getInputProps('password')}
-                    />
+                    {form.values.type === ServerType.JELLYFIN && (
+                        <JellyfinSignInMethodPicker
+                            onChange={(method) => {
+                                setSignInMethod(method);
+                                if (method !== 'quickConnect') stopQuickConnect();
+                            }}
+                            value={signInMethod}
+                        />
+                    )}
+                    {!showQuickConnect && (
+                        <>
+                            <TextInput
+                                label={t('form.addServer.input', {
+                                    context: 'username',
+                                })}
+                                required
+                                {...form.getInputProps('username')}
+                            />
+                            <PasswordInput
+                                description={
+                                    form.values.type === ServerType.NAVIDROME &&
+                                    t('form.addServer.input', { context: 'passwordNoSSO' })
+                                }
+                                label={t('form.addServer.input', {
+                                    context: 'password',
+                                })}
+                                {...form.getInputProps('password')}
+                            />
+                        </>
+                    )}
                     {localSettings && form.values.type === ServerType.NAVIDROME && (
                         <Checkbox
                             label={t('form.addServer.input', {
@@ -463,25 +546,32 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             })}
                         />
                     )}
-                    {isElectron() && (
-                        <>
-                            <Divider />
-                            <IgnoreCorsSslSwitches />
-                            <Divider />
-                        </>
+                    {showQuickConnect && (
+                        <JellyfinQuickConnectButton
+                            code={quickConnectCode}
+                            disabled={!form.values.name || !form.values.url || hasProxyAuthInput}
+                            isLoading={isQuickConnectLoading}
+                            onStart={() =>
+                                startQuickConnect(sanitizeServerUrl(form.values.url).url)
+                            }
+                            onStop={stopQuickConnect}
+                            url={sanitizeServerUrl(form.values.url).url}
+                        />
                     )}
                     <Group grow justify="flex-end">
                         {onCancel && (
                             <ModalButton onClick={onCancel}>{t('common.cancel')}</ModalButton>
                         )}
-                        <ModalButton
-                            disabled={isSubmitDisabled}
-                            loading={isLoading}
-                            type="submit"
-                            variant="filled"
-                        >
-                            {t('common.add')}
-                        </ModalButton>
+                        {!showQuickConnect && (
+                            <ModalButton
+                                disabled={isSubmitDisabled}
+                                loading={isLoading}
+                                type="submit"
+                                variant="filled"
+                            >
+                                {t('common.add')}
+                            </ModalButton>
+                        )}
                     </Group>
                 </Stack>
             </form>

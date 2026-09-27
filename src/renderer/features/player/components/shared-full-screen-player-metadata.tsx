@@ -33,8 +33,7 @@ export const SharedFullscreenPlayerMetadata = ({
 }: SharedFullscreenPlayerMetadataProps) => {
     const currentSong = usePlayerSong();
     const isRadioActive = useIsRadioActive();
-    const { isPlaying: isRadioPlaying, metadata: radioMetadata, stationName } = useRadioPlayer();
-    const isPlayingRadio = isRadioActive && isRadioPlaying;
+    const { metadata: radioMetadata, stationName } = useRadioPlayer();
 
     const { playerItemAlignment, titleDisplayType, titleLineCount } = useFullScreenPlayerStore();
     const { playerItems } = useGeneralSettings();
@@ -94,7 +93,7 @@ export const SharedFullscreenPlayerMetadata = ({
     });
 
     const hasMetadata =
-        !isPlayingRadio && deduplicatedPlayerItems.some((i) => !i.disabled && builtDataItems[i.id]);
+        !isRadioActive && deduplicatedPlayerItems.some((i) => !i.disabled && builtDataItems[i.id]);
 
     const showMetadata =
         deduplicatedPlayerItems.some((i) => !i.disabled && builtDataItems[i.id]) ||
@@ -143,7 +142,7 @@ export const SharedFullscreenPlayerMetadata = ({
                                 size="4xl"
                                 speed={50}
                             >
-                                {isPlayingRadio
+                                {isRadioActive
                                     ? radioMetadata?.title || stationName || 'Radio'
                                     : currentSong?.name}
                             </TextScrolling>
@@ -160,14 +159,14 @@ export const SharedFullscreenPlayerMetadata = ({
                                 }}
                                 w="100%"
                             >
-                                {isPlayingRadio
+                                {isRadioActive
                                     ? radioMetadata?.title || stationName || 'Radio'
                                     : currentSong?.name}
                             </Text>
                         ))}
                     {showArtist && (
                         <Text key="fs-artists" size="xl">
-                            {isPlayingRadio
+                            {isRadioActive
                                 ? radioMetadata?.artist || stationName || 'Radio'
                                 : currentSong?.artists?.map((artist, index) => (
                                       <Fragment key={`fs-artist-${artist.id}`}>
@@ -198,7 +197,7 @@ export const SharedFullscreenPlayerMetadata = ({
                         </Text>
                     )}
                     {showAlbum &&
-                        (isPlayingRadio ? (
+                        (isRadioActive ? (
                             <Text overflow="hidden" size="xl" w="100%">
                                 {stationName || 'Radio'}
                             </Text>
@@ -216,7 +215,7 @@ export const SharedFullscreenPlayerMetadata = ({
                                 {currentSong?.album}
                             </Text>
                         ))}
-                    {!isPlayingRadio && hasMetadata && (
+                    {!isRadioActive && hasMetadata && (
                         <Group justify={metadataAlignment} mt="sm" w="100%">
                             {deduplicatedPlayerItems.map(
                                 (i) => !i.disabled && builtDataItems[i.id],

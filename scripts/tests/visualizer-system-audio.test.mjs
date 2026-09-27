@@ -35,14 +35,24 @@ test('system audio capture requests video only on macOS', () => {
     if (typeof systemAudio.getVisualizerDisplayMediaOptions !== 'function') return;
 
     assert.deepEqual(systemAudio.getVisualizerDisplayMediaOptions(false), {
-        audio: true,
+        audio: {
+            autoGainControl: false,
+            channelCount: 2,
+            echoCancellation: false,
+            noiseSuppression: false,
+        },
         monitorTypeSurfaces: 'include',
         systemAudio: 'include',
         video: false,
         windowAudio: 'system',
     });
     assert.deepEqual(systemAudio.getVisualizerDisplayMediaOptions(true), {
-        audio: true,
+        audio: {
+            autoGainControl: false,
+            channelCount: 2,
+            echoCancellation: false,
+            noiseSuppression: false,
+        },
         monitorTypeSurfaces: 'include',
         systemAudio: 'include',
         video: true,

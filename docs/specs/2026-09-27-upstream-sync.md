@@ -15,7 +15,7 @@ Authorization: `already_authorized` by the user's request to change the maintena
 
 ### Stage 1: Controlled integration
 
-Status: ACTIVE
+Status: COMPLETE
 
 Acceptance criteria:
 
@@ -25,7 +25,7 @@ Acceptance criteria:
 
 ### Stage 2: Verification and remediation
 
-Status: NOT STARTED
+Status: ACTIVE
 
 Acceptance criteria:
 
@@ -49,9 +49,9 @@ Acceptance criteria:
 
 | Requirement | Stage | Status | Evidence |
 | --- | --- | --- | --- |
-| R1 | 1 | PENDING | Awaiting controlled merge. |
-| R2 | 1, 2 | PENDING | Awaiting conflict reconciliation and regressions. |
-| R3 | 1, 2 | PENDING | Awaiting conflict reconciliation and regressions. |
+| R1 | 1 | SATISFIED | Merge commit incorporates upstream `6c5173f1` without rewriting fork history. |
+| R2 | 1, 2 | IN PROGRESS | Fork conflicts reconciled; final non-Docker verification remains. |
+| R3 | 1, 2 | IN PROGRESS | Upstream conflict behavior integrated; final non-Docker verification remains. |
 | R4 | 2 | PENDING | Awaiting focused gate and build. |
 | R5 | 3 | PENDING | Awaiting verified commit and push. |
 | R6 | 3 | PENDING | Awaiting current open-PR record. |

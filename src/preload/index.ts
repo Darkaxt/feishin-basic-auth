@@ -4,6 +4,7 @@ import { autodiscover } from './autodiscover';
 import { browser } from './browser';
 import { customThemes } from './custom-themes';
 import { discordRpc } from './discord-rpc';
+import { dlnaPlayer, dlnaPlayerListener } from './dlna-player';
 import { ipc } from './ipc';
 import { lidaClips } from './lidaclips';
 import { localSettings } from './local-settings';
@@ -20,6 +21,8 @@ const api = {
     browser,
     customThemes,
     discordRpc,
+    dlnaPlayer,
+    dlnaPlayerListener,
     getPathForFile: webUtils.getPathForFile,
     ipc,
     lidaClips,

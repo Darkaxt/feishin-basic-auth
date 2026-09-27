@@ -10,12 +10,14 @@ import {
     updateQueueSong,
     usePlayerActions,
     usePlayerHydrated,
+    usePlayerProperties,
     usePlayerSong,
     usePlayerStore,
     usePlayerStoreBase,
 } from '/@/renderer/store/player.store';
 import { logger } from '/@/renderer/utils/logger';
 import { QueueSong, SongDetailQuery } from '/@/shared/types/domain-types';
+import { PlayerStyle } from '/@/shared/types/types';
 import { isSongNotFoundError } from '/@/shared/utils/song-availability';
 
 export const useUpdateCurrentSong = () => {
@@ -100,6 +102,8 @@ export const useUpdateCurrentSong = () => {
         });
     }, []);
 
+    const { transitionType } = usePlayerProperties();
+
     usePlayerEvents(
         {
             onCurrentSongChange: (properties, prev) => {
@@ -109,11 +113,13 @@ export const useUpdateCurrentSong = () => {
                     properties.song?._uniqueId !== prev.song?._uniqueId
                 ) {
                     // Prevents issues with lingering seekToTimestamp on song autonext
-                    resetSeekToTimestamp();
+                    if (transitionType !== PlayerStyle.CROSSFADE) {
+                        resetSeekToTimestamp();
+                    }
                 }
             },
         },
-        [resetSeekToTimestamp],
+        [handleSongChange, resetSeekToTimestamp, transitionType],
     );
 };
 

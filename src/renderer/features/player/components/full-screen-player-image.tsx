@@ -79,6 +79,7 @@ const ImageWithPlaceholder = ({
     vinylEnabled: boolean;
 }) => {
     const nativeAspectRatio = useNativeAspectRatio();
+    const useImageAspectRatio = useFullScreenPlayerStore((state) => state.useImageAspectRatio);
     const placeholder = (
         <Center
             style={{
@@ -100,8 +101,8 @@ const ImageWithPlaceholder = ({
             enabled={vinylEnabled}
             expectedSrc={expectedSrc}
             imageStyle={{
-                objectFit: nativeAspectRatio ? 'contain' : 'cover',
-                width: nativeAspectRatio ? 'auto' : '100%',
+                objectFit: nativeAspectRatio || useImageAspectRatio ? 'contain' : 'cover',
+                width: nativeAspectRatio || useImageAspectRatio ? 'auto' : '100%',
             }}
             isActiveSong={isActiveSong}
             isPlaying={isPlaying}
@@ -120,7 +121,7 @@ export const FullScreenPlayerImage = () => {
     const [imageContainerWidth, setImageContainerWidth] = useState<null | number>(null);
 
     const isRadioActive = useIsRadioActive();
-    const { isPlaying: isRadioPlaying } = useRadioPlayer();
+    const { currentStationArt: currentRadioStationArt } = useRadioPlayer();
 
     const currentSong = usePlayerSong();
     const playerStatus = usePlayerStatus();
@@ -133,8 +134,6 @@ export const FullScreenPlayerImage = () => {
         titleLineCount,
         vinylArtworkEnabled,
     } = useFullScreenPlayerStore();
-
-    const isPlayingRadio = isRadioActive && isRadioPlaying;
 
     const currentImageUrl = useItemImageUrl({
         id: currentSong?.imageId || undefined,
@@ -163,6 +162,17 @@ export const FullScreenPlayerImage = () => {
         nextImageUrl,
         nextSong?._serverId,
         coverArtSize,
+    ].join('|');
+    const radioImage = useItemImageUrl({
+        id: currentRadioStationArt?.imageId || undefined,
+        itemType: LibraryItem.RADIO_STATION,
+        serverId: currentRadioStationArt?.serverId,
+        type: 'fullScreenPlayer',
+    });
+    const radioArtworkRequestKey = [
+        currentRadioStationArt?.imageId,
+        radioImage,
+        currentRadioStationArt?.serverId,
     ].join('|');
 
     const [imageState, setImageState] = useSetState({
@@ -263,7 +273,7 @@ export const FullScreenPlayerImage = () => {
 
     // Update images when song or size changes (skip when playing radio - no album art)
     useEffect(() => {
-        if (isPlayingRadio) {
+        if (isRadioActive) {
             return;
         }
         if (currentSong?._uniqueId === previousSongRef.current) {
@@ -300,7 +310,7 @@ export const FullScreenPlayerImage = () => {
 
         previousSongRef.current = currentSong?._uniqueId;
     }, [
-        isPlayingRadio,
+        isRadioActive,
         currentSong?._uniqueId,
         currentImageUrl,
         nextSong?._uniqueId,
@@ -359,7 +369,7 @@ export const FullScreenPlayerImage = () => {
                 }}
             >
                 <AnimatePresence initial={false} mode="sync">
-                    {!isPlayingRadio &&
+                    {!isRadioActive &&
                         artworkSlots.map((slot) => {
                             if (!slot.render) {
                                 return null;
@@ -402,23 +412,23 @@ export const FullScreenPlayerImage = () => {
                             );
                         })}
 
-                    {isPlayingRadio && (
+                    {isRadioActive && (
                         <ImageWithPlaceholder
                             animate="open"
                             className="full-screen-player-image"
                             custom={{ isOpen: true }}
                             draggable={false}
                             exit="closed"
-                            expectedSrc=""
+                            expectedSrc={radioImage || ''}
                             initial="closed"
                             isActiveSong={false}
                             isPlaying={false}
                             key="radio"
                             placeholder="var(--theme-colors-foreground-muted)"
                             placeholderIcon="radio"
-                            requestKey="radio"
+                            requestKey={radioArtworkRequestKey}
                             shrinkOnPause={false}
-                            src=""
+                            src={radioImage || ''}
                             variants={imageVariants}
                             vinylEnabled={false}
                         />

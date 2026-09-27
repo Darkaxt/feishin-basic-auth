@@ -1,7 +1,7 @@
 appId: eu.remaxku.feishin.basicauth
 productName: Feishin
 artifactName: Feishin-${version}-${os}-${arch}.${ext}
-electronVersion: 43.4.1
+electronVersion: 43.7.0
 directories:
     buildResources: assets
 files:
@@ -44,6 +44,8 @@ mac:
     type: distribution
     hardenedRuntime: false
     identity: '-'
+    entitlements: build/entitlements.mac.plist
+    entitlementsInherit: build/entitlements.mac.plist
     gatekeeperAssess: false
     notarize: false
     extendInfo:

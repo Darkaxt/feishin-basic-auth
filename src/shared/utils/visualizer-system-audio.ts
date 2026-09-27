@@ -38,7 +38,12 @@ export function bindVisualizerSystemAudioRecovery({
 
 export function getVisualizerDisplayMediaOptions(isMacOS: boolean): DisplayMediaStreamOptions {
     return {
-        audio: true,
+        audio: {
+            autoGainControl: false,
+            channelCount: 2,
+            echoCancellation: false,
+            noiseSuppression: false,
+        },
         monitorTypeSurfaces: 'include',
         systemAudio: 'include',
         video: isMacOS,

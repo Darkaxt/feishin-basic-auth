@@ -3,6 +3,8 @@ import type { RefObject } from 'react';
 import isElectron from 'is-electron';
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
+import { playerHandoff } from './player-handoff';
+
 import { eventEmitter } from '/@/renderer/events/event-emitter';
 import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import { getSongUrl } from '/@/renderer/features/player/audio-player/hooks/use-stream-url';
@@ -21,6 +23,7 @@ import {
     useTimestampStoreBase,
 } from '/@/renderer/store';
 import { useFullScreenPlayerStore } from '/@/renderer/store/full-screen-player.store';
+import { logger } from '/@/renderer/utils/logger';
 import { PlayerStatus } from '/@/shared/types/types';
 import { shouldStopLidaClipsModeAfterAutoNext } from '/@/shared/utils/lidaclips';
 import { createMpvQueuePlan, createMpvQueueSyncCoordinator } from '/@/shared/utils/mpv-queue-sync';
@@ -68,7 +71,6 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
     const currentSong = usePlayerSong();
 
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-    const isMountedRef = useRef<boolean>(true);
     const queueSyncCoordinatorRef = useRef(createMpvQueueSyncCoordinator());
     const recoveryPositionRef = useRef<null | {
         isPlaying: boolean;
@@ -114,7 +116,6 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             return;
         }
 
-        isMountedRef.current = true;
         const queueSyncCoordinator = queueSyncCoordinatorRef.current;
         queueSyncCoordinator.reset();
         setMpvInitialized(false);
@@ -170,7 +171,8 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
             }
 
             const recoveryPosition = recoveryPositionRef.current;
-            await queueSyncCoordinator.markReady(() =>
+            const pendingLocalSeek = playerHandoff.pendingLocalSeek;
+            const queuePopulated = await queueSyncCoordinator.markReady(() =>
                 replaceMpvQueue(transcode, {
                     isPlaying: recoveryPosition?.isPlaying,
                     startTime: recoveryPosition
@@ -180,20 +182,26 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
                               savedSongId: recoveryPosition.songId,
                               savedTimestamp: recoveryPosition.timestamp,
                           })
-                        : undefined,
+                        : normalizePlaybackStartTime(pendingLocalSeek),
                 }),
             );
+            if (queuePopulated && pendingLocalSeek > 0) {
+                playerHandoff.pendingLocalSeek = -1;
+            }
             if (!isCancelled) {
                 recoveryPositionRef.current = null;
                 setMpvInitialized(true);
             }
         };
 
-        initializeMpv();
+        // Guard against an unhandled rejection (e.g. a failed getSongUrl / initialize
+        // call); the player simply stays uninitialized and a reload can retry.
+        initializeMpv().catch((error) => {
+            logger.error('Failed to initialize mpv', { error });
+        });
 
         return () => {
             isCancelled = true;
-            isMountedRef.current = false;
             // Quit mpv on unmount
             mpvPlayer?.quit();
             queueSyncCoordinator.reset();
@@ -275,39 +283,36 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         if (progressIntervalRef.current) {
             clearInterval(progressIntervalRef.current);
         }
-
         if (!hasCurrentSong) {
             return;
         }
+        let cancelled = false;
 
         if (playerStatus !== PlayerStatus.PLAYING) {
             return;
         }
 
         const updateProgress = async () => {
-            if (!mpvPlayer || !isMountedRef.current) {
+            if (!mpvPlayer || cancelled) {
                 return;
             }
 
             try {
                 const time = await mpvPlayer.getCurrentTime();
-                if (time !== undefined && isMountedRef.current) {
+                if (time !== undefined && !cancelled) {
                     onProgress({
                         played: time / (time + 10),
                         playedSeconds: time,
                     });
                 }
             } catch {
-                // Handle error silently
+                // Catch
             }
         };
-
-        const interval = PROGRESS_UPDATE_INTERVAL;
-        progressIntervalRef.current = setInterval(updateProgress, interval);
+        progressIntervalRef.current = setInterval(updateProgress, PROGRESS_UPDATE_INTERVAL);
         updateProgress();
-
         return () => {
-            isMountedRef.current = false;
+            cancelled = true;
             if (progressIntervalRef.current) {
                 clearInterval(progressIntervalRef.current);
                 progressIntervalRef.current = null;
@@ -454,6 +459,10 @@ async function handleMpvAutoNext(transcode: {
     enabled: boolean;
     format?: string | undefined;
 }) {
+    const storeStatus = usePlayerStore.getState().player?.status;
+    if (storeStatus !== PlayerStatus.PLAYING) {
+        return;
+    }
     const playerData = usePlayerStore.getState().getPlayerData();
     const nextSongUrl = playerData.nextSong
         ? await getSongUrl(playerData.nextSong, transcode, true)
@@ -480,8 +489,10 @@ async function replaceMpvQueue(
     const currentSongUrl = playerData.currentSong
         ? await getSongUrl(playerData.currentSong, transcode, true)
         : undefined;
-    const nextSongUrl = playerData.nextSong
-        ? await getSongUrl(playerData.nextSong, transcode, true)
+    const isDifferentNextSong =
+        playerData.nextSong && playerData.nextSong.id !== playerData.currentSong?.id;
+    const nextSongUrl = isDifferentNextSong
+        ? await getSongUrl(playerData.nextSong!, transcode, true)
         : undefined;
     const plan = createMpvQueuePlan({
         currentUrl: currentSongUrl,

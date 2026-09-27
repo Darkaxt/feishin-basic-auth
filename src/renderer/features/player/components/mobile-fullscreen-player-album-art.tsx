@@ -98,7 +98,6 @@ const ImageWithPlaceholder = ({
             expectedSrc={expectedSrc}
             imageStyle={{
                 objectFit: useImageAspectRatio ? 'contain' : 'cover',
-                width: useImageAspectRatio ? 'auto' : '100%',
             }}
             isActiveSong={isActiveSong}
             isPlaying={isPlaying}
@@ -120,12 +119,10 @@ export const MobileFullscreenPlayerAlbumArt = () => {
     const { shrinkVinylArtworkOnPause, useImageAspectRatio, vinylArtworkEnabled } =
         useFullScreenPlayerStore();
     const isRadioActive = useIsRadioActive();
-    const { isPlaying: isRadioPlaying } = useRadioPlayer();
+    const { currentStationArt: currentRadioStationArt } = useRadioPlayer();
     const currentSong = usePlayerSong();
     const playerStatus = usePlayerStatus();
     const { nextSong } = usePlayerData();
-
-    const isPlayingRadio = isRadioActive && isRadioPlaying;
 
     const currentImageUrl = useItemImageUrl({
         id: currentSong?.imageId || undefined,
@@ -154,6 +151,17 @@ export const MobileFullscreenPlayerAlbumArt = () => {
         nextImageUrl,
         nextSong?._serverId,
         mainImageDimensions.idealSize,
+    ].join('|');
+    const radioImage = useItemImageUrl({
+        id: currentRadioStationArt?.imageId || undefined,
+        itemType: LibraryItem.RADIO_STATION,
+        serverId: currentRadioStationArt?.serverId,
+        type: 'fullScreenPlayer',
+    });
+    const radioArtworkRequestKey = [
+        currentRadioStationArt?.imageId,
+        radioImage,
+        currentRadioStationArt?.serverId,
     ].join('|');
 
     const [imageState, setImageState] = useSetState({
@@ -266,14 +274,14 @@ export const MobileFullscreenPlayerAlbumArt = () => {
                 })}
             >
                 <AnimatePresence initial={false} mode="sync">
-                    {isPlayingRadio ? (
+                    {isRadioActive ? (
                         <ImageWithPlaceholder
                             animate="open"
                             className={PlaybackSelectors.playerCoverArt}
                             custom={{ isOpen: true }}
                             draggable={false}
                             exit="closed"
-                            expectedSrc=""
+                            expectedSrc={radioImage || ''}
                             initial="closed"
                             isActiveSong={false}
                             isPlaying={false}
@@ -281,9 +289,9 @@ export const MobileFullscreenPlayerAlbumArt = () => {
                             loading="eager"
                             placeholder="var(--theme-colors-foreground-muted)"
                             placeholderIcon="radio"
-                            requestKey="radio"
+                            requestKey={radioArtworkRequestKey}
                             shrinkOnPause={false}
-                            src=""
+                            src={radioImage || ''}
                             useImageAspectRatio={useImageAspectRatio}
                             variants={imageVariants}
                             vinylEnabled={false}
