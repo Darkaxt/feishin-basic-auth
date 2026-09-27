@@ -25,7 +25,7 @@ Acceptance criteria:
 
 ### Stage 2: Verification and remediation
 
-Status: ACTIVE
+Status: COMPLETE
 
 Acceptance criteria:
 
@@ -36,7 +36,7 @@ Acceptance criteria:
 
 ### Stage 3: Documentation and source delivery
 
-Status: NOT STARTED
+Status: ACTIVE
 
 Acceptance criteria:
 
@@ -50,11 +50,30 @@ Acceptance criteria:
 | Requirement | Stage | Status | Evidence |
 | --- | --- | --- | --- |
 | R1 | 1 | SATISFIED | Merge commit incorporates upstream `6c5173f1` without rewriting fork history. |
-| R2 | 1, 2 | IN PROGRESS | Fork conflicts reconciled; final non-Docker verification remains. |
-| R3 | 1, 2 | IN PROGRESS | Upstream conflict behavior integrated; final non-Docker verification remains. |
-| R4 | 2 | PENDING | Awaiting focused gate and build. |
+| R2 | 1, 2 | SATISFIED | Fork conflicts reconciled; focused regressions and the complete non-Docker gate pass. |
+| R3 | 1, 2 | SATISFIED | Upstream conflict behavior integrated; type checks, lint, and production Electron build pass. |
+| R4 | 2 | SATISFIED | Non-Docker release gate and `pnpm run build:electron` both exit successfully. |
 | R5 | 3 | PENDING | Awaiting verified commit and push. |
-| R6 | 3 | PENDING | Awaiting current open-PR record. |
+| R6 | 3 | SATISFIED | Relevant open parent PRs are recorded below without automatic integration. |
+
+## Verification evidence
+
+- Merge commit `05c607317d2721b637683cacc325079a2e93bfb5` has upstream `6c5173f1` as its second parent.
+- `node scripts/run-basic-auth-release-gates.mjs`: exit 0; all focused regressions, dependency checks, node/web type checks, code/style lint, and the BasicAuth secret scan pass.
+- `pnpm run build:electron`: exit 0; the main, preload, and renderer production bundles compile successfully.
+- Transactional cleanup removed the exact generated `out` tree: 324 attributed entries and 52,311,445 bytes, with no exclusions or residual files.
+- Docker, Electron packaging, release publication, and installed-application deployment were not run.
+
+## Unmerged parent PR tracking
+
+- `#2543` simple API-key authentication (draft): authentication overlap; reassess after merge.
+- `#2529` fullscreen title-scroll reset: fullscreen overlap; reassess after merge.
+- `#2518` visualizer cleanup on resume: visualizer/recovery overlap; reassess after merge.
+- `#2506` mini player: player UI expansion; track without pre-merging.
+- `#2505` Up Next queue: queue UI overlap; track without pre-merging.
+- `#2492` sidebar Now Playing: queue/sidebar overlap; track without pre-merging.
+- `#2484` custom headers (draft): proxy/auth header overlap; reassess after merge.
+- `#1678` SSO proxy authentication: conflicts with current parent and overlaps BasicAuth; do not integrate in its current state.
 
 Blockers: none.
 
