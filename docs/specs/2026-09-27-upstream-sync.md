@@ -36,7 +36,7 @@ Acceptance criteria:
 
 ### Stage 3: Documentation and source delivery
 
-Status: ACTIVE
+Status: COMPLETE
 
 Acceptance criteria:
 
@@ -53,7 +53,7 @@ Acceptance criteria:
 | R2 | 1, 2 | SATISFIED | Fork conflicts reconciled; focused regressions and the complete non-Docker gate pass. |
 | R3 | 1, 2 | SATISFIED | Upstream conflict behavior integrated; type checks, lint, and production Electron build pass. |
 | R4 | 2 | SATISFIED | Non-Docker release gate and `pnpm run build:electron` both exit successfully. |
-| R5 | 3 | PENDING | Awaiting verified commit and push. |
+| R5 | 3 | SATISFIED | Verified merge `05c60731` and sync record `008f8945` were pushed to `origin/development`; no release or deployment occurred. |
 | R6 | 3 | SATISFIED | Relevant open parent PRs are recorded below without automatic integration. |
 
 ## Verification evidence
