@@ -64,3 +64,14 @@ test('fullscreen player fills the resized main-content row when controls hide', 
     assert.doesNotMatch(containerVariants, /calc\(100vh - (?:90|120)px\)/);
     assert.equal(containerVariants.match(/height:\s*'100%'/g)?.length, 2);
 });
+
+test('fullscreen dark tint composites theme noise above its color to prevent banding', () => {
+    const playerStyles = readSource(
+        'src/renderer/features/player/components/full-screen-player.module.css',
+    );
+
+    const backgroundOverlay = playerStyles.match(/\.background-overlay\s*\{[\s\S]*?\}/)?.[0];
+
+    assert.ok(backgroundOverlay, 'fullscreen background overlay styles must exist');
+    assert.match(backgroundOverlay, /background-image:\s*var\(--theme-background-noise\)/);
+});

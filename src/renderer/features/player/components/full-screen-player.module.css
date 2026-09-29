@@ -117,4 +117,5 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    background-image: var(--theme-background-noise);
 }
