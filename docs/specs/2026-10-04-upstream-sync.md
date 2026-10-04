@@ -15,7 +15,7 @@ Authorized by the user's request to proceed after the maintenance blocker.
 
 1. Local candidate verification - COMPLETE. Acceptance: source gate and Electron build succeed on `07f3c3e70`. Both commands exited successfully on the unchanged local candidate.
 2. Integration and verification - COMPLETE. Acceptance: upstream ancestry and fork behavior preserved, focused and source gates pass, production build succeeds. Conflicts retain the desktop player default and hydrated metadata refresh, and retire the removed stored-seek API. Unavailable-song recovery retains timestamp reset and queue synchronization. Repeated seek events and subscriber cleanup have focused regression coverage.
-3. Delivery - ACTIVE. Acceptance: sync marker correct, verified changes committed and pushed, worktree clean, generated output removed.
+3. Delivery - COMPLETE. Acceptance: sync marker correct, verified changes committed and pushed, worktree clean, generated output removed. Merge `e6f5d319a` was pushed successfully; upstream has zero missing commits. Cleanup transaction `d491227af0bc975b50b1dccf86b144a3` removed all registered output (52,329,302 bytes) with no residuals.
 
 ## Verification evidence
 
