@@ -15,6 +15,7 @@ export type EventMap = {
     PLAYER_PLAY: PlayerPlayEventPayload;
     PLAYER_QUEUE_SYNC: PlayerQueueSyncEventPayload;
     PLAYER_REPEATED: PlayerRepeatedEventPayload;
+    PLAYER_SEEK_TO_TIMESTAMP: PlayerSeekToTimestampEventPayload;
     PLAYER_STOP: PlayerStopEventPayload;
     PLAYLIST_MOVE_DOWN: PlaylistMoveEventPayload;
     PLAYLIST_MOVE_TO_BOTTOM: PlaylistMoveEventPayload;
@@ -64,6 +65,10 @@ export type PlayerQueueSyncEventPayload = Record<string, never>;
 
 export type PlayerRepeatedEventPayload = {
     index: number;
+};
+
+export type PlayerSeekToTimestampEventPayload = {
+    timestamp: number;
 };
 
 export type PlayerStopEventPayload = {

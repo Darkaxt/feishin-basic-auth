@@ -302,42 +302,76 @@ test('export preview uses edited form values instead of initial props', () => {
     assert.match(syncedForm.displayed(), /\[offset:300\]/);
 });
 
-test('song changes clear stale seeks without resetting a mounted restored song', () => {
-    let callbacks;
-    let state = { player: { seekToTimestamp: '96-restored' } };
+test('hydrated current songs refresh without emitting a seek that resets restoration', async () => {
+    const fetched = [];
+    const emitter = new EventEmitter();
+    const seeks = [];
+    emitter.on('PLAYER_SEEK_TO_TIMESTAMP', (payload) => seeks.push(payload));
+    let hydrated = false;
+    let song = { _serverId: 'server', _uniqueId: 'a1', id: 'a' };
     const { useUpdateCurrentSong } = loadSource(
         'src/renderer/features/player/hooks/use-update-current-song.ts',
         {
             '/@/renderer/api': {},
-            '/@/renderer/api/query-keys': {},
+            '/@/renderer/api/query-keys': { queryKeys: { songs: { detail: () => ['song'] } } },
+            '/@/renderer/events/event-emitter': { eventEmitter: emitter },
             '/@/renderer/features/player/audio-player/hooks/use-player-events': {
-                usePlayerEvents: (value) => {
-                    callbacks = value;
-                },
+                usePlayerEvents: () => {},
             },
             '/@/renderer/store/player.store': {
-                uniqueSeekToTimestamp: (value) => `${value}-new`,
                 usePlayerActions: () => ({}),
-                usePlayerHydrated: () => true,
-                usePlayerProperties: () => ({ transitionType: 'gapless' }),
-                usePlayerSong: () => undefined,
-                usePlayerStore: { getState: () => ({}) },
-                usePlayerStoreBase: { setState: (update) => update(state) },
+                usePlayerHydrated: () => hydrated,
+                usePlayerSong: () => song,
+                usePlayerStore: { getState: () => ({ player: { index: 0 } }) },
             },
             '/@/renderer/utils/logger': {},
             '/@/shared/types/types': { PlayerStyle: { CROSSFADE: 'crossfade' } },
             '/@/shared/utils/song-availability': {},
-            '@tanstack/react-query': { useQueryClient: () => ({}) },
+            '@tanstack/react-query': {
+                useQueryClient: () => ({
+                    fetchQuery: async () => {
+                        fetched.push(song.id);
+                    },
+                }),
+            },
             react: { useCallback: (fn) => fn, useEffect: (fn) => fn() },
         },
     );
     useUpdateCurrentSong();
-    assert.equal(state.player.seekToTimestamp, '96-restored');
-    const previous = { song: { _uniqueId: 'a1', id: 'a' } };
-    callbacks.onCurrentSongChange({ song: { ...previous.song, name: 'Refreshed' } }, previous);
-    assert.equal(state.player.seekToTimestamp, '96-restored');
-    callbacks.onCurrentSongChange({ song: { _uniqueId: 'b1', id: 'b' } }, previous);
-    assert.equal(state.player.seekToTimestamp, '0-new');
+    assert.deepEqual(fetched, []);
+    hydrated = true;
+    useUpdateCurrentSong();
+    song = { ...song, _uniqueId: 'b1', id: 'b' };
+    useUpdateCurrentSong();
+    await Promise.resolve();
+    assert.deepEqual(fetched, ['a', 'b']);
+    assert.deepEqual(seeks, []);
+});
+
+test('seek events deliver repeated timestamps and detach on unmount', () => {
+    const emitter = new EventEmitter();
+    let cleanup;
+    const { usePlayerEvents } = loadSource(
+        'src/renderer/features/player/audio-player/hooks/use-player-events.ts',
+        {
+            '/@/renderer/events/event-emitter': { eventEmitter: emitter },
+            '/@/renderer/store': {},
+            react: {
+                useEffect: (effect) => {
+                    cleanup = effect();
+                },
+            },
+        },
+    );
+    const received = [];
+    usePlayerEvents({ onPlayerSeekToTimestamp: ({ timestamp }) => received.push(timestamp) }, []);
+    emitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 96 });
+    emitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 96 });
+    assert.deepEqual(received, [96, 96]);
+    cleanup();
+    emitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 0 });
+    assert.deepEqual(received, [96, 96]);
+    assert.equal(emitter.listenerCount('PLAYER_SEEK_TO_TIMESTAMP'), 0);
 });
 
 test('desktop panel predicates include clips and exclude mobile-only tabs', () => {

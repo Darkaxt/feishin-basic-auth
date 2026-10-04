@@ -4,20 +4,15 @@ import { useCallback, useEffect } from 'react';
 
 import { api } from '/@/renderer/api';
 import { queryKeys } from '/@/renderer/api/query-keys';
-import { usePlayerEvents } from '/@/renderer/features/player/audio-player/hooks/use-player-events';
 import {
-    uniqueSeekToTimestamp,
     updateQueueSong,
     usePlayerActions,
     usePlayerHydrated,
-    usePlayerProperties,
     usePlayerSong,
     usePlayerStore,
-    usePlayerStoreBase,
 } from '/@/renderer/store/player.store';
 import { logger } from '/@/renderer/utils/logger';
 import { QueueSong, SongDetailQuery } from '/@/shared/types/domain-types';
-import { PlayerStyle } from '/@/shared/types/types';
 import { isSongNotFoundError } from '/@/shared/utils/song-availability';
 
 export const useUpdateCurrentSong = () => {
@@ -96,31 +91,6 @@ export const useUpdateCurrentSong = () => {
             song: currentSong,
         });
     }, [currentSong, handleSongChange, playerHydrated]);
-    const resetSeekToTimestamp = useCallback(() => {
-        usePlayerStoreBase.setState((state) => {
-            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
-        });
-    }, []);
-
-    const { transitionType } = usePlayerProperties();
-
-    usePlayerEvents(
-        {
-            onCurrentSongChange: (properties, prev) => {
-                // Only update if the song actually changed
-                if (
-                    properties.song?.id !== prev.song?.id ||
-                    properties.song?._uniqueId !== prev.song?._uniqueId
-                ) {
-                    // Prevents issues with lingering seekToTimestamp on song autonext
-                    if (transitionType !== PlayerStyle.CROSSFADE) {
-                        resetSeekToTimestamp();
-                    }
-                }
-            },
-        },
-        [handleSongChange, resetSeekToTimestamp, transitionType],
-    );
 };
 
 export const UpdateCurrentSongHook = () => {

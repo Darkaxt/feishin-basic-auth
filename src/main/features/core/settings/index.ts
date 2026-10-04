@@ -1,4 +1,3 @@
-import type { TitleTheme } from '/@/shared/types/types';
 import type { FSWatcher } from 'fs';
 
 import {
@@ -17,20 +16,21 @@ import path from 'path';
 
 import log from '/@/main/logger';
 import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
+import { Platform, type TitleTheme } from '/@/shared/types/types';
 
 const getFrame = () => {
     const isWindows = process.platform === 'win32';
     const isMacOS = process.platform === 'darwin';
 
     if (isWindows) {
-        return 'windows';
+        return Platform.WINDOWS;
     }
 
     if (isMacOS) {
-        return 'macOS';
+        return Platform.MACOS;
     }
 
-    return 'linux';
+    return Platform.LINUX;
 };
 
 const isDevelopment = process.env.NODE_ENV === 'development';

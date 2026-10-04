@@ -101,7 +101,6 @@ interface State {
         pauseOnNextSongEnd: boolean;
         playerNum: 1 | 2;
         repeat: PlayerRepeat;
-        seekToTimestamp: string;
         shuffle: PlayerShuffle;
         speed: number;
         status: PlayerStatus;
@@ -171,11 +170,6 @@ export function mapShuffledToQueueIndex(shuffledIndex: number, shuffled: number[
         return shuffled[shuffledIndex];
     }
     return shuffledIndex;
-}
-
-// We need to use a unique id so that the equalityFn can work if attempting to set the same timestamp
-export function uniqueSeekToTimestamp(timestamp: number) {
-    return `${timestamp}-${nanoid()}`;
 }
 
 // Helper function to add new indexes to shuffled array after current position
@@ -355,7 +349,6 @@ const initialState: State = {
         pauseOnNextSongEnd: false,
         playerNum: 1,
         repeat: PlayerRepeat.NONE,
-        seekToTimestamp: uniqueSeekToTimestamp(0),
         shuffle: PlayerShuffle.NONE,
         speed: 1,
         status: PlayerStatus.PAUSED,
@@ -983,16 +976,13 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         setTimestampStore(0);
                         state.player.status = newStatus;
 
-                        if (shouldStop) {
-                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
-                        }
-
                         if (pauseOnNext) {
                             state.player.pauseOnNextSongEnd = false;
                         }
                     });
 
                     if (shouldStop) {
+                        eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 0 });
                         emitPlayerStop(get, true);
                     }
 
@@ -1127,8 +1117,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                             state.player.status = PlayerStatus.STOPPED;
                             state.player.playerNum = 1;
                             setTimestampStore(0);
-                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
                         });
+                        eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 0 });
                         emitPlayerStop(get, true);
                         return;
                     }
@@ -1258,9 +1248,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
 
                     // If timestamp is greater than 10 seconds, restart current song
                     if (currentTimestamp > 10) {
-                        set((state) => {
-                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
-                        });
+                        eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 0 });
                         return;
                     }
 
@@ -1304,9 +1292,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     // See mediaSkipBackward: update the timestamp store right away to
                     // avoid the stale-read left by the ~500ms engine poll.
                     setTimestampStore(timestamp);
-                    set((state) => {
-                        state.player.seekToTimestamp = uniqueSeekToTimestamp(timestamp);
-                    });
+                    eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp });
                 },
                 mediaSkipBackward: (offset?: number) => {
                     const offsetFromSettings =
@@ -1320,9 +1306,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     // stale value left by the ~500ms engine poll (otherwise mashing
                     // the seek keys repeatedly lands on the same time).
                     setTimestampStore(newTimestamp);
-                    set((state) => {
-                        state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
-                    });
+                    eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: newTimestamp });
                 },
                 mediaSkipForward: (offset?: number) => {
                     const state = get();
@@ -1344,9 +1328,7 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     // See mediaSkipBackward: update the timestamp store right away to
                     // avoid the stale-read left by the ~500ms engine poll.
                     setTimestampStore(newTimestamp);
-                    set((state) => {
-                        state.player.seekToTimestamp = uniqueSeekToTimestamp(newTimestamp);
-                    });
+                    eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: newTimestamp });
                 },
                 mediaStop: (options?: { reset?: boolean }) => {
                     const reset = options?.reset !== false;
@@ -1354,9 +1336,12 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         state.player.status = PlayerStatus.STOPPED;
                         if (reset) {
                             setTimestampStore(0);
-                            state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
                         }
                     });
+
+                    if (reset) {
+                        eventEmitter.emit('PLAYER_SEEK_TO_TIMESTAMP', { timestamp: 0 });
+                    }
 
                     emitPlayerStop(get, reset);
                 },
@@ -1521,7 +1506,6 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                         cleanupOrphanedSongs(state);
                         state.player.index = recovery.nextIndex;
                         state.player.playerNum = 1;
-                        state.player.seekToTimestamp = uniqueSeekToTimestamp(0);
 
                         if (recovery.shouldStop) {
                             state.player.status = PlayerStatus.STOPPED;
@@ -1813,10 +1797,10 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
             partialize: (state) => {
                 const shouldRestorePlayQueue = useSettingsStore.getState().general.resume;
 
-                // Exclude playerNum, seekToTimestamp, and status from stored player object
+                // Exclude playerNum and status from stored player object
                 // These are not needed to be stored since they are ephemeral properties
                 // Note: timestamp is now in a separate store and doesn't need to be excluded here
-                const excludedPlayerKeys = ['playerNum', 'seekToTimestamp', 'status'];
+                const excludedPlayerKeys = ['playerNum', 'status'];
 
                 // If we're not restoring the play queue, we don't need the index property
                 // (it is meaningless without the queue)
@@ -2042,20 +2026,6 @@ export const subscribePlayerStatus = (
         (state) => state.player.status,
         (status, prevStatus) => {
             onChange({ status }, { status: prevStatus });
-        },
-    );
-};
-
-export const subscribePlayerSeekToTimestamp = (
-    onChange: (properties: { timestamp: number }, prev: { timestamp: number }) => void,
-) => {
-    return usePlayerStoreBase.subscribe(
-        (state) => state.player.seekToTimestamp,
-        (timestamp, prevTimestamp) => {
-            onChange(
-                { timestamp: parseUniqueSeekToTimestamp(timestamp) },
-                { timestamp: parseUniqueSeekToTimestamp(prevTimestamp) },
-            );
         },
     );
 };
@@ -2434,10 +2404,6 @@ function findLastAlbumRange(queueItems: QueueSong[]) {
     }
 
     return [rangeStart + 1, rangeEnd];
-}
-
-function parseUniqueSeekToTimestamp(timestamp: string) {
-    return Number(timestamp.split('-')[0]);
 }
 
 function recalculatePlayerIndex(state: any, queue: string[]) {
