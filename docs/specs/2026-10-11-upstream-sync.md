@@ -12,7 +12,7 @@ Authorization: scheduled Feishin upstream maintenance. No Docker, release packag
 ## Stages
 
 1. Integration and verification - COMPLETE. Acceptance: exact translation-only upstream diff integrated without changing fork production behavior; gate and Electron build pass. Initial branch clean, origin divergence 0/0, upstream divergence 157/1. No unverified local-only commits. Conflict-free merge changes only de/es/et/fr/zh-Hant locale JSON files. Fresh complete non-Docker gate and production Electron build both exited zero. Fork regressions, Node/web type checks, ESLint, Stylelint, and secret scan passed. No conflict-specific changes were necessary.
-2. Delivery and cleanup - ACTIVE. Acceptance: marker correct, verified integration committed and pushed, clean development matches origin and includes upstream, generated output removed.
+2. Delivery and cleanup - COMPLETE. Acceptance: marker correct, verified integration committed and pushed, clean development matches origin and includes upstream, generated output removed. Merge 01e2f88ca pushed successfully; upstream divergence became 158/0. Marker records 9dc15477c86fbd48d1a98fa878769d09811895e8. Cleanup transaction a9058a74ac22e674ef886e07079deb13 applied successfully, removing 52,334,451 bytes with the out root absent. Final evidence recorded in this documentation commit.
 
 ## Parent PR observations
 
