@@ -9,6 +9,36 @@ import ts from 'typescript';
 
 const require = createRequire(import.meta.url);
 const lyricUtils = await import('../../src/shared/utils/lyrics.ts');
+const lidaclips = await import('../../src/shared/utils/lidaclips.ts');
+const songAvailability = await import('../../src/shared/utils/song-availability.ts');
+
+function loadQueueStore() {
+    const emitter = new EventEmitter();
+    const types = loadSource('src/shared/types/types.ts', {
+        '/@/shared/types/domain-types': { LibraryItem: {} },
+    });
+    const settings = { general: { resume: true, upNextQueue: true }, playback: {} };
+    const { usePlayerStoreBase: store } = loadSource('src/renderer/store/player.store.ts', {
+        '/@/renderer/events/event-emitter': { eventEmitter: emitter },
+        '/@/renderer/features/radio/hooks/use-radio-player': {
+            useRadioStore: { getState: () => ({}) },
+        },
+        '/@/renderer/lib/zustand': { createSelectors: (value) => value },
+        '/@/renderer/store/settings.store': { useSettingsStore: { getState: () => settings } },
+        '/@/renderer/store/timestamp.store': {
+            setTimestamp: () => {},
+            useTimestampStoreBase: { getState: () => ({ timestamp: 0 }) },
+        },
+        '/@/renderer/store/utils': {
+            playerStoreStorage: { getItem: () => null, setItem: () => {} },
+        },
+        '/@/renderer/utils/shuffle': { shuffleInPlace: (items) => items },
+        '/@/shared/types/types': types,
+        '/@/shared/utils/lidaclips': lidaclips,
+        '/@/shared/utils/song-availability': songAvailability,
+    });
+    return { emitter, store, types };
+}
 
 function loadSource(path, mocks = {}, globals = {}) {
     const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
@@ -38,6 +68,43 @@ function loadSource(path, mocks = {}, globals = {}) {
     );
     return module.exports;
 }
+
+test('whole-second LRC timestamps retain translations and fractional precision', () => {
+    assert.deepEqual(
+        lyricUtils.parseLyricsForDisplay(
+            '[00:01]Original\n[00:01]Translation\n[00:02.12]Next\n[00:03.123]Last',
+        ),
+        [
+            { startMs: 1000, text: 'Original_BREAK_Translation' },
+            { startMs: 2120, text: 'Next' },
+            { startMs: 3123, text: 'Last' },
+        ],
+    );
+});
+
+test('Up Next integrates with paused clip advancement and unavailable-song recovery', () => {
+    const { emitter, store, types } = loadQueueStore();
+    store.getState().setQueue([{ id: 'current' }, { id: 'later' }]);
+    store.getState().addToQueueByType([{ id: 'next' }], types.Play.NEXT);
+    assert.deepEqual(
+        Array.from(store.getState().getQueueOrder().items, (item) => item.id),
+        ['current', 'next', 'later'],
+    );
+    store.getState().mediaAutoNext({ keepPaused: true });
+    assert.equal(store.getState().getCurrentSong().id, 'next');
+    assert.equal(store.getState().player.status, types.PlayerStatus.PAUSED);
+    assert.equal(store.getState().queue.priority.length, 0);
+    store.getState().addToQueueByType([{ id: 'replacement' }], types.Play.NEXT);
+    let synchronizations = 0;
+    emitter.on('PLAYER_QUEUE_SYNC', () => {
+        synchronizations += 1;
+    });
+    store.getState().removeUnavailableSong(store.getState().getCurrentSong()._uniqueId);
+    assert.equal(store.getState().getCurrentSong().id, 'replacement');
+    assert.equal(store.getState().player.status, types.PlayerStatus.PAUSED);
+    assert.equal(synchronizations, 1);
+    assert.equal(store.getState().queue.priority.length, 0);
+});
 
 test('lyrics events reach subscribers once and detach on unmount', () => {
     const emitter = new EventEmitter();
