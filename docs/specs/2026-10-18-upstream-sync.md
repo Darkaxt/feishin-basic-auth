@@ -12,7 +12,7 @@ Authorization: scheduled upstream integration, already authorized. No Docker, re
 ## Stages
 
 1. Integration and verification - COMPLETE. Acceptance: fork contracts retained alongside upstream queue behavior, conflict-area regressions and complete non-Docker gate plus Electron build pass. Initial development clean, origin divergence 0/0, upstream divergence 159/15. Lyrics conflict retains the shared parser, which already supports whole-second timestamps without losing translated lines. Regression checks verify whole-second/fractional parsing together. Real player-store regression reproduced stale Up Next membership after fork unavailable-song recovery; the recovery action now calls the merged queue normalizer, preserving paused status and PLAYER_QUEUE_SYNC. Regression passed after the fix. Complete non-Docker gate and production Electron build exited zero, including Node/web type checks, ESLint, Stylelint and secret scan. Existing startup hydration, MPV, LidaClips, updater and fullscreen regression checks passed. No installed/runtime playback claim is made.
-2. Delivery and cleanup - ACTIVE. Acceptance: marker correct, verified commits pushed, clean branch includes upstream and matches origin, generated output removed. Internal advancement blocker: cleanup and remote delivery remain; resolved by successful transactional cleanup and verified push.
+2. Delivery and cleanup - COMPLETE. Acceptance: marker correct, verified commits pushed, clean branch includes upstream and matches origin, generated output removed. Merge a0706852f1e075c9572f1b76a47fbcd1e8cbb7dc pushed successfully; branch matched origin, with upstream divergence 160/0 before this evidence-only closure. Marker records 36f8e18395b273dca148d1786784ade632918f2b. Cleanup ac9c414e0388a2e41a4f12793767ef1e applied successfully, removing 64,869,396 bytes; both registered roots are absent. No Docker, release packaging/publication, or installed-app changes occurred. No required blockers or deferrals remain.
 
 Closure assessment: queue normalization reuses upstream's existing owner rather than adding a parallel state path. No material design-debt finding requiring additional scope. Unchanged assessment applies to final reconciliation.
 
@@ -21,5 +21,6 @@ Closure assessment: queue normalization reuses upstream's existing owner rather 
 - #2593 still reports packaged Electron LAN permission failures; not merged automatically.
 - #2549 session retries and #2550 queue clearing remain open and touch fork authentication/queue contracts.
 - #2618 changes local lyrics metadata handling; its description lacks normalization test results. Leave unmerged.
+- Push diagnostics report 43 dependency alerts including one critical. These are GitHub-reported, not independently assessed or remediated by this upstream-sync run.
 
 Tracked deferrals: none.
