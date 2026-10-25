@@ -12,6 +12,45 @@ const lyricUtils = await import('../../src/shared/utils/lyrics.ts');
 const lidaclips = await import('../../src/shared/utils/lidaclips.ts');
 const songAvailability = await import('../../src/shared/utils/song-availability.ts');
 
+test('Electron permission handlers permit LAN and fonts while denying unrelated permissions', () => {
+    const source = readFileSync(new URL('../../src/main/index.ts', import.meta.url), 'utf8');
+    const start = source.indexOf('const ALLOWED_PERMISSIONS =');
+    const end = source.indexOf('session.defaultSession.webRequest.onHeadersReceived', start);
+    assert.ok(start >= 0 && end > start, 'permission registration is present');
+    let check;
+    let request;
+    vm.runInNewContext(source.slice(start, end), {
+        session: {
+            defaultSession: {
+                setPermissionCheckHandler: (handler) => {
+                    check = handler;
+                },
+                setPermissionRequestHandler: (handler) => {
+                    request = handler;
+                },
+            },
+        },
+    });
+    for (const permission of [
+        'local-fonts',
+        'local-network',
+        'local-network-access',
+        'loopback-network',
+        'camera',
+        'microphone',
+        'geolocation',
+        'notifications',
+    ]) {
+        const expected = permission.startsWith('local-') || permission === 'loopback-network';
+        assert.equal(check(null, permission), expected, permission);
+        let granted;
+        request(null, permission, (value) => {
+            granted = value;
+        });
+        assert.equal(granted, expected, permission);
+    }
+});
+
 function loadQueueStore() {
     const emitter = new EventEmitter();
     const types = loadSource('src/shared/types/types.ts', {
