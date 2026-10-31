@@ -34,6 +34,10 @@ import { installProxyAuthInterceptor } from './features/core/proxy-auth';
 import { shutdownServer } from './features/core/remote';
 import { store } from './features/core/settings';
 import { canHandleVisualizerDisplayMedia } from './features/core/visualizer';
+import {
+    isVisualizerCapturePermissionAllowed,
+    VisualizerCapturePermissionInput,
+} from './features/core/visualizer/capture-permissions';
 import log, { autoUpdaterLogInterface, isBrokenPipeError } from './logger';
 import MenuBuilder, { MenuPlaybackState } from './menu';
 import './features';
@@ -863,8 +867,13 @@ async function createWindow(first = true): Promise<void> {
         return { action: 'deny' };
     });
 
-    mainWindow.webContents.session.setDisplayMediaRequestHandler((_request, callback) => {
-        if (!canHandleVisualizerDisplayMedia()) {
+    mainWindow.webContents.session.setDisplayMediaRequestHandler((request, callback) => {
+        if (
+            !canHandleVisualizerDisplayMedia() ||
+            request.frame !== mainWindow?.webContents.mainFrame ||
+            !request.audioRequested ||
+            (!isMacOS() && request.videoRequested)
+        ) {
             callback({});
             return;
         }
@@ -1200,11 +1209,32 @@ if (!singleInstance) {
                 'local-network-access',
                 'loopback-network',
             ]);
-            session.defaultSession.setPermissionCheckHandler((_wc, permission) =>
-                ALLOWED_PERMISSIONS.has(permission),
+            const allowVisualizerCapture = (
+                wc: Electron.WebContents | null,
+                permission: string,
+                details: Partial<VisualizerCapturePermissionInput>,
+            ) =>
+                isVisualizerCapturePermissionAllowed({
+                    ...details,
+                    eligible: Boolean(
+                        mainWindow &&
+                        wc === mainWindow.webContents &&
+                        canHandleVisualizerDisplayMedia(),
+                    ),
+                    mainFrameUrl: mainWindow?.webContents.getURL() || '',
+                    permission,
+                });
+            session.defaultSession.setPermissionCheckHandler(
+                (wc, permission, _origin, details) =>
+                    ALLOWED_PERMISSIONS.has(permission) ||
+                    allowVisualizerCapture(wc, permission, details),
             );
-            session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) =>
-                callback(ALLOWED_PERMISSIONS.has(permission)),
+            session.defaultSession.setPermissionRequestHandler(
+                (wc, permission, callback, details) =>
+                    callback(
+                        ALLOWED_PERMISSIONS.has(permission) ||
+                            allowVisualizerCapture(wc, permission, details),
+                    ),
             );
 
             session.defaultSession.webRequest.onHeadersReceived((details, callback) => {

@@ -40,6 +40,7 @@ export function useVisualizerSystemAudio(options: {
     const streamRef = useRef<MediaStream | null>(null);
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const connectInFlightRef = useRef(false);
+    const captureGeneration = useRef(0);
     const shouldAttemptConnectionRef = useRef(shouldAttemptConnection);
     const [connectionRevision, setConnectionRevision] = useState(0);
     const [isConnecting, setIsConnecting] = useState(false);
@@ -51,6 +52,7 @@ export function useVisualizerSystemAudio(options: {
     }, [webAudio]);
 
     const disconnect = useCallback(() => {
+        captureGeneration.current += 1;
         if (streamRef.current) {
             streamRef.current.getTracks().forEach((t) => t.stop());
             streamRef.current = null;
@@ -88,6 +90,8 @@ export function useVisualizerSystemAudio(options: {
         }
     }, [playbackType, shouldKeepConnection, disconnect]);
 
+    useEffect(() => () => disconnect(), [disconnect]);
+
     const connect = useCallback(async () => {
         if (!isElectron()) {
             return;
@@ -97,6 +101,7 @@ export function useVisualizerSystemAudio(options: {
         if (connectInFlightRef.current) return;
 
         disconnect();
+        const generation = captureGeneration.current;
         connectInFlightRef.current = true;
         setIsConnecting(true);
 
@@ -104,6 +109,12 @@ export function useVisualizerSystemAudio(options: {
             const stream = await navigator.mediaDevices.getDisplayMedia(
                 getVisualizerDisplayMediaOptions(Boolean(electronUtils?.isMacOS())),
             );
+
+            if (!shouldAttemptConnectionRef.current || generation !== captureGeneration.current) {
+                stream.getTracks().forEach((track) => track.stop());
+                return;
+            }
+            streamRef.current = stream;
 
             stream.getVideoTracks().forEach((track) => track.stop());
 
@@ -138,6 +149,10 @@ export function useVisualizerSystemAudio(options: {
                 // ignore
             }
 
+            if (!shouldAttemptConnectionRef.current || generation !== captureGeneration.current) {
+                return;
+            }
+
             const source = latest.context.createMediaStreamSource(stream);
             streamRef.current = stream;
             sourceRef.current = source;
@@ -152,6 +167,7 @@ export function useVisualizerSystemAudio(options: {
             });
             onSuccessRef.current?.();
         } catch (e) {
+            disconnect();
             const name = (e as DOMException)?.name;
             logger.warn('Visualizer system audio capture failed', {
                 message: (e as Error)?.message,

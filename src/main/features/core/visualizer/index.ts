@@ -20,6 +20,8 @@ export const canHandleVisualizerDisplayMedia = (): boolean => {
     return isLocalVisualizerSurfaceVisible;
 };
 
-ipcMain.on('visualizer-set-local-surface-visible', (_event, visible: boolean) => {
+ipcMain.handle('visualizer-set-local-surface-visible', (event, visible: boolean) => {
+    if (event.senderFrame !== event.sender.mainFrame) return false;
     setLocalVisualizerSurfaceVisible(Boolean(visible));
+    return true;
 });

@@ -1,17 +1,9 @@
-export interface SystemAudioPromptConditions {
+export interface SystemAudioConnectionConditions {
     canCaptureSystemAudio: boolean;
     hasAttemptedConnectionThisSession?: boolean;
     hasVisualizerInput: boolean;
     isConnecting: boolean;
-    promptState: SystemAudioPromptState;
 }
-
-export type SystemAudioPromptState =
-    | 'loading'
-    | {
-          consent: boolean;
-          promptedThisSession: boolean;
-      };
 
 export type VisualizerSystemAudioRecoveryReason = 'devicechange' | 'track-ended';
 
@@ -51,34 +43,15 @@ export function getVisualizerDisplayMediaOptions(isMacOS: boolean): DisplayMedia
     } as DisplayMediaStreamOptions;
 }
 
-export function shouldAutoConnectSystemAudio({
+export function shouldConnectVisualizerSystemAudio({
     canCaptureSystemAudio,
     hasAttemptedConnectionThisSession = false,
     hasVisualizerInput,
     isConnecting,
-    promptState,
-}: SystemAudioPromptConditions): boolean {
+}: SystemAudioConnectionConditions): boolean {
     return (
         canCaptureSystemAudio &&
-        promptState !== 'loading' &&
-        promptState.consent &&
         !hasAttemptedConnectionThisSession &&
-        !hasVisualizerInput &&
-        !isConnecting
-    );
-}
-
-export function shouldOpenSystemAudioConsentPrompt({
-    canCaptureSystemAudio,
-    hasVisualizerInput,
-    isConnecting,
-    promptState,
-}: SystemAudioPromptConditions): boolean {
-    return (
-        canCaptureSystemAudio &&
-        promptState !== 'loading' &&
-        !promptState.consent &&
-        !promptState.promptedThisSession &&
         !hasVisualizerInput &&
         !isConnecting
     );

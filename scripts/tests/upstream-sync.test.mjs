@@ -11,6 +11,8 @@ const require = createRequire(import.meta.url);
 const lyricUtils = await import('../../src/shared/utils/lyrics.ts');
 const lidaclips = await import('../../src/shared/utils/lidaclips.ts');
 const songAvailability = await import('../../src/shared/utils/song-availability.ts');
+const capturePermissions =
+    await import('../../src/main/features/core/visualizer/capture-permissions.ts');
 
 test('Electron permission handlers permit LAN and fonts while denying unrelated permissions', () => {
     const source = readFileSync(new URL('../../src/main/index.ts', import.meta.url), 'utf8');
@@ -19,7 +21,16 @@ test('Electron permission handlers permit LAN and fonts while denying unrelated 
     assert.ok(start >= 0 && end > start, 'permission registration is present');
     let check;
     let request;
-    vm.runInNewContext(source.slice(start, end), {
+    const ownContents = { getURL: () => 'file:///C:/Feishin/index.html' };
+    let visualizerVisible = false;
+    const registration = ts.transpileModule(source.slice(start, end), {
+        compilerOptions: { target: ts.ScriptTarget.ES2022 },
+    }).outputText;
+    vm.runInNewContext(registration, {
+        canHandleVisualizerDisplayMedia: () => visualizerVisible,
+        isVisualizerCapturePermissionAllowed:
+            capturePermissions.isVisualizerCapturePermissionAllowed,
+        mainWindow: { webContents: ownContents },
         session: {
             defaultSession: {
                 setPermissionCheckHandler: (handler) => {
@@ -49,6 +60,34 @@ test('Electron permission handlers permit LAN and fonts while denying unrelated 
         });
         assert.equal(granted, expected, permission);
     }
+    const details = {
+        isMainFrame: true,
+        mediaTypes: [],
+        requestingUrl: 'file:///C:/Feishin/index.html',
+    };
+    assert.equal(check(ownContents, 'media', 'file:///', details), false);
+    visualizerVisible = true;
+    assert.equal(check(ownContents, 'media', 'file:///', details), true);
+    assert.equal(check({}, 'media', 'file:///', details), false);
+    let captureGranted;
+    request(
+        ownContents,
+        'media',
+        (value) => {
+            captureGranted = value;
+        },
+        details,
+    );
+    assert.equal(captureGranted, true);
+    request(
+        ownContents,
+        'media',
+        (value) => {
+            captureGranted = value;
+        },
+        { ...details, mediaTypes: ['audio'] },
+    );
+    assert.equal(captureGranted, false);
 });
 
 function loadQueueStore() {
