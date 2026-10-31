@@ -1,16 +1,18 @@
 import type { ChildProcess } from 'node:child_process';
 
 import { app, ipcMain, powerMonitor } from 'electron';
-import { access, rm } from 'fs/promises';
+import { rm } from 'fs/promises';
 import uniq from 'lodash/uniq';
 import MpvAPI from 'node-mpv';
+import { join } from 'node:path';
 import { pid } from 'node:process';
 import process from 'process';
 
 import { getMainWindow, sendToastToRenderer } from '../../../index';
 import log from '../../../logger';
 import { store } from '../settings';
-import { getMpvBinaryCandidates } from './mpv-binary';
+import { getMpvErrorMessage, resolveMpvBinaryPath } from './mpv-binary';
+import { ensureManagedMpv } from './mpv-runtime';
 
 import { isWindows } from '/@/main/env';
 import { PlayerData } from '/@/shared/types/domain-types';
@@ -50,19 +52,6 @@ const sendRendererPlaybackEvent = (channel: string, ...args: unknown[]) => {
     getMainWindow()?.webContents.send(channel, ...args);
 };
 
-const NodeMpvErrorCode = {
-    0: 'Unable to load file or stream',
-    1: 'Invalid argument',
-    2: 'Binary not found',
-    3: 'IPC command invalid',
-    4: 'Unable to bind IPC socket',
-    5: 'Connection timeout',
-    6: 'MPV is already running',
-    7: 'Could not send IPC message',
-    8: 'MPV is not running',
-    9: 'Unsupported protocol',
-};
-
 type NodeMpvError = {
     errcode: number;
     method: string;
@@ -76,14 +65,12 @@ const mpvLog = (
         level?: 'debug' | 'error' | 'info' | 'warn';
         toast?: 'info' | 'success' | 'warning';
     },
-    err?: NodeMpvError,
+    err?: unknown,
 ) => {
     const { action, toast } = data;
 
     if (err) {
-        const message = `${action} - mpv errorcode ${err.errcode} - ${
-            NodeMpvErrorCode[err.errcode as keyof typeof NodeMpvErrorCode]
-        }`;
+        const message = `${action}: ${getMpvErrorMessage(err)}`;
 
         sendToastToRenderer({ message, type: 'error' });
         log.error(message);
@@ -97,7 +84,6 @@ const mpvLog = (
     }
 };
 
-const MPV_BINARY_PATH = store.get('mpv_path') as string | undefined;
 const prefetchPlaylistParams = [
     '--prefetch-playlist=no',
     '--prefetch-playlist=yes',
@@ -106,6 +92,11 @@ const prefetchPlaylistParams = [
 
 const DEFAULT_MPV_PARAMETERS = (extraParameters?: string[]) => {
     const parameters = ['--idle=yes', '--no-config', '--load-scripts=no'];
+
+    if (isWindows()) {
+        // node-mpv completes its IPC handshake from stdout, including GUI-subsystem builds.
+        parameters.push('--terminal=yes');
+    }
 
     if (!extraParameters?.some((param) => prefetchPlaylistParams.includes(param))) {
         parameters.push('--prefetch-playlist=yes');
@@ -127,37 +118,31 @@ const DEFAULT_MPV_PARAMETERS = (extraParameters?: string[]) => {
     return parameters;
 };
 
-const resolveMpvBinaryPath = async (binaryPath?: string) => {
-    const candidates = getMpvBinaryCandidates({
-        pathValue: process.env.PATH,
-        platform: process.platform,
-        requestedPath: binaryPath,
-        storedPath: MPV_BINARY_PATH,
-    });
-
-    for (const candidate of candidates) {
-        try {
-            await access(candidate);
-            return candidate;
-        } catch {
-            // Try the next common Homebrew location.
-        }
-    }
-
-    if (isWindows()) {
-        throw new Error('No direct mpv.exe executable was found');
-    }
-
-    return undefined;
-};
-
 const createMpv = async (data: {
     binaryPath?: string;
     extraParameters?: string[];
     properties?: Record<string, any>;
 }): Promise<MpvAPI> => {
     const { binaryPath, extraParameters, properties } = data;
-    const resolvedBinaryPath = await resolveMpvBinaryPath(binaryPath);
+    const resolvedBinaryPath = await resolveMpvBinaryPath({
+        pathValue: process.env.PATH,
+        platform: process.platform,
+        provision: () =>
+            ensureManagedMpv(
+                (store.get('mpv_managed_directory') as string | undefined) ||
+                    join(app.getPath('userData'), 'mpv-runtime'),
+                process.arch,
+                () => {
+                    log.info('Downloading and verifying managed MPV', { arch: process.arch });
+                    sendToastToRenderer({
+                        message: 'Downloading and verifying MPV for first use...',
+                        type: 'info',
+                    });
+                },
+            ),
+        requestedPath: binaryPath,
+        storedPath: store.get('mpv_path') as string | undefined,
+    });
     const normalizedExtraParameters = (extraParameters ?? [])
         .map((param) => param.trim())
         .filter((param) => param.length > 0);
@@ -172,6 +157,7 @@ const createMpv = async (data: {
             audio_only: true,
             auto_restart: false,
             binary: resolvedBinaryPath,
+            ...(isWindows() ? { ipc_command: '--input-ipc-server' } : {}),
             socket: socketPath,
             time_update: 1,
         },

@@ -121,6 +121,7 @@ export const MpvSettings = memo(() => {
                             localSettings?.set('mpv_path', transformedValue);
                         }}
                         onClick={() => handleSetMpvPath()}
+                        placeholder={t('setting.mpvExecutablePathAutomatic')}
                         rightSection={
                             mpvPath && (
                                 <ActionIcon
