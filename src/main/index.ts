@@ -1209,6 +1209,20 @@ if (!singleInstance) {
                 'local-network-access',
                 'loopback-network',
             ]);
+            const allowAppFullscreen = (
+                wc: Electron.WebContents | null,
+                permission: string,
+                details: { isMainFrame?: boolean; requestingUrl?: string },
+            ) =>
+                Boolean(
+                    permission === 'fullscreen' &&
+                    mainWindow &&
+                    wc === mainWindow.webContents &&
+                    details?.isMainFrame === true &&
+                    details.requestingUrl &&
+                    details.requestingUrl.split('#')[0] ===
+                        mainWindow.webContents.getURL().split('#')[0],
+                );
             const allowVisualizerCapture = (
                 wc: Electron.WebContents | null,
                 permission: string,
@@ -1227,12 +1241,14 @@ if (!singleInstance) {
             session.defaultSession.setPermissionCheckHandler(
                 (wc, permission, _origin, details) =>
                     ALLOWED_PERMISSIONS.has(permission) ||
+                    allowAppFullscreen(wc, permission, details) ||
                     allowVisualizerCapture(wc, permission, details),
             );
             session.defaultSession.setPermissionRequestHandler(
                 (wc, permission, callback, details) =>
                     callback(
                         ALLOWED_PERMISSIONS.has(permission) ||
+                            allowAppFullscreen(wc, permission, details) ||
                             allowVisualizerCapture(wc, permission, details),
                     ),
             );

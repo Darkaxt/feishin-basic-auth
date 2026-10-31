@@ -65,6 +65,30 @@ test('Electron permission handlers permit LAN and fonts while denying unrelated 
         mediaTypes: [],
         requestingUrl: 'file:///C:/Feishin/index.html',
     };
+    let fullscreenGranted;
+    request(
+        ownContents,
+        'fullscreen',
+        (value) => {
+            fullscreenGranted = value;
+        },
+        details,
+    );
+    assert.equal(fullscreenGranted, true, 'F11 must reach native fullscreen');
+    assert.equal(check(ownContents, 'fullscreen', 'file:///', details), true);
+    assert.equal(check({}, 'fullscreen', 'file:///', details), false);
+    assert.equal(
+        check(ownContents, 'fullscreen', 'file:///', { ...details, isMainFrame: false }),
+        false,
+    );
+    assert.equal(
+        check(ownContents, 'fullscreen', 'file:///', {
+            ...details,
+            requestingUrl: 'https://other.example/',
+        }),
+        false,
+    );
+    assert.equal(check(ownContents, 'automatic-fullscreen', 'file:///', details), false);
     assert.equal(check(ownContents, 'media', 'file:///', details), false);
     visualizerVisible = true;
     assert.equal(check(ownContents, 'media', 'file:///', details), true);

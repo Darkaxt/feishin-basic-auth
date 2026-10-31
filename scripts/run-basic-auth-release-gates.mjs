@@ -38,6 +38,10 @@ const commands = [
     ['node', ['scripts/check-basic-auth-secrets.mjs']],
 ];
 
+if (process.platform === 'win32') {
+    commands.unshift(['node', ['scripts/tests/fullscreen-runtime.cjs']]);
+}
+
 if (full) {
     commands.push(['node', ['scripts/basic-auth-smoke.mjs']]);
     commands.push(['node', ['scripts/clean-release-dist.mjs']]);
