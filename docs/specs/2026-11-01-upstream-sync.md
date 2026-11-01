@@ -12,7 +12,7 @@ Authority: current upstream heartbeat and standing release authorization. No Doc
 ## Stages
 
 1. Integrate and verify - COMPLETE. Owns R1-R2 and the marker/PR inspection from R4. Conflict-free merge changes only the two upstream locales; fork runtime code remains byte-for-byte unchanged. Parsed both JSON resources and checked all changed English-matched interpolation tokens (94 Thai and 671 Swedish changed keys). The complete non-Docker gate passed, including real hidden Electron 43.7.0 fullscreen/display bounds, exit restoration and autohide, adjacent fork regressions, both type checks, lint/styles and secret scan. Production Electron main/preload/renderer and remote builds passed. Closure assessment: no new state ownership or abstraction; no refactoring needed.
-2. Release and reconcile - ACTIVE. Owns R3 and remaining R4. Acceptance: verified commit/push, normal complete ba30 publication, independent delivered-package verification, exact cleanup and final reconciliation.
+2. Release and reconcile - COMPLETE. Owns R3 and remaining R4. Source/tag are pushed and read back, normal latest ba30 has all nine verified assets, independently retrieved installer/payload and native packaged permission behavior passed, and all reviewed scratch/build output was removed. Final reconciliation satisfies R1-R4 with no required blockers or tracked deferrals. Local installation and profile were preserved.
 
 ## Evidence and reconciliation
 
@@ -20,7 +20,7 @@ Upstream adds only src/i18n/locales/th.json and sv.json. Development contains on
 
 Scratch: E:/Temp/feishin-sync-20261101 for disposable orchestration and receipts; D:/Temp/feishin-sync-20261101 for native runtime/profile and packaging I/O. D: is required for sustained native/small-file I/O. Existing checkout out/dist are unavoidable generated build outputs. Cleanup transaction a3979527175f88b10956a8266e8474ad covers these exact roots.
 
-No tracked deferrals. Packaging/publication and independent delivery verification remain current-stage acceptance blockers and are being completed.
+No blockers or tracked deferrals remain. Final closure reuses stage one's assessment: this translation-only integration adds no runtime state ownership or abstraction requiring refactoring.
 
 The first build wrapper failed while printing its Unicode log tail under cp1252 after the production build finished. All three build completion records were inspected in the retained UTF-8 log; the wrapper was corrected to emit UTF-8. This was an orchestration output error, not a product build failure. Native runtime/profile are retained for the delivered-package permission check, then removed with the original pre-creation cleanup transaction. A redundant post-creation native-only inventory (66366ac9914ece4c127b8221ab77d504) protected its baseline members and was discarded without deleting anything.
 
@@ -39,4 +39,14 @@ Windows x64/ARM64 ZIP and NSIS packaging, architecture-neutral NSIS, blockmaps a
 
 The compiled packaged permission callbacks passed own/foreign frame/document, automatic fullscreen, scoped capture and microphone-denial checks. Those same compiled callbacks passed the real hidden Electron 43.7.0 F11/display-bounds/exit/autohide workflow. Native test windows ended invisible, nonfocusable and opacity zero. This uses the established source hook fixture with the packaged main-process permission/capture code; it does not launch the user's installed app.
 
-Candidate app.asar SHA256: 8d38b126aec8c8d7dd33de5325d08e9b0ab4c3d896c8b964d6cff06d248dee0e. Candidate x64 installer SHA256: b0fa9f8948e368d2cf1df59c2def9839f64c047125bfc6a1a3a180eede3ca4e1. Publication/readback and independent installer retrieval remain pending stage-two criteria.
+Candidate app.asar SHA256: 8d38b126aec8c8d7dd33de5325d08e9b0ab4c3d896c8b964d6cff06d248dee0e. Candidate x64 installer SHA256: b0fa9f8948e368d2cf1df59c2def9839f64c047125bfc6a1a3a180eede3ca4e1. Publication/readback and independent installer retrieval subsequently passed as recorded below.
+
+## Delivered release verification
+
+Release/source tag v1.15.1-ba.30 resolves to controlled merge d1ed65c7a3557805e66d840059a6417d5733c77a. Its parents are prior fork development 5d46313b9 and upstream 76fa20e08. Atomic development/tag push succeeded and live remote refs matched. Fork/upstream became 174/0; fork/origin 0/0. CodeQL 41283939301 completed successfully for actions and JavaScript/TypeScript at that exact source commit.
+
+https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.15.1-ba.30 is normal published latest, not draft/prerelease, with all nine required assets. Every published size/SHA256 digest matched its candidate. Independently retrieved the published x64 installer; SHA256 b0fa9f8948e368d2cf1df59c2def9839f64c047125bfc6a1a3a180eede3ca4e1. Extracted executable SHA256 59ee30f14eb310e44a67af967c402df2edf594af585ebd6341c5078d466319a3, FileVersion 1.15.1-ba.30, unsigned as the established channel. Its executable and app.asar exactly matched the verified candidate. The extracted updater configuration targets Darkaxt/feishin-basic-auth.
+
+Reconstructed the independently delivered payload's Swedish/Thai JSON resources and checked exact source equality and packaged build-file hashes. Re-executed its actual compiled permission/capture callbacks through the hidden Electron 43.7.0 native fullscreen workflow; display coverage, F11 exit restoration, three-second autohide/reveal, visualizer targeting and scoped denials passed. No installed application, user profile, managed MPV or desktop state was modified.
+
+Cleanup a3979527175f88b10956a8266e8474ad inspected all 2,854 signed manifest members before separate ticket issuance. Apply removed all 2,854 members / 3,924,608,466 logical bytes, with no warnings, errors or exclusions. E:/Temp/feishin-sync-20261101, D:/Temp/feishin-sync-20261101 and checkout out/dist are absent. No task runtime, scratch consumer or cleanup residual remains. Maintained source, published release, installed app/profile and managed MPV are retained. Evidence-only closure is committed separately from the release source/tag.
