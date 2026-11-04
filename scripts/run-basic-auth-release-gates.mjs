@@ -19,6 +19,7 @@ const commands = [
     ['node', ['--test', 'scripts/tests/vinyl-artwork.test.mjs']],
     ['node', ['--test', 'scripts/tests/mpv-process-errors.test.mjs']],
     ['node', ['--test', 'scripts/tests/lyrics.test.mjs']],
+    ['node', ['--test', 'scripts/tests/lyrics-startup.test.mjs']],
     ['node', ['--test', 'scripts/tests/dependency-security.test.mjs']],
     [
         'node',

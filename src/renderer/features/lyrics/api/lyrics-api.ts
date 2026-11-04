@@ -116,7 +116,7 @@ export async function fetchLocalLyrics(params: {
     if (hasFeature(server, ServerFeature.LYRICS_MULTIPLE_STRUCTURED)) {
         const subsonicLyrics = await api.controller
             .getStructuredLyrics({
-                apiClientProps: { serverId, signal },
+                apiClientProps: { serverId, signal, silent: true },
                 query: { songId: song.id },
             })
             .catch(console.error);
@@ -124,7 +124,7 @@ export async function fetchLocalLyrics(params: {
     } else if (hasFeature(server, ServerFeature.LYRICS_SINGLE_STRUCTURED)) {
         const jfLyrics = await api.controller
             .getLyrics({
-                apiClientProps: { serverId, signal },
+                apiClientProps: { serverId, signal, silent: true },
                 query: { songId: song.id },
             })
             .catch((err) => console.error(err));
