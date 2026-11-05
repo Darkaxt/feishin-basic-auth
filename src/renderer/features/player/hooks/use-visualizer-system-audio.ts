@@ -10,6 +10,7 @@ import { PlayerType, WebAudio } from '/@/shared/types/types';
 import {
     bindVisualizerSystemAudioRecovery,
     getVisualizerDisplayMediaOptions,
+    VisualizerSystemAudioRecoveryReason,
 } from '/@/shared/utils/visualizer-system-audio';
 
 const electronUtils = isElectron() ? window.api.utils : null;
@@ -40,6 +41,7 @@ export function useVisualizerSystemAudio(options: {
     const streamRef = useRef<MediaStream | null>(null);
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const connectInFlightRef = useRef(false);
+    const recoveryPendingRef = useRef(false);
     const captureGeneration = useRef(0);
     const shouldAttemptConnectionRef = useRef(shouldAttemptConnection);
     const [connectionRevision, setConnectionRevision] = useState(0);
@@ -52,17 +54,16 @@ export function useVisualizerSystemAudio(options: {
     }, [webAudio]);
 
     const disconnect = useCallback(() => {
+        recoveryPendingRef.current = false;
         captureGeneration.current += 1;
         if (streamRef.current) {
             streamRef.current.getTracks().forEach((t) => t.stop());
             streamRef.current = null;
         }
         if (sourceRef.current) {
-            try {
-                sourceRef.current.disconnect();
-            } catch {
-                // ignore
-            }
+            // Consumers own their input connections. Disconnecting them here makes
+            // AudioMotion.destroy() throw before removing its canvas on recovery.
+            // Stopping the stream releases capture; the visualizer detaches its graph.
             sourceRef.current = null;
         }
         const w = webAudioRef.current;
@@ -167,6 +168,7 @@ export function useVisualizerSystemAudio(options: {
             });
             onSuccessRef.current?.();
         } catch (e) {
+            if (generation !== captureGeneration.current) return;
             disconnect();
             const name = (e as DOMException)?.name;
             logger.warn('Visualizer system audio capture failed', {
@@ -185,6 +187,10 @@ export function useVisualizerSystemAudio(options: {
         } finally {
             connectInFlightRef.current = false;
             setIsConnecting(false);
+            if (recoveryPendingRef.current && shouldAttemptConnectionRef.current) {
+                recoveryPendingRef.current = false;
+                void connectRef.current();
+            }
         }
     }, [disconnect, setWebAudio]);
 
@@ -199,24 +205,37 @@ export function useVisualizerSystemAudio(options: {
         const observedStream = streamRef.current;
         const audioTrack = observedStream?.getAudioTracks()[0];
 
-        return bindVisualizerSystemAudioRecovery({
+        const onRecoveryNeeded = (reason: VisualizerSystemAudioRecoveryReason) => {
+            if (reason === 'track-ended' && streamRef.current !== observedStream) {
+                return;
+            }
+
+            if (!shouldAttemptConnectionRef.current) return;
+            if (!sourceRef.current && !connectInFlightRef.current) return;
+
+            logger.warn('Visualizer system audio capture needs recovery', { reason });
+            disconnect();
+            onLostRef.current?.();
+            setConnectionRevision((revision) => revision + 1);
+
+            if (connectInFlightRef.current) {
+                recoveryPendingRef.current = true;
+            } else {
+                void connectRef.current();
+            }
+        };
+        const unbindSystemAudio = bindVisualizerSystemAudioRecovery({
             audioTrack,
             mediaDevices: navigator.mediaDevices,
-            onRecoveryNeeded: (reason) => {
-                if (reason === 'track-ended' && streamRef.current !== observedStream) {
-                    return;
-                }
-
-                logger.warn('Visualizer system audio capture needs recovery', { reason });
-                disconnect();
-                onLostRef.current?.();
-                setConnectionRevision((revision) => revision + 1);
-
-                if (shouldAttemptConnectionRef.current) {
-                    void connectRef.current();
-                }
-            },
+            onRecoveryNeeded,
         });
+        const unbindMpv = window.api.visualizer.onAudioReconfigured(() =>
+            onRecoveryNeeded('mpv-audio-reconfig'),
+        );
+        return () => {
+            unbindSystemAudio();
+            unbindMpv();
+        };
     }, [connectionRevision, disconnect, playbackType]);
 
     return {

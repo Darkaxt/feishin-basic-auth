@@ -1,4 +1,4 @@
-import { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import styles from './visualizer.module.css';
 
@@ -18,7 +18,7 @@ import { PlayerStatus, PlayerType } from '/@/shared/types/types';
 
 const VisualizerInner = () => {
     const { webAudio } = useWebAudio();
-    const canvasRef = createRef<HTMLDivElement>();
+    const canvasRef = useRef<HTMLDivElement>(null);
     const accent = useAccent();
     const visualizer = useSettingsStore((store) => store.visualizer);
     const playbackType = usePlaybackType();
@@ -232,7 +232,6 @@ const VisualizerInner = () => {
             inputNodes.length > 0 &&
             context &&
             canvasRef.current &&
-            !motion &&
             libraryLoaded &&
             (shouldRunForWebPlayback || shouldRunForMpvLoopback)
         ) {
@@ -272,9 +271,9 @@ const VisualizerInner = () => {
         }
 
         return () => {
-            if (motion) {
+            if (audioMotion) {
                 try {
-                    motion.destroy();
+                    audioMotion.destroy();
                 } catch {
                     // ignore (e.g. already destroyed by idle timer)
                 }
@@ -290,7 +289,6 @@ const VisualizerInner = () => {
         visualizer,
         options,
         isCustomGradient,
-        motion,
         libraryLoaded,
         isPlaying,
     ]);

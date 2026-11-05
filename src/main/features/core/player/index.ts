@@ -1,4 +1,5 @@
 import type { ChildProcess } from 'node:child_process';
+import type { EventEmitter } from 'node:events';
 
 import { app, ipcMain, powerMonitor } from 'electron';
 import { rm } from 'fs/promises';
@@ -11,6 +12,7 @@ import process from 'process';
 import { getMainWindow, sendToastToRenderer } from '../../../index';
 import log from '../../../logger';
 import { store } from '../settings';
+import { bindMpvAudioReconfiguration } from './mpv-audio-reconfiguration';
 import { getMpvErrorMessage, resolveMpvBinaryPath } from './mpv-binary';
 import { ensureManagedMpv } from './mpv-runtime';
 
@@ -199,6 +201,15 @@ const createMpv = async (data: {
         }
         sendRendererPlaybackEvent(channel, ...args);
     };
+
+    const unbindAudioReconfiguration = bindMpvAudioReconfiguration(
+        // The pinned node-mpv implementation exposes its IPC event emitter, but its
+        // published types omit it (as they also omit mpvPlayer).
+        (mpv as MpvAPI & { socket: EventEmitter }).socket,
+        () => eventGeneration === playbackEventGeneration && mpvInstance === mpv,
+        () => sendIfCurrent('visualizer-audio-reconfigured'),
+    );
+    mpvProcess?.once('exit', unbindAudioReconfiguration);
 
     mpv.on('status', (status) => {
         if (status.property === 'playlist-pos') {

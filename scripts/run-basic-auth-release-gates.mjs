@@ -15,6 +15,8 @@ const commands = [
     ['node', ['--test', 'scripts/tests/mpv-runtime.test.mjs']],
     ['node', ['--test', 'scripts/tests/visualizer-permissions.test.mjs']],
     ['node', ['--test', 'scripts/tests/visualizer-capture-lifecycle.test.mjs']],
+    ['node', ['--test', 'scripts/tests/mpv-audio-reconfiguration.test.mjs']],
+    ['node', ['--test', 'scripts/tests/visualizer-instance-lifecycle.test.mjs']],
     ['node', ['--test', 'scripts/tests/song-availability.test.mjs']],
     ['node', ['--test', 'scripts/tests/vinyl-artwork.test.mjs']],
     ['node', ['--test', 'scripts/tests/mpv-process-errors.test.mjs']],

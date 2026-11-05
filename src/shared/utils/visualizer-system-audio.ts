@@ -5,7 +5,10 @@ export interface SystemAudioConnectionConditions {
     isConnecting: boolean;
 }
 
-export type VisualizerSystemAudioRecoveryReason = 'devicechange' | 'track-ended';
+export type VisualizerSystemAudioRecoveryReason =
+    | 'devicechange'
+    | 'mpv-audio-reconfig'
+    | 'track-ended';
 
 export function bindVisualizerSystemAudioRecovery({
     audioTrack,

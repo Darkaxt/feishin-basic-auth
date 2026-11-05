@@ -12,10 +12,14 @@ function harness(initialAudio) {
     let cursor = 0;
     let webAudio = initialAudio;
     let resolveCapture;
+    let rejectCapture;
     let resolveResume;
     let stopped = 0;
     let closed = 0;
     let inputs = 0;
+    let captures = 0;
+    let sourceDisconnections = 0;
+    const audioEvents = new EventTarget();
     const track = new EventTarget();
     track.stop = () => stopped++;
     const stream = {
@@ -25,7 +29,14 @@ function harness(initialAudio) {
     };
     const pending = [];
     const react = {
-        useCallback: (fn) => fn,
+        useCallback: (fn, deps) => {
+            const index = cursor++;
+            const previous = slots[index];
+            if (!previous || deps.some((dep, i) => dep !== previous.deps[i])) {
+                slots[index] = { deps, value: fn };
+            }
+            return slots[index].value;
+        },
         useEffect: (fn, deps) => {
             const index = cursor++;
             const previous = slots[index];
@@ -56,7 +67,11 @@ function harness(initialAudio) {
             return Promise.resolve();
         }
         createMediaStreamSource() {
-            return { disconnect() {} };
+            return {
+                disconnect() {
+                    sourceDisconnections++;
+                },
+            };
         }
         resume() {
             return new Promise((resolve) => {
@@ -64,14 +79,15 @@ function harness(initialAudio) {
             });
         }
     }
+    const setWebAudio = (next) => {
+        webAudio = next;
+        if (next?.visualizerInputs?.length) inputs++;
+    };
     const mocks = {
         '/@/i18n/i18n': { default: { t: (key) => key } },
         '/@/renderer/features/player/hooks/use-webaudio': {
             useWebAudio: () => ({
-                setWebAudio: (next) => {
-                    webAudio = next;
-                    if (next?.visualizerInputs?.length) inputs++;
-                },
+                setWebAudio,
                 webAudio,
             }),
         },
@@ -105,22 +121,40 @@ function harness(initialAudio) {
             module,
             navigator: {
                 mediaDevices: Object.assign(new EventTarget(), {
-                    getDisplayMedia: () =>
-                        new Promise((resolve) => {
+                    getDisplayMedia: () => {
+                        captures++;
+                        return new Promise((resolve, reject) => {
                             resolveCapture = resolve;
-                        }),
+                            rejectCapture = reject;
+                        });
+                    },
                 }),
             },
             require: (id) => {
                 assert.ok(id in mocks, id);
                 return mocks[id];
             },
-            window: { api: { utils: { isMacOS: () => false } }, AudioContext },
+            window: {
+                api: {
+                    utils: { isMacOS: () => false },
+                    visualizer: {
+                        onAudioReconfigured: (callback) => {
+                            audioEvents.addEventListener('reconfigured', callback);
+                            return () => audioEvents.removeEventListener('reconfigured', callback);
+                        },
+                    },
+                },
+                AudioContext,
+            },
         },
     );
     return {
         capture: () => resolveCapture(stream),
+        captures: () => captures,
         counts: () => ({ closed, inputs, stopped }),
+        reconfigure: () => audioEvents.dispatchEvent(new Event('reconfigured')),
+        rejectCapture: () =>
+            rejectCapture(Object.assign(new Error('Capture aborted'), { name: 'AbortError' })),
         render(visible = true) {
             cursor = 0;
             const result = module.exports.useVisualizerSystemAudio({
@@ -130,10 +164,97 @@ function harness(initialAudio) {
             return result;
         },
         resume: () => resolveResume?.(),
+        sourceDisconnections: () => sourceDisconnections,
         unmount: () => slots.forEach((slot) => slot.cleanup?.()),
         webAudio: () => webAudio,
     };
 }
+
+test('MPV output reconfiguration replaces a live capture without browser devicechange', async () => {
+    const h = harness();
+    const first = h.render().connect();
+    h.capture();
+    await new Promise(setImmediate);
+    h.resume();
+    await first;
+    h.render();
+    h.reconfigure();
+    assert.equal(h.captures(), 2);
+    assert.deepEqual(h.counts(), { closed: 1, inputs: 1, stopped: 1 });
+    assert.equal(
+        h.sourceDisconnections(),
+        0,
+        'consumer-owned input edges must survive until renderer cleanup',
+    );
+    h.capture();
+    await new Promise(setImmediate);
+    h.resume();
+    await new Promise(setImmediate);
+    assert.equal(h.counts().inputs, 2);
+    h.unmount();
+    h.reconfigure();
+    assert.equal(h.captures(), 2);
+});
+
+test('a stale acquisition failure still releases its queued output recovery', async () => {
+    const h = harness();
+    const first = h.render().connect();
+    h.reconfigure();
+    h.rejectCapture();
+    await first;
+    assert.equal(h.captures(), 2);
+    h.unmount();
+    h.capture();
+    await new Promise(setImmediate);
+    assert.equal(h.counts().inputs, 0);
+});
+
+test('native output events cannot initiate or retry a denied activation', async () => {
+    const h = harness();
+    h.render();
+    h.reconfigure();
+    assert.equal(h.captures(), 0);
+    const first = h.render().connect();
+    h.rejectCapture();
+    await first;
+    h.reconfigure();
+    assert.equal(h.captures(), 1);
+    h.unmount();
+});
+
+test('output changes during acquisition coalesce into one replacement after acquisition settles', async () => {
+    const h = harness();
+    const first = h.render().connect();
+    h.reconfigure();
+    h.reconfigure();
+    assert.equal(h.captures(), 1);
+    h.capture();
+    await new Promise(setImmediate);
+    h.resume();
+    await first;
+    assert.equal(h.captures(), 2);
+    assert.equal(h.counts().inputs, 0);
+    h.capture();
+    await new Promise(setImmediate);
+    h.resume();
+    await new Promise(setImmediate);
+    assert.equal(h.counts().inputs, 1);
+    h.unmount();
+});
+
+test('closing the surface cancels recovery queued behind a pending capture', async () => {
+    const h = harness();
+    const first = h.render().connect();
+    h.reconfigure();
+    h.render(false);
+    h.capture();
+    await first;
+    assert.equal(h.captures(), 1);
+    assert.equal(h.counts().inputs, 0);
+    h.reconfigure();
+    assert.equal(h.captures(), 1);
+    h.unmount();
+});
 
 test('capture resolving after unmount stops its tracks without creating an input', async () => {
     const h = harness();
