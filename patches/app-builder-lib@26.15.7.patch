@@ -1,0 +1,29 @@
+diff --git a/out/node-module-collector/nodeModulesCollector.js b/out/node-module-collector/nodeModulesCollector.js
+--- a/out/node-module-collector/nodeModulesCollector.js
++++ b/out/node-module-collector/nodeModulesCollector.js
+@@ -362,7 +362,13 @@ class NodeModulesCollector {
+                 catch {
+                     // ignore
+                 }
+-                reject(err);
++                // The retry diagnostic also reads this file on failure. Wait until
++                // destroy has released the handle before reporting the original error.
++                if (outStream.closed) {
++                    reject(err);
++                } else {
++                    outStream.once("close", () => reject(err));
++                }
+             };
+             const settle = () => {
+                 if (settled || !childClosed || !streamFinished) {
+@@ -392,7 +392,9 @@ class NodeModulesCollector {
+                 return shouldResolve ? resolve() : reject(new Error(`Node module collector process exited with code ${code}:\n${stderr}`));
+             };
+             outStream.on("error", err => fail(new Error(`Node module collector failed writing output (${command}): ${err.message}`)));
+-            outStream.on("finish", () => {
++            // finish flushes writes but the Windows handle remains open until close.
++            // Reopening the output before close races the writer and can fail EBUSY.
++            outStream.on("close", () => {
+                 streamFinished = true;
+                 settle();
+             });

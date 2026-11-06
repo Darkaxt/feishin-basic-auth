@@ -1,7 +1,6 @@
 import { initClient, initContract } from '@ts-rest/core';
-import axios, { AxiosError, AxiosResponse, isAxiosError, Method } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, isAxiosError, Method } from 'axios';
 import isElectron from 'is-electron';
-import debounce from 'lodash/debounce';
 import omitBy from 'lodash/omitBy';
 import qs from 'qs';
 
@@ -332,143 +331,125 @@ const parsePath = (fullPath: string) => {
     };
 };
 
-let authSuccess = true;
-let shouldDelay = false;
+interface NavidromeRequestConfig extends AxiosRequestConfig {
+    authenticationRetried?: boolean;
+    serverId?: string;
+}
 
-const RETRY_DELAY_MS = 1000;
-const MAX_RETRIES = 5;
+const reauthentications = new Map<string, Promise<void>>();
 
-const waitForResult = async (count = 0): Promise<void> => {
-    return new Promise((resolve) => {
-        if (count === MAX_RETRIES || !shouldDelay) resolve();
+const renewSession = (server: ServerListItemWithCredential): Promise<void> => {
+    const pending = reauthentications.get(server.id);
+    if (pending) return pending;
 
-        setTimeout(() => {
-            waitForResult(count + 1)
-                .then(resolve)
-                .catch(resolve);
-        }, RETRY_DELAY_MS);
-    });
+    const renewal = (async () => {
+        try {
+            const password = await localSettings?.passwordGet(server.id);
+            if (!password) {
+                authenticationFailure(server);
+                throw new Error(i18n.t('error.sessionExpiredError') as string);
+            }
+
+            const res = await axios.post(`${server.url}/auth/login`, {
+                password,
+                username: server.username,
+            });
+            if (
+                res.status !== 200 ||
+                typeof res.data.token !== 'string' ||
+                typeof res.data.subsonicSalt !== 'string' ||
+                typeof res.data.subsonicToken !== 'string'
+            ) {
+                throw new Error(i18n.t('error.authenticatedFailed') as string);
+            }
+            const current = useAuthStore.getState().serverList[server.id];
+            // An explicit logout, deletion, account edit or replacement owns newer state.
+            if (
+                !current ||
+                useAuthStore.getState().currentServer?.id !== server.id ||
+                current.ndCredential !== server.ndCredential ||
+                current.url !== server.url ||
+                current.username !== server.username
+            ) {
+                return;
+            }
+            useAuthStore.getState().actions.updateServer(server.id, {
+                credential: `u=${encodeURIComponent(server.username)}&s=${encodeURIComponent(res.data.subsonicSalt)}&t=${encodeURIComponent(res.data.subsonicToken)}`,
+                ndCredential: res.data.token,
+            });
+        } catch (error) {
+            const status = isAxiosError(error) ? error.response?.status : undefined;
+            if (status === 401 || status === 403) {
+                authenticationFailure(server);
+            } else if (status === 429) {
+                toast.error({
+                    message: i18n.t('error.loginRateError') as string,
+                    title: i18n.t('error.sessionExpiredError') as string,
+                });
+            }
+            logger.warn('Native session renewal failed', { serverId: server.id, status });
+            throw error;
+        } finally {
+            reauthentications.delete(server.id);
+        }
+    })();
+    reauthentications.set(server.id, renewal);
+    return renewal;
 };
-
-const limitedFail = debounce(authenticationFailure, RETRY_DELAY_MS);
-const TIMEOUT_ERROR = Error();
 
 axiosClient.interceptors.response.use(
     (response) => {
-        const serverId = useAuthStore.getState().currentServer?.id;
+        const serverId = (response.config as NavidromeRequestConfig).serverId;
 
         if (serverId) {
             const headerCredential = response.headers['x-nd-authorization'] as string | undefined;
 
-            if (headerCredential) {
+            const server = useAuthStore.getState().serverList[serverId];
+            if (
+                headerCredential &&
+                server?.ndCredential &&
+                response.config.headers['x-nd-authorization'] === `Bearer ${server.ndCredential}`
+            ) {
                 useAuthStore.getState().actions.updateServer(serverId, {
                     ndCredential: headerCredential,
                 });
             }
         }
 
-        authSuccess = true;
-
         return response;
     },
-    (error) => {
-        if (error.response && error.response.status === 401) {
-            const currentServer = useAuthStore.getState().currentServer;
-
-            if (localSettings && currentServer?.savePassword) {
-                return localSettings
-                    .passwordGet(currentServer.id)
-                    .then(async (password: null | string) => {
-                        authSuccess = false;
-
-                        if (password === null) {
-                            throw error;
-                        }
-
-                        if (shouldDelay) {
-                            await waitForResult();
-
-                            // Hopefully the delay was sufficient for authentication.
-                            // Otherwise, it will require manual intervention
-                            if (authSuccess) {
-                                return axiosClient.request(error.config);
-                            }
-
-                            throw error;
-                        }
-
-                        shouldDelay = true;
-
-                        // Do not use axiosClient. Instead, manually make a post
-                        const res = await axios.post(`${currentServer.url}/auth/login`, {
-                            password,
-                            username: currentServer.username,
-                        });
-
-                        if (res.status === 429) {
-                            toast.error({
-                                message: i18n.t('error.loginRateError') as string,
-                                title: i18n.t('error.sessionExpiredError') as string,
-                            });
-
-                            const serverId = currentServer.id;
-                            useAuthStore.getState().actions.updateServer(serverId, {
-                                credential: undefined,
-                                ndCredential: undefined,
-                            });
-                            useAuthStore.getState().actions.setCurrentServer(null);
-
-                            // special error to prevent sending a second message, and stop other messages that could be enqueued
-                            limitedFail.cancel();
-                            throw TIMEOUT_ERROR;
-                        }
-                        if (res.status !== 200) {
-                            throw new Error(i18n.t('error.authenticatedFailed') as string);
-                        }
-
-                        const newCredential = res.data.token;
-                        const subsonicCredential = `u=${currentServer.username}&s=${res.data.subsonicSalt}&t=${res.data.subsonicToken}`;
-
-                        useAuthStore.getState().actions.updateServer(currentServer.id, {
-                            credential: subsonicCredential,
-                            ndCredential: newCredential,
-                        });
-
-                        error.config.headers['x-nd-authorization'] = `Bearer ${newCredential}`;
-
-                        authSuccess = true;
-
-                        return axiosClient.request(error.config);
-                    })
-                    .catch((newError: any) => {
-                        if (newError !== TIMEOUT_ERROR) {
-                            console.error('Error when trying to reauthenticate: ', newError);
-
-                            if (isAxiosError(newError) && newError.code === 'ERR_NETWORK') {
-                                logger.warn(
-                                    'Network error during reauthentication - preserving credentials',
-                                );
-                            } else {
-                                limitedFail(currentServer);
-                            }
-                        }
-
-                        // make sure to pass the error so axios will error later on
-                        throw newError;
-                    })
-                    .finally(() => {
-                        shouldDelay = false;
-                    });
-            }
-
-            if (isAxiosError(error) && error.code === 'ERR_NETWORK') {
-                logger.warn('Network error during authentication - preserving credentials');
-            } else {
-                limitedFail(currentServer);
-            }
+    async (error) => {
+        const config = error.config as NavidromeRequestConfig | undefined;
+        if (error.response?.status !== 401 || !config?.serverId || config.signal?.aborted) {
+            throw error;
         }
-
-        return Promise.reject(error);
+        const server = useAuthStore.getState().serverList[config.serverId];
+        if (!server || useAuthStore.getState().currentServer?.id !== server.id) throw error;
+        if (config.authenticationRetried) {
+            if (config.headers?.['x-nd-authorization'] === `Bearer ${server.ndCredential}`) {
+                authenticationFailure(server);
+            }
+            throw error;
+        }
+        config.authenticationRetried = true;
+        const authorization = config.headers?.['x-nd-authorization'];
+        if (!server.ndCredential || authorization === `Bearer ${server.ndCredential}`) {
+            if (!localSettings || !server.savePassword) {
+                authenticationFailure(server);
+                throw error;
+            }
+            await renewSession(server);
+        }
+        const latest = useAuthStore.getState().serverList[server.id];
+        if (!latest?.ndCredential || useAuthStore.getState().currentServer?.id !== server.id) {
+            throw error;
+        }
+        config.headers = {
+            ...config.headers,
+            'x-nd-authorization': `Bearer ${latest.ndCredential}`,
+        };
+        // Resource errors from this replay are handled as resource errors, outside renewal.
+        return axiosClient.request(config);
     },
 );
 
@@ -496,9 +477,11 @@ export const ndApiClient = (args: {
             }
 
             try {
-                if (shouldDelay) await waitForResult();
-
-                const result = await axiosClient.request({
+                if (server) {
+                    await reauthentications.get(server.id);
+                    token = useAuthStore.getState().serverList[server.id]?.ndCredential;
+                }
+                const config: NavidromeRequestConfig = {
                     data: body,
                     headers: {
                         ...headers,
@@ -506,9 +489,11 @@ export const ndApiClient = (args: {
                     },
                     method: method as Method,
                     params,
+                    serverId: server?.id,
                     signal,
                     url: `${baseUrl}/${api}`,
-                });
+                };
+                const result = await axiosClient.request(config);
                 validateResponse({
                     controller: 'Navidrome',
                     method,

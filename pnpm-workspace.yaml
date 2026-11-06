@@ -29,6 +29,7 @@ overrides:
     'xml2js': '0.5.0'
     'yaml': '2.8.3'
 patchedDependencies:
+    app-builder-lib@26.15.7: patches/app-builder-lib@26.15.7.patch
     minimatch@3.1.5: patches/minimatch@3.1.5.patch
     minimatch@5.1.9: patches/minimatch@5.1.9.patch
     minimatch@9.0.9: patches/minimatch@9.0.9.patch

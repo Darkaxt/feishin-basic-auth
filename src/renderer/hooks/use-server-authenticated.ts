@@ -305,11 +305,6 @@ export const useServerAuthenticated = () => {
                     serverType: serverWithAuth.type,
                 });
 
-                // Clear server credentials and saved password on failure
-                if (serverWithAuth.savePassword && localSettings) {
-                    localSettings.passwordRemove(serverWithAuth.id);
-                }
-
                 toast.error({
                     message: errorMessage,
                 });

@@ -5,6 +5,8 @@ const full = process.argv.includes('--full');
 const commands = [
     ['node', ['--test', 'scripts/tests/upstream-sync.test.mjs']],
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
+    ['node', ['--test', 'scripts/tests/navidrome-session.test.mjs']],
+    ['node', ['--test', 'scripts/tests/packaging-collector-lifecycle.test.mjs']],
     ['node', ['--test', 'scripts/tests/lidaclips.test.mjs']],
     ['node', ['--test', 'scripts/tests/default-playback.test.mjs']],
     ['node', ['--test', 'scripts/tests/fork-updater.test.mjs']],
