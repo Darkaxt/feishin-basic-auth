@@ -118,6 +118,8 @@ export const store = new Store<any>({
         visualizer_system_audio_consent_granted: false,
         window_enable_tray: true,
         window_exit_to_tray: false,
+        window_mini_player_always_on_top: true,
+        window_mini_player_on_minimize: true,
         window_minimize_to_tray: false,
         window_start_minimized: false,
         window_window_bar_style: getFrame(),

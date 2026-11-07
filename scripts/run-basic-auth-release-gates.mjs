@@ -3,6 +3,14 @@ import { spawnSync } from 'node:child_process';
 const full = process.argv.includes('--full');
 
 const commands = [
+    [
+        'node',
+        [
+            '--test',
+            'scripts/tests/mini-player.test.mjs',
+            'scripts/tests/mini-player-renderer.test.mjs',
+        ],
+    ],
     ['node', ['--test', 'scripts/tests/upstream-sync.test.mjs']],
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
     ['node', ['--test', 'scripts/tests/navidrome-session.test.mjs']],
@@ -44,6 +52,7 @@ const commands = [
 ];
 
 if (process.platform === 'win32') {
+    commands.unshift(['node', ['scripts/tests/mini-player-runtime.cjs']]);
     commands.unshift(['node', ['scripts/tests/fullscreen-runtime.cjs']]);
 }
 

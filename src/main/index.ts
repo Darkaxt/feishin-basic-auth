@@ -1,6 +1,8 @@
-import type { UpdateCheckResult } from 'electron-updater';
+import type { MiniPlayerCommand } from '/@/shared/types/mini-player';
 
 import './user-data-path';
+
+import type { UpdateCheckResult } from 'electron-updater';
 
 import { is } from '@electron-toolkit/utils';
 import {
@@ -29,6 +31,7 @@ import path, { join } from 'path';
 import semver from 'semver';
 
 import packageJson from '../../package.json';
+import { createMiniPlayer } from './features/core/mini-player';
 import { disableMediaKeys, enableMediaKeys } from './features/core/player/media-keys';
 import { installProxyAuthInterceptor } from './features/core/proxy-auth';
 import { shutdownServer } from './features/core/remote';
@@ -39,8 +42,8 @@ import {
     VisualizerCapturePermissionInput,
 } from './features/core/visualizer/capture-permissions';
 import log, { autoUpdaterLogInterface, isBrokenPipeError } from './logger';
-import MenuBuilder, { MenuPlaybackState } from './menu';
 import './features';
+import MenuBuilder, { MenuPlaybackState } from './menu';
 import { hotkeyToElectronAccelerator } from './utils';
 
 import { disableAutoUpdates, isLinux, isMacOS, isWindows } from '/@/main/env';
@@ -694,6 +697,42 @@ async function createWindow(first = true): Promise<void> {
     });
     installProxyAuthInterceptor(mainWindow.webContents.session);
 
+    const miniPlayer = createMiniPlayer(mainWindow, {
+        alwaysOnTop: () => store.get('window_mini_player_always_on_top', true) === true,
+        area: (bounds) => screen.getDisplayMatching(bounds).workArea,
+        readBounds: () => store.get('mini_player_bounds'),
+        saveBounds: (bounds) => store.set('mini_player_bounds', bounds),
+    });
+    ipcMain.handle('mini-player-get', () => miniPlayer.getState());
+    ipcMain.handle('mini-player-command', (event, request: MiniPlayerCommand) => {
+        if (
+            event.sender !== mainWindow?.webContents ||
+            !request ||
+            !['dismiss', 'enter', 'queue', 'restore'].includes(request.action)
+        )
+            return;
+        return miniPlayer.command(request);
+    });
+    const onMiniTrack = (event: Electron.IpcMainEvent, available: boolean) => {
+        if (event.sender === mainWindow?.webContents)
+            miniPlayer.setTrackAvailable(available === true);
+    };
+    ipcMain.on('mini-player-track', onMiniTrack);
+    const unsubscribePin = store.onDidChange('window_mini_player_always_on_top', () =>
+        miniPlayer.refreshPin(),
+    );
+    const minimize = () => {
+        if (store.get('window_minimize_to_tray') === true) {
+            hideMainWindowToTray();
+        } else if (miniPlayer.getState().active) {
+            void miniPlayer.command({ action: 'dismiss' });
+        } else if (store.get('window_mini_player_on_minimize', true) && miniPlayer.hasTrack()) {
+            void miniPlayer.command({ action: 'enter' });
+        } else {
+            mainWindow?.minimize();
+        }
+    };
+
     electronLocalShortcut.register(mainWindow, 'Ctrl+Shift+I', () => {
         mainWindow?.webContents.openDevTools();
     });
@@ -710,18 +749,13 @@ async function createWindow(first = true): Promise<void> {
         mainWindow?.unmaximize();
     });
 
-    ipcMain.on('window-minimize', () => {
-        if (store.get('window_minimize_to_tray') === true) {
-            log.info('Main window minimized to tray');
-            hideMainWindowToTray();
-        } else {
-            mainWindow?.minimize();
-        }
-    });
+    ipcMain.on('window-minimize', minimize);
 
-    ipcMain.on('window-close', () => {
-        mainWindow?.close();
-    });
+    const closeWindow = () => {
+        if (miniPlayer.getState().active) void miniPlayer.command({ action: 'dismiss' });
+        else mainWindow?.close();
+    };
+    ipcMain.on('window-close', closeWindow);
 
     ipcMain.on('window-quit', () => {
         log.info('App quitting', { reason: 'window-quit' });
@@ -817,18 +851,25 @@ async function createWindow(first = true): Promise<void> {
         log.info('Main window closed');
         ipcMain.removeHandler('window-clear-cache');
         ipcMain.removeHandler('app-check-for-updates');
+        ipcMain.removeHandler('mini-player-get');
+        ipcMain.removeHandler('mini-player-command');
+        ipcMain.removeListener('mini-player-track', onMiniTrack);
+        ipcMain.removeListener('window-minimize', minimize);
+        ipcMain.removeListener('window-close', closeWindow);
+        unsubscribePin();
         mainWindow = null;
     });
 
     mainWindow.on('close', (event) => {
         if (mainWindow) {
-            const bounds = mainWindow.getNormalBounds();
+            const desktop = miniPlayer.getDesktop();
+            const bounds = desktop?.bounds ?? mainWindow.getNormalBounds();
             store.set(
                 'bounds',
                 clampWindowBoundsToDisplay(bounds, screen.getDisplayMatching(bounds).workArea),
             );
-            store.set('maximized', mainWindow.isMaximized());
-            store.set('fullscreen', mainWindow.isFullScreen());
+            store.set('maximized', desktop?.maximized ?? mainWindow.isMaximized());
+            store.set('fullscreen', desktop?.fullscreen ?? mainWindow.isFullScreen());
         }
 
         if (!exitFromTray && store.get('window_exit_to_tray')) {
@@ -844,11 +885,18 @@ async function createWindow(first = true): Promise<void> {
     });
 
     mainWindow.on('minimize', () => {
+        if (miniPlayer.consumeDismissMinimize()) return;
         if (store.get('window_minimize_to_tray') === true) {
             log.info('Main window minimized to tray');
             setImmediate(() => {
                 hideMainWindowToTray();
             });
+        } else if (
+            !miniPlayer.getState().active &&
+            store.get('window_mini_player_on_minimize', true) &&
+            miniPlayer.hasTrack()
+        ) {
+            void miniPlayer.command({ action: 'enter' });
         }
     });
 

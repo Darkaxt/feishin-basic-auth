@@ -1,3 +1,5 @@
+import type { MiniPlayerCommand, MiniPlayerState } from '/@/shared/types/mini-player';
+
 import { ipcRenderer } from 'electron';
 
 const exit = () => {
@@ -34,6 +36,20 @@ export const browser = {
     exit,
     maximize,
     minimize,
+    miniPlayerCommand: (command: MiniPlayerCommand): Promise<void> =>
+        ipcRenderer.invoke('mini-player-command', command),
+    miniPlayerState: (): Promise<MiniPlayerState> => ipcRenderer.invoke('mini-player-get'),
+    miniPlayerTrack: (available: boolean): void => {
+        ipcRenderer.send('mini-player-track', available);
+    },
+    onMiniPlayerState: (callback: (state: MiniPlayerState) => void) => {
+        const listener = (_event: Electron.IpcRendererEvent, state: MiniPlayerState) =>
+            callback(state);
+        ipcRenderer.on('mini-player-state', listener);
+        return () => {
+            ipcRenderer.removeListener('mini-player-state', listener);
+        };
+    },
     quit,
     unmaximize,
 };

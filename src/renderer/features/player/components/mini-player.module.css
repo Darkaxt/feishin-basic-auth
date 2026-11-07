@@ -1,0 +1,184 @@
+.mini {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--theme-colors-foreground);
+    outline: none;
+    background: var(--theme-colors-background);
+}
+
+.turntable {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background-image: radial-gradient(ellipse at 25% 10%, rgb(255 255 255 / 12%), transparent 70%), linear-gradient(150deg, rgb(0 0 0 / 35%), rgb(0 0 0 / 80%));
+}
+
+.grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23n)' d='M0 0h128v128H0z'/%3E%3C/svg%3E");
+    opacity: 0.055;
+}
+
+.artwork {
+    position: absolute;
+    inset: 7%;
+    pointer-events: none;
+    filter: drop-shadow(0 8px 12px rgb(0 0 0 / 65%));
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    color: white;
+    background: linear-gradient(rgb(0 0 0 / 30%), rgb(0 0 0 / 12%) 40%, rgb(0 0 0 / 88%));
+    opacity: 0;
+    transition: opacity 160ms ease;
+    -webkit-app-region: drag;
+}
+
+.turntable:hover .overlay,
+.overlay:focus-within {
+    opacity: 1;
+}
+
+.overlay button,
+.metadata {
+    -webkit-app-region: no-drag;
+}
+
+.overlay button {
+    color: white;
+}
+
+.overlay button:focus-visible,
+.queue button:focus-visible {
+    outline: 2px solid var(--theme-colors-primary);
+    outline-offset: 2px;
+}
+
+.top,
+.transport,
+.track,
+.times,
+.queue header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.drag-handle {
+    flex: 1;
+    align-self: stretch;
+}
+
+.transport {
+    gap: 16px;
+    justify-content: center;
+}
+
+.metadata {
+    padding: 0 6px;
+    font-size: 12px;
+}
+
+.track > div,
+.queue-row > span {
+    min-width: 0;
+}
+
+.track strong,
+.track span,
+.queue-row strong,
+.queue-row small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track strong {
+    font-size: 14px;
+}
+
+.track span {
+    margin-top: 2px;
+    color: rgb(255 255 255 / 75%);
+}
+
+.times {
+    margin-top: 4px;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.queue {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--theme-colors-surface);
+}
+
+.queue header {
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    -webkit-app-region: drag;
+}
+
+.queue header button {
+    -webkit-app-region: no-drag;
+}
+
+.queue header > span {
+    flex: 1;
+    opacity: 0.6;
+}
+
+.queue-list {
+    overflow: auto;
+}
+
+.queue-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 14px;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+}
+
+.queue-row:hover,
+.queue-row[aria-current='true'] {
+    background: color-mix(in srgb, var(--theme-colors-primary) 15%, transparent);
+}
+
+.queue-row small,
+.queue-row time {
+    font-size: 11px;
+    opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .overlay {
+        transition: none;
+    }
+}

@@ -29,6 +29,38 @@ export const WindowSettings = memo(() => {
     const windowOptions: SettingOption[] = [
         {
             control: (
+                <Switch
+                    aria-label={t('miniPlayer.onMinimize')}
+                    checked={settings.miniPlayerOnMinimize}
+                    onChange={(event) =>
+                        setSettings({
+                            window: { miniPlayerOnMinimize: event.currentTarget.checked },
+                        })
+                    }
+                />
+            ),
+            description: t('miniPlayer.onMinimizeDescription'),
+            isHidden: !isElectron(),
+            title: t('miniPlayer.onMinimize'),
+        },
+        {
+            control: (
+                <Switch
+                    aria-label={t('miniPlayer.alwaysOnTop')}
+                    checked={settings.miniPlayerAlwaysOnTop}
+                    onChange={(event) =>
+                        setSettings({
+                            window: { miniPlayerAlwaysOnTop: event.currentTarget.checked },
+                        })
+                    }
+                />
+            ),
+            description: t('miniPlayer.alwaysOnTopDescription'),
+            isHidden: !isElectron(),
+            title: t('miniPlayer.alwaysOnTop'),
+        },
+        {
+            control: (
                 <Select
                     data={WINDOW_BAR_OPTIONS}
                     disabled={!isElectron()}

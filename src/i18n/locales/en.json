@@ -765,6 +765,25 @@
             "title": "$t(entity.track, {\"count\": 2})"
         }
     },
+    "miniPlayer": {
+        "title": "Mini-player",
+        "open": "Open mini-player",
+        "dismiss": "Dismiss mini-player",
+        "restore": "Restore full player",
+        "previous": "Previous track",
+        "next": "Next track",
+        "empty": "Nothing playing",
+        "showQueue": "Show queue",
+        "hideQueue": "Hide queue",
+        "queue": "Queue",
+        "playQueue": "Play queue",
+        "trackCount_one": "{{count}} track",
+        "trackCount_other": "{{count}} tracks",
+        "onMinimize": "Mini-player on minimize",
+        "onMinimizeDescription": "Show the vinyl mini-player when a track is loaded. Minimize to tray takes precedence.",
+        "alwaysOnTop": "Keep mini-player on top",
+        "alwaysOnTopDescription": "Keep the mini-player above other windows."
+    },
     "player": {
         "addLast": "Last",
         "addNext": "Next",

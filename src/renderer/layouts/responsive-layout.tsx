@@ -7,6 +7,7 @@ import { CommandPalette } from '/@/renderer/features/search/components/command-p
 import { useGarbageCollection } from '/@/renderer/hooks/use-garbage-collection';
 import { HotkeyItem, useHotkeys } from '/@/renderer/hooks/use-hotkeys';
 import { useIsMobile } from '/@/renderer/hooks/use-is-mobile';
+import { useMiniPlayer } from '/@/renderer/hooks/use-mini-player';
 import { DefaultLayout } from '/@/renderer/layouts/default-layout';
 import { MobileLayout } from '/@/renderer/layouts/mobile-layout/mobile-layout';
 import { AppRoute } from '/@/renderer/router/routes';
@@ -33,6 +34,7 @@ const ResponsiveLayoutBase = ({ shell }: ResponsiveLayoutProps) => {
 
 export const ResponsiveLayout = ({ shell }: ResponsiveLayoutProps) => {
     useAppTracker();
+    useMiniPlayer();
 
     return (
         <>

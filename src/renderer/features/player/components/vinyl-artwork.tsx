@@ -32,6 +32,7 @@ type VinylArtworkProps = {
     imageStyle?: CSSProperties;
     isActiveSong: boolean;
     isPlaying: boolean;
+    keepRecordOnPause?: boolean;
     loading?: 'eager' | 'lazy';
     motionProps: HTMLMotionProps<'div'>;
     onError?: (event: SyntheticEvent<HTMLImageElement>) => void;
@@ -48,6 +49,7 @@ export const VinylArtwork = ({
     imageStyle,
     isActiveSong,
     isPlaying,
+    keepRecordOnPause = false,
     loading,
     motionProps,
     onError,
@@ -140,7 +142,7 @@ export const VinylArtwork = ({
         );
     }
 
-    if (!presentation.showRecord) {
+    if (!presentation.showRecord && !(keepRecordOnPause && artworkReady)) {
         return (
             <motion.div
                 {...motionProps}
@@ -177,10 +179,12 @@ export const VinylArtwork = ({
             <div className={styles.surface}>
                 <div
                     className={clsx(styles.record, {
-                        [styles.rotating]: presentation.rotate,
+                        [styles.rotating]:
+                            presentation.rotate || (keepRecordOnPause && !reducedMotion),
                     })}
                     style={{
                         animationDuration: `${VINYL_ROTATION_DURATION_MS}ms`,
+                        animationPlayState: presentation.rotate ? 'running' : 'paused',
                     }}
                 >
                     <img

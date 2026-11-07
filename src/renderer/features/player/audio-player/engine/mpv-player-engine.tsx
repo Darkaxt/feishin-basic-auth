@@ -449,7 +449,7 @@ export const MpvPlayerEngine = (props: MpvPlayerEngineProps) => {
         },
     }));
 
-    return <div id="mpv-player-engine" style={{ display: 'none' }} />;
+    return <div data-ready={isInitialized} id="mpv-player-engine" style={{ display: 'none' }} />;
 };
 
 MpvPlayerEngine.displayName = 'MpvPlayerEngine';

@@ -1,4 +1,5 @@
 import { t } from 'i18next';
+import isElectron from 'is-electron';
 import { useCallback, useEffect, useMemo, useState, WheelEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -89,6 +90,7 @@ export const RightControls = () => {
     const showRatings = useShowRatings();
     const showFavorites = useShowFavorites();
     const playbackType = usePlaybackType();
+    const currentSong = usePlayerSong();
     return (
         <Flex align="flex-end" direction="column" h="100%" px="1rem" py="0.5rem">
             <Group h="calc(100% / 3)">
@@ -102,6 +104,17 @@ export const RightControls = () => {
                 <LyricsButton />
                 {showFavorites && <FavoriteButton />}
                 <QueueButton />
+                {isElectron() && (
+                    <ActionIcon
+                        aria-label={t('miniPlayer.open')}
+                        disabled={!currentSong}
+                        icon="shrink"
+                        onClick={() =>
+                            void window.api.browser.miniPlayerCommand({ action: 'enter' })
+                        }
+                        variant="subtle"
+                    />
+                )}
                 {playbackType === PlayerType.DLNA ? <DlnaVolumeButton /> : <VolumeButton />}
             </Group>
             <Group h="calc(100% / 3)" />
