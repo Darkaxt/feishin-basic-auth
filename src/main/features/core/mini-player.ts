@@ -6,6 +6,7 @@ import { expandMiniPlayerQueue, resolveMiniPlayerBounds } from '../../utils/mini
 interface Options {
     alwaysOnTop: () => boolean;
     area: (bounds: Rectangle) => Rectangle;
+    cursor: () => { x: number; y: number };
     readBounds: () => Rectangle | undefined;
     saveBounds: (bounds: Rectangle) => void;
 }
@@ -27,6 +28,7 @@ export const createMiniPlayer = (window: BrowserWindow, options: Options) => {
     let pending = Promise.resolve();
     let trackAvailable = false;
     let dismissMinimize = false;
+    let dragOrigin: undefined | { cursor: { x: number; y: number }; position: number[] };
 
     const publish = () => window.webContents.send('mini-player-state', state);
     const updateBounds = () => {
@@ -157,8 +159,9 @@ export const createMiniPlayer = (window: BrowserWindow, options: Options) => {
                 publish();
             }
             if (request.action === 'dismiss') {
-                await restore();
-                // This is a deliberate dismissal, not another request to enter mini mode.
+                remember();
+                dragOrigin = undefined;
+                // Minimize this presentation directly. Full restore is a separate action.
                 dismissMinimize = true;
                 window.minimize();
             }
@@ -171,6 +174,21 @@ export const createMiniPlayer = (window: BrowserWindow, options: Options) => {
             const dismissed = dismissMinimize;
             dismissMinimize = false;
             return dismissed;
+        },
+        drag: (phase: 'end' | 'move' | 'start') => {
+            if (phase === 'end' || !state.active || window.isMinimized()) {
+                dragOrigin = undefined;
+                return;
+            }
+            if (phase === 'start') {
+                dragOrigin = { cursor: options.cursor(), position: window.getPosition() };
+            } else if (phase === 'move' && dragOrigin) {
+                const cursor = options.cursor();
+                window.setPosition(
+                    dragOrigin.position[0] + cursor.x - dragOrigin.cursor.x,
+                    dragOrigin.position[1] + cursor.y - dragOrigin.cursor.y,
+                );
+            }
         },
         getDesktop: () => desktop,
         getState: () => state,

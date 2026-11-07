@@ -38,6 +38,9 @@ export const browser = {
     minimize,
     miniPlayerCommand: (command: MiniPlayerCommand): Promise<void> =>
         ipcRenderer.invoke('mini-player-command', command),
+    miniPlayerDrag: (phase: 'end' | 'move' | 'start'): void => {
+        ipcRenderer.send('mini-player-drag', phase);
+    },
     miniPlayerState: (): Promise<MiniPlayerState> => ipcRenderer.invoke('mini-player-get'),
     miniPlayerTrack: (available: boolean): void => {
         ipcRenderer.send('mini-player-track', available);

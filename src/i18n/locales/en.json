@@ -766,6 +766,7 @@
         }
     },
     "miniPlayer": {
+        "drag": "Drag mini-player",
         "title": "Mini-player",
         "open": "Open mini-player",
         "dismiss": "Dismiss mini-player",

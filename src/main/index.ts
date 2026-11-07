@@ -700,6 +700,7 @@ async function createWindow(first = true): Promise<void> {
     const miniPlayer = createMiniPlayer(mainWindow, {
         alwaysOnTop: () => store.get('window_mini_player_always_on_top', true) === true,
         area: (bounds) => screen.getDisplayMatching(bounds).workArea,
+        cursor: () => screen.getCursorScreenPoint(),
         readBounds: () => store.get('mini_player_bounds'),
         saveBounds: (bounds) => store.set('mini_player_bounds', bounds),
     });
@@ -718,6 +719,11 @@ async function createWindow(first = true): Promise<void> {
             miniPlayer.setTrackAvailable(available === true);
     };
     ipcMain.on('mini-player-track', onMiniTrack);
+    const onMiniDrag = (event: Electron.IpcMainEvent, phase: 'end' | 'move' | 'start') => {
+        if (event.sender === mainWindow?.webContents && ['end', 'move', 'start'].includes(phase))
+            miniPlayer.drag(phase);
+    };
+    ipcMain.on('mini-player-drag', onMiniDrag);
     const unsubscribePin = store.onDidChange('window_mini_player_always_on_top', () =>
         miniPlayer.refreshPin(),
     );
@@ -854,6 +860,7 @@ async function createWindow(first = true): Promise<void> {
         ipcMain.removeHandler('mini-player-get');
         ipcMain.removeHandler('mini-player-command');
         ipcMain.removeListener('mini-player-track', onMiniTrack);
+        ipcMain.removeListener('mini-player-drag', onMiniDrag);
         ipcMain.removeListener('window-minimize', minimize);
         ipcMain.removeListener('window-close', closeWindow);
         unsubscribePin();

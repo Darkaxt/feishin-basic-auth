@@ -47,6 +47,7 @@ export const MiniPlayer = () => {
     useEffect(() => {
         // Give keyboard users access without forcing the hover overlay to stay visible.
         surface.current?.focus({ preventScroll: true });
+        return () => window.api.browser.miniPlayerDrag('end');
     }, []);
     return (
         <section
@@ -96,7 +97,26 @@ export const MiniPlayer = () => {
                             onClick={() => void command({ action: 'dismiss' })}
                             variant="subtle"
                         />
-                        <div aria-hidden="true" className={styles.dragHandle} />
+                        <div
+                            className={styles.dragHandle}
+                            onLostPointerCapture={() => window.api.browser.miniPlayerDrag('end')}
+                            onPointerDown={(event) => {
+                                if (event.button !== 0) return;
+                                event.currentTarget.setPointerCapture(event.pointerId);
+                                window.api.browser.miniPlayerDrag('start');
+                            }}
+                            onPointerMove={(event) => {
+                                if (event.currentTarget.hasPointerCapture(event.pointerId))
+                                    window.api.browser.miniPlayerDrag('move');
+                            }}
+                            onPointerUp={(event) => {
+                                if (event.currentTarget.hasPointerCapture(event.pointerId))
+                                    event.currentTarget.releasePointerCapture(event.pointerId);
+                            }}
+                            title={t('miniPlayer.drag')}
+                        >
+                            <Icon icon="dragHorizontal" size={18} />
+                        </div>
                         <ActionIcon
                             aria-label={t('miniPlayer.restore')}
                             icon="expand"
@@ -108,63 +128,63 @@ export const MiniPlayer = () => {
                     <div className={styles.transport}>
                         <ActionIcon
                             aria-label={t('miniPlayer.previous')}
+                            className={styles.previous}
                             disabled={!song}
                             icon="mediaPrevious"
+                            iconProps={{ size: 18 }}
                             onClick={() => player.mediaPrevious(false)}
-                            size="lg"
+                            size={32}
                             variant="subtle"
                         />
                         <ActionIcon
                             aria-label={paused ? t('player.play') : t('player.pause')}
+                            className={styles.playPause}
                             disabled={!song}
                             icon={paused ? 'mediaPlay' : 'mediaPause'}
+                            iconProps={{ size: 18 }}
                             onClick={player.mediaTogglePlayPause}
-                            size="xl"
-                            variant="filled"
+                            size={32}
+                            variant="subtle"
                         />
                         <ActionIcon
                             aria-label={t('miniPlayer.next')}
+                            className={styles.next}
                             disabled={!song}
                             icon="mediaNext"
+                            iconProps={{ size: 18 }}
                             onClick={() => player.mediaNext(false)}
-                            size="lg"
+                            size={32}
+                            variant="subtle"
+                        />
+                        <ActionIcon
+                            aria-label={t('player.stop')}
+                            className={styles.stop}
+                            disabled={!song || status === PlayerStatus.STOPPED}
+                            icon="mediaStop"
+                            iconProps={{ size: 18 }}
+                            onClick={() => player.mediaStop()}
+                            size={32}
                             variant="subtle"
                         />
                     </div>
-                    <div className={styles.metadata}>
-                        <div className={styles.track}>
-                            <div>
-                                <strong title={song?.name}>
-                                    {song?.name || t('miniPlayer.empty')}
-                                </strong>
-                                <span title={song?.artistName}>{song?.artistName}</span>
-                            </div>
-                            <ActionIcon
-                                aria-label={t('player.stop')}
-                                disabled={!song || status === PlayerStatus.STOPPED}
-                                icon="mediaStop"
-                                onClick={() => player.mediaStop()}
-                                variant="subtle"
-                            />
-                            <ActionIcon
-                                aria-expanded={queueOpen}
-                                aria-label={
-                                    queueOpen
-                                        ? t('miniPlayer.hideQueue')
-                                        : t('miniPlayer.showQueue')
-                                }
-                                icon="queue"
-                                onClick={() =>
-                                    void command({ action: 'queue', queueOpen: !queueOpen })
-                                }
-                                variant="subtle"
-                            />
-                        </div>
-                        <PlayerbarSeekSlider max={duration || 1} min={0} />
-                        <div className={styles.times}>
-                            <span>{formatDuration(time * 1000)}</span>
-                            <span>{formatDuration(duration * 1000)}</span>
-                        </div>
+                    <div className={styles.bottom}>
+                        <span>
+                            {duration > 0
+                                ? Math.floor(Math.min(100, Math.max(0, (time / duration) * 100)))
+                                : 0}
+                            %
+                        </span>
+                        <ActionIcon
+                            aria-expanded={queueOpen}
+                            aria-label={
+                                queueOpen ? t('miniPlayer.hideQueue') : t('miniPlayer.showQueue')
+                            }
+                            icon="queue"
+                            iconProps={{ size: 18 }}
+                            onClick={() => void command({ action: 'queue', queueOpen: !queueOpen })}
+                            size={32}
+                            variant="subtle"
+                        />
                     </div>
                 </div>
             </div>
@@ -177,6 +197,8 @@ const MiniQueue = ({ onClose }: { onClose: () => void }) => {
     const queue = usePlayerStoreBase((state) => state.queue);
     const shuffle = usePlayerStoreBase((state) => state.player.shuffle);
     const song = usePlayerSong();
+    const time = usePlayerTimestamp();
+    const duration = (song?.duration ?? 0) / 1000;
     const { mediaPlay } = usePlayer();
     const currentRow = useRef<HTMLButtonElement>(null);
     const originalOrder = usePlayerStoreBase.getState().getQueue().items;
@@ -199,6 +221,13 @@ const MiniQueue = ({ onClose }: { onClose: () => void }) => {
                     variant="subtle"
                 />
             </header>
+            <div className={styles.queuePlayback}>
+                <PlayerbarSeekSlider max={duration || 1} min={0} />
+                <div className={styles.times}>
+                    <span>{formatDuration(time * 1000)}</span>
+                    <span>{formatDuration(duration * 1000)}</span>
+                </div>
+            </div>
             <div className={styles.queueList}>
                 {items.map((item) => (
                     <button

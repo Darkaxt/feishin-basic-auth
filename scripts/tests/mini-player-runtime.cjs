@@ -61,6 +61,7 @@ if (!process.versions.electron) {
                 'data:text/html,<html><body>Native mini-player lifecycle</body></html>',
             );
             let saved;
+            let cursor = { x: 100, y: 100 };
             const areaQueries = [];
             let pinned = true;
             const mini = createMiniPlayer(window, {
@@ -69,6 +70,7 @@ if (!process.versions.electron) {
                     areaQueries.push(rect);
                     return screen.getDisplayMatching(rect).workArea;
                 },
+                cursor: () => cursor,
                 readBounds: () => saved,
                 saveBounds: (rect) => {
                     saved = rect;
@@ -118,6 +120,16 @@ if (!process.versions.electron) {
             near(window.getContentBounds().width, square.width + 100);
             near(window.getContentBounds().height, window.getContentBounds().width);
             pinned = false;
+            const dragStart = window.getPosition();
+            mini.drag('start');
+            cursor = { x: 80, y: 80 };
+            mini.drag('move');
+            near(window.getPosition()[0], dragStart[0] - 20);
+            near(window.getPosition()[1], dragStart[1] - 20);
+            mini.drag('end');
+            cursor = { x: 50, y: 50 };
+            mini.drag('move');
+            near(window.getPosition()[0], dragStart[0] - 20);
             mini.refreshPin();
             assert.equal(window.isAlwaysOnTop(), false);
             await mini.command({ action: 'restore' });
@@ -156,7 +168,27 @@ if (!process.versions.electron) {
             await minimized;
             assert.equal(mini.consumeDismissMinimize(), true);
             assert.equal(mini.consumeDismissMinimize(), false);
-            assert.equal(mini.getState().active, false);
+            assert.equal(
+                mini.getState().active,
+                true,
+                'Dismiss must retain mini presentation until explicit restore',
+            );
+            assert.ok(mini.getDesktop(), 'Dismiss must retain desktop recovery bounds');
+            for (let cycle = 0; cycle < 4; cycle++) {
+                const restored = new Promise((resolve) => window.once('restore', resolve));
+                window.restore();
+                await restored;
+                assert.equal(mini.getState().active, true);
+                assert.equal(window.webContents.isCrashed(), false);
+                await mini.command({ action: 'restore' });
+                assert.equal(mini.getState().active, false);
+                await mini.command({ action: 'enter' });
+                assert.equal(mini.getState().active, true);
+                const nextMinimize = new Promise((resolve) => window.once('minimize', resolve));
+                await mini.command({ action: 'dismiss' });
+                await nextMinimize;
+                assert.equal(mini.consumeDismissMinimize(), true);
+            }
             window.hide();
             assert.equal(window.isVisible(), false);
             assert.equal(window.getOpacity(), 0);

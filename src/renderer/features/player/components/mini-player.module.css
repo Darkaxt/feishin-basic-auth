@@ -8,6 +8,7 @@
     color: var(--theme-colors-foreground);
     outline: none;
     background: var(--theme-colors-background);
+    -webkit-app-region: no-drag;
 }
 
 .turntable {
@@ -45,21 +46,17 @@
     background: linear-gradient(rgb(0 0 0 / 30%), rgb(0 0 0 / 12%) 40%, rgb(0 0 0 / 88%));
     opacity: 0;
     transition: opacity 160ms ease;
-    -webkit-app-region: drag;
+    -webkit-app-region: no-drag;
 }
 
-.turntable:hover .overlay,
+.mini:hover .overlay,
 .overlay:focus-within {
     opacity: 1;
 }
 
-.overlay button,
-.metadata {
-    -webkit-app-region: no-drag;
-}
-
 .overlay button {
     color: white;
+    -webkit-app-region: no-drag;
 }
 
 .overlay button:focus-visible,
@@ -69,8 +66,7 @@
 }
 
 .top,
-.transport,
-.track,
+.bottom,
 .times,
 .queue header {
     display: flex;
@@ -79,42 +75,66 @@
 }
 
 .drag-handle {
-    flex: 1;
-    align-self: stretch;
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    justify-content: center;
+    width: 48px;
+    height: 20px;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    opacity: 0.65;
 }
 
 .transport {
-    gap: 16px;
-    justify-content: center;
+    position: absolute;
+    inset: 20%;
+    pointer-events: none;
 }
 
-.metadata {
-    padding: 0 6px;
+.transport button {
+    position: absolute;
+    pointer-events: auto;
+    translate: -50% -50%;
+}
+
+.play-pause {
+    top: 0;
+    left: 50%;
+}
+
+.previous {
+    top: 50%;
+    left: 0;
+}
+
+.next {
+    top: 50%;
+    left: 100%;
+}
+
+.stop {
+    top: 100%;
+    left: 50%;
+}
+
+.bottom {
+    padding-left: 6px;
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
 }
 
-.track > div,
 .queue-row > span {
     min-width: 0;
 }
 
-.track strong,
-.track span,
 .queue-row strong,
 .queue-row small {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.track strong {
-    font-size: 14px;
-}
-
-.track span {
-    margin-top: 2px;
-    color: rgb(255 255 255 / 75%);
 }
 
 .times {
@@ -136,7 +156,7 @@
     gap: 8px;
     padding: 6px 12px;
     font-size: 12px;
-    -webkit-app-region: drag;
+    -webkit-app-region: no-drag;
 }
 
 .queue header button {
@@ -149,7 +169,14 @@
 }
 
 .queue-list {
+    flex: 1;
+    min-height: 0;
     overflow: auto;
+}
+
+.queue-playback {
+    flex-shrink: 0;
+    padding: 4px 14px 8px;
 }
 
 .queue-row {
@@ -166,9 +193,13 @@
     border: 0;
 }
 
-.queue-row:hover,
-.queue-row[aria-current='true'] {
+.queue-row:hover {
     background: color-mix(in srgb, var(--theme-colors-primary) 15%, transparent);
+}
+
+.queue-row[aria-current='true'] {
+    background: color-mix(in srgb, var(--theme-colors-primary) 22%, transparent);
+    box-shadow: inset 3px 0 var(--theme-colors-primary);
 }
 
 .queue-row small,
