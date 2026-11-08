@@ -324,8 +324,10 @@ export const useItemDragDropState = <TElement extends HTMLElement = HTMLDivEleme
                               eventEmitter.emit('PLAYLIST_REORDER', {
                                   edge: args.edge,
                                   playlistId,
-                                  sourceIds: args.source.id,
-                                  targetId: targetItem.id,
+                                  sourceIds: sourceItems.map(
+                                      (source) => internalState.extractRowId(source)!,
+                                  ),
+                                  targetId: internalState.extractRowId(targetItem)!,
                               });
                           }
                       }

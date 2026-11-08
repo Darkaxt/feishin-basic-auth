@@ -1,6 +1,6 @@
 {
     "name": "feishin-basic-auth",
-    "version": "1.15.1-ba.35",
+    "version": "1.15.1-ba.36",
     "description": "A modern self-hosted music player.",
     "keywords": [
         "subsonic",
@@ -199,7 +199,7 @@
         "babel-plugin-react-compiler": "^1.0.0",
         "concurrently": "^9.2.1",
         "cross-env": "^10.1.0",
-        "electron": "^43.7.0",
+        "electron": "^43.8.6",
         "electron-builder": "^26.15.7",
         "electron-devtools-installer": "^4.0.0",
         "electron-vite": "^5.0.0",

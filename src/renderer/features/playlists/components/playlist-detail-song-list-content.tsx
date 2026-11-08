@@ -179,7 +179,7 @@ export const PlaylistDetailSongListEdit = ({ data }: { data: PlaylistSongListRes
                 }
 
                 // Create a list of IDs in current order
-                const currentIds = prev.items.map((item) => item.id);
+                const currentIds = prev.items.map((item) => item.playlistItemId || item.id);
 
                 // Find the target index
                 const targetIndex = currentIds.indexOf(payload.targetId);
@@ -218,7 +218,9 @@ export const PlaylistDetailSongListEdit = ({ data }: { data: PlaylistSongListRes
                 ];
 
                 // Create a map for quick lookup
-                const itemMap = new Map(prev.items.map((item) => [item.id, item]));
+                const itemMap = new Map(
+                    prev.items.map((item) => [item.playlistItemId || item.id, item]),
+                );
 
                 // Reorder items based on new ID order
                 const reorderedItems = reorderedIds

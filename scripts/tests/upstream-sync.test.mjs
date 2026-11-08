@@ -8,6 +8,56 @@ import vm from 'node:vm';
 import ts from 'typescript';
 
 const require = createRequire(import.meta.url);
+
+test('skip forward caps the seek in seconds while keeping the timestamp store synchronized', () => {
+    const file = 'src/renderer/store/player.store.ts';
+    const source = readFileSync(new URL(`../../${file}`, import.meta.url), 'utf8');
+    const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+    let expression;
+    const visit = (node) => {
+        if (
+            ts.isPropertyAssignment(node) &&
+            node.name.getText(ast) === 'mediaSkipForward' &&
+            ts.isArrowFunction(node.initializer)
+        )
+            expression = node.initializer.getText(ast);
+        ts.forEachChild(node, visit);
+    };
+    visit(ast);
+    assert.ok(expression);
+    const code = ts.transpileModule(`const skip = ${expression};`, {
+        compilerOptions: { target: ts.ScriptTarget.ES2022 },
+    }).outputText;
+    for (const [timestamp, offset, expected] of [
+        [10, undefined, 15],
+        [98, 5, 99],
+        [99, 30, 99],
+    ]) {
+        let stored;
+        let sought;
+        const skip = vm.runInNewContext(`${code}\nskip`, {
+            eventEmitter: {
+                emit: (_event, payload) => {
+                    sought = payload.timestamp;
+                },
+            },
+            get: () => ({
+                getQueue: () => ({ items: [{ duration: 100000 }] }),
+                player: { index: 0 },
+            }),
+            setTimestampStore: (value) => {
+                stored = value;
+            },
+            useSettingsStore: {
+                getState: () => ({ general: { skipButtons: { skipForwardSeconds: 5 } } }),
+            },
+            useTimestampStoreBase: { getState: () => ({ timestamp }) },
+        });
+        skip(offset);
+        assert.equal(sought, expected);
+        assert.equal(stored, expected);
+    }
+});
 const lyricUtils = await import('../../src/shared/utils/lyrics.ts');
 const lidaclips = await import('../../src/shared/utils/lidaclips.ts');
 const songAvailability = await import('../../src/shared/utils/song-availability.ts');
