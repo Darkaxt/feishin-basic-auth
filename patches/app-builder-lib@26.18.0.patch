@@ -1,7 +1,7 @@
 diff --git a/out/node-module-collector/nodeModulesCollector.js b/out/node-module-collector/nodeModulesCollector.js
 --- a/out/node-module-collector/nodeModulesCollector.js
 +++ b/out/node-module-collector/nodeModulesCollector.js
-@@ -362,7 +362,13 @@ class NodeModulesCollector {
+@@ -393,7 +393,13 @@
                  catch {
                      // ignore
                  }
@@ -16,8 +16,8 @@ diff --git a/out/node-module-collector/nodeModulesCollector.js b/out/node-module
              };
              const settle = () => {
                  if (settled || !childClosed || !streamFinished) {
-@@ -392,7 +392,9 @@ class NodeModulesCollector {
-                 return shouldResolve ? resolve() : reject(new Error(`Node module collector process exited with code ${code}:\n${stderr}`));
+@@ -421,7 +427,9 @@
+                 return shouldResolve ? resolve({ code: code, stderr }) : reject(new Error(`Node module collector process exited with code ${code}:\n${stderr}`));
              };
              outStream.on("error", err => fail(new Error(`Node module collector failed writing output (${command}): ${err.message}`)));
 -            outStream.on("finish", () => {

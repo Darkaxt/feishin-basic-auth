@@ -282,8 +282,7 @@ export const useItemDragDropState = <TElement extends HTMLElement = HTMLDivEleme
                                   const sourceItems = (args.source.item || []) as Song[];
                                   if (sourceItems.length > 0) {
                                       const sourcePlaylistId = args.source.metadata?.playlistId as
-                                          | string
-                                          | undefined;
+                                          string | undefined;
                                       playerContext.addToQueueByData(
                                           sourceItems,
                                           {
@@ -324,8 +323,8 @@ export const useItemDragDropState = <TElement extends HTMLElement = HTMLDivEleme
                               eventEmitter.emit('PLAYLIST_REORDER', {
                                   edge: args.edge,
                                   playlistId,
-                                  sourceIds: sourceItems.map(
-                                      (source) => internalState.extractRowId(source)!,
+                                  sourceIds: sourceItems.map((source) =>
+                                      internalState.extractRowId(source)!,
                                   ),
                                   targetId: internalState.extractRowId(targetItem)!,
                               });

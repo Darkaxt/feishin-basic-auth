@@ -127,8 +127,8 @@ const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
                     eventEmitter.emit('PLAYLIST_REORDER', {
                         edge: args.edge,
                         playlistId,
-                        sourceIds: sourceItems.map(
-                            (source) => props.internalState.extractRowId(source)!,
+                        sourceIds: sourceItems.map((source) =>
+                            props.internalState.extractRowId(source)!,
                         ),
                         targetId: props.internalState.extractRowId(targetItem)!,
                     });
@@ -167,8 +167,8 @@ const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
 
         const validItems = getValidDataItems();
         const selectedItems = getDraggedItems(item as any, props.internalState);
-        const sourceIds = selectedItems.map(
-            (selected) => props.internalState.extractRowId(selected)!,
+        const sourceIds = selectedItems.map((selected) =>
+            props.internalState.extractRowId(selected)!,
         );
 
         if (sourceIds.length === 0) {
@@ -208,8 +208,8 @@ const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
 
         const validItems = getValidDataItems();
         const selectedItems = getDraggedItems(item as any, props.internalState);
-        const sourceIds = selectedItems.map(
-            (selected) => props.internalState.extractRowId(selected)!,
+        const sourceIds = selectedItems.map((selected) =>
+            props.internalState.extractRowId(selected)!,
         );
 
         if (sourceIds.length === 0) {
@@ -243,8 +243,8 @@ const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
 
         const validItems = getValidDataItems();
         const selectedItems = getDraggedItems(item as any, props.internalState);
-        const sourceIds = selectedItems.map(
-            (selected) => props.internalState.extractRowId(selected)!,
+        const sourceIds = selectedItems.map((selected) =>
+            props.internalState.extractRowId(selected)!,
         );
 
         if (sourceIds.length === 0) {
@@ -284,8 +284,8 @@ const PlaylistReorderColumnBase = (props: ItemTableListInnerColumn) => {
 
         const validItems = getValidDataItems();
         const selectedItems = getDraggedItems(item as any, props.internalState);
-        const sourceIds = selectedItems.map(
-            (selected) => props.internalState.extractRowId(selected)!,
+        const sourceIds = selectedItems.map((selected) =>
+            props.internalState.extractRowId(selected)!,
         );
 
         if (sourceIds.length === 0) {

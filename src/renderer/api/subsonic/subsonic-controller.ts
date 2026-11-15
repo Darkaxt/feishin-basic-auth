@@ -1400,7 +1400,7 @@ export const SubsonicController: InternalControllerEndpoint = {
         const res = await ssApiClient(apiClientProps).getRandomSongList({
             query: {
                 fromYear: query.minYear,
-                genre: query.genre,
+                genre: query.genre?.name,
                 musicFolderId: getLibraryId(query.musicFolderId),
                 size: query.limit,
                 toYear: query.maxYear,
