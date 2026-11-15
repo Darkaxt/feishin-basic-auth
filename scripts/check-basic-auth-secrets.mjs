@@ -1,7 +1,11 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const ALLOWLIST = new Set(['scripts/tests/proxy-auth.test.mjs']);
+// These two fixtures deliberately exercise synthetic URL credentials and Basic headers.
+const ALLOWLIST = new Set([
+    'scripts/tests/native-image.test.mjs',
+    'scripts/tests/proxy-auth.test.mjs',
+]);
 const BASIC_HEADER_PATTERN = /\bAuthorization:\s*Basic\s+(?!<redacted>)[A-Za-z0-9+/=]{12,}/i;
 const URL_CREDENTIAL_PATTERN = /https?:\/\/(?!<proxy-auth>@)[^/\s:@]+:[^/\s@]+@/i;
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ImageRequest } from '/@/shared/types/domain-types';
+import { createBasicAuthorizationHeader } from '/@/shared/utils/proxy-auth';
 
 type FetchPriority = 'auto' | 'high' | 'low';
 
@@ -90,9 +91,27 @@ export function useNativeImage({
 
         void (async () => {
             try {
+                const url = new URL(request.url, document.baseURI);
+                const headers = new Headers(request.headers);
+
+                // Fetch rejects URL userinfo; send the same credentials in the header.
+                if (url.username || url.password) {
+                    if (!headers.has('Authorization')) {
+                        headers.set(
+                            'Authorization',
+                            createBasicAuthorizationHeader(
+                                decodeURIComponent(url.username),
+                                decodeURIComponent(url.password),
+                            ),
+                        );
+                    }
+                    url.username = '';
+                    url.password = '';
+                }
+
                 const init = {
                     credentials: request.credentials,
-                    headers: request.headers,
+                    headers,
                     signal: abortController.signal,
                 } as RequestInit & { priority?: FetchPriority };
 
@@ -100,7 +119,7 @@ export function useNativeImage({
                     init.priority = fetchPriority;
                 }
 
-                const response = await fetch(request.url, init);
+                const response = await fetch(url, init);
 
                 if (!response.ok) {
                     throw new Error(`Failed to load image: ${response.status}`);

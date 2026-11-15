@@ -15,6 +15,7 @@ const commands = [
     ['node', ['--test', 'scripts/tests/upstream-library.test.mjs']],
     ['node', ['--test', 'scripts/tests/playlist-reorder.test.mjs']],
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
+    ['node', ['--test', 'scripts/tests/native-image.test.mjs']],
     ['node', ['--test', 'scripts/tests/navidrome-session.test.mjs']],
     ['node', ['--test', 'scripts/tests/packaging-collector-lifecycle.test.mjs']],
     ['node', ['--test', 'scripts/tests/lidaclips.test.mjs']],
