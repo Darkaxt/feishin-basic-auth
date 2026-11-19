@@ -28,4 +28,6 @@ Feishin had no system-accent source: the widget's "accent" was the theme's `--th
 
 ## Delivery
 
-Pending: ba.42 publication and verification.
+- Commit `d37c1e365`, tag `v1.15.1-ba.42`, released 2026-11-19T22:09:57Z as "latest" with nine assets; published digests match the local candidate. CI "Push on development" passed.
+- Independent check: the x64 installer downloaded via `releases/latest` has SHA-256 `028e9467241374ad78b9d0fc2f38a0f9669679045a4749558f439f6bb99c7965`. Its `app.asar`, `Feishin.exe`, `app-update.yml` and `ffmpeg.dll` are byte-identical to `dist/win-unpacked`; FileVersion 1.15.1-ba.42, Electron 43.8.7, 18,366 asar entries (as in ba.41; `package.json` changed only its version).
+- Local install: left to the in-app updater added in ba.41 (startup and 6-hourly checks, then "Restart to update"). This is the first real in-app update; record it in `2026-11-19-in-app-updater.md` once the live log shows it.
