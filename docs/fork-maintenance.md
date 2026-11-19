@@ -23,6 +23,9 @@ invariants if upstream moves code around.
   off so `-ba.N` tags resolve. Keep upstream's alpha (S3 nightly) and beta channels and the
   release-channel picker out: they would replace the fork with upstream builds. When an upstream
   sync touches the updater block in `src/main/index.ts`, keep the fork module instead.
+- The mini-player follows the Windows accent colour live (`system-accent-color` IPC from
+  `src/main/features/core/system-accent.ts`), with readable dark/light overlay controls. Keep its
+  `.mini .overlay ... [data-variant]` selectors above the shared ActionIcon variant rules.
 
 ## Current patch map
 
@@ -38,6 +41,9 @@ invariants if upstream moves code around.
   `src/main/fork-updater.ts`, `src/main/fork-updater-options.ts`
 - Updater UI: `src/renderer/hooks/use-updater-status.ts`, `src/renderer/update-available-dialog.tsx`,
   `src/renderer/features/settings/components/update-available-button.tsx`
+- Mini-player accent: `src/main/features/core/system-accent.ts`,
+  `src/renderer/hooks/use-system-accent-color.ts`, `src/shared/utils/readable-foreground.ts`,
+  `src/renderer/features/player/components/mini-player.module.css`
 
 ## Autonomous sync procedure
 

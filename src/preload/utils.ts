@@ -173,6 +173,17 @@ const onUpdaterStatus = (cb: (status: UpdaterStatus) => void) => {
     };
 };
 
+const getSystemAccentColor = (): Promise<null | string> =>
+    ipcRenderer.invoke('system-accent-color');
+
+const onSystemAccentColor = (cb: (color: null | string) => void) => {
+    const listener = (_event: IpcRendererEvent, color: null | string) => cb(color);
+    ipcRenderer.on('system-accent-color', listener);
+    return () => {
+        ipcRenderer.removeListener('system-accent-color', listener);
+    };
+};
+
 const installUpdate = () => {
     ipcRenderer.send('updater-install');
 };
@@ -185,6 +196,7 @@ export const utils = {
     exportDiagnostics,
     forceGarbageCollection,
     getCustomCss,
+    getSystemAccentColor,
     getUpdaterStatus,
     installUpdate,
     isLinux,
@@ -193,6 +205,7 @@ export const utils = {
     mainMessageListener,
     offBatchProgress,
     onBatchProgress,
+    onSystemAccentColor,
     onUpdaterStatus,
     openApplicationDirectory,
     openCustomCssFolder,

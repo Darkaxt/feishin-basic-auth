@@ -10,6 +10,7 @@ const commands = [
             'scripts/tests/mini-player.test.mjs',
             'scripts/tests/mini-player-renderer.test.mjs',
             'scripts/tests/mini-player-layout-width.test.mjs',
+            'scripts/tests/system-accent.test.mjs',
         ],
     ],
     ['node', ['--test', 'scripts/tests/upstream-sync.test.mjs']],

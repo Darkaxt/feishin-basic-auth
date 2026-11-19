@@ -1,5 +1,5 @@
 import formatDuration from 'format-duration';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { type CSSProperties, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './mini-player.module.css';
@@ -8,6 +8,7 @@ import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { PlayerbarSeekSlider } from '/@/renderer/features/player/components/playerbar-seek-slider';
 import { VinylArtwork } from '/@/renderer/features/player/components/vinyl-artwork';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
+import { useSystemAccentColor } from '/@/renderer/hooks/use-system-accent-color';
 import { useMiniPlayerStore } from '/@/renderer/store/mini-player.store';
 import { usePlayerSong, usePlayerStatus, usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { useGeneralSettings } from '/@/renderer/store/settings.store';
@@ -16,6 +17,7 @@ import { ActionIcon } from '/@/shared/components/action-icon/action-icon';
 import { Icon } from '/@/shared/components/icon/icon';
 import { ExplicitStatus, LibraryItem } from '/@/shared/types/domain-types';
 import { PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
+import { readableForeground } from '/@/shared/utils/readable-foreground';
 
 const command = window.api?.browser?.miniPlayerCommand;
 const MINI_PLAYER_IMAGE_SIZE = 800;
@@ -53,6 +55,18 @@ export const MiniPlayer = () => {
     const { blurExplicitImages } = useGeneralSettings();
     const restoreButton = useRef<HTMLButtonElement>(null);
     const surface = useRef<HTMLElement>(null);
+    // Follow the Windows accent colour live; controls switch to dark or light for contrast.
+    const systemAccent = useSystemAccentColor();
+    const accentStyle = useMemo(
+        () =>
+            systemAccent
+                ? ({
+                      '--mini-accent': systemAccent,
+                      '--mini-on-accent': readableForeground(systemAccent),
+                  } as CSSProperties)
+                : undefined,
+        [systemAccent],
+    );
     const image = useItemImageUrl({
         id: song?.imageId || undefined,
         imageUrl: song?.imageUrl,
@@ -78,6 +92,7 @@ export const MiniPlayer = () => {
             aria-label={t('miniPlayer.title')}
             className={styles.mini}
             ref={surface}
+            style={accentStyle}
             tabIndex={-1}
         >
             {queueOpen && <MiniQueue onClose={closeQueue} />}
