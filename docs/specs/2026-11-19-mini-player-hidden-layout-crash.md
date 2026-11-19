@@ -25,3 +25,10 @@ Evidence (hidden isolated harness, production builds): ba.38 crashes on those th
 - Final build: no crash, no document overflow (scroll width 320 in mini), and the mini-player screenshot is clean.
 - `mini-player-layout-width.test.mjs` executes the production layout hooks and fails on the previous source. It is added to the non-Docker gate. The mini-player, mini-player-renderer and native mini-player runtime contracts pass.
 - Accent background: the turntable computes to the theme primary (`#0558fd`) and the queue renders over it.
+
+## Delivery
+
+- Released [v1.15.1-ba.40](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.15.1-ba.40) at 2026-11-19T16:29:41Z (latest, not draft or prerelease) from commit `7f5513e42`, tag pushed atomically with `development`.
+- All nine assets' server SHA-256 digests match the locally built candidates. CodeQL push run 44566360224 succeeded.
+- The x64 installer was independently downloaded via the latest-release API: 187822079 bytes, SHA-256 `b827d4bc14efd7bd912f25a78f86e97040074c3e8f1df88ef7c1fa01378bd1a9`. Its extracted `app.asar`, `Feishin.exe`, `app-update.yml` and `ffmpeg.dll` are byte-identical to the build. FileVersion is 1.15.1-ba.40, and Electron is 43.8.7.
+- The installed app and live profile were not replaced or modified. Users update through the in-app updater.
