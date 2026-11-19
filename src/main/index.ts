@@ -2,8 +2,6 @@ import type { MiniPlayerCommand } from '/@/shared/types/mini-player';
 
 import './user-data-path';
 
-import type { UpdateCheckResult } from 'electron-updater';
-
 import { is } from '@electron-toolkit/utils';
 import {
     app,
@@ -25,10 +23,8 @@ import {
     Tray,
 } from 'electron';
 import electronLocalShortcut from 'electron-localshortcut';
-import { AppImageUpdater, autoUpdater, MacUpdater, NsisUpdater } from 'electron-updater';
 import { access, constants } from 'fs';
 import path, { join } from 'path';
-import semver from 'semver';
 
 import packageJson from '../../package.json';
 import { createMiniPlayer } from './features/core/mini-player';
@@ -41,7 +37,8 @@ import {
     isVisualizerCapturePermissionAllowed,
     VisualizerCapturePermissionInput,
 } from './features/core/visualizer/capture-permissions';
-import log, { autoUpdaterLogInterface, isBrokenPipeError } from './logger';
+import { startForkUpdater } from './fork-updater';
+import log, { isBrokenPipeError } from './logger';
 import './features';
 import MenuBuilder, { MenuPlaybackState } from './menu';
 import { hotkeyToElectronAccelerator } from './utils';
@@ -54,303 +51,6 @@ import {
 } from '/@/main/utils/window-bounds';
 import { DEFAULT_DESKTOP_PLAYER_TYPE } from '/@/shared/constants/default-player';
 import { PlayerRepeat, PlayerStatus, PlayerType, TitleTheme } from '/@/shared/types/types';
-
-const ALPHA_UPDATER_CONFIG: {
-    bucket: string;
-    channel: string;
-    endpoint: string;
-    provider: 's3';
-} = {
-    bucket: '',
-    channel: 'alpha',
-    endpoint: 'https://feishin-nightly-bucket.jeffvli.org',
-    provider: 's3',
-};
-
-const GITHUB_UPDATER_CONFIG = {
-    owner: 'Darkaxt',
-    provider: 'github' as const,
-    repo: 'feishin-basic-auth',
-};
-
-type UpdaterInstance = AppImageUpdater | MacUpdater | NsisUpdater | typeof autoUpdater;
-
-class AppUpdater {
-    constructor() {
-        const effectiveChannel = store.get('release_channel') as string;
-        log.info('Effective update channel:', effectiveChannel);
-        if (effectiveChannel === 'alpha') {
-            checkAllChannelsAndGetBest().then(({ result, updater: updaterInstance }) => {
-                attachUpdaterMilestoneLogs(updaterInstance);
-
-                if (!result?.isUpdateAvailable) {
-                    log.info('Updater check complete', { available: false });
-                    return;
-                }
-
-                log.info('Updater check complete', {
-                    available: true,
-                    version: result.updateInfo.version,
-                });
-
-                updaterInstance.autoInstallOnAppQuit = true;
-                updaterInstance.autoRunAppAfterInstall = true;
-                if (isMacOS()) {
-                    getMainWindow()?.webContents.send(
-                        'update-available',
-                        result.updateInfo.version,
-                    );
-                } else {
-                    log.info('Updater download starting', { version: result.updateInfo.version });
-                    updaterInstance.autoDownload = true;
-                    updaterInstance.checkForUpdatesAndNotify();
-                }
-            });
-            return;
-        }
-
-        const updater = configureAndGetUpdater();
-        attachUpdaterMilestoneLogs(updater);
-
-        if (isMacOS()) {
-            autoUpdater.autoDownload = false;
-            autoUpdater
-                .checkForUpdates()
-                .then((result) => {
-                    if (result?.isUpdateAvailable) {
-                        log.info('Updater check complete', {
-                            available: true,
-                            version: result.updateInfo.version,
-                        });
-                        getMainWindow()?.webContents.send(
-                            'update-available',
-                            result.updateInfo.version,
-                        );
-                    } else {
-                        log.info('Updater check complete', { available: false });
-                    }
-                })
-                .catch((err) => log.error('Check for updates failed', err));
-        } else {
-            autoUpdater.checkForUpdatesAndNotify();
-        }
-    }
-}
-
-function attachUpdaterMilestoneLogs(updater: UpdaterInstance): void {
-    let downloadStarted = false;
-
-    updater.on('checking-for-update', () => {
-        log.info('Updater checking for update');
-    });
-
-    updater.on('update-available', (info) => {
-        log.info('Updater update available', { version: info.version });
-    });
-
-    updater.on('update-not-available', (info) => {
-        log.info('Updater update not available', { version: info.version });
-    });
-
-    updater.on('download-progress', () => {
-        if (!downloadStarted) {
-            downloadStarted = true;
-            log.info('Updater download starting');
-        }
-    });
-
-    updater.on('update-downloaded', (info) => {
-        log.info('Updater download complete', { version: info.version });
-    });
-
-    updater.on('error', (error) => {
-        log.error('Updater error', error);
-    });
-}
-
-// When release channel is alpha, check alpha and latest for updates and return
-// the updater + result for the newest version found (so alpha users can receive
-// latest updates when they are newer than the current alpha).
-async function checkAllChannelsAndGetBest(): Promise<{
-    result: null | UpdateCheckResult;
-    updater: UpdaterInstance;
-}> {
-    const currentVersion = packageJson.version;
-    const candidates: Array<{
-        channel: 'alpha' | 'beta' | 'latest';
-        result: UpdateCheckResult;
-        updater: UpdaterInstance;
-    }> = [];
-
-    const alphaUpdater = createAlphaUpdaterInstance({ probeOnly: true });
-
-    try {
-        log.info('Checking for updates on alpha channel');
-        const alphaResult = await alphaUpdater.checkForUpdates();
-        if (
-            alphaResult?.updateInfo?.version &&
-            alphaResult.isUpdateAvailable &&
-            semver.valid(alphaResult.updateInfo.version) &&
-            semver.gt(alphaResult.updateInfo.version, currentVersion)
-        ) {
-            candidates.push({ channel: 'alpha', result: alphaResult, updater: alphaUpdater });
-        }
-    } catch (e) {
-        log.warn('Alpha channel check failed', e);
-    }
-
-    try {
-        const latestUpdater = createGithubUpdaterInstance('latest', { probeOnly: true });
-        log.info('Checking for updates on latest channel (GitHub)');
-        const latestResult = await latestUpdater.checkForUpdates();
-        if (
-            latestResult?.updateInfo?.version &&
-            latestResult.isUpdateAvailable &&
-            semver.valid(latestResult.updateInfo.version) &&
-            semver.gt(latestResult.updateInfo.version, currentVersion)
-        ) {
-            candidates.push({ channel: 'latest', result: latestResult, updater: latestUpdater });
-        }
-    } catch (e) {
-        log.warn('Latest channel check failed', e);
-    }
-
-    if (candidates.length === 0) {
-        return { result: null, updater: alphaUpdater };
-    }
-
-    const best = candidates.reduce((a, b) =>
-        semver.gt(a.result.updateInfo.version, b.result.updateInfo.version) ? a : b,
-    );
-
-    if (best.channel === 'latest') {
-        configureAutoUpdaterForChannel('latest');
-        return { result: best.result, updater: autoUpdater };
-    }
-
-    return { result: best.result, updater: best.updater };
-}
-
-function configureAndGetUpdater(): UpdaterInstance {
-    const isBetaVersion = packageJson.version.includes('-beta');
-    const isAlphaVersion = packageJson.version.includes('-alpha');
-    let releaseChannel = store.get('release_channel');
-    const isNotConfigured = !releaseChannel;
-
-    log.info('Release channel:', releaseChannel);
-    log.info('Is beta version:', isBetaVersion);
-    log.info('Is alpha version:', isAlphaVersion);
-    log.info('Is not configured:', isNotConfigured);
-
-    if (isNotConfigured) {
-        log.info('Release channel not configured, setting default channel');
-        const defaultChannel = isAlphaVersion ? 'alpha' : isBetaVersion ? 'beta' : 'latest';
-        store.set('release_channel', defaultChannel);
-        releaseChannel = defaultChannel;
-    }
-
-    const effectiveChannel = store.get('release_channel') as string;
-
-    if (effectiveChannel === 'alpha') {
-        return createAlphaUpdaterInstance();
-    }
-
-    autoUpdater.logger = autoUpdaterLogInterface;
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.autoRunAppAfterInstall = true;
-
-    if (effectiveChannel === 'beta') {
-        autoUpdater.channel = 'beta';
-        autoUpdater.allowDowngrade = true;
-        autoUpdater.allowPrerelease = true;
-        autoUpdater.disableDifferentialDownload = true;
-    } else {
-        autoUpdater.channel = 'latest';
-        autoUpdater.allowDowngrade = false;
-        autoUpdater.allowPrerelease = true;
-    }
-
-    return autoUpdater;
-}
-
-/**
- * Configures the global autoUpdater for a specific GitHub channel (beta or latest).
- * Used when checking multiple channels or when the winning channel is beta/latest.
- */
-function configureAutoUpdaterForChannel(channel: 'beta' | 'latest'): void {
-    autoUpdater.logger = autoUpdaterLogInterface;
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.autoRunAppAfterInstall = true;
-    if (channel === 'beta') {
-        autoUpdater.channel = 'beta';
-        autoUpdater.allowDowngrade = true;
-        autoUpdater.allowPrerelease = true;
-        autoUpdater.disableDifferentialDownload = true;
-    } else {
-        autoUpdater.channel = 'latest';
-        autoUpdater.allowDowngrade = false;
-        autoUpdater.allowPrerelease = true;
-    }
-}
-
-function createAlphaUpdaterInstance(
-    options: { probeOnly?: boolean } = {},
-): AppImageUpdater | MacUpdater | NsisUpdater {
-    const probeOnly = options.probeOnly ?? false;
-    let updater: AppImageUpdater | MacUpdater | NsisUpdater;
-
-    if (isMacOS()) {
-        updater = new MacUpdater(ALPHA_UPDATER_CONFIG);
-    } else if (isLinux()) {
-        updater = new AppImageUpdater(ALPHA_UPDATER_CONFIG);
-    } else {
-        updater = new NsisUpdater(ALPHA_UPDATER_CONFIG);
-    }
-
-    updater.logger = autoUpdaterLogInterface;
-    updater.channel = ALPHA_UPDATER_CONFIG.channel;
-    updater.allowPrerelease = true;
-    updater.disableDifferentialDownload = true;
-    updater.allowDowngrade = true;
-    updater.autoDownload = !probeOnly;
-    updater.autoInstallOnAppQuit = true;
-    updater.autoRunAppAfterInstall = true;
-
-    return updater;
-}
-
-function createGithubUpdaterInstance(
-    channel: 'beta' | 'latest',
-    options: { probeOnly?: boolean } = {},
-): AppImageUpdater | MacUpdater | NsisUpdater {
-    const probeOnly = options.probeOnly ?? false;
-    let updater: AppImageUpdater | MacUpdater | NsisUpdater;
-
-    if (isMacOS()) {
-        updater = new MacUpdater(GITHUB_UPDATER_CONFIG);
-    } else if (isLinux()) {
-        updater = new AppImageUpdater(GITHUB_UPDATER_CONFIG);
-    } else {
-        updater = new NsisUpdater(GITHUB_UPDATER_CONFIG);
-    }
-
-    updater.logger = autoUpdaterLogInterface;
-    updater.autoDownload = !probeOnly;
-    updater.autoInstallOnAppQuit = true;
-    updater.autoRunAppAfterInstall = true;
-    updater.channel = channel;
-
-    if (channel === 'beta') {
-        updater.allowDowngrade = true;
-        updater.allowPrerelease = true;
-        updater.disableDifferentialDownload = true;
-    } else {
-        updater.allowDowngrade = false;
-        updater.allowPrerelease = true;
-    }
-
-    return updater;
-}
 
 protocol.registerSchemesAsPrivileged([
     { privileges: { bypassCSP: true, corsEnabled: true }, scheme: 'feishin' },
@@ -856,7 +556,6 @@ async function createWindow(first = true): Promise<void> {
     mainWindow.on('closed', () => {
         log.info('Main window closed');
         ipcMain.removeHandler('window-clear-cache');
-        ipcMain.removeHandler('app-check-for-updates');
         ipcMain.removeHandler('mini-player-get');
         ipcMain.removeHandler('mini-player-command');
         ipcMain.removeListener('mini-player-track', onMiniTrack);
@@ -955,9 +654,13 @@ async function createWindow(first = true): Promise<void> {
             });
     });
 
-    if (!disableAutoUpdates() && store.get('disable_auto_updates') !== true) {
-        new AppUpdater();
-    }
+    startForkUpdater({
+        beforeInstall: () => {
+            exitFromTray = true;
+        },
+        enabled: !disableAutoUpdates() && store.get('disable_auto_updates') !== true,
+        getMainWindow: () => mainWindow,
+    });
 
     const theme = store.get('theme') as TitleTheme | undefined;
     nativeTheme.themeSource = theme || 'dark';

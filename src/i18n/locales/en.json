@@ -36,6 +36,8 @@
         "setRating": "Set rating",
         "viewPlaylists": "View $t(entity.playlist, {\"count\": 2})",
         "viewMore": "View more",
+        "restartToUpdate": "Restart to update",
+        "later": "Later",
         "openApplicationDirectory": "Open application directory",
         "openIn": {
             "lastfm": "Open in Last.fm",
@@ -174,6 +176,9 @@
         "itemsMore": "{{count}} more",
         "lastScan": "Last scan {{date}}",
         "newVersionAvailable": "A new version is available",
+        "updateDownloading": "Downloading update {{version}} ({{percent}}%)",
+        "updateReady": "Feishin {{version}} is ready to install",
+        "updateReadyDescription": "Restart now to update, or it will be installed when you quit Feishin.",
         "scanFolderCount": "{{count}} folders",
         "scanItemCount": "{{count}} items",
         "scanningLibrary": "Scanning library…"

@@ -8,6 +8,7 @@ import type {
     TagValue,
     WriteSongTagsBatchResult,
 } from '../shared/types/tag-editor';
+import type { UpdaterStatus } from '../shared/types/updater';
 
 import { disableAutoUpdates, isLinux, isMacOS, isWindows } from '../main/env';
 
@@ -104,10 +105,6 @@ const download = (url: string) => {
     ipcRenderer.send('download-url', url);
 };
 
-const checkForUpdates = (): Promise<{ updateAvailable: boolean; version?: string }> => {
-    return ipcRenderer.invoke('app-check-for-updates');
-};
-
 const startPowerSaveBlocker = (full: boolean) => {
     return ipcRenderer.invoke('power-save-blocker-start', { full });
 };
@@ -166,25 +163,37 @@ const rendererOpenReleaseNotes = (cb: () => void) => {
     ipcRenderer.on('renderer-open-release-notes', () => cb());
 };
 
-const rendererUpdateAvailable = (cb: (version: string) => void) => {
-    ipcRenderer.on('update-available', (_, version) => cb(version));
+const getUpdaterStatus = (): Promise<UpdaterStatus> => ipcRenderer.invoke('updater-get-status');
+
+const onUpdaterStatus = (cb: (status: UpdaterStatus) => void) => {
+    const listener = (_event: IpcRendererEvent, status: UpdaterStatus) => cb(status);
+    ipcRenderer.on('updater-status', listener);
+    return () => {
+        ipcRenderer.removeListener('updater-status', listener);
+    };
+};
+
+const installUpdate = () => {
+    ipcRenderer.send('updater-install');
 };
 
 export const utils = {
     cancelReadSongMetadata,
-    checkForUpdates,
     customCssUpdatedListener,
     disableAutoUpdates,
     download,
     exportDiagnostics,
     forceGarbageCollection,
     getCustomCss,
+    getUpdaterStatus,
+    installUpdate,
     isLinux,
     isMacOS,
     isWindows,
     mainMessageListener,
     offBatchProgress,
     onBatchProgress,
+    onUpdaterStatus,
     openApplicationDirectory,
     openCustomCssFolder,
     openItem,
@@ -199,7 +208,6 @@ export const utils = {
     rendererOpenSettings,
     rendererTogglePrivateMode,
     rendererToggleSidebar,
-    rendererUpdateAvailable,
     saveCustomCss,
     separator: isWindows() ? '\\' : '/',
     setInputFocused,

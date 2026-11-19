@@ -19,6 +19,10 @@ invariants if upstream moves code around.
 - Use URL credentials only as an MPV/direct external media fallback, and only after reading the
   password from `safeStorage`.
 - Point package identity, app id, and updater metadata at `Darkaxt/feishin-basic-auth`.
+- The in-app updater follows only the fork's GitHub "latest" release, with `allowPrerelease`
+  off so `-ba.N` tags resolve. Keep upstream's alpha (S3 nightly) and beta channels and the
+  release-channel picker out: they would replace the fork with upstream builds. When an upstream
+  sync touches the updater block in `src/main/index.ts`, keep the fork module instead.
 
 ## Current patch map
 
@@ -30,7 +34,10 @@ invariants if upstream moves code around.
   `src/renderer/features/servers/components/add-server-form.tsx`,
   `src/renderer/features/servers/components/edit-server-form.tsx`
 - MPV fallback: `src/renderer/api/subsonic/subsonic-controller.ts`
-- Fork identity/updater: `package.json`, `electron-builder*.yml`, `src/main/index.ts`
+- Fork identity/updater: `package.json`, `electron-builder*.yml`, `src/main/index.ts`,
+  `src/main/fork-updater.ts`, `src/main/fork-updater-options.ts`
+- Updater UI: `src/renderer/hooks/use-updater-status.ts`, `src/renderer/update-available-dialog.tsx`,
+  `src/renderer/features/settings/components/update-available-button.tsx`
 
 ## Autonomous sync procedure
 

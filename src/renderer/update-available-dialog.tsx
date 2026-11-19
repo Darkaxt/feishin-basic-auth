@@ -1,8 +1,7 @@
-import isElectron from 'is-electron';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { toTag } from '/@/renderer/hooks';
+import { installUpdate, useUpdaterStatus } from '/@/renderer/hooks/use-updater-status';
 import { Button } from '/@/shared/components/button/button';
 import { Dialog } from '/@/shared/components/dialog/dialog';
 import { Group } from '/@/shared/components/group/group';
@@ -11,44 +10,23 @@ import { Stack } from '/@/shared/components/stack/stack';
 import { Text } from '/@/shared/components/text/text';
 import { useLocalStorage } from '/@/shared/hooks/use-local-storage';
 
+// Shown once per version when the background download finishes.
 export const UpdateAvailableDialog = () => {
-    const [opened, setOpened] = useState(false);
-    const [version, setVersion] = useState<string>('');
     const { t } = useTranslation();
+    const updater = useUpdaterStatus();
     const [versionDismissed, setVersionDismissed] = useLocalStorage<string>({
         key: 'version_dismissed',
     });
 
-    useEffect(() => {
-        if (!isElectron()) return;
+    if (updater.state !== 'downloaded' || versionDismissed === updater.version) return null;
 
-        const handleUpdateAvailable = (newVersion: string) => {
-            if (versionDismissed !== newVersion) {
-                setVersion(newVersion);
-                setOpened(true);
-            }
-        };
-
-        window.api.utils.rendererUpdateAvailable(handleUpdateAvailable);
-
-        return () => {
-            window.api.ipc.removeListener?.('update-available', handleUpdateAvailable);
-        };
-    }, [versionDismissed]);
-
-    if (!opened) return null;
-
-    const handleDismiss = () => {
-        if (version) {
-            setVersionDismissed(version);
-        }
-        setOpened(false);
-    };
+    const version = updater.version;
+    const handleDismiss = () => setVersionDismissed(version);
 
     return (
         <Dialog
             onClose={handleDismiss}
-            opened={opened}
+            opened
             position={{ bottom: 100, right: 12 }}
             radius="md"
             size="lg"
@@ -56,22 +34,25 @@ export const UpdateAvailableDialog = () => {
         >
             <Stack gap="md">
                 <Text fw={700} size="md">
-                    {t('common.newVersionAvailable')} - {version}
+                    {t('common.updateReady', { version: `v${version}` })}
                 </Text>
+                <Text size="sm">{t('common.updateReadyDescription')}</Text>
                 <Group justify="flex-end">
-                    <Button onClick={handleDismiss} size="xs" variant="default">
-                        {t('common.dismiss')}
-                    </Button>
                     <Button
                         component="a"
                         href={`https://github.com/Darkaxt/feishin-basic-auth/releases/tag/${toTag(version)}`}
-                        onClick={handleDismiss}
                         rightSection={<Icon icon="externalLink" size="sm" />}
                         size="xs"
                         target="_blank"
-                        variant="filled"
+                        variant="subtle"
                     >
                         {t('action.viewMore')}
+                    </Button>
+                    <Button onClick={handleDismiss} size="xs" variant="default">
+                        {t('action.later')}
+                    </Button>
+                    <Button onClick={installUpdate} size="xs" variant="filled">
+                        {t('action.restartToUpdate')}
                     </Button>
                 </Group>
             </Stack>
