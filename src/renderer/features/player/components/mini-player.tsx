@@ -8,7 +8,6 @@ import { useItemImageUrl } from '/@/renderer/components/item-image/item-image';
 import { PlayerbarSeekSlider } from '/@/renderer/features/player/components/playerbar-seek-slider';
 import { VinylArtwork } from '/@/renderer/features/player/components/vinyl-artwork';
 import { usePlayer } from '/@/renderer/features/player/context/player-context';
-import { useFastAverageColor } from '/@/renderer/hooks';
 import { useMiniPlayerStore } from '/@/renderer/store/mini-player.store';
 import { usePlayerSong, usePlayerStatus, usePlayerStoreBase } from '/@/renderer/store/player.store';
 import { useGeneralSettings } from '/@/renderer/store/settings.store';
@@ -63,11 +62,6 @@ export const MiniPlayer = () => {
         size: MINI_PLAYER_IMAGE_SIZE,
         type: 'fullScreenPlayer',
     });
-    const { background } = useFastAverageColor({
-        algorithm: 'dominant',
-        src: image,
-        srcLoaded: true,
-    });
     const duration = (song?.duration ?? 0) / 1000;
     const paused = status !== PlayerStatus.PLAYING;
     const closeQueue = useCallback(() => {
@@ -87,7 +81,7 @@ export const MiniPlayer = () => {
             tabIndex={-1}
         >
             {queueOpen && <MiniQueue onClose={closeQueue} />}
-            <div className={styles.turntable} style={{ backgroundColor: background }}>
+            <div className={styles.turntable}>
                 <div aria-hidden="true" className={styles.grain} />
                 <div
                     className={styles.artwork}

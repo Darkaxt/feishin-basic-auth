@@ -17,6 +17,7 @@
     width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
+    background-color: var(--theme-colors-primary);
     background-image: radial-gradient(ellipse at 25% 10%, rgb(255 255 255 / 12%), transparent 70%), linear-gradient(150deg, rgb(0 0 0 / 35%), rgb(0 0 0 / 80%));
 }
 
