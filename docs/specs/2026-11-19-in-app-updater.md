@@ -45,3 +45,17 @@ Two more problems:
   - "Restart to update" invoked the installer step with `isSilent: true, isForceRunAfter: true`.
   - The live config hash and live log size were unchanged. The harness cache and profile were removed.
 - Limitation: the real installer launched by `quitAndInstall` runs for the first time on the next release after ba.41. ba.38 to ba.40 cannot self-update because of the bug above, so ba.41 is installed directly.
+
+## Delivery
+
+- Released [v1.15.1-ba.41](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.15.1-ba.41) at 2026-11-19T17:22:42Z (latest, not draft or prerelease) from commit `2888cca15`. The tag was pushed atomically with `development`. CodeQL push run 44576177741 succeeded.
+- All nine assets' server SHA-256 digests match the local candidates. The bundled package set equals ba.40's (322 packages, 18,366 asar entries).
+- Independently downloaded x64 installer: 187820412 bytes, SHA-256 `f2702411562f3b4f244248e90805d108003a73c16678502f2e3db7e7908fd98a`.
+  - Its `app.asar`, `Feishin.exe`, `app-update.yml` and `ffmpeg.dll` are byte-identical to the build.
+  - FileVersion is 1.15.1-ba.41, and Electron is 43.8.7.
+- Deployed locally, as authorized:
+  - The running ba.38 was paused, so it was closed gracefully (window close; exit-to-tray off).
+  - The verified installer then ran with `/S --force-run` and exited with 0. It installed into the fork's recorded location (`HKCU\Software\0dadfe7c-…` → `Programs\Feishin BasicAuth`).
+  - The installed `app.asar` matches the release. The uninstall entry and FileVersion show 1.15.1-ba.41. The separate upstream Feishin 1.17.0 install is untouched.
+  - The app relaunched paused on the same track (213 / 459).
+  - Its first updater check logged "Update for version 1.15.1-ba.41 is not available (latest version: 1.15.1-ba.41)" instead of `ERR_UPDATER_NO_PUBLISHED_VERSIONS`.
