@@ -22,8 +22,13 @@ import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-
 import { ItemTableList } from '/@/renderer/components/item-list/item-table-list/item-table-list';
 import { ItemTableListColumn } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { ItemControls } from '/@/renderer/components/item-list/types';
+import { albumQueries } from '/@/renderer/features/albums/api/album-api';
 import { artistsQueries } from '/@/renderer/features/artists/api/artists-api';
 import { AlbumArtistGridCarousel } from '/@/renderer/features/artists/components/album-artist-grid-carousel';
+import {
+    deriveArtistGenresFromAlbums,
+    rankArtistsBySharedGenres,
+} from '/@/renderer/features/artists/utils/artist-library-relations';
 import { useIsPlayerFetching, usePlayer } from '/@/renderer/features/player/context/player-context';
 import {
     ListConfigMenu,
@@ -356,8 +361,21 @@ const AlbumArtistMetadataTopSongsContent = ({
         enabled: canStartQuery,
     });
 
-    const topSongsQuery =
+    // Show whichever source has songs when the stored choice is empty (e.g. Navidrome without
+    // Last.fm returns no community top songs) instead of an empty table.
+    const selectedTopSongsQuery =
         topSongsQueryType === 'personal' ? personalTopSongsQuery : communityTopSongsQuery;
+    const otherTopSongsQuery =
+        topSongsQueryType === 'personal' ? communityTopSongsQuery : personalTopSongsQuery;
+    const selectedIsEmpty =
+        selectedTopSongsQuery.isSuccess && (selectedTopSongsQuery.data?.items?.length ?? 0) === 0;
+    const useOther = selectedIsEmpty && (otherTopSongsQuery.data?.items?.length ?? 0) > 0;
+    const topSongsQuery = useOther ? otherTopSongsQuery : selectedTopSongsQuery;
+    const effectiveTopSongsQueryType = useOther
+        ? topSongsQueryType === 'personal'
+            ? 'community'
+            : 'personal'
+        : topSongsQueryType;
 
     const songs = useMemo(() => topSongsQuery.data?.items || [], [topSongsQuery.data?.items]);
 
@@ -541,7 +559,7 @@ const AlbumArtistMetadataTopSongsContent = ({
                                         setTopSongsQueryType(value as 'community' | 'personal')
                                     }
                                     size="xs"
-                                    value={topSongsQueryType}
+                                    value={effectiveTopSongsQueryType}
                                 />
                                 <ListConfigMenu
                                     displayTypes={[
@@ -1133,11 +1151,19 @@ const AlbumArtistMetadataExternalLinks = ({
 };
 
 interface AlbumArtistMetadataSimilarArtistsProps {
+    artistName?: string;
+    genreIds: string[];
     order?: number;
     routeId: string;
 }
 
+// Below this many server-provided similar artists, fill from library artists sharing genres.
+const MIN_SIMILAR_ARTISTS = 6;
+const MAX_SIMILAR_ARTISTS = 12;
+
 const AlbumArtistMetadataSimilarArtists = ({
+    artistName,
+    genreIds,
     order,
     routeId,
 }: AlbumArtistMetadataSimilarArtistsProps) => {
@@ -1153,7 +1179,47 @@ const AlbumArtistMetadataSimilarArtists = ({
         enabled: Boolean(server?.id && routeId),
     });
 
-    const relatedArtists = artistInfoQuery.data?.similarArtists ?? null;
+    const serverRelatedArtists = artistInfoQuery.data?.similarArtists ?? null;
+    const needsLibraryFallback =
+        !artistInfoQuery.isLoading &&
+        genreIds.length > 0 &&
+        (serverRelatedArtists?.length ?? 0) < MIN_SIMILAR_ARTISTS;
+
+    const genreAlbumsQuery = useQuery({
+        ...albumQueries.list({
+            query: {
+                genreIds: genreIds.slice(0, 3),
+                limit: 150,
+                sortBy: AlbumListSort.PLAY_COUNT,
+                sortOrder: SortOrder.DESC,
+                startIndex: 0,
+            },
+            serverId: server?.id,
+        }),
+        enabled: Boolean(server?.id && needsLibraryFallback),
+        staleTime: 1000 * 60 * 10,
+    });
+
+    const relatedArtists = useMemo(() => {
+        const fromServer = serverRelatedArtists ?? [];
+        if (!needsLibraryFallback || !genreAlbumsQuery.data?.items) return fromServer;
+        const fromLibrary = rankArtistsBySharedGenres(
+            genreAlbumsQuery.data.items,
+            routeId,
+            genreIds.slice(0, 3),
+            fromServer.map((artist) => artist.id),
+            MAX_SIMILAR_ARTISTS - fromServer.length,
+            artistName,
+        );
+        return [...fromServer, ...fromLibrary];
+    }, [
+        artistName,
+        genreAlbumsQuery.data,
+        genreIds,
+        needsLibraryFallback,
+        routeId,
+        serverRelatedArtists,
+    ]);
 
     const similarArtists = useMemo(() => {
         if (!relatedArtists || relatedArtists.length === 0) {
@@ -1202,7 +1268,10 @@ const AlbumArtistMetadataSimilarArtists = ({
         [t],
     );
 
-    if (!artistInfoQuery.isLoading && similarArtists.length === 0) {
+    const isLoading =
+        artistInfoQuery.isLoading || (needsLibraryFallback && genreAlbumsQuery.isLoading);
+
+    if (!isLoading && similarArtists.length === 0) {
         return null;
     }
 
@@ -1211,7 +1280,7 @@ const AlbumArtistMetadataSimilarArtists = ({
             <AlbumArtistGridCarousel
                 data={similarArtists}
                 excludeIds={[routeId]}
-                isLoading={artistInfoQuery.isLoading}
+                isLoading={isLoading}
                 rowCount={1}
                 title={carouselTitle}
             />
@@ -1304,6 +1373,15 @@ export const AlbumArtistDetailContent = ({
     const genresOrder = 0;
     const externalLinksOrder = 0.5;
 
+    // Navidrome 0.55+ returns no artist genres; fall back to the genres of the artist's albums.
+    const serverGenres = detailQuery.data?.genres;
+    const artistAlbums = albumsQuery.data?.items;
+    const artistGenres = useMemo(
+        () => (serverGenres?.length ? serverGenres : deriveArtistGenresFromAlbums(artistAlbums)),
+        [artistAlbums, serverGenres],
+    );
+    const artistGenreIds = useMemo(() => artistGenres.map((genre) => genre.id), [artistGenres]);
+
     return (
         <div className={styles.contentContainer}>
             <div className={styles.detailContainer}>
@@ -1313,10 +1391,7 @@ export const AlbumArtistDetailContent = ({
                     onArtistRadio={handleArtistRadio}
                 />
                 <Grid gap="2xl">
-                    <AlbumArtistMetadataGenres
-                        genres={detailQuery.data?.genres}
-                        order={genresOrder}
-                    />
+                    <AlbumArtistMetadataGenres genres={artistGenres} order={genresOrder} />
                     {externalLinks &&
                         (lastFM || listenBrainz || musicBrainz || qobuz || spotify) && (
                             <AlbumArtistMetadataExternalLinks
@@ -1342,6 +1417,8 @@ export const AlbumArtistDetailContent = ({
                     <ArtistAlbums albumsQuery={albumsQuery} order={itemOrder.recentAlbums} />
                     {enabledItem.similarArtists && (
                         <AlbumArtistMetadataSimilarArtists
+                            artistName={detailQuery.data?.name}
+                            genreIds={artistGenreIds}
                             order={itemOrder.similarArtists}
                             routeId={routeId}
                         />

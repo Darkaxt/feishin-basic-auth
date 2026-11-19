@@ -43,7 +43,17 @@ export const DefaultLayout = ({ shell }: DefaultLayoutProps) => {
                 })}
                 id="default-layout"
                 inert={mini}
-                style={mini ? { pointerEvents: 'none', visibility: 'hidden' } : undefined}
+                // content-visibility skips layout/paint of the hidden app while keeping it mounted
+                // (MPV, LidaClips video and scroll state survive the mini-player round trip).
+                style={
+                    mini
+                        ? {
+                              contentVisibility: 'hidden',
+                              pointerEvents: 'none',
+                              visibility: 'hidden',
+                          }
+                        : undefined
+                }
             >
                 <WindowBar />
                 <MainContent shell={shell} />

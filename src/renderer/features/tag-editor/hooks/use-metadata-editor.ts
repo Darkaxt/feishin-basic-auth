@@ -117,6 +117,12 @@ export const useMetadataEditor = ({ browser, songs: songsProp, utils }: UseMetad
     const [editedFields, setEditedFields] = useState<Record<string, TagValue>>({});
     const [removedKeys, setRemovedKeys] = useState<Set<string>>(new Set());
     const [artworkDisplayUrl, setArtworkDisplayUrl] = useState<null | string>(null);
+
+    // Release picked-image blob URLs when they are replaced, removed or the editor closes.
+    useEffect(() => {
+        if (!artworkDisplayUrl?.startsWith('blob:')) return undefined;
+        return () => URL.revokeObjectURL(artworkDisplayUrl);
+    }, [artworkDisplayUrl]);
     const [artworkOp, setArtworkOp] = useState<ArtworkOp | null>(null);
 
     const setRescan = useCallback(

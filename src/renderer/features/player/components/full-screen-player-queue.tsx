@@ -155,6 +155,7 @@ const Controls = () => {
             {headerItems.map((item) => (
                 <div className={styles.headerItemWrapper} key={`tab-${item.label}`}>
                     <Button
+                        aria-pressed={Boolean(item.active)}
                         flex={1}
                         fw="600"
                         onClick={item.onClick}

@@ -13,6 +13,7 @@ const commands = [
     ],
     ['node', ['--test', 'scripts/tests/upstream-sync.test.mjs']],
     ['node', ['--test', 'scripts/tests/upstream-library.test.mjs']],
+    ['node', ['--test', 'scripts/tests/artist-library-relations.test.mjs']],
     ['node', ['--test', 'scripts/tests/playlist-reorder.test.mjs']],
     ['node', ['--test', 'scripts/tests/proxy-auth.test.mjs']],
     ['node', ['--test', 'scripts/tests/native-image.test.mjs']],

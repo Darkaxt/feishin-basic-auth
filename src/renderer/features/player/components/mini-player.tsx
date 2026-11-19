@@ -1,5 +1,5 @@
 import formatDuration from 'format-duration';
-import { useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './mini-player.module.css';
@@ -19,13 +19,37 @@ import { ExplicitStatus, LibraryItem } from '/@/shared/types/domain-types';
 import { PlayerShuffle, PlayerStatus } from '/@/shared/types/types';
 
 const command = window.api?.browser?.miniPlayerCommand;
+const MINI_PLAYER_IMAGE_SIZE = 800;
+
+// Position updates arrive twice a second; keep them in leaf components so the turntable,
+// transport controls and queue rows do not re-render on every tick.
+const MiniProgress = ({ duration }: { duration: number }) => {
+    const time = usePlayerTimestamp();
+    return (
+        <span>
+            {duration > 0 ? Math.floor(Math.min(100, Math.max(0, (time / duration) * 100))) : 0}%
+        </span>
+    );
+};
+
+const MiniQueuePlayback = ({ duration }: { duration: number }) => {
+    const time = usePlayerTimestamp();
+    return (
+        <div className={styles.queuePlayback}>
+            <PlayerbarSeekSlider max={duration || 1} min={0} />
+            <div className={styles.times}>
+                <span>{formatDuration(time * 1000)}</span>
+                <span>{formatDuration(duration * 1000)}</span>
+            </div>
+        </div>
+    );
+};
 
 export const MiniPlayer = () => {
     const { t } = useTranslation();
-    const { queueOpen } = useMiniPlayerStore();
+    const queueOpen = useMiniPlayerStore((state) => state.queueOpen);
     const song = usePlayerSong();
     const status = usePlayerStatus();
-    const time = usePlayerTimestamp();
     const player = usePlayer();
     const { blurExplicitImages } = useGeneralSettings();
     const restoreButton = useRef<HTMLButtonElement>(null);
@@ -35,6 +59,8 @@ export const MiniPlayer = () => {
         imageUrl: song?.imageUrl,
         itemType: LibraryItem.SONG,
         serverId: song?._serverId,
+        // The square window stays small; avoid decoding original-size covers on every track.
+        size: MINI_PLAYER_IMAGE_SIZE,
         type: 'fullScreenPlayer',
     });
     const { background } = useFastAverageColor({
@@ -44,6 +70,10 @@ export const MiniPlayer = () => {
     });
     const duration = (song?.duration ?? 0) / 1000;
     const paused = status !== PlayerStatus.PLAYING;
+    const closeQueue = useCallback(() => {
+        void command({ action: 'queue', queueOpen: false });
+        restoreButton.current?.focus();
+    }, []);
     useEffect(() => {
         // Give keyboard users access without forcing the hover overlay to stay visible.
         surface.current?.focus({ preventScroll: true });
@@ -56,14 +86,7 @@ export const MiniPlayer = () => {
             ref={surface}
             tabIndex={-1}
         >
-            {queueOpen && (
-                <MiniQueue
-                    onClose={() => {
-                        void command({ action: 'queue', queueOpen: false });
-                        restoreButton.current?.focus();
-                    }}
-                />
-            )}
+            {queueOpen && <MiniQueue onClose={closeQueue} />}
             <div className={styles.turntable} style={{ backgroundColor: background }}>
                 <div aria-hidden="true" className={styles.grain} />
                 <div
@@ -168,12 +191,7 @@ export const MiniPlayer = () => {
                         />
                     </div>
                     <div className={styles.bottom}>
-                        <span>
-                            {duration > 0
-                                ? Math.floor(Math.min(100, Math.max(0, (time / duration) * 100)))
-                                : 0}
-                            %
-                        </span>
+                        <MiniProgress duration={duration} />
                         <ActionIcon
                             aria-expanded={queueOpen}
                             aria-label={
@@ -192,25 +210,25 @@ export const MiniPlayer = () => {
     );
 };
 
-const MiniQueue = ({ onClose }: { onClose: () => void }) => {
+const MiniQueue = memo(function MiniQueue({ onClose }: { onClose: () => void }) {
     const { t } = useTranslation();
     const queue = usePlayerStoreBase((state) => state.queue);
     const shuffle = usePlayerStoreBase((state) => state.player.shuffle);
     const song = usePlayerSong();
-    const time = usePlayerTimestamp();
     const duration = (song?.duration ?? 0) / 1000;
     const { mediaPlay } = usePlayer();
     const currentRow = useRef<HTMLButtonElement>(null);
-    const originalOrder = usePlayerStoreBase.getState().getQueue().items;
-    const items =
-        shuffle !== PlayerShuffle.NONE && queue.shuffled.length > 0
+    const items = useMemo(() => {
+        const originalOrder = usePlayerStoreBase.getState().getQueue().items;
+        return shuffle !== PlayerShuffle.NONE && queue.shuffled.length > 0
             ? queue.shuffled.map((index) => originalOrder[index]).filter(Boolean)
             : originalOrder;
+    }, [queue, shuffle]);
     useEffect(() => {
         currentRow.current?.scrollIntoView({ block: 'nearest' });
     }, [song?._uniqueId, queue, shuffle]);
     return (
-        <div aria-label={t('miniPlayer.playQueue')} className={styles.queue}>
+        <div aria-label={t('miniPlayer.playQueue')} className={styles.queue} role="region">
             <header>
                 <strong>{t('miniPlayer.queue')}</strong>
                 <span>{t('miniPlayer.trackCount', { count: items.length })}</span>
@@ -221,13 +239,7 @@ const MiniQueue = ({ onClose }: { onClose: () => void }) => {
                     variant="subtle"
                 />
             </header>
-            <div className={styles.queuePlayback}>
-                <PlayerbarSeekSlider max={duration || 1} min={0} />
-                <div className={styles.times}>
-                    <span>{formatDuration(time * 1000)}</span>
-                    <span>{formatDuration(duration * 1000)}</span>
-                </div>
-            </div>
+            <MiniQueuePlayback duration={duration} />
             <div className={styles.queueList}>
                 {items.map((item) => (
                     <button
@@ -248,4 +260,4 @@ const MiniQueue = ({ onClose }: { onClose: () => void }) => {
             </div>
         </div>
     );
-};
+});

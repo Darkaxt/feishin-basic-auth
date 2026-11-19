@@ -238,13 +238,16 @@ export function useVisualizerSystemAudio(options: {
         };
     }, [connectionRevision, disconnect, playbackType]);
 
+    // Stable identity: the bridge effect depends on connect and only needs the refs.
+    const connectStable = useCallback(async () => {
+        if (connectInFlightRef.current) {
+            return;
+        }
+        await connectRef.current();
+    }, []);
+
     return {
-        connect: async () => {
-            if (connectInFlightRef.current) {
-                return;
-            }
-            await connectRef.current();
-        },
+        connect: connectStable,
         isConnected: Boolean(webAudio?.visualizerInputs?.length),
         isConnecting,
     };
