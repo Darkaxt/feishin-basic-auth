@@ -9,6 +9,7 @@ const commands = [
             '--test',
             'scripts/tests/mini-player.test.mjs',
             'scripts/tests/mini-player-renderer.test.mjs',
+            'scripts/tests/mini-player-layout-width.test.mjs',
         ],
     ],
     ['node', ['--test', 'scripts/tests/upstream-sync.test.mjs']],
