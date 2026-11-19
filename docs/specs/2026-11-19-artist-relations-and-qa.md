@@ -16,7 +16,7 @@ Authority: the user's 2026-11-19 request (take over the Codex Feishin thread, re
 | --- | --- | --- |
 | S1 Source | COMPLETE | R1 merged; R2 `artist-library-relations.ts` + detail page fallback; R3 fixes below. |
 | S2 Verification | COMPLETE | Gate, types, lint, styles, secrets, hidden rendering pass (below). |
-| S3 Delivery | IN PROGRESS | Commit/tag/push, package, publish, independent retrieval, cleanup. |
+| S3 Delivery | COMPLETE | Commit/tag/push, package, publish, independent retrieval, cleanup. |
 
 ## QA findings
 
@@ -31,3 +31,9 @@ Focused: `artist-library-relations` (3 tests: genre ranking, exclusion of self/c
 Hidden isolated rendering (production build, isolated D: profile, non-focusable window): Taylor Davis shows genres Pop/Classical/Folk/Instrumental/Classical Crossover/Trance/Violin (derived from albums; the server has none) while its related artists come unchanged from the server's Deezer agent (Tina Guo, Taylor Davis & Lara de Wit, Lorne Balfe, ...), so the library fallback correctly stays off; IU shows server Red Velvet/SHINee topped up with K-Pop matches KISS OF LIFE, TUIDE, GOT the beat, and Top songs shows 45 personal songs. Mini-player enter, queue (current occurrence highlighted, seek/timestamps) and restore render correctly.
 
 Harness lesson: `src/main/user-data-path.ts` re-points userData to the live `Feishin BasicAuth` directory and electron-store migrations key off `app.getVersion()`. A harness must intercept `app.setPath('userData')` and report the package version, and must compare the live config hash before and after each run. The first runs of this task lacked those guards and reset live config keys; they were restored from a pre-run snapshot the same minute.
+
+## Delivery
+
+Packaging used electron-builder 26.18.0. pnpm was unavailable on PATH, so module collection fell back to node_modules traversal; the resulting app.asar holds the same 342 top-level modules as installed ba.38, and the updater configuration is byte-identical (Darkaxt/feishin-basic-auth, cache `feishin-basic-auth-updater`). The artifact checker validated all nine assets. The packaged renderer, extracted from app.asar, rendered IU's genres, related artists and Top songs in the hidden isolated harness.
+
+Source/tag commit `3cf11a825d4598e88d4dcba9353c0c6e864ad4d8` (parents: merge `80aea209c` of upstream `e36c5a958`) was pushed atomically with tag v1.15.1-ba.39. CodeQL run 44500442705 passed both analyses. [v1.15.1-ba.39](https://github.com/Darkaxt/feishin-basic-auth/releases/tag/v1.15.1-ba.39) was published as the normal latest release at 2026-11-19T09:54:49Z. All nine server-side sizes/SHA256 digests equal the candidate manifest. The x64 installer (187,821,879 bytes, SHA256 `194772f3a8e86731bbc42e4753763c0a230bf90f7b05e6b14113d0e7627788a5`) was retrieved independently from the public latest release and extracted with 7-Zip. Its app.asar, Feishin.exe, app-update.yml and ffmpeg.dll equal the candidate. FileVersion is 1.15.1-ba.39, and in Node-only mode the executable reports Electron 43.8.7. The installed app was not replaced.
