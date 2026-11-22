@@ -59,3 +59,13 @@ Two more problems:
   - The installed `app.asar` matches the release. The uninstall entry and FileVersion show 1.15.1-ba.41. The separate upstream Feishin 1.17.0 install is untouched.
   - The app relaunched paused on the same track (213 / 459).
   - Its first updater check logged "Update for version 1.15.1-ba.41 is not available (latest version: 1.15.1-ba.41)" instead of `ERR_UPDATER_NO_PUBLISHED_VERSIONS`.
+
+## First in-app update
+
+Observed read-only in the live `main.log` (ba.41 to ba.42):
+
+- 2026-11-19T23:24:23Z: the 6-hourly check found 1.15.1-ba.42 and started a differential download against the ba.41 blockmap (21,120 KB of 183,422 KB, 12%).
+- 2026-11-19T23:24:32Z: "Updater download complete" (pending `Feishin-1.15.1-ba.42-win-x64.exe`).
+- 2026-11-20T10:18:45Z: the user chose "Restart to update": "Install on explicit quitAndInstall", silent with force-run (`--updated,/S,--force-run`).
+- 2026-11-20T10:19:11Z: the relaunched app reported "Update for version 1.15.1-ba.42 is not available"; no updater errors since.
+- The installed `Feishin.exe` FileVersion is 1.15.1-ba.42 (checked 2026-11-22).
