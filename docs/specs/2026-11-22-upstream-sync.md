@@ -17,7 +17,7 @@ Authority: the weekly Reframe task `feishin-upstream-sync-release-weekly` and th
 | --- | --- | --- |
 | S1 Integration | COMPLETE | Clean merge (`package.json`, `pnpm-lock.yaml` only); `pnpm install --frozen-lockfile` (pnpm 11.5.2) installed taglib-wasm 2.4.1 and rebuilt native deps for Electron 43.8.7. |
 | S2 Verification | COMPLETE | See below. |
-| S3 Delivery | ACTIVE | Package, publish, verify, clean up. |
+| S3 Delivery | COMPLETE | Published, verified independently, scratch cleaned. |
 
 ## Verification
 
@@ -28,4 +28,8 @@ Authority: the weekly Reframe task `feishin-upstream-sync-release-weekly` and th
 
 ## Delivery
 
-Pending.
+- Merge `73f8cc1d9` (parents `dcc14b3ae`, upstream `760b7829e`), release commit `f5d74e379`, tag `v1.15.1-ba.43`, published 2026-11-22T08:19:56Z as Latest with nine assets; all published digests match the local candidate. CI "Push on development" passed.
+- The packaged `app.asar` contains `node_modules/taglib-wasm` 2.4.1 with `taglib-wasi.wasm` (18,419 entries). The runtime check above passed again against that packaged copy, loading the WASM from inside the asar.
+- Independent check: the x64 installer from `releases/latest` has SHA-256 `a18b262cb666c2001767c6c96964909bf8dd4f6bb4990fe068a382810bf926de`. Its `app.asar`, `Feishin.exe`, `app-update.yml` (Darkaxt/feishin-basic-auth, cache `feishin-basic-auth-updater`) and `ffmpeg.dll` are byte-identical to `dist/win-unpacked`; FileVersion 1.15.1-ba.43, Electron 43.8.7.
+- Installation is left to the in-app updater (first confirmed with ba.42; see `2026-11-19-in-app-updater.md`).
+- Final divergence: fork/upstream 204/0.
